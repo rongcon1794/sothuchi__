@@ -1,0 +1,31 @@
+{
+  "_comment": "Tệp mẫu. Chạy `flutterfire configure` hoặc tải google-services.json từ Firebase Console đặt vào android/app/google-services.json (KHÔNG commit tệp thật).",
+  "project_info": {
+    "project_number": "000000000000",
+    "project_id": "your-firebase-project-id",
+    "storage_bucket": "your-firebase-project-id.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
+        "android_client_info": {
+          "package_name": "vn.sothuchi.so_thu_chi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "000000000000-yourwebclientid.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "REPLACE_VIA_FLUTTERFIRE_CONFIGURE"
+        }
+      ]
+    }
+  ],
+  "configuration_version": "1"
+}
+

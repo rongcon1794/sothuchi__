@@ -1,0 +1,234 @@
+{
+  "@@locale": "vi",
+  "appTitle": "Sổ Thu Chi",
+  "@appTitle": {
+    "description": "Tên ứng dụng"
+  },
+  "appTagline": "Quản lý tài chính cá nhân thông minh & tinh gọn",
+  "navOverview": "Tổng quan",
+  "navTransactions": "Giao dịch",
+  "navBudgets": "Ngân sách",
+  "navReports": "Báo cáo",
+  "navSettings": "Cài đặt",
+  "onboardingSkip": "Bỏ qua",
+  "onboardingNext": "Tiếp tục",
+  "onboardingStart": "Bắt đầu ngay",
+  "onboarding1Title": "Ghi chép thu chi trong 3 giây",
+  "onboarding1Subtitle": "Theo dõi mọi khoản thu nhập, chi tiêu và chuyển khoản với định dạng tiền Việt rõ ràng, chính xác đến từng đồng.",
+  "onboarding2Title": "Quản lý đa ví & ngân sách chủ động",
+  "onboarding2Subtitle": "Quản lý tiền mặt, tài khoản ngân hàng, ví điện tử và nhận cảnh báo sớm trước khi vượt ngân sách tháng.",
+  "onboarding3Title": "Làm việc ngoại tuyến, đồng bộ tức thì",
+  "onboarding3Subtitle": "Ghi chép ngay cả khi không có mạng. Dữ liệu được bảo mật riêng tư và tự động đồng bộ lên đám mây khi kết nối lại.",
+  "signInTitle": "Chào mừng đến với Sổ Thu Chi",
+  "signInSubtitle": "Đăng nhập bằng tài khoản Google để đồng bộ dữ liệu an toàn giữa các thiết bị của bạn.",
+  "signInWithGoogle": "Đăng nhập với Google",
+  "tryOfflineDemo": "Dùng thử chế độ Ngoại tuyến (Chưa cấu hình Firebase)",
+  "firebaseUnconfiguredBanner": "Chưa tìm thấy cấu hình Firebase trên thiết bị. Bạn có thể xem hướng dẫn thiết lập hoặc trải nghiệm toàn bộ tính năng ở chế độ cục bộ.",
+  "viewSetupGuide": "Xem hướng dẫn cấu hình",
+  "signOut": "Đăng xuất",
+  "signOutConfirmTitle": "Đăng xuất tài khoản?",
+  "signOutConfirmBody": "Bạn có thể đăng nhập lại bất cứ lúc nào để tiếp tục đồng bộ dữ liệu.",
+  "deleteAccount": "Xóa tài khoản & toàn bộ dữ liệu",
+  "deleteAccountConfirmTitle": "Xóa vĩnh viễn tài khoản?",
+  "deleteAccountConfirmBody": "Toàn bộ ví, danh mục, giao dịch, ngân sách và hồ sơ của bạn sẽ bị xóa vĩnh viễn và không thể khôi phục.",
+  "deleteAccountAction": "Xóa vĩnh viễn",
+  "cancel": "Hủy",
+  "save": "Lưu",
+  "edit": "Chỉnh sửa",
+  "delete": "Xóa",
+  "undo": "Hoàn tác",
+  "confirm": "Xác nhận",
+  "close": "Đóng",
+  "retry": "Thử lại",
+  "all": "Tất cả",
+  "today": "Hôm nay",
+  "yesterday": "Hôm qua",
+  "totalBalance": "Tổng tài sản ròng",
+  "showBalance": "Hiện số dư",
+  "hideBalance": "Ẩn số dư",
+  "thisMonthSummary": "Tháng này",
+  "income": "Thu nhập",
+  "expense": "Chi tiêu",
+  "transfer": "Chuyển khoản",
+  "netBalance": "Chênh lệch ròng",
+  "recentTransactions": "Giao dịch gần đây",
+  "viewAll": "Xem tất cả",
+  "quickAddTransaction": "Thêm giao dịch",
+  "walletsTitle": "Ví & Tài khoản",
+  "manageWallets": "Quản lý ví",
+  "addWallet": "Thêm ví mới",
+  "editWallet": "Chỉnh sửa ví",
+  "walletName": "Tên ví",
+  "walletNameHint": "VD: Tiền mặt, Vietcombank, MoMo...",
+  "walletType": "Loại tài khoản",
+  "walletTypeCash": "Tiền mặt",
+  "walletTypeBank": "Ngân hàng",
+  "walletTypeEwallet": "Ví điện tử",
+  "walletTypeCard": "Thẻ tín dụng / ghi nợ",
+  "initialBalance": "Số dư ban đầu",
+  "currentBalance": "Số dư hiện tại",
+  "archiveWallet": "Lưu trữ ví",
+  "unarchiveWallet": "Khôi phục ví",
+  "archivedWallets": "Ví đã lưu trữ",
+  "activeWallets": "Ví đang sử dụng",
+  "transferBetweenWallets": "Chuyển tiền giữa các ví",
+  "fromWallet": "Từ ví nguồn",
+  "toWallet": "Đến ví đích",
+  "emptyWalletsTitle": "Chưa có ví nào",
+  "emptyWalletsSubtitle": "Tạo ví đầu tiên để bắt đầu theo dõi dòng tiền hàng ngày.",
+  "categoriesTitle": "Danh mục thu chi",
+  "manageCategories": "Quản lý danh mục",
+  "addCategory": "Thêm danh mục",
+  "editCategory": "Sửa danh mục",
+  "categoryName": "Tên danh mục",
+  "categoryNameHint": "VD: Cà phê, Xăng xe, Tiền nhà...",
+  "defaultCategoryBadge": "Mặc định",
+  "selectIcon": "Chọn biểu tượng",
+  "selectColor": "Chọn màu sắc",
+  "transactionsTitle": "Sổ giao dịch",
+  "addTransaction": "Ghi giao dịch",
+  "editTransaction": "Sửa giao dịch",
+  "transactionDeleted": "Đã xóa giao dịch",
+  "amount": "Số tiền",
+  "amountRequiredError": "Vui lòng nhập số tiền lớn hơn 0",
+  "selectCategory": "Chọn danh mục",
+  "categoryRequiredError": "Vui lòng chọn danh mục",
+  "walletRequiredError": "Vui lòng chọn ví",
+  "sameWalletTransferError": "Ví nguồn và ví đích phải khác nhau",
+  "date": "Ngày giao dịch",
+  "note": "Ghi chú",
+  "noteHint": "Thêm mô tả ngắn (VD: Ăn trưa cùng đồng nghiệp)...",
+  "tags": "Thẻ (phân cách bằng dấu phẩy)",
+  "tagsHint": "VD: công tác, gia đình",
+  "searchTransactionsHint": "Tìm theo ghi chú hoặc thẻ...",
+  "filterTransactions": "Bộ lọc giao dịch",
+  "clearFilters": "Xóa bộ lọc",
+  "dateRange": "Khoảng thời gian",
+  "selectDateRange": "Chọn khoảng ngày",
+  "emptyTransactionsTitle": "Chưa có giao dịch nào",
+  "emptyTransactionsSubtitle": "Nhấn nút + để ghi khoản thu hoặc chi đầu tiên của bạn.",
+  "noMatchingTransactionsTitle": "Không tìm thấy giao dịch phù hợp",
+  "noMatchingTransactionsSubtitle": "Hãy thử thay đổi từ khóa tìm kiếm hoặc xóa bớt điều kiện lọc.",
+  "budgetsTitle": "Ngân sách tháng",
+  "addBudget": "Thiết lập ngân sách",
+  "editBudget": "Chỉnh sửa ngân sách",
+  "overallMonthlyBudget": "Tổng ngân sách tháng",
+  "categoryBudget": "Ngân sách theo danh mục",
+  "budgetScope": "Phạm vi áp dụng",
+  "budgetLimit": "Hạn mức tháng",
+  "alertThresholdLabel": "Cảnh báo khi chạm ngưỡng ({percent}%)",
+  "@alertThresholdLabel": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetSpentOf": "Đã chi {spent} / {limit}",
+  "@budgetSpentOf": {
+    "placeholders": {
+      "spent": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetRemaining": "Còn lại {amount}",
+  "@budgetRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetExceededBy": "Vượt ngân sách {amount}",
+  "@budgetExceededBy": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetWarningBanner": "Cảnh báo: {name} đã dùng {percent}% hạn mức tháng!",
+  "@budgetWarningBanner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "emptyBudgetsTitle": "Chưa thiết lập ngân sách",
+  "emptyBudgetsSubtitle": "Đặt hạn mức chi tiêu hàng tháng để nhận cảnh báo sớm khi chi vượt kế hoạch.",
+  "reportsTitle": "Báo cáo & Phân tích",
+  "expenseByCategory": "Cơ cấu chi tiêu theo danh mục",
+  "incomeVsExpenseTrend": "Xu hướng Thu nhập vs Chi tiêu (6 tháng)",
+  "savingsRate": "Tỷ lệ tiết kiệm",
+  "noReportDataTitle": "Chưa có dữ liệu báo cáo trong tháng này",
+  "noReportDataSubtitle": "Ghi chép các khoản thu chi để xem biểu đồ phân tích trực quan.",
+  "settingsTitle": "Cài đặt",
+  "appearanceSection": "Giao diện & Hiển thị",
+  "themeMode": "Chế độ giao diện",
+  "themeSystem": "Theo hệ thống",
+  "themeLight": "Sáng",
+  "themeDark": "Tối",
+  "language": "Ngôn ngữ",
+  "languageVietnamese": "Tiếng Việt",
+  "languageEnglish": "English",
+  "defaultCurrency": "Đơn vị tiền tệ",
+  "securitySection": "Bảo mật & Dữ liệu",
+  "biometricLock": "Khóa ứng dụng sinh trắc học",
+  "biometricLockSubtitle": "Yêu cầu vân tay / Face ID khi mở ứng dụng",
+  "biometricNotAvailable": "Thiết bị hiện không hỗ trợ hoặc chưa cài đặt sinh trắc học.",
+  "biometricPromptReason": "Xác thực sinh trắc học để mở Sổ Thu Chi",
+  "appLockedTitle": "Sổ Thu Chi đang khóa",
+  "appLockedSubtitle": "Xác thực danh tính để tiếp tục xem dữ liệu tài chính của bạn.",
+  "unlockNow": "Mở khóa ngay",
+  "exportCsv": "Xuất giao dịch ra tệp CSV",
+  "exportCsvSubtitle": "Lưu hoặc chia sẻ toàn bộ lịch sử giao dịch cho Excel / Google Sheets",
+  "exportCsvSuccess": "Đã tạo tệp CSV ({count} giao dịch)",
+  "@exportCsvSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "aboutSection": "Thông tin & Pháp lý",
+  "privacyPolicy": "Chính sách quyền riêng tư",
+  "aboutApp": "Giới thiệu ứng dụng",
+  "accountSection": "Tài khoản",
+  "offlineIndicator": "Ngoại tuyến — Thay đổi sẽ tự đồng bộ khi có mạng",
+  "syncingIndicator": "Đang đồng bộ dữ liệu lên đám mây...",
+  "syncedIndicator": "Đã đồng bộ",
+  "errorGeneric": "Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.",
+  "errorNetwork": "Không có kết nối mạng. Vui lòng kiểm tra đường truyền.",
+  "errorAuthCancelled": "Bạn đã hủy đăng nhập Google.",
+  "errorAuthFailed": "Đăng nhập không thành công. Vui lòng kiểm tra cấu hình Google/Firebase và thử lại.",
+  "errorPermissionDenied": "Bạn không có quyền thực hiện thao tác này.",
+  "errorValidation": "Dữ liệu nhập chưa hợp lệ. Vui lòng kiểm tra lại.",
+  "catFood": "Ăn uống",
+  "catTransport": "Di chuyển",
+  "catHousing": "Nhà ở",
+  "catBills": "Hóa đơn & Tiện ích",
+  "catShopping": "Mua sắm",
+  "catEntertainment": "Giải trí",
+  "catHealth": "Sức khỏe",
+  "catEducation": "Giáo dục",
+  "catSalary": "Lương",
+  "catBonus": "Thưởng",
+  "catInvestment": "Đầu tư & Lãi",
+  "catOtherExpense": "Chi tiêu khác",
+  "catOtherIncome": "Thu nhập khác",
+  "defaultCashWalletName": "Tiền mặt",
+  "previousMonth": "Tháng trước",
+  "nextMonth": "Tháng sau",
+  "balanceHidden": "Số dư đang ẩn",
+  "differentCurrencyTransferError": "Chỉ hỗ trợ chuyển khoản giữa hai ví cùng đơn vị tiền tệ",
+  "moreOptions": "Tùy chọn khác"
+}
+

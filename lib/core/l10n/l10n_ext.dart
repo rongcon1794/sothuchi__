@@ -1,0 +1,46 @@
+import 'package:flutter/widgets.dart';
+import 'package:so_thu_chi/core/errors/app_exception.dart';
+import 'package:so_thu_chi/l10n/app_localizations.dart';
+
+extension AppLocalizationsX on BuildContext {
+  AppLocalizations get l10n => AppLocalizations.of(this);
+
+  String localizeError(Object error) {
+    final l = l10n;
+    return switch (error) {
+      NetworkException() => l.errorNetwork,
+      AuthCancelledException() => l.errorAuthCancelled,
+      AuthFailedException() => l.errorAuthFailed,
+      PermissionDeniedException() => l.errorPermissionDenied,
+      ValidationException() => l.errorValidation,
+      _ => l.errorGeneric,
+    };
+  }
+}
+
+/// Resolves default seeded category keys to localized display names when switching vi/en.
+abstract final class DefaultCategoryLocalization {
+  static String resolveName(
+    AppLocalizations l10n, {
+    required String categoryId,
+    required String fallbackName,
+  }) {
+    return switch (categoryId) {
+      'default_food' => l10n.catFood,
+      'default_transport' => l10n.catTransport,
+      'default_housing' => l10n.catHousing,
+      'default_bills' => l10n.catBills,
+      'default_shopping' => l10n.catShopping,
+      'default_entertainment' => l10n.catEntertainment,
+      'default_health' => l10n.catHealth,
+      'default_education' => l10n.catEducation,
+      'default_other_expense' => l10n.catOtherExpense,
+      'default_salary' => l10n.catSalary,
+      'default_bonus' => l10n.catBonus,
+      'default_investment' => l10n.catInvestment,
+      'default_other_income' => l10n.catOtherIncome,
+      _ => fallbackName,
+    };
+  }
+}
+

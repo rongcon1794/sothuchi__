@@ -1,0 +1,90 @@
+{
+  "project_info": {
+    "project_number": "835896714104",
+    "project_id": "sochitieu-2dca6",
+    "storage_bucket": "sochitieu-2dca6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:835896714104:android:0bd988a9ba6f04c938de8d",
+        "android_client_info": {
+          "package_name": "com.nguyenxuanhuy.sothuchi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "835896714104-gft5f5vbotbn063a16pkga9ail9g6s5m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3519bPi4HRLu6gQMdRxJqVXPB0RGHxrU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "835896714104-gft5f5vbotbn063a16pkga9ail9g6s5m.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "835896714104-e36antfoglgm5aq6ug5o95b6rje7orgu.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.nguyenxuanhuy.MyFirstIOSApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:835896714104:android:2ce18726419e36e538de8d",
+        "android_client_info": {
+          "package_name": "vn.sothuchi.so_thu_chi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "835896714104-r3jlidbsi17kig51srtuto4qk6mm7k3a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "vn.sothuchi.so_thu_chi",
+            "certificate_hash": "15c03c5dd65214ac44c99bbfcd44cb5d696fe1f6"
+          }
+        },
+        {
+          "client_id": "835896714104-gft5f5vbotbn063a16pkga9ail9g6s5m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3519bPi4HRLu6gQMdRxJqVXPB0RGHxrU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "835896714104-gft5f5vbotbn063a16pkga9ail9g6s5m.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "835896714104-e36antfoglgm5aq6ug5o95b6rje7orgu.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.nguyenxuanhuy.MyFirstIOSApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

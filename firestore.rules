@@ -1,0 +1,502 @@
+rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model — Sổ Thu Chi (Personal Finance App)
+// ===============================================================
+//
+// All user data is strictly isolated under `/users/{uid}` and its
+// subcollections. Only the authenticated owner (`request.auth.uid == uid`)
+// may read, create, update, or delete documents in their namespace.
+// All other paths are denied by default.
+//
+// 1. Collection: users/{uid} (UserProfileDto)
+//    Fields:
+//      - uid: string (optional on partial preference merge; must equal {uid} & immutable when present)
+//      - email: string (<= 320 chars; required on full profile)
+//      - displayName: string | null (optional, <= 200 chars)
+//      - photoUrl: string | null (optional, <= 2048 chars)
+//      - defaultCurrency: string in ['VND', 'USD', 'EUR', 'JPY', 'KRW']
+//      - locale: string in ['vi', 'en']
+//      - isDemoUser: bool (optional)
+//      - createdAt: timestamp (immutable once set)
+//      - updatedAt: timestamp (required)
+//      - deletedAt: timestamp | null (optional)
+//
+// 2. Collection: users/{uid}/accounts/{accountId} (AccountDto)
+//    Fields:
+//      - id: string (required, 1..128 chars, immutable)
+//      - name: string (required, 1..100 chars)
+//      - type: string in ['cash', 'bank', 'ewallet', 'card'] (required)
+//      - balance: int (required, integer minor units; never float)
+//      - currency: string in ['VND', 'USD', 'EUR', 'JPY', 'KRW'] (required)
+//      - icon: string (required, 1..64 chars)
+//      - color: int (required, 32-bit signed/unsigned ARGB integer)
+//      - archived: bool (required)
+//      - createdAt: timestamp (required, immutable)
+//      - updatedAt: timestamp (required)
+//      - deletedAt: timestamp | null (optional)
+//
+// 3. Collection: users/{uid}/categories/{categoryId} (CategoryDto)
+//    Fields:
+//      - id: string (required, 1..128 chars, immutable)
+//      - name: string (required, 1..100 chars)
+//      - type: string in ['income', 'expense'] (required)
+//      - icon: string (required, 1..64 chars)
+//      - color: int (required, 32-bit signed/unsigned ARGB integer)
+//      - parentId: string | null (optional, 1..128 chars when string)
+//      - isDefault: bool (required)
+//      - createdAt: timestamp (required, immutable)
+//      - updatedAt: timestamp (required)
+//      - deletedAt: timestamp | null (optional)
+//
+// 4. Collection: users/{uid}/transactions/{transactionId} (TransactionDto)
+//    Fields:
+//      - id: string (required, 1..128 chars, immutable)
+//      - amount: int (required, > 0, integer minor units; never float)
+//      - currency: string in ['VND', 'USD', 'EUR', 'JPY', 'KRW'] (required)
+//      - type: string in ['income', 'expense', 'transfer'] (required)
+//      - accountId: string (required, 1..128 chars)
+//      - toAccountId: string | null (optional; required non-empty != accountId when type == 'transfer')
+//      - categoryId: string (required, 1..128 chars)
+//      - note: string (required, 0..1000 chars)
+//      - date: timestamp (required)
+//      - tags: list<string> (required, <= 20 items, each 1..64 chars)
+//      - createdAt: timestamp (required, immutable)
+//      - updatedAt: timestamp (required)
+//      - deletedAt: timestamp | null (optional)
+//
+// 5. Collection: users/{uid}/budgets/{budgetId} (BudgetDto)
+//    Fields:
+//      - id: string (required, 1..128 chars, immutable)
+//      - categoryId: string | null (optional; null = overall monthly budget)
+//      - amount: int (required, > 0, integer minor units; never float)
+//      - currency: string in ['VND', 'USD', 'EUR', 'JPY', 'KRW'] (required)
+//      - period: string in ['month'] (required)
+//      - startDate: timestamp (required)
+//      - alertThreshold: int (required, 1..100)
+//      - createdAt: timestamp (required, immutable)
+//      - updatedAt: timestamp (required)
+//      - deletedAt: timestamp | null (optional)
+//
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAuthenticated() {
+      return isSignedIn();
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function hasRequiredKeys(data, requiredKeys) {
+      return data.keys().hasAll(requiredKeys);
+    }
+
+    function hasOnlyAllowedKeys(data, allowedKeys) {
+      return data.keys().hasOnly(allowedKeys);
+    }
+
+    function isBoundedString(value, minLen, maxLen) {
+      return value is string && value.size() >= minLen && value.size() <= maxLen;
+    }
+
+    function isOptionalNullableString(data, field, minLen, maxLen) {
+      return !(field in data) ||
+             data[field] == null ||
+             isBoundedString(data[field], minLen, maxLen);
+    }
+
+    function isOptionalNullableTimestamp(data, field) {
+      return !(field in data) ||
+             data[field] == null ||
+             data[field] is timestamp;
+    }
+
+    function isValidCurrency(value) {
+      return value is string &&
+             value in ['VND', 'USD', 'EUR', 'JPY', 'KRW'];
+    }
+
+    function isValidLocale(value) {
+      return value is string &&
+             value in ['vi', 'en'];
+    }
+
+    // Supports both signed 32-bit and unsigned 32-bit ARGB integers (e.g. 0xFF0D7C66).
+    function isValidColorInt(value) {
+      return value is int &&
+             value >= -2147483648 &&
+             value <= 4294967295;
+    }
+
+    // Strict integer minor units (rejects floats/doubles and extreme 64-bit overflows).
+    function isValidSignedMinorUnits(value) {
+      return value is int &&
+             value >= -9000000000000000 &&
+             value <= 9000000000000000;
+    }
+
+    function isValidPositiveMinorUnits(value) {
+      return value is int &&
+             value > 0 &&
+             value <= 9000000000000000;
+    }
+
+    function isValidTagAt(tags, index) {
+      return tags.size() <= index ||
+             isBoundedString(tags[index], 1, 64);
+    }
+
+    // Validates list size (<= 20) AND ensures every element is a non-empty bounded string (1..64 chars).
+    function isValidStringTagsList(tags) {
+      return tags is list &&
+             tags.size() <= 20 &&
+             isValidTagAt(tags, 0) &&
+             isValidTagAt(tags, 1) &&
+             isValidTagAt(tags, 2) &&
+             isValidTagAt(tags, 3) &&
+             isValidTagAt(tags, 4) &&
+             isValidTagAt(tags, 5) &&
+             isValidTagAt(tags, 6) &&
+             isValidTagAt(tags, 7) &&
+             isValidTagAt(tags, 8) &&
+             isValidTagAt(tags, 9) &&
+             isValidTagAt(tags, 10) &&
+             isValidTagAt(tags, 11) &&
+             isValidTagAt(tags, 12) &&
+             isValidTagAt(tags, 13) &&
+             isValidTagAt(tags, 14) &&
+             isValidTagAt(tags, 15) &&
+             isValidTagAt(tags, 16) &&
+             isValidTagAt(tags, 17) &&
+             isValidTagAt(tags, 18) &&
+             isValidTagAt(tags, 19);
+    }
+
+    // Protects `createdAt` against modification once present on an existing document.
+    function isCreatedAtUnchanged() {
+      return resource != null &&
+             (!('createdAt' in resource.data) ||
+              ('createdAt' in request.resource.data &&
+               request.resource.data.createdAt == resource.data.createdAt));
+    }
+
+    // Protects `id` against modification once present on an existing subcollection document.
+    function isIdUnchanged() {
+      return resource != null &&
+             (!('id' in resource.data) ||
+              ('id' in request.resource.data &&
+               request.resource.data.id == resource.data.id));
+    }
+
+    // Protects `uid` against modification once present on an existing user document.
+    function isUidUnchanged() {
+      return resource != null &&
+             (!('uid' in resource.data) ||
+              ('uid' in request.resource.data &&
+               request.resource.data.uid == resource.data.uid));
+    }
+
+    // ===============================================================
+    // Domain Validators (Used in BOTH create and update)
+    // ===============================================================
+
+    function isValidUserProfile(data, uid) {
+      let allowedKeys = [
+        'uid',
+        'email',
+        'displayName',
+        'photoUrl',
+        'defaultCurrency',
+        'locale',
+        'isDemoUser',
+        'createdAt',
+        'updatedAt',
+        'deletedAt'
+      ];
+      let hasFullProfile = hasRequiredKeys(data, [
+        'uid',
+        'email',
+        'defaultCurrency',
+        'locale',
+        'createdAt',
+        'updatedAt'
+      ]);
+      // Supports `FirebaseAuthRepository.updateProfilePreferences` calling
+      // `.set({'defaultCurrency': ..., 'locale': ..., 'updatedAt': ...}, SetOptions(merge: true))`
+      // even if the profile document has not been materialized yet.
+      let isPreferenceBootstrap = hasOnlyAllowedKeys(data, [
+        'defaultCurrency',
+        'locale',
+        'updatedAt'
+      ]) && ('defaultCurrency' in data || 'locale' in data);
+
+      return hasOnlyAllowedKeys(data, allowedKeys) &&
+             (hasFullProfile || isPreferenceBootstrap) &&
+             data.updatedAt is timestamp &&
+             (!('uid' in data) || (data.uid is string && data.uid == uid)) &&
+             (!('email' in data) || isBoundedString(data.email, 0, 320)) &&
+             isOptionalNullableString(data, 'displayName', 0, 200) &&
+             isOptionalNullableString(data, 'photoUrl', 0, 2048) &&
+             (!('defaultCurrency' in data) || isValidCurrency(data.defaultCurrency)) &&
+             (!('locale' in data) || isValidLocale(data.locale)) &&
+             (!('isDemoUser' in data) || data.isDemoUser is bool) &&
+             (!('createdAt' in data) || data.createdAt is timestamp) &&
+             isOptionalNullableTimestamp(data, 'deletedAt');
+    }
+
+    function isValidAccount(data) {
+      let requiredKeys = [
+        'id',
+        'name',
+        'type',
+        'balance',
+        'currency',
+        'icon',
+        'color',
+        'archived',
+        'createdAt',
+        'updatedAt'
+      ];
+      let allowedKeys = [
+        'id',
+        'name',
+        'type',
+        'balance',
+        'currency',
+        'icon',
+        'color',
+        'archived',
+        'createdAt',
+        'updatedAt',
+        'deletedAt'
+      ];
+
+      return hasRequiredKeys(data, requiredKeys) &&
+             hasOnlyAllowedKeys(data, allowedKeys) &&
+             isBoundedString(data.id, 1, 128) &&
+             isBoundedString(data.name, 1, 100) &&
+             data.type is string &&
+             data.type in ['cash', 'bank', 'ewallet', 'card'] &&
+             isValidSignedMinorUnits(data.balance) &&
+             isValidCurrency(data.currency) &&
+             isBoundedString(data.icon, 1, 64) &&
+             isValidColorInt(data.color) &&
+             data.archived is bool &&
+             data.createdAt is timestamp &&
+             data.updatedAt is timestamp &&
+             isOptionalNullableTimestamp(data, 'deletedAt');
+    }
+
+    function isValidCategory(data) {
+      let requiredKeys = [
+        'id',
+        'name',
+        'type',
+        'icon',
+        'color',
+        'isDefault',
+        'createdAt',
+        'updatedAt'
+      ];
+      let allowedKeys = [
+        'id',
+        'name',
+        'type',
+        'icon',
+        'color',
+        'parentId',
+        'isDefault',
+        'createdAt',
+        'updatedAt',
+        'deletedAt'
+      ];
+
+      return hasRequiredKeys(data, requiredKeys) &&
+             hasOnlyAllowedKeys(data, allowedKeys) &&
+             isBoundedString(data.id, 1, 128) &&
+             isBoundedString(data.name, 1, 100) &&
+             data.type is string &&
+             data.type in ['income', 'expense'] &&
+             isBoundedString(data.icon, 1, 64) &&
+             isValidColorInt(data.color) &&
+             isOptionalNullableString(data, 'parentId', 1, 128) &&
+             data.isDefault is bool &&
+             data.createdAt is timestamp &&
+             data.updatedAt is timestamp &&
+             isOptionalNullableTimestamp(data, 'deletedAt');
+    }
+
+    function isValidTransferTarget(data) {
+      return data.type == 'transfer'
+        ? ('toAccountId' in data &&
+           isBoundedString(data.toAccountId, 1, 128) &&
+           data.toAccountId != data.accountId)
+        : isOptionalNullableString(data, 'toAccountId', 1, 128);
+    }
+
+    function isValidTransaction(data) {
+      let requiredKeys = [
+        'id',
+        'amount',
+        'currency',
+        'type',
+        'accountId',
+        'categoryId',
+        'note',
+        'date',
+        'tags',
+        'createdAt',
+        'updatedAt'
+      ];
+      let allowedKeys = [
+        'id',
+        'amount',
+        'currency',
+        'type',
+        'accountId',
+        'toAccountId',
+        'categoryId',
+        'note',
+        'date',
+        'tags',
+        'createdAt',
+        'updatedAt',
+        'deletedAt'
+      ];
+
+      return hasRequiredKeys(data, requiredKeys) &&
+             hasOnlyAllowedKeys(data, allowedKeys) &&
+             isBoundedString(data.id, 1, 128) &&
+             isValidPositiveMinorUnits(data.amount) &&
+             isValidCurrency(data.currency) &&
+             data.type is string &&
+             data.type in ['income', 'expense', 'transfer'] &&
+             isBoundedString(data.accountId, 1, 128) &&
+             isValidTransferTarget(data) &&
+             isBoundedString(data.categoryId, 1, 128) &&
+             isBoundedString(data.note, 0, 1000) &&
+             data.date is timestamp &&
+             isValidStringTagsList(data.tags) &&
+             data.createdAt is timestamp &&
+             data.updatedAt is timestamp &&
+             isOptionalNullableTimestamp(data, 'deletedAt');
+    }
+
+    function isValidBudget(data) {
+      let requiredKeys = [
+        'id',
+        'amount',
+        'currency',
+        'period',
+        'startDate',
+        'alertThreshold',
+        'createdAt',
+        'updatedAt'
+      ];
+      let allowedKeys = [
+        'id',
+        'categoryId',
+        'amount',
+        'currency',
+        'period',
+        'startDate',
+        'alertThreshold',
+        'createdAt',
+        'updatedAt',
+        'deletedAt'
+      ];
+
+      return hasRequiredKeys(data, requiredKeys) &&
+             hasOnlyAllowedKeys(data, allowedKeys) &&
+             isBoundedString(data.id, 1, 128) &&
+             isOptionalNullableString(data, 'categoryId', 1, 128) &&
+             isValidPositiveMinorUnits(data.amount) &&
+             isValidCurrency(data.currency) &&
+             data.period is string &&
+             data.period in ['month'] &&
+             data.startDate is timestamp &&
+             data.alertThreshold is int &&
+             data.alertThreshold >= 1 &&
+             data.alertThreshold <= 100 &&
+             data.createdAt is timestamp &&
+             data.updatedAt is timestamp &&
+             isOptionalNullableTimestamp(data, 'deletedAt');
+    }
+
+    // ===============================================================
+    // User Namespace & Subcollection Rules
+    // ===============================================================
+
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid) &&
+                       isValidUserProfile(request.resource.data, uid);
+      allow update: if isOwner(uid) &&
+                       isValidUserProfile(request.resource.data, uid) &&
+                       isUidUnchanged() &&
+                       isCreatedAtUnchanged();
+      allow delete: if isOwner(uid);
+
+      match /accounts/{accountId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) &&
+                         isValidAccount(request.resource.data);
+        allow update: if isOwner(uid) &&
+                         isValidAccount(request.resource.data) &&
+                         isIdUnchanged() &&
+                         isCreatedAtUnchanged();
+        allow delete: if isOwner(uid);
+      }
+
+      match /categories/{categoryId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) &&
+                         isValidCategory(request.resource.data);
+        allow update: if isOwner(uid) &&
+                         isValidCategory(request.resource.data) &&
+                         isIdUnchanged() &&
+                         isCreatedAtUnchanged();
+        allow delete: if isOwner(uid);
+      }
+
+      match /transactions/{transactionId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) &&
+                         isValidTransaction(request.resource.data);
+        allow update: if isOwner(uid) &&
+                         isValidTransaction(request.resource.data) &&
+                         isIdUnchanged() &&
+                         isCreatedAtUnchanged();
+        allow delete: if isOwner(uid);
+      }
+
+      match /budgets/{budgetId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) &&
+                         isValidBudget(request.resource.data);
+        allow update: if isOwner(uid) &&
+                         isValidBudget(request.resource.data) &&
+                         isIdUnchanged() &&
+                         isCreatedAtUnchanged();
+        allow delete: if isOwner(uid);
+      }
+    }
+
+    // Default deny for all other collections and paths.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "so-thu-chi-firestore-rules-tests",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Cloud Firestore Security Rules unit test suite for Sổ Thu Chi",
+  "scripts": {
+    "test": "firebase emulators:exec --config ../firebase.json --only firestore --project demo-so-thu-chi \"node --test firestore.rules.test.mjs\"",
+    "test:unit": "node --test firestore.rules.test.mjs"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^3.0.4",
+    "firebase": "^10.14.1",
+    "firebase-tools": "^13.29.1"
+  }
+}

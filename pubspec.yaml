@@ -1,0 +1,57 @@
+name: so_thu_chi
+description: "Sổ Thu Chi — Ứng dụng quản lý tài chính cá nhân thông minh cho người Việt."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
+  cupertino_icons: ^1.0.8
+
+  # State Management & Routing
+  flutter_riverpod: ^3.4.3
+  riverpod_annotation: ^4.0.7
+  go_router: ^18.1.2
+
+  # Immutable Models & Serialization
+  freezed_annotation: ^3.1.0
+  json_annotation: ^4.12.0
+
+  # Firebase & Google Sign-In (v7.x API)
+  firebase_core: ^5.1.0
+  firebase_auth: ^7.0.1
+  cloud_firestore: ^7.1.0
+  google_sign_in: ^7.2.0
+
+  # Charts & UI
+  fl_chart: ^1.3.0
+
+  # Security, Storage, Connectivity & Export
+  local_auth: ^3.0.2
+  flutter_secure_storage: ^11.2.0
+  shared_preferences: ^2.5.6
+  connectivity_plus: ^7.3.2
+  csv: ^8.0.0
+  path_provider: ^2.1.6
+  share_plus: ^13.3.1
+  uuid: ^4.6.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  build_runner: ^2.15.0
+  freezed: ^4.0.3
+  json_serializable: ^6.14.0
+  riverpod_generator: ^4.0.9
+  fake_cloud_firestore: ^4.5.0
+
+flutter:
+  generate: true
+  uses-material-design: true
