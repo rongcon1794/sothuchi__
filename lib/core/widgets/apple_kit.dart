@@ -264,7 +264,8 @@ class AppleSquircleBadge extends StatelessWidget {
   const AppleSquircleBadge({
     super.key,
     required this.icon,
-    required this.backgroundColor,
+    this.backgroundColor = AppleTokens.systemBlue,
+    this.color,
     this.iconColor = Colors.white,
     this.size = 32.0,
     this.iconSize = 18.0,
@@ -273,6 +274,7 @@ class AppleSquircleBadge extends StatelessWidget {
 
   final IconData icon;
   final Color backgroundColor;
+  final Color? color;
   final Color iconColor;
   final double size;
   final double iconSize;
@@ -284,7 +286,7 @@ class AppleSquircleBadge extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: backgroundColor,
+        color: color ?? backgroundColor,
         borderRadius: BorderRadius.circular(radius),
       ),
       child: Center(
@@ -462,3 +464,4 @@ class AppleSegmentedPill<T> extends StatelessWidget {
     );
   }
 }
+

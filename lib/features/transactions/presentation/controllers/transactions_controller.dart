@@ -7,6 +7,7 @@ import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
 import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_controller.dart';
+import 'package:so_thu_chi/features/ai/presentation/widgets/ai_quick_entry_card.dart';
 import 'package:so_thu_chi/features/categories/presentation/controllers/categories_controller.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
@@ -222,8 +223,8 @@ final expenseBudgetWarningHookProvider = Provider<ExpenseBudgetCheckHook?>(
   (ref) => null,
 );
 
-/// Optional slot for future `lib/features/ai/` quick natural-language entry bar.
-final aiQuickEntrySlotProvider = Provider<Widget?>((ref) => null);
+/// Default slot for `lib/features/ai/` quick natural-language entry card.
+final aiQuickEntrySlotProvider = Provider<Widget?>((ref) => const AiQuickEntryCard());
 
 class TransactionsActionController extends Notifier<AsyncValue<void>> {
   @override

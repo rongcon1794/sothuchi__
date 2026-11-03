@@ -4,8 +4,10 @@ import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
+import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/date_formatter.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
+import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/core/widgets/empty_state_view.dart';
 import 'package:so_thu_chi/core/widgets/skeleton_box.dart';
 import 'package:so_thu_chi/features/budgets/domain/entities/budget.dart';
@@ -80,12 +82,12 @@ class BudgetsScreen extends ConsumerWidget {
           // Month Switcher Bar
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
+            child: AppleGlassCard(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+              borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
                     IconButton(
                       tooltip: l10n.previousMonth,
                       onPressed: () => ref
@@ -116,7 +118,6 @@ class BudgetsScreen extends ConsumerWidget {
                 ),
               ),
             ),
-          ),
 
           Expanded(
             child: budgetsStream.when(
@@ -272,10 +273,13 @@ class _BudgetProgressCard extends StatelessWidget {
       masked: hideBalance,
     );
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
+    return AppleGlassCard(
+      padding: const EdgeInsets.all(16),
+      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+      borderColor: progress.isExceeded
+          ? AppleTokens.systemRed.withValues(alpha: 0.4)
+          : null,
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -384,7 +388,6 @@ class _BudgetProgressCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 }

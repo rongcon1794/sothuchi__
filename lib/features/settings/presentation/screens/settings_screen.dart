@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -310,6 +311,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   title: Text(l10n.categoriesTitle),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => context.push(AppRoutes.categories),
+                ),
+                const Divider(indent: 58),
+                ListTile(
+                  leading: const AppleSquircleBadge(
+                    icon: CupertinoIcons.person_2_fill,
+                    backgroundColor: AppleTokens.systemIndigo,
+                  ),
+                  title: const Text('Sổ Ghi Nợ'),
+                  subtitle: const Text('Quản lý tiền cho vay & đi vay'),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => context.push(AppRoutes.debts),
                 ),
               ],
             ),

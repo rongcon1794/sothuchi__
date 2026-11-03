@@ -13,6 +13,7 @@ abstract final class AppRoutes {
 
   static const String accounts = '/accounts';
   static const String categories = '/categories';
+  static const String debts = '/debts';
   static const String privacy = '/settings/privacy';
   static const String about = '/settings/about';
 

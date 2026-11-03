@@ -15,6 +15,7 @@ abstract final class AppleTokens {
   static const Color systemYellow = Color(0xFFFFCC00);
   static const Color systemMint = Color(0xFF00C7BE);
   static const Color systemCyan = Color(0xFF32ADE6);
+  static const Color systemGray = Color(0xFF8E8E93);
 
   // Financial Semantics (Jade & Ruby Apple-styled)
   static const Color jadePrimary = Color(0xFF00897B);
@@ -26,11 +27,14 @@ abstract final class AppleTokens {
   // --- Backgrounds & Grouped Surfaces (iOS 18) ---
   // Light Mode
   static const Color bgLightGrouped = Color(0xFFF2F2F7);
+  static const Color bgLightPrimary = bgLightGrouped;
   static const Color bgLightCard = Color(0xFFFFFFFF);
   static const Color bgLightSecondary = Color(0xFFE5E5EA);
+  static const Color borderLight = Color(0xFFE5E5EA);
 
   // Dark Mode
   static const Color bgDarkGrouped = Color(0xFF000000);
+  static const Color bgDarkPrimary = bgDarkGrouped;
   static const Color bgDarkCard = Color(0xFF1C1C1E);
   static const Color bgDarkSecondary = Color(0xFF2C2C2E);
   static const Color bgDarkTertiary = Color(0xFF3A3A3C);

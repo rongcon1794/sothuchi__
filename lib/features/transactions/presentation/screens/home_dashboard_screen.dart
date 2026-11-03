@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -223,6 +224,46 @@ class HomeDashboardScreen extends ConsumerWidget {
                   },
                 ),
               ),
+            const SizedBox(height: 16),
+
+            // Sổ Ghi Nợ Quick Capsule
+            ApplePressable(
+              onTap: () => context.push(AppRoutes.debts),
+              child: AppleGlassCard(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                child: Row(
+                  children: [
+                    const AppleSquircleBadge(
+                      icon: CupertinoIcons.person_2_fill,
+                      color: AppleTokens.systemIndigo,
+                      size: 32,
+                      iconSize: 18,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Sổ Ghi Nợ',
+                            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
+                          ),
+                          Text(
+                            'Theo dõi các khoản cho vay & đi vay',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(CupertinoIcons.chevron_right, size: 14, color: AppleTokens.systemGray),
+                  ],
+                ),
+              ),
+            ),
             const SizedBox(height: 20),
 
             // Recent Transactions Header

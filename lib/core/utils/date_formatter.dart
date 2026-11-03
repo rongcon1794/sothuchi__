@@ -71,7 +71,13 @@ abstract final class AppDateUtils {
     return DateFormat('MMM', locale).format(date);
   }
 
-  static String formatShortDate(DateTime date, {String locale = 'vi'}) =>
-      DateFormat('dd/MM/yyyy', locale).format(date);
+  static String formatShortDate(DateTime date, {String locale = 'vi'}) {
+    final d = date.day.toString().padLeft(2, '0');
+    final m = date.month.toString().padLeft(2, '0');
+    return '$d/$m/${date.year}';
+  }
+
+  static String formatVnDate(DateTime date) =>
+      formatShortDate(date, locale: 'vi');
 }
 

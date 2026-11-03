@@ -10,6 +10,8 @@ import 'package:so_thu_chi/features/budgets/data/repositories/firestore_budget_r
 import 'package:so_thu_chi/features/budgets/domain/repositories/budget_repository.dart';
 import 'package:so_thu_chi/features/categories/data/repositories/firestore_category_repository.dart';
 import 'package:so_thu_chi/features/categories/domain/repositories/category_repository.dart';
+import 'package:so_thu_chi/features/debts/data/repositories/firestore_debt_repository.dart';
+import 'package:so_thu_chi/features/debts/domain/repositories/debt_repository.dart';
 import 'package:so_thu_chi/features/reports/data/repositories/reports_repository_impl.dart';
 import 'package:so_thu_chi/features/reports/domain/repositories/reports_repository.dart';
 import 'package:so_thu_chi/features/settings/data/repositories/settings_repository_impl.dart';
@@ -40,6 +42,10 @@ final inMemoryBudgetRepoProvider = Provider<InMemoryBudgetRepository>((ref) {
   return InMemoryBudgetRepository();
 });
 
+final inMemoryDebtRepoProvider = Provider<InMemoryDebtRepository>((ref) {
+  return InMemoryDebtRepository();
+});
+
 /// Bootstrapper invoked when a user signs in: idempotently seeds Vietnamese
 /// default categories and ensures a default Cash wallet exists.
 final userBootstrapCallbackProvider = Provider<UserBootstrapCallback?>((ref) {
@@ -68,6 +74,7 @@ final userBootstrapCallbackProvider = Provider<UserBootstrapCallback?>((ref) {
 /// Cleanup hook when an offline demo account deletes all data.
 final demoDataCleanupCallbackProvider = Provider<Future<void> Function()?>(
   (ref) => () async {
+    ref.read(inMemoryDebtRepoProvider).clear();
     ref.read(inMemoryBudgetRepoProvider).clear();
     ref.read(inMemoryTransactionRepoProvider).clear();
     ref.read(inMemoryAccountRepoProvider).clear();
@@ -150,6 +157,15 @@ final budgetRepositoryProvider = Provider<BudgetRepository>((ref) {
     return ref.watch(inMemoryBudgetRepoProvider);
   }
   return FirestoreBudgetRepository(firestore: firestore, uid: user.uid);
+});
+
+final debtRepositoryProvider = Provider<DebtRepository>((ref) {
+  final user = ref.watch(currentUserProvider);
+  final firestore = ref.watch(firestoreProvider);
+  if (user == null || user.isDemoUser || firestore == null) {
+    return ref.watch(inMemoryDebtRepoProvider);
+  }
+  return FirestoreDebtRepository(firestore: firestore, uid: user.uid);
 });
 
 final reportsRepositoryProvider = Provider<ReportsRepository>((ref) {
