@@ -245,20 +245,21 @@ class TransactionTile extends StatelessWidget {
         alignment: Alignment.centerLeft,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
-          color: theme.colorScheme.primaryContainer,
+          color: const Color(0xFF007AFF),
           borderRadius: BorderRadius.circular(14),
         ),
         child: Row(
           children: [
-            Icon(
+            const Icon(
               Icons.edit_rounded,
-              color: theme.colorScheme.onPrimaryContainer,
+              color: Colors.white,
             ),
             const SizedBox(width: 8),
             Text(
               l10n.edit,
               style: theme.textTheme.labelLarge?.copyWith(
-                color: theme.colorScheme.onPrimaryContainer,
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
@@ -268,7 +269,7 @@ class TransactionTile extends StatelessWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
-          color: theme.colorScheme.errorContainer,
+          color: const Color(0xFFFF3B30),
           borderRadius: BorderRadius.circular(14),
         ),
         child: Row(
@@ -277,13 +278,14 @@ class TransactionTile extends StatelessWidget {
             Text(
               l10n.delete,
               style: theme.textTheme.labelLarge?.copyWith(
-                color: theme.colorScheme.onErrorContainer,
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(width: 8),
-            Icon(
+            const Icon(
               Icons.delete_outline_rounded,
-              color: theme.colorScheme.onErrorContainer,
+              color: Colors.white,
             ),
           ],
         ),

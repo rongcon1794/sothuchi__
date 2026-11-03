@@ -5,7 +5,9 @@ import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/errors/result.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
+import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
+import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/core/widgets/empty_state_view.dart';
 import 'package:so_thu_chi/core/widgets/icon_and_color_picker.dart';
 import 'package:so_thu_chi/core/widgets/skeleton_box.dart';
@@ -273,27 +275,29 @@ class _WalletTile extends StatelessWidget {
       ),
     );
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onEdit,
+    return ApplePressable(
+      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+      onTap: onEdit,
+      child: Card(
+        clipBehavior: Clip.antiAlias,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+          padding: const EdgeInsets.fromLTRB(16, 14, 8, 14),
           child: Row(
             children: [
               Container(
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: walletColor.withValues(alpha: 0.14),
+                  color: walletColor.withValues(alpha: 0.16),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   AppIconCatalog.resolve(account.icon),
                   color: walletColor,
+                  size: 22,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -303,6 +307,7 @@ class _WalletTile extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
                         decoration: account.archived
                             ? TextDecoration.lineThrough
                             : null,

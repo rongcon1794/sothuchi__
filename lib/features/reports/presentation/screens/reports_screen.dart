@@ -2,10 +2,12 @@ import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
+import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/date_formatter.dart';
 import 'package:so_thu_chi/core/widgets/empty_state_view.dart';
 import 'package:so_thu_chi/core/widgets/skeleton_box.dart';
@@ -52,6 +54,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                     IconButton(
                       tooltip: l10n.previousMonth,
                       onPressed: () {
+                        HapticFeedback.selectionClick();
                         setState(() => _touchedPieIndex = -1);
                         ref
                             .read(selectedReportMonthProvider.notifier)
@@ -68,12 +71,15 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                         textAlign: TextAlign.center,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleMedium,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                     IconButton(
                       tooltip: l10n.nextMonth,
                       onPressed: () {
+                        HapticFeedback.selectionClick();
                         setState(() => _touchedPieIndex = -1);
                         ref
                             .read(selectedReportMonthProvider.notifier)
@@ -505,49 +511,65 @@ class _CategoryLegendRow extends StatelessWidget {
       label:
           '$name, ${slice.percentage}%, ${hideBalance ? l10n.balanceHidden : formattedAmount}',
       excludeSemantics: true,
-      child: Row(
+      child: Column(
         children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: catColor.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(
-              AppIconCatalog.resolve(slice.icon),
-              size: 18,
-              color: catColor,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              name,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodyMedium,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            '${slice.percentage}%',
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontFeatures: AppTheme.tabularFigures,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Flexible(
-            flex: 0,
-            child: Text(
-              formattedAmount,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                fontFeatures: AppTheme.tabularFigures,
+          Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: catColor.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  AppIconCatalog.resolve(slice.icon),
+                  size: 18,
+                  color: catColor,
+                ),
               ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '${slice.percentage}%',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontFeatures: AppTheme.tabularFigures,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Flexible(
+                flex: 0,
+                child: Text(
+                  formattedAmount,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    fontFeatures: AppTheme.tabularFigures,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+            child: LinearProgressIndicator(
+              value: (slice.percentage / 100.0).clamp(0.0, 1.0),
+              minHeight: 4,
+              backgroundColor: catColor.withValues(alpha: 0.12),
+              valueColor: AlwaysStoppedAnimation<Color>(catColor),
             ),
           ),
         ],

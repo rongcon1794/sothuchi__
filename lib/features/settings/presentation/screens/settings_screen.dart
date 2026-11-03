@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
+import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
+import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:so_thu_chi/features/settings/domain/entities/app_settings.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
@@ -242,8 +244,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 child: Row(
                   children: [
                     CircleAvatar(
-                      radius: 26,
-                      backgroundColor: scheme.primaryContainer,
+                      radius: 28,
+                      backgroundColor: AppleTokens.jadePrimary,
                       child: Text(
                         (user.displayName?.isNotEmpty == true
                                 ? user.displayName![0]
@@ -252,7 +254,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 : 'S')
                             .toUpperCase(),
                         style: theme.textTheme.titleLarge?.copyWith(
-                          color: scheme.onPrimaryContainer,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
@@ -263,7 +266,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         children: [
                           Text(
                             user.displayName ?? l10n.appTitle,
-                            style: theme.textTheme.titleMedium,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                           const SizedBox(height: 2),
                           Text(
@@ -279,7 +284,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 18),
           ],
 
           // Wallets & Categories Quick Access
@@ -288,17 +293,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: Column(
               children: [
                 ListTile(
-                  leading: Icon(
-                    Icons.account_balance_wallet_outlined,
-                    color: scheme.primary,
+                  leading: const AppleSquircleBadge(
+                    icon: Icons.account_balance_wallet_rounded,
+                    backgroundColor: AppleTokens.systemGreen,
                   ),
                   title: Text(l10n.walletsTitle),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => context.push(AppRoutes.accounts),
                 ),
-                const Divider(indent: 56),
+                const Divider(indent: 58),
                 ListTile(
-                  leading: Icon(Icons.category_outlined, color: scheme.primary),
+                  leading: const AppleSquircleBadge(
+                    icon: Icons.category_rounded,
+                    backgroundColor: AppleTokens.systemOrange,
+                  ),
                   title: Text(l10n.categoriesTitle),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => context.push(AppRoutes.categories),
@@ -306,7 +314,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 22),
 
           // Appearance & Localization Section
           _SectionHeader(title: l10n.appearanceSection),
@@ -320,8 +328,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(l10n.themeMode, style: theme.textTheme.titleSmall),
-                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          const AppleSquircleBadge(
+                            icon: Icons.palette_rounded,
+                            backgroundColor: AppleTokens.systemIndigo,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(l10n.themeMode, style: theme.textTheme.titleSmall),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
                       SizedBox(
                         width: double.infinity,
                         child: SegmentedButton<ThemeMode>(
@@ -350,7 +367,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 const Divider(),
                 ListTile(
-                  leading: const Icon(Icons.language_rounded),
+                  leading: const AppleSquircleBadge(
+                    icon: Icons.translate_rounded,
+                    backgroundColor: AppleTokens.systemTeal,
+                  ),
                   title: Text(l10n.language),
                   subtitle: Text(
                     settings.localeCode == 'en'
@@ -360,9 +380,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _pickLanguage(settings.localeCode),
                 ),
-                const Divider(indent: 56),
+                const Divider(indent: 58),
                 ListTile(
-                  leading: const Icon(Icons.payments_outlined),
+                  leading: const AppleSquircleBadge(
+                    icon: Icons.monetization_on_rounded,
+                    backgroundColor: AppleTokens.systemYellow,
+                  ),
                   title: Text(l10n.defaultCurrency),
                   subtitle: Text(
                     '${activeCurrencyInfo.code} (${activeCurrencyInfo.symbol})',
@@ -373,7 +396,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 22),
 
           // Security & Data Export Section
           _SectionHeader(title: l10n.securitySection),
@@ -383,21 +406,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: Column(
               children: [
                 SwitchListTile(
-                  secondary: const Icon(Icons.fingerprint_rounded),
+                  secondary: const AppleSquircleBadge(
+                    icon: Icons.fingerprint_rounded,
+                    backgroundColor: AppleTokens.systemBlue,
+                  ),
                   title: Text(l10n.biometricLock),
                   subtitle: Text(l10n.biometricLockSubtitle),
                   value: settings.biometricLockEnabled,
                   onChanged: _handleToggleBiometric,
                 ),
-                const Divider(indent: 56),
+                const Divider(indent: 58),
                 ListTile(
                   leading: _exportingCsv
                       ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          width: 32,
+                          height: 32,
+                          child: Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
                         )
-                      : const Icon(Icons.download_rounded),
+                      : const AppleSquircleBadge(
+                          icon: Icons.table_view_rounded,
+                          backgroundColor: AppleTokens.jadePrimary,
+                        ),
                   title: Text(l10n.exportCsv),
                   subtitle: Text(l10n.exportCsvSubtitle),
                   trailing: const Icon(Icons.ios_share_rounded, size: 20),
@@ -406,7 +441,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 22),
 
           // Legal & About Section
           _SectionHeader(title: l10n.aboutSection),
@@ -416,14 +451,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.privacy_tip_outlined),
+                  leading: const AppleSquircleBadge(
+                    icon: Icons.shield_outlined,
+                    backgroundColor: AppleTokens.systemMint,
+                  ),
                   title: Text(l10n.privacyPolicy),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => context.push(AppRoutes.privacy),
                 ),
-                const Divider(indent: 56),
+                const Divider(indent: 58),
                 ListTile(
-                  leading: const Icon(Icons.info_outline_rounded),
+                  leading: const AppleSquircleBadge(
+                    icon: Icons.info_outline_rounded,
+                    backgroundColor: Color(0xFF8E8E93),
+                  ),
                   title: Text(l10n.aboutApp),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => context.push(AppRoutes.about),
@@ -431,7 +472,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 22),
 
           // Account Actions (Sign Out & Delete Account + All Data)
           _SectionHeader(title: l10n.accountSection),
@@ -442,16 +483,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               children: [
                 ListTile(
                   enabled: !authBusy,
-                  leading: const Icon(Icons.logout_rounded),
+                  leading: const AppleSquircleBadge(
+                    icon: Icons.logout_rounded,
+                    backgroundColor: AppleTokens.systemOrange,
+                  ),
                   title: Text(l10n.signOut),
                   onTap: _confirmSignOut,
                 ),
-                const Divider(indent: 56),
+                const Divider(indent: 58),
                 ListTile(
                   enabled: !authBusy,
-                  leading: Icon(
-                    Icons.delete_forever_rounded,
-                    color: scheme.error,
+                  leading: const AppleSquircleBadge(
+                    icon: Icons.delete_forever_rounded,
+                    backgroundColor: AppleTokens.systemRed,
                   ),
                   title: Text(
                     l10n.deleteAccount,

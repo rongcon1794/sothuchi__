@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 
 /// Semantic financial colors meeting WCAG AA >= 4.5:1 contrast in Light & Dark modes.
 @immutable
@@ -158,7 +159,7 @@ abstract final class AppTheme {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: seed,
       brightness: brightness,
-      surface: isDark ? const Color(0xFF0F1513) : const Color(0xFFF8FAF9),
+      surface: isDark ? AppleTokens.bgDarkCard : AppleTokens.bgLightCard,
     );
     final baseText = Typography.material2021().black.apply(
       bodyColor: colorScheme.onSurface,
@@ -169,7 +170,8 @@ abstract final class AppTheme {
       useMaterial3: true,
       brightness: brightness,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: colorScheme.surface,
+      scaffoldBackgroundColor:
+          isDark ? AppleTokens.bgDarkGrouped : AppleTokens.bgLightGrouped,
       extensions: [isDark ? FinanceColors.dark : FinanceColors.light],
       textTheme: baseText.copyWith(
         displaySmall: baseText.displaySmall?.copyWith(
@@ -193,6 +195,7 @@ abstract final class AppTheme {
         ),
         titleMedium: baseText.titleMedium?.copyWith(
           fontWeight: FontWeight.w600,
+          letterSpacing: -0.1,
         ),
         bodyLarge: baseText.bodyLarge?.copyWith(height: 1.4),
         bodyMedium: baseText.bodyMedium?.copyWith(height: 1.4),
@@ -204,46 +207,48 @@ abstract final class AppTheme {
       appBarTheme: AppBarTheme(
         centerTitle: false,
         elevation: 0,
-        scrolledUnderElevation: 0.5,
-        backgroundColor: colorScheme.surface,
+        scrolledUnderElevation: 0,
+        backgroundColor:
+            isDark ? AppleTokens.bgDarkGrouped : AppleTokens.bgLightGrouped,
         foregroundColor: colorScheme.onSurface,
       ),
       cardTheme: CardThemeData(
         elevation: 0,
         margin: EdgeInsets.zero,
-        color: isDark
-            ? colorScheme.surfaceContainerLow
-            : colorScheme.surfaceContainerLowest,
+        color: isDark ? AppleTokens.bgDarkCard : AppleTokens.bgLightCard,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
           side: BorderSide(
-            color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.08)
+                : Colors.black.withValues(alpha: 0.05),
+            width: AppleTokens.hairline,
           ),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: isDark
-            ? colorScheme.surfaceContainer
-            : colorScheme.surfaceContainerLowest,
+            ? AppleTokens.bgDarkSecondary
+            : AppleTokens.bgLightSecondary.withValues(alpha: 0.7),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: colorScheme.outlineVariant),
+          borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+          borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: colorScheme.outlineVariant),
+          borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: colorScheme.primary, width: 1.8),
+          borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+          borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
           borderSide: BorderSide(color: colorScheme.error),
         ),
       ),
@@ -252,7 +257,7 @@ abstract final class AppTheme {
           minimumSize: const Size(48, 50),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
           ),
         ),
       ),
@@ -261,7 +266,7 @@ abstract final class AppTheme {
           minimumSize: const Size(48, 50),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
           ),
         ),
       ),

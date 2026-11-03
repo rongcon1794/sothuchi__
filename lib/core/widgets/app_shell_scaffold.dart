@@ -1,8 +1,13 @@
+import 'dart:ui';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
+import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 
-/// Persistent Material 3 bottom navigation shell for the 5 primary tabs.
+/// Translucent, frosted-glass Apple bottom navigation shell.
+/// Features iOS 18 blur materials, subtle spring micro-interactions, and haptic feedback.
 class AppShellScaffold extends StatelessWidget {
   const AppShellScaffold({
     required this.navigationShell,
@@ -14,6 +19,9 @@ class AppShellScaffold extends StatelessWidget {
   final Widget? topBanner;
 
   void _onDestinationSelected(int index) {
+    if (index != navigationShell.currentIndex) {
+      HapticFeedback.selectionClick();
+    }
     navigationShell.goBranch(
       index,
       initialLocation: index == navigationShell.currentIndex,
@@ -23,46 +31,172 @@ class AppShellScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final currentIndex = navigationShell.currentIndex;
+
+    final destinations = [
+      _NavDestinationData(
+        icon: CupertinoIcons.square_grid_2x2,
+        activeIcon: CupertinoIcons.square_grid_2x2_fill,
+        label: l10n.navOverview,
+      ),
+      _NavDestinationData(
+        icon: CupertinoIcons.doc_text,
+        activeIcon: CupertinoIcons.doc_text_fill,
+        label: l10n.navTransactions,
+      ),
+      _NavDestinationData(
+        icon: CupertinoIcons.chart_pie,
+        activeIcon: CupertinoIcons.chart_pie_fill,
+        label: l10n.navBudgets,
+      ),
+      _NavDestinationData(
+        icon: CupertinoIcons.chart_bar,
+        activeIcon: CupertinoIcons.chart_bar_fill,
+        label: l10n.navReports,
+      ),
+      _NavDestinationData(
+        icon: CupertinoIcons.gear_alt,
+        activeIcon: CupertinoIcons.gear_alt_fill,
+        label: l10n.navSettings,
+      ),
+    ];
 
     return Scaffold(
+      extendBody: true,
       body: Column(
         children: [
           ?topBanner,
           Expanded(child: navigationShell),
         ],
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: _onDestinationSelected,
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.dashboard_outlined),
-            selectedIcon: const Icon(Icons.dashboard_rounded),
-            label: l10n.navOverview,
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+            boxShadow: isDark
+                ? AppleTokens.floatingBarShadowDark
+                : AppleTokens.floatingBarShadowLight,
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.receipt_long_outlined),
-            selectedIcon: const Icon(Icons.receipt_long_rounded),
-            label: l10n.navTransactions,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+              child: Container(
+                height: 64,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF1C1C1E).withValues(alpha: 0.82)
+                      : Colors.white.withValues(alpha: 0.85),
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+                  border: Border.all(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.12)
+                        : Colors.black.withValues(alpha: 0.06),
+                    width: AppleTokens.hairline,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    for (int i = 0; i < destinations.length; i++)
+                      _AppleNavBarItem(
+                        data: destinations[i],
+                        isSelected: i == currentIndex,
+                        onTap: () => _onDestinationSelected(i),
+                      ),
+                  ],
+                ),
+              ),
+            ),
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.pie_chart_outline_rounded),
-            selectedIcon: const Icon(Icons.pie_chart_rounded),
-            label: l10n.navBudgets,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.bar_chart_outlined),
-            selectedIcon: const Icon(Icons.bar_chart_rounded),
-            label: l10n.navReports,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.settings_outlined),
-            selectedIcon: const Icon(Icons.settings_rounded),
-            label: l10n.navSettings,
-          ),
-        ],
+        ),
       ),
     );
   }
 }
 
+class _NavDestinationData {
+  const _NavDestinationData({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+  });
+
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+}
+
+class _AppleNavBarItem extends StatelessWidget {
+  const _AppleNavBarItem({
+    required this.data,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final _NavDestinationData data;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    const primaryColor = AppleTokens.jadePrimary;
+
+    return Expanded(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: AnimatedScale(
+          scale: isSelected ? 1.05 : 1.0,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutBack,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? primaryColor.withValues(alpha: isDark ? 0.22 : 0.12)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                ),
+                child: Icon(
+                  isSelected ? data.activeIcon : data.icon,
+                  size: 22,
+                  color: isSelected
+                      ? primaryColor
+                      : (isDark
+                          ? const Color(0xFF8E8E93)
+                          : const Color(0xFF8E8E93)),
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                data.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  color: isSelected
+                      ? primaryColor
+                      : (isDark
+                          ? const Color(0xFF8E8E93)
+                          : const Color(0xFF8E8E93)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

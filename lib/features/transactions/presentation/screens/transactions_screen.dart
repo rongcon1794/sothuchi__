@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,6 +6,7 @@ import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
+import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/date_formatter.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/empty_state_view.dart';
@@ -82,6 +84,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final settings = ref.watch(settingsControllerProvider).value;
     final locale = settings?.localeCode ?? 'vi';
     final currency = settings?.currencyCode ?? AppCurrencies.defaultCode;
@@ -110,7 +113,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
       ),
       body: Column(
         children: [
-          // Search Bar + Quick Type Filter Chips
+          // Search Bar + Quick Type Filter Chips (Apple Cupertino style)
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
             child: TextField(
@@ -119,8 +122,29 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                   .read(transactionFilterProvider.notifier)
                   .setSearchQuery(value),
               decoration: InputDecoration(
+                filled: true,
+                fillColor: isDark
+                    ? AppleTokens.bgDarkSecondary
+                    : AppleTokens.bgLightSecondary,
                 hintText: l10n.searchTransactionsHint,
-                prefixIcon: const Icon(Icons.search_rounded),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                  borderSide: const BorderSide(
+                    color: AppleTokens.jadePrimary,
+                    width: 1.5,
+                  ),
+                ),
+                prefixIcon: const Icon(CupertinoIcons.search, size: 20),
                 suffixIcon: filter.searchQuery.isNotEmpty
                     ? IconButton(
                         tooltip: l10n.clearFilters,
@@ -130,7 +154,10 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                               .read(transactionFilterProvider.notifier)
                               .setSearchQuery('');
                         },
-                        icon: const Icon(Icons.close_rounded),
+                        icon: const Icon(
+                          CupertinoIcons.clear_thick_circled,
+                          size: 18,
+                        ),
                       )
                     : null,
               ),
@@ -142,6 +169,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
             child: Row(
               children: [
                 FilterChip(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                  ),
                   label: Text(l10n.all),
                   selected: filter.type == null,
                   onSelected: (_) =>
@@ -149,6 +179,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 ),
                 const SizedBox(width: 8),
                 FilterChip(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                  ),
                   label: Text(l10n.expense),
                   selected: filter.type == TransactionType.expense,
                   onSelected: (sel) => ref
@@ -157,6 +190,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 ),
                 const SizedBox(width: 8),
                 FilterChip(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                  ),
                   label: Text(l10n.income),
                   selected: filter.type == TransactionType.income,
                   onSelected: (sel) => ref
@@ -165,6 +201,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 ),
                 const SizedBox(width: 8),
                 FilterChip(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                  ),
                   label: Text(l10n.transfer),
                   selected: filter.type == TransactionType.transfer,
                   onSelected: (sel) => ref
@@ -174,6 +213,10 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 if (filter.hasActiveFilters) ...[
                   const SizedBox(width: 8),
                   ActionChip(
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(AppleTokens.radiusPill),
+                    ),
                     avatar: const Icon(Icons.filter_alt_off_rounded, size: 16),
                     label: Text(l10n.clearFilters),
                     onPressed: () {

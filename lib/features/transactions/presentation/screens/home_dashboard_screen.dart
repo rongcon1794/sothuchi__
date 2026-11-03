@@ -7,8 +7,10 @@ import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
+import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/date_formatter.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
+import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/core/widgets/empty_state_view.dart';
 import 'package:so_thu_chi/core/widgets/skeleton_box.dart';
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
@@ -297,14 +299,27 @@ class HomeDashboardScreen extends ConsumerWidget {
           ? FloatingActionButton(
               heroTag: 'home_quick_add_fab',
               tooltip: l10n.quickAddTransaction,
+              backgroundColor: AppleTokens.jadePrimary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+              ),
               onPressed: () => context.push(AppRoutes.transactionNew),
               child: const Icon(Icons.add_rounded),
             )
           : FloatingActionButton.extended(
               heroTag: 'home_quick_add_fab',
+              backgroundColor: AppleTokens.jadePrimary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+              ),
               onPressed: () => context.push(AppRoutes.transactionNew),
               icon: const Icon(Icons.add_rounded),
-              label: Text(l10n.quickAddTransaction),
+              label: Text(
+                l10n.quickAddTransaction,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
             ),
     );
   }
@@ -329,21 +344,34 @@ class _HeroBalanceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
-    // Dedicated rich deep-jade surface with crisp white foreground guarantees >7:1 WCAG AAA contrast in both Light and Dark themes.
+    final isDark = theme.brightness == Brightness.dark;
     const fgColor = Colors.white;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF0D7C66),
-            Color(0xFF074C3E),
+            Color(0xFF0F7A62),
+            Color(0xFF094638),
           ],
         ),
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.18),
+          width: AppleTokens.hairline,
+        ),
+        boxShadow: isDark
+            ? AppleTokens.cardShadowDark
+            : [
+                BoxShadow(
+                  color: const Color(0xFF094638).withValues(alpha: 0.25),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -351,11 +379,36 @@ class _HeroBalanceCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text(
-                  l10n.totalBalance,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: fgColor.withValues(alpha: 0.9),
-                  ),
+                child: Row(
+                  children: [
+                    // Apple Wallet EMV Chip Ornament
+                    Container(
+                      width: 28,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.amber.shade200.withValues(alpha: 0.8),
+                            Colors.amber.shade400.withValues(alpha: 0.8),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.3),
+                          width: AppleTokens.hairline,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      l10n.totalBalance,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: fgColor.withValues(alpha: 0.9),
+                        letterSpacing: 0.2,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               IconButton(
@@ -365,18 +418,25 @@ class _HeroBalanceCard extends StatelessWidget {
                   foregroundColor: fgColor,
                   backgroundColor: fgColor.withValues(alpha: 0.16),
                 ),
-                icon: Icon(
-                  hideBalance
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
-                  size: 20,
+                icon: AnimatedRotation(
+                  turns: hideBalance ? 0.5 : 0.0,
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOutBack,
+                  child: Icon(
+                    hideBalance
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    size: 20,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 10),
           AnimatedSwitcher(
-            duration: const Duration(milliseconds: 180),
+            duration: const Duration(milliseconds: 220),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
             child: SizedBox(
               key: ValueKey<bool>(hideBalance),
               width: double.infinity,
@@ -389,18 +449,23 @@ class _HeroBalanceCard extends StatelessWidget {
                   style: theme.textTheme.displaySmall?.copyWith(
                     color: fgColor,
                     fontWeight: FontWeight.w700,
+                    letterSpacing: -0.6,
                     fontFeatures: AppTheme.tabularFigures,
                   ),
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: fgColor.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
+              color: fgColor.withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+              border: Border.all(
+                color: fgColor.withValues(alpha: 0.12),
+                width: AppleTokens.hairline,
+              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -458,49 +523,53 @@ class _CashflowMetricCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color: containerColor,
-                    borderRadius: BorderRadius.circular(10),
+    return ApplePressable(
+      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: containerColor,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(icon, size: 18, color: onContainerColor),
                   ),
-                  child: Icon(icon, size: 18, color: onContainerColor),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              amountText,
-              semanticsLabel: semanticsAmount,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: accentColor,
-                fontWeight: FontWeight.w700,
-                fontFeatures: AppTheme.tabularFigures,
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: 10),
+              Text(
+                amountText,
+                semanticsLabel: semanticsAmount,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: accentColor,
+                  fontWeight: FontWeight.w700,
+                  fontFeatures: AppTheme.tabularFigures,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -537,15 +606,16 @@ class _MiniWalletCard extends StatelessWidget {
 
     return SizedBox(
       width: cardWidth,
-      child: Card(
-        clipBehavior: Clip.antiAlias,
-        child: Semantics(
-          button: true,
-          excludeSemantics: true,
-          label:
-              '${account.name}, ${hideBalance ? l10n.balanceHidden : formattedBalance}',
-          child: InkWell(
-            onTap: onTap,
+      child: ApplePressable(
+        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+        onTap: onTap,
+        child: Card(
+          clipBehavior: Clip.antiAlias,
+          child: Semantics(
+            button: true,
+            excludeSemantics: true,
+            label:
+                '${account.name}, ${hideBalance ? l10n.balanceHidden : formattedBalance}',
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
@@ -573,7 +643,9 @@ class _MiniWalletCard extends StatelessWidget {
                           account.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.labelLarge,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
@@ -7,8 +8,10 @@ import 'package:so_thu_chi/core/contracts/transaction_draft_contract.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
+import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/date_formatter.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
+import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
 import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_controller.dart';
 import 'package:so_thu_chi/features/budgets/presentation/controllers/budgets_controller.dart';
@@ -139,6 +142,22 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     if (picked != null && mounted) {
       setState(() => _selectedDate = picked);
     }
+  }
+
+  void _addAmountShortcut(int additionMinorUnits, String currencyCode, String locale) {
+    HapticFeedback.lightImpact();
+    final current =
+        Money.tryParse(_amountController.text, currencyCode: currencyCode)
+            ?.minorUnits ??
+        0;
+    final updated = current + additionMinorUnits;
+    final newText = Money(
+      minorUnits: updated,
+      currencyCode: currencyCode,
+    ).toInputString(locale: locale);
+    setState(() {
+      _amountController.text = newText;
+    });
   }
 
   Future<void> _submit() async {
@@ -338,6 +357,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final settings = ref.watch(settingsControllerProvider).value;
     final locale = settings?.localeCode ?? 'vi';
 
@@ -403,10 +423,12 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
           ? const Center(child: CircularProgressIndicator())
           : Form(
               key: _formKey,
-              child: ListView(
+              child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-                children: [
-                  // Type Segmented Control
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Type Segmented Control
                   SegmentedButton<TransactionType>(
                     segments: [
                       ButtonSegment(
@@ -478,7 +500,58 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
+
+                  // Quick Amount Addition Pills (Apple style)
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        for (final shortcut in [
+                          (label: '+20k', amount: 20000),
+                          (label: '+50k', amount: 50000),
+                          (label: '+100k', amount: 100000),
+                          (label: '+200k', amount: 200000),
+                          (label: '+500k', amount: 500000),
+                          (label: '+1tr', amount: 1000000),
+                        ])
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: ApplePressable(
+                              borderRadius:
+                                  BorderRadius.circular(AppleTokens.radiusPill),
+                              onTap: () => _addAmountShortcut(
+                                shortcut.amount,
+                                currencyCode,
+                                locale,
+                              ),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? AppleTokens.bgDarkSecondary
+                                      : AppleTokens.bgLightSecondary,
+                                  borderRadius: BorderRadius.circular(
+                                    AppleTokens.radiusPill,
+                                  ),
+                                ),
+                                child: Text(
+                                  shortcut.label,
+                                  style: theme.textTheme.labelMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: theme.colorScheme.onSurface,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
 
                   // Source Wallet Selector
                   DropdownButtonFormField<String>(
@@ -634,19 +707,39 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                   const SizedBox(height: 28),
 
                   FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppleTokens.jadePrimary,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size.fromHeight(52),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppleTokens.radiusPill),
+                      ),
+                      elevation: 0,
+                    ),
                     onPressed: isSaving ? null : _submit,
                     icon: isSaving
                         ? const SizedBox(
                             width: 18,
                             height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
                           )
                         : const Icon(Icons.check_rounded),
-                    label: Text(l10n.save),
+                    label: Text(
+                      l10n.save,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
+          ),
     );
   }
 }

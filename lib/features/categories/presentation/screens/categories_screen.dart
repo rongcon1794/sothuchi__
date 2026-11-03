@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
+import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
+import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/core/widgets/icon_and_color_picker.dart';
 import 'package:so_thu_chi/core/widgets/skeleton_box.dart';
 import 'package:so_thu_chi/features/categories/domain/entities/category.dart';
@@ -115,52 +117,62 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                         )
                       : cat.name;
 
-                  return Card(
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 4,
-                      ),
-                      leading: Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: color.withValues(alpha: 0.14),
-                          borderRadius: BorderRadius.circular(12),
+                  return ApplePressable(
+                    borderRadius:
+                        BorderRadius.circular(AppleTokens.radiusCard),
+                    onTap: () => _openCategorySheet(existing: cat),
+                    child: Card(
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
                         ),
-                        child: Icon(
-                          AppIconCatalog.resolve(cat.icon),
-                          color: color,
+                        leading: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: color.withValues(alpha: 0.16),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            AppIconCatalog.resolve(cat.icon),
+                            color: color,
+                            size: 22,
+                          ),
                         ),
-                      ),
-                      title: Text(displayName, style: theme.textTheme.titleMedium),
-                      subtitle: cat.isDefault
-                          ? Text(
-                              l10n.defaultCategoryBadge,
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: scheme.onSurfaceVariant,
+                        title: Text(
+                          displayName,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        subtitle: cat.isDefault
+                            ? Text(
+                                l10n.defaultCategoryBadge,
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: scheme.onSurfaceVariant,
+                                ),
+                              )
+                            : null,
+                        trailing: PopupMenuButton<String>(
+                          tooltip: l10n.moreOptions,
+                          onSelected: (value) {
+                            if (value == 'edit') {
+                              _openCategorySheet(existing: cat);
+                            } else if (value == 'delete') {
+                              _deleteCategory(cat);
+                            }
+                          },
+                          itemBuilder: (ctx) => [
+                            PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
+                            if (!cat.isDefault)
+                              PopupMenuItem(
+                                value: 'delete',
+                                child: Text(l10n.delete),
                               ),
-                            )
-                          : null,
-                      trailing: PopupMenuButton<String>(
-                        tooltip: l10n.moreOptions,
-                        onSelected: (value) {
-                          if (value == 'edit') {
-                            _openCategorySheet(existing: cat);
-                          } else if (value == 'delete') {
-                            _deleteCategory(cat);
-                          }
-                        },
-                        itemBuilder: (ctx) => [
-                          PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
-                          if (!cat.isDefault)
-                            PopupMenuItem(
-                              value: 'delete',
-                              child: Text(l10n.delete),
-                            ),
-                        ],
+                          ],
+                        ),
                       ),
-                      onTap: () => _openCategorySheet(existing: cat),
                     ),
                   );
                 },
