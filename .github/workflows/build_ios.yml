@@ -26,15 +26,17 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Pre-create build directories
+      - name: Configure CocoaPods & Disable SwiftPM
         run: |
-          mkdir -p build/ios/SourcePackages build/ios/iphoneos
+          flutter config --no-enable-swift-package-manager
+          mkdir -p build/ios/iphoneos
 
       - name: Install dependencies & Generate code
         run: |
           flutter pub get
           flutter gen-l10n
           dart run build_runner build --delete-conflicting-outputs || dart run build_runner build
+          cd ios && pod install && cd ..
 
       - name: Build Android APK (.apk)
         run: |
@@ -42,7 +44,6 @@ jobs:
 
       - name: Build iOS App (.app)
         run: |
-          mkdir -p build/ios/SourcePackages build/ios/iphoneos
           flutter build ios --release --no-codesign
 
       - name: Package .app into .ipa
