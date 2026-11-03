@@ -26,9 +26,8 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Pre-create build directories & Fix rsync
+      - name: Pre-create build directories
         run: |
-          brew unlink rsync || true
           mkdir -p build/ios/SourcePackages build/ios/iphoneos
 
       - name: Install dependencies & Generate code
