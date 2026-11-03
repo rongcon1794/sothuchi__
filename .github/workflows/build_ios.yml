@@ -8,7 +8,7 @@ on:
 jobs:
   build-ios:
     name: Build iOS IPA (Unsigned / Ad-hoc)
-    runs-on: macos-14 # Máy Mac Apple Silicon M1/M2 miễn phí của GitHub
+    runs-on: macos-15 # Máy Mac Apple Silicon macOS 15 Sequoia (Xcode 16.2+ / Swift 6.2+)
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
