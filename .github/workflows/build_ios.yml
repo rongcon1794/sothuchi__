@@ -32,8 +32,13 @@ jobs:
           flutter gen-l10n
           dart run build_runner build --delete-conflicting-outputs || dart run build_runner build
 
+      - name: Build Android APK (.apk)
+        run: |
+          flutter build apk --release
+
       - name: Build iOS App (.app)
         run: |
+          mkdir -p build/ios/SourcePackages build/ios/iphoneos
           flutter build ios --release --no-codesign
 
       - name: Package .app into .ipa
@@ -44,10 +49,12 @@ jobs:
           zip -r SoThuChi.ipa Payload
           cd ../../..
 
-      - name: Upload IPA Artifact
+      - name: Upload IPA & APK Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SoThuChi-iOS-IPA
-          path: build/ios/iphoneos/SoThuChi.ipa
+          name: SoThuChi-Builds
+          path: |
+            build/ios/iphoneos/SoThuChi.ipa
+            build/app/outputs/flutter-apk/app-release.apk
           retention-days: 7
 
