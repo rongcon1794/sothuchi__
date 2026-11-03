@@ -48,6 +48,7 @@ jobs:
 
       - name: Package .app into .ipa
         run: |
+          cp ios/Runner/GoogleService-Info.plist build/ios/iphoneos/Runner.app/GoogleService-Info.plist || true
           mkdir -p build/ios/iphoneos/Payload
           cp -r build/ios/iphoneos/Runner.app build/ios/iphoneos/Payload/
           cd build/ios/iphoneos

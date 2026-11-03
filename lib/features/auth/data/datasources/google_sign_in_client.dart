@@ -48,7 +48,13 @@ class GoogleSignInV7Client implements GoogleSignInClient {
     final trimmedServerId = (serverClientId?.trim().isEmpty ?? true)
         ? null
         : serverClientId!.trim();
-    await GoogleSignIn.instance.initialize(serverClientId: trimmedServerId);
+    final clientId = defaultTargetPlatform == TargetPlatform.iOS
+        ? '835896714104-vegeqvb0vndjekrn0uepumanakce7oq6.apps.googleusercontent.com'
+        : null;
+    await GoogleSignIn.instance.initialize(
+      clientId: clientId,
+      serverClientId: trimmedServerId,
+    );
     _initialized = true;
   }
 
