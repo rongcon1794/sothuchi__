@@ -453,6 +453,14 @@ class _HeroBalanceCard extends StatelessWidget {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final primary = theme.colorScheme.primary;
+    final primaryDark = Color.alphaBlend(
+      Colors.black.withValues(alpha: isDark ? 0.5 : 0.35),
+      primary,
+    );
+    final primaryLight = isDark
+        ? primary
+        : Color.alphaBlend(Colors.white.withValues(alpha: 0.18), primary);
     const fgColor = Colors.white;
 
     return Container(
@@ -461,31 +469,20 @@ class _HeroBalanceCard extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: isDark
-              ? const [
-                  Color(0xFF007552),
-                  Color(0xFF004D36),
-                ]
-              : const [
-                  Color(0xFF00B074),
-                  Color(0xFF0D7C66),
-                  Color(0xFF043927),
-                ],
+          colors: [primaryLight, primary, primaryDark],
         ),
         borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.18),
+          color: Colors.white.withValues(alpha: 0.22),
           width: AppleTokens.hairline,
         ),
-        boxShadow: isDark
-            ? AppleTokens.cardShadowDark
-            : [
-                BoxShadow(
-                  color: const Color(0xFF00A86B).withValues(alpha: 0.28),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                ),
-              ],
+        boxShadow: [
+          BoxShadow(
+            color: primary.withValues(alpha: isDark ? 0.35 : 0.28),
+            blurRadius: 22,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

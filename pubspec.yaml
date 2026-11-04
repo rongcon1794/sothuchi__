@@ -55,5 +55,7 @@ dev_dependencies:
 flutter:
   generate: true
   uses-material-design: true
+  assets:
+    - assets/icon/
   config:
     enable-swift-package-manager: false

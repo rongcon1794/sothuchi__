@@ -56,39 +56,45 @@ class SoThuChiLogo extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(size * 0.235),
-        child: Stack(
-          children: [
-            // Specular Glass Sheen (Top-left diagonal highlight)
-            Positioned(
-              top: -size * 0.2,
-              left: -size * 0.2,
-              width: size * 1.4,
-              height: size * 0.7,
-              child: Transform.rotate(
-                angle: -math.pi / 5,
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.white.withValues(alpha: 0.35),
-                        Colors.white.withValues(alpha: 0.0),
-                      ],
+        child: Image.asset(
+          'assets/icon/app_icon.png',
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => Stack(
+            children: [
+              // Specular Glass Sheen (Top-left diagonal highlight)
+              Positioned(
+                top: -size * 0.2,
+                left: -size * 0.2,
+                width: size * 1.4,
+                height: size * 0.7,
+                child: Transform.rotate(
+                  angle: -math.pi / 5,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.white.withValues(alpha: 0.35),
+                          Colors.white.withValues(alpha: 0.0),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
 
-            // Custom Painted Geometric Emblem (Intersecting Cashflow Curves & Gold Vault Spark)
-            Center(
-              child: CustomPaint(
-                size: Size(size * 0.62, size * 0.62),
-                painter: _LogoEmblemPainter(),
+              // Custom Painted Geometric Emblem (Intersecting Cashflow Curves & Gold Vault Spark)
+              Center(
+                child: CustomPaint(
+                  size: Size(size * 0.62, size * 0.62),
+                  painter: _LogoEmblemPainter(),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
