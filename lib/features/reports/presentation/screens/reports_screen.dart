@@ -14,6 +14,8 @@ import 'package:so_thu_chi/core/widgets/empty_state_view.dart';
 import 'package:so_thu_chi/core/widgets/skeleton_box.dart';
 import 'package:so_thu_chi/features/reports/domain/entities/monthly_report.dart';
 import 'package:so_thu_chi/features/reports/presentation/controllers/reports_controller.dart';
+import 'package:so_thu_chi/features/reports/presentation/widgets/apple_spending_heatmap.dart';
+import 'package:so_thu_chi/features/reports/presentation/widgets/financial_health_card.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
 
@@ -122,6 +124,22 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                   children: [
                     // Monthly Summary Grid
                     _MonthlySummaryHeader(
+                      report: report,
+                      locale: locale,
+                      hideBalance: hideBalance,
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Financial Health Insights
+                    FinancialHealthCard(
+                      report: report,
+                      locale: locale,
+                      hideBalance: hideBalance,
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Daily Spending Heatmap Grid
+                    AppleSpendingHeatmap(
                       report: report,
                       locale: locale,
                       hideBalance: hideBalance,

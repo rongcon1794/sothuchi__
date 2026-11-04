@@ -88,11 +88,24 @@ void main() {
       expect(report.sixMonthTrend.length, 6);
       expect(report.sixMonthTrend[4].expenseMinorUnits, 2000000); // Oct
       expect(report.sixMonthTrend[5].expenseMinorUnits, 4000000); // Nov
+
+      // Daily spending heatmap assertions
+      expect(report.dailyExpenseMinor[10], 4000000);
+      expect(report.peakSpendingDay, 10);
+      expect(report.peakSpendingAmountMinor, 4000000);
+      expect(report.activeSpendingDaysCount, 1);
     });
 
     testWidgets('renders PieChart donut, BarChart 6-month trend, and switches months', (
       tester,
     ) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
       SharedPreferences.setMockInitialValues({'onboarding_completed': true});
       final prefs = await SharedPreferences.getInstance();
       final accRepo = InMemoryAccountRepository();
@@ -146,10 +159,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      expect(find.text('Sức Khỏe Tài Chính'), findsOneWidget);
+      expect(find.text('Bản đồ Chi tiêu theo Ngày'), findsOneWidget);
       expect(find.byType(PieChart), findsOneWidget);
-      expect(find.text('75%'), findsOneWidget); // savings rate = (12M - 3M) / 12M
+      expect(find.text('75%'), findsWidgets); // savings rate = (12M - 3M) / 12M
 
-      await tester.drag(find.byType(ListView).first, const Offset(0, -350));
+      await tester.drag(find.byType(ListView).first, const Offset(0, -500));
       await tester.pumpAndSettle();
       expect(find.byType(BarChart), findsOneWidget);
     });

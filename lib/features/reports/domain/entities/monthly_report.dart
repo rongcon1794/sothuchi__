@@ -58,6 +58,7 @@ class MonthlyReportData {
     required this.totalExpenseMinor,
     required this.categorySlices,
     required this.sixMonthTrend,
+    this.dailyExpenseMinor = const {},
   });
 
   final DateTime selectedMonth;
@@ -66,6 +67,7 @@ class MonthlyReportData {
   final int totalExpenseMinor;
   final List<CategorySpendSlice> categorySlices;
   final List<MonthlyTrendBar> sixMonthTrend;
+  final Map<int, int> dailyExpenseMinor;
 
   int get netMinor => totalIncomeMinor - totalExpenseMinor;
 
@@ -83,6 +85,39 @@ class MonthlyReportData {
     final rate = ((totalIncomeMinor - totalExpenseMinor) * 100) ~/ totalIncomeMinor;
     return rate.clamp(-999, 100);
   }
+
+  /// Total days in the selected calendar month.
+  int get daysInMonth {
+    final nextMonth = DateTime(selectedMonth.year, selectedMonth.month + 1, 1);
+    return nextMonth.subtract(const Duration(days: 1)).day;
+  }
+
+  /// Average daily expense minor units.
+  int get averageDailyExpenseMinor {
+    final days = daysInMonth;
+    return days > 0 ? totalExpenseMinor ~/ days : 0;
+  }
+
+  /// Day with the highest expense (`1..31`), or `0` if no spending.
+  int get peakSpendingDay {
+    if (dailyExpenseMinor.isEmpty) return 0;
+    var maxDay = 0;
+    var maxVal = 0;
+    for (final entry in dailyExpenseMinor.entries) {
+      if (entry.value > maxVal) {
+        maxVal = entry.value;
+        maxDay = entry.key;
+      }
+    }
+    return maxDay;
+  }
+
+  /// Amount spent on the peak day.
+  int get peakSpendingAmountMinor => dailyExpenseMinor[peakSpendingDay] ?? 0;
+
+  /// Count of days where at least 1 expense was recorded.
+  int get activeSpendingDaysCount =>
+      dailyExpenseMinor.values.where((amount) => amount > 0).length;
 
   bool get hasAnyActivityInSelectedMonth =>
       totalIncomeMinor > 0 || totalExpenseMinor > 0;

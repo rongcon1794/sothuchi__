@@ -24,6 +24,7 @@ class ReportsRepositoryImpl implements ReportsRepository {
     final expenseByMonthIndex = List<int>.filled(6, 0);
     final spendByCat = <String, int>{};
     final countByCat = <String, int>{};
+    final dailyExpense = <int, int>{};
 
     // Single O(N) pass filtering strictly by `currencyCode`.
     for (final tx in transactions) {
@@ -43,6 +44,8 @@ class ReportsRepositoryImpl implements ReportsRepository {
           spendByCat[tx.categoryId] =
               (spendByCat[tx.categoryId] ?? 0) + tx.amount;
           countByCat[tx.categoryId] = (countByCat[tx.categoryId] ?? 0) + 1;
+          dailyExpense[tx.date.day] =
+              (dailyExpense[tx.date.day] ?? 0) + tx.amount;
         }
       }
     }
@@ -82,6 +85,7 @@ class ReportsRepositoryImpl implements ReportsRepository {
       totalExpenseMinor: monthExpense,
       categorySlices: slices,
       sixMonthTrend: trend,
+      dailyExpenseMinor: dailyExpense,
     );
   }
 }
