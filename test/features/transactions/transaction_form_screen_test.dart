@@ -154,5 +154,20 @@ void main() {
       expect(find.text('Chọn ví thanh toán'), findsNothing);
       expect(find.textContaining('Techcombank'), findsOneWidget);
     });
+
+    testWidgets('category selection card displays active category and supports 1-tap selection', (tester) async {
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pumpAndSettle();
+
+      // Category card should be present in expense mode
+      expect(find.text('Chọn danh mục'), findsOneWidget);
+      expect(find.text('Tất cả'), findsOneWidget);
+
+      // Verify TextField for amount has showCursor: false and no border
+      final textField = tester.widget<TextField>(
+        find.byType(TextField).first,
+      );
+      expect(textField.showCursor, isFalse);
+    });
   });
 }

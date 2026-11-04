@@ -139,8 +139,8 @@ class AppleGlassCard extends StatelessWidget {
             : AppleTokens.bgLightCard.withValues(alpha: 0.88));
     final border = borderColor ??
         (isDark
-            ? Colors.white.withValues(alpha: 0.08)
-            : Colors.black.withValues(alpha: 0.05));
+            ? Colors.white.withValues(alpha: 0.12)
+            : AppleTokens.borderLight);
     final shadow = boxShadow ??
         (isDark ? AppleTokens.cardShadowDark : AppleTokens.cardShadowLight);
 

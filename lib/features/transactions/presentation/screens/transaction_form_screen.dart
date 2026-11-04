@@ -585,50 +585,28 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                     onAddShortcut: (amount) => _addAmountShortcut(amount, currencyCode, locale),
                     onClear: _clearAmount,
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 18),
 
-                  // 2. Classification & Wallet Section
+                  // 2. Category Selection Card (Only for Expense & Income)
+                  if (_type != TransactionType.transfer && availableCategories.isNotEmpty) ...[
+                    _CategorySelectionCard(
+                      categories: availableCategories,
+                      selectedId: _categoryId,
+                      selectedCategory: selectedCategory,
+                      onSelected: (id) {
+                        HapticFeedback.selectionClick();
+                        setState(() => _categoryId = id);
+                      },
+                      onOpenMore: () => _openCategoryPicker(context, categories: availableCategories),
+                    ),
+                    const SizedBox(height: 18),
+                  ],
+
+                  // 3. Wallet Selection Section
                   AppleListGroup(
-                    header: 'PHÂN LOẠI & VÍ TIỀN',
+                    header: l10n.walletsTitle,
                     margin: const EdgeInsets.only(bottom: 20),
                     children: [
-                      if (_type != TransactionType.transfer) ...[
-                        // Category Picker Tile
-                        ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                          leading: AppleSquircleBadge(
-                            icon: selectedCategory != null
-                                ? AppIconCatalog.resolve(selectedCategory.icon)
-                                : CupertinoIcons.square_grid_2x2,
-                            backgroundColor: selectedCategory != null
-                                ? AppIconCatalog.contrastSafeColor(
-                                    Color(selectedCategory.color),
-                                    theme.brightness,
-                                  )
-                                : AppleTokens.systemBlue,
-                            size: 38,
-                            iconSize: 20,
-                            radius: 10,
-                          ),
-                          title: Text(
-                            l10n.selectCategory,
-                            style: const TextStyle(fontSize: 13, color: AppleTokens.systemGray),
-                          ),
-                          subtitle: Text(
-                            selectedCategory != null
-                                ? DefaultCategoryLocalization.resolveName(
-                                    l10n,
-                                    categoryId: selectedCategory.id,
-                                    fallbackName: selectedCategory.name,
-                                  )
-                                : 'Chọn danh mục',
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                          ),
-                          trailing: const Icon(CupertinoIcons.chevron_right, size: 16, color: AppleTokens.systemGray),
-                          onTap: () => _openCategoryPicker(context, categories: availableCategories),
-                        ),
-                      ],
-
                       if (_type == TransactionType.transfer) ...[
                         // Source Wallet (From)
                         ListTile(
@@ -764,20 +742,6 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                       ],
                     ],
                   ),
-
-                  // Quick Category Grid for 1-Tap selection (when in Expense / Income mode)
-                  if (_type != TransactionType.transfer && availableCategories.isNotEmpty) ...[
-                    _QuickCategoryCarousel(
-                      categories: availableCategories,
-                      selectedId: _categoryId,
-                      onSelected: (id) {
-                        HapticFeedback.selectionClick();
-                        setState(() => _categoryId = id);
-                      },
-                      onOpenMore: () => _openCategoryPicker(context, categories: availableCategories),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
 
                   // 3. Transaction Details & Metadata Section
                   AppleListGroup(
@@ -1042,77 +1006,86 @@ class _HeroAmountCard extends StatelessWidget {
           const SizedBox(height: 18),
 
           // 2. Large Amount Input Display
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                typeSign,
-                style: TextStyle(
-                  fontSize: 34,
-                  fontWeight: FontWeight.w800,
-                  color: typeColor,
-                ),
-              ),
-              const SizedBox(width: 6),
-              Flexible(
-                child: IntrinsicWidth(
-                  child: TextFormField(
-                    controller: amountController,
-                    autofocus: !isEditing,
-                    textAlign: TextAlign.center,
-                    keyboardType: TextInputType.numberWithOptions(
-                      decimal: currencyInfo.decimalDigits > 0,
-                    ),
-                    inputFormatters: [
-                      MoneyInputFormatter(
-                        currencyCode: currencyCode,
-                        locale: locale,
-                      ),
-                    ],
-                    style: theme.textTheme.displaySmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: typeColor,
-                      letterSpacing: -0.8,
-                      fontFeatures: AppTheme.tabularFigures,
-                    ),
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      isDense: true,
-                      hintText: '0',
-                      hintStyle: TextStyle(
-                        color: typeColor.withValues(alpha: 0.3),
-                        fontWeight: FontWeight.w800,
-                      ),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    validator: (val) {
-                      final m = Money.tryParse(val ?? '', currencyCode: currencyCode);
-                      if (m == null || m.minorUnits <= 0) {
-                        return context.l10n.amountRequiredError;
-                      }
-                      return null;
-                    },
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  typeSign,
+                  style: TextStyle(
+                    fontSize: 34,
+                    fontWeight: FontWeight.w800,
+                    color: typeColor,
+                    height: 1.0,
                   ),
                 ),
-              ),
-              const SizedBox(width: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: typeColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(6),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: IntrinsicWidth(
+                    child: TextFormField(
+                      controller: amountController,
+                      autofocus: !isEditing,
+                      textAlign: TextAlign.center,
+                      showCursor: false,
+                      keyboardType: TextInputType.numberWithOptions(
+                        decimal: currencyInfo.decimalDigits > 0,
+                      ),
+                      inputFormatters: [
+                        MoneyInputFormatter(
+                          currencyCode: currencyCode,
+                          locale: locale,
+                        ),
+                      ],
+                      style: theme.textTheme.displaySmall?.copyWith(
+                        fontSize: 38,
+                        fontWeight: FontWeight.w800,
+                        color: typeColor,
+                        letterSpacing: -0.8,
+                        fontFeatures: AppTheme.tabularFigures,
+                        height: 1.1,
+                      ),
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        errorBorder: InputBorder.none,
+                        focusedErrorBorder: InputBorder.none,
+                        disabledBorder: InputBorder.none,
+                        filled: false,
+                        fillColor: Colors.transparent,
+                        isDense: true,
+                        hintText: '0',
+                        hintStyle: TextStyle(
+                          color: typeColor.withValues(alpha: 0.25),
+                          fontWeight: FontWeight.w800,
+                        ),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      validator: (val) {
+                        final m = Money.tryParse(val ?? '', currencyCode: currencyCode);
+                        if (m == null || m.minorUnits <= 0) {
+                          return context.l10n.amountRequiredError;
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
                 ),
-                child: Text(
+                const SizedBox(width: 6),
+                Text(
                   currencyInfo.symbol,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 22,
                     fontWeight: FontWeight.w700,
-                    color: typeColor,
+                    color: typeColor.withValues(alpha: 0.85),
+                    height: 1.0,
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(height: 16),
 
@@ -1294,17 +1267,21 @@ class _TransactionTypeSegmentedPill extends StatelessWidget {
   }
 }
 
-/// Horizontal Quick Category Carousel for 1-Tap selection on form.
-class _QuickCategoryCarousel extends StatelessWidget {
-  const _QuickCategoryCarousel({
+/// Unified, elegant Apple HIG Category Selection Card for Expense & Income transactions.
+/// Features clean enclosing card with crisp visible border, active category header,
+/// and smooth 1-tap squircle category icons without harsh stroke boxes.
+class _CategorySelectionCard extends StatelessWidget {
+  const _CategorySelectionCard({
     required this.categories,
     required this.selectedId,
+    required this.selectedCategory,
     required this.onSelected,
     required this.onOpenMore,
   });
 
   final List<Category> categories;
   final String? selectedId;
+  final Category? selectedCategory;
   final ValueChanged<String> onSelected;
   final VoidCallback onOpenMore;
 
@@ -1314,144 +1291,239 @@ class _QuickCategoryCarousel extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final l10n = context.l10n;
 
-    // Show up to 7 quick categories + 1 "More" button
-    final previewCategories = categories.take(7).toList();
+    final previewCategories = categories.take(8).toList();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return AppleGlassCard(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+      borderColor: isDark
+          ? Colors.white.withValues(alpha: 0.12)
+          : AppleTokens.borderLight,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header: Category Title + Current Selected Category Badge + Open Sheet Button
+          Row(
             children: [
-              Text(
-                'CHỌN NHANH DANH MỤC',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6C6C70),
-                  letterSpacing: 0.5,
+              AppleSquircleBadge(
+                icon: selectedCategory != null
+                    ? AppIconCatalog.resolve(selectedCategory!.icon)
+                    : CupertinoIcons.square_grid_2x2,
+                backgroundColor: selectedCategory != null
+                    ? AppIconCatalog.contrastSafeColor(
+                        Color(selectedCategory!.color),
+                        theme.brightness,
+                      )
+                    : AppleTokens.systemBlue,
+                size: 36,
+                iconSize: 18,
+                radius: 10,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.selectCategory,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppleTokens.systemGray,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      selectedCategory != null
+                          ? DefaultCategoryLocalization.resolveName(
+                              l10n,
+                              categoryId: selectedCategory!.id,
+                              fallbackName: selectedCategory!.name,
+                            )
+                          : l10n.selectCategory,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              GestureDetector(
+              ApplePressable(
+                scaleDown: 0.94,
                 onTap: onOpenMore,
-                child: const Text(
-                  'Xem tất cả',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppleTokens.systemBlue,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Tất cả',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppleTokens.systemBlue,
+                        ),
+                      ),
+                      SizedBox(width: 2),
+                      Icon(
+                        CupertinoIcons.chevron_right,
+                        size: 12,
+                        color: AppleTokens.systemBlue,
+                      ),
+                    ],
                   ),
                 ),
               ),
             ],
           ),
-        ),
-        const SizedBox(height: 8),
-        SizedBox(
-          height: 84,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: previewCategories.length + 1,
-            separatorBuilder: (_, _) => const SizedBox(width: 10),
-            itemBuilder: (context, index) {
-              if (index < previewCategories.length) {
-                final cat = previewCategories[index];
-                final isSelected = cat.id == selectedId;
-                final catColor = AppIconCatalog.contrastSafeColor(
-                  Color(cat.color),
-                  theme.brightness,
-                );
-                final name = DefaultCategoryLocalization.resolveName(
-                  l10n,
-                  categoryId: cat.id,
-                  fallbackName: cat.name,
-                );
+          const SizedBox(height: 12),
+          Divider(
+            height: AppleTokens.hairline,
+            thickness: AppleTokens.hairline,
+            color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
+          ),
+          const SizedBox(height: 10),
 
-                return ApplePressable(
-                  scaleDown: 0.94,
-                  onTap: () => onSelected(cat.id),
-                  child: Container(
-                    width: 70,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? catColor.withValues(alpha: 0.16)
-                          : (isDark ? AppleTokens.bgDarkCard : Colors.white),
-                      borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-                      border: Border.all(
-                        color: isSelected
-                            ? catColor
-                            : (isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.06)),
-                        width: isSelected ? 1.5 : AppleTokens.hairline,
+          // Horizontal 1-Tap Category Icons Strip
+          SizedBox(
+            height: 74,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: previewCategories.length + 1,
+              separatorBuilder: (_, _) => const SizedBox(width: 10),
+              itemBuilder: (context, index) {
+                if (index < previewCategories.length) {
+                  final cat = previewCategories[index];
+                  final isSelected = cat.id == selectedId;
+                  final catColor = AppIconCatalog.contrastSafeColor(
+                    Color(cat.color),
+                    theme.brightness,
+                  );
+                  final name = DefaultCategoryLocalization.resolveName(
+                    l10n,
+                    categoryId: cat.id,
+                    fallbackName: cat.name,
+                  );
+
+                  return ApplePressable(
+                    scaleDown: 0.92,
+                    onTap: () => onSelected(cat.id),
+                    child: SizedBox(
+                      width: 58,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? catColor.withValues(alpha: 0.22)
+                                      : (isDark
+                                          ? AppleTokens.bgDarkSecondary
+                                          : AppleTokens.bgLightSecondary),
+                                  borderRadius: BorderRadius.circular(13),
+                                  border: isSelected
+                                      ? Border.all(color: catColor, width: 1.5)
+                                      : null,
+                                ),
+                                child: Center(
+                                  child: Icon(
+                                    AppIconCatalog.resolve(cat.icon),
+                                    size: 22,
+                                    color: catColor,
+                                  ),
+                                ),
+                              ),
+                              if (isSelected)
+                                Positioned(
+                                  right: -3,
+                                  top: -3,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(2),
+                                    decoration: BoxDecoration(
+                                      color: catColor,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      CupertinoIcons.checkmark,
+                                      size: 10,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                              color: isSelected ? catColor : theme.colorScheme.onSurface,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+                  );
+                }
+
+                // Last item: "Khác" button
+                return ApplePressable(
+                  scaleDown: 0.92,
+                  onTap: onOpenMore,
+                  child: SizedBox(
+                    width: 58,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          AppIconCatalog.resolve(cat.icon),
-                          size: 24,
-                          color: catColor,
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
+                            borderRadius: BorderRadius.circular(13),
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              CupertinoIcons.ellipsis,
+                              size: 20,
+                              color: AppleTokens.systemBlue,
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 6),
-                        Text(
-                          name,
+                        const Text(
+                          'Khác',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 11,
-                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                            color: isSelected ? catColor : theme.colorScheme.onSurface,
+                            fontWeight: FontWeight.w600,
+                            color: AppleTokens.systemBlue,
                           ),
                         ),
                       ],
                     ),
                   ),
                 );
-              }
-
-              // "More" category button
-              return ApplePressable(
-                scaleDown: 0.94,
-                onTap: onOpenMore,
-                child: Container(
-                  width: 70,
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  decoration: BoxDecoration(
-                    color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-                    border: Border.all(
-                      color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.06),
-                      width: AppleTokens.hairline,
-                    ),
-                  ),
-                  child: const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        CupertinoIcons.square_grid_2x2,
-                        size: 22,
-                        color: AppleTokens.systemBlue,
-                      ),
-                      SizedBox(height: 6),
-                      Text(
-                        'Tất cả',
-                        maxLines: 1,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: AppleTokens.systemBlue,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -1706,7 +1778,7 @@ class _CategoryPickerSheetState extends State<_CategoryPickerSheet> {
                                 border: Border.all(
                                   color: isSelected
                                       ? catColor
-                                      : (isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.08)),
+                                      : (isDark ? Colors.white.withValues(alpha: 0.1) : AppleTokens.borderLight),
                                   width: isSelected ? 2 : AppleTokens.hairline,
                                 ),
                               ),
