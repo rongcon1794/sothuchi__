@@ -20,6 +20,7 @@ class DebtsScreen extends ConsumerStatefulWidget {
 
 class _DebtsScreenState extends ConsumerState<DebtsScreen> {
   bool _isFabExpanded = true;
+  bool _isFabVisible = true;
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +52,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
       floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
       floatingActionButton: AppleAdaptiveExpandableFab(
         heroTag: 'debts_add_fab',
+        isVisible: _isFabVisible,
         isExpanded: _isFabExpanded,
         icon: const Icon(CupertinoIcons.plus),
         label: const Text('Ghi nợ mới'),
@@ -67,12 +69,26 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
         data: (allDebts) {
           return NotificationListener<UserScrollNotification>(
             onNotification: (notification) {
-              if (notification.direction == ScrollDirection.reverse && _isFabExpanded) {
-                setState(() => _isFabExpanded = false);
-              } else if (notification.direction == ScrollDirection.forward && !_isFabExpanded) {
-                setState(() => _isFabExpanded = true);
-              } else if (notification.metrics.pixels <= 30 && !_isFabExpanded) {
-                setState(() => _isFabExpanded = true);
+              if (notification.direction == ScrollDirection.reverse) {
+                if (_isFabVisible) {
+                  setState(() {
+                    _isFabVisible = false;
+                    _isFabExpanded = false;
+                  });
+                }
+              } else if (notification.direction == ScrollDirection.forward) {
+                if (!_isFabVisible) {
+                  setState(() {
+                    _isFabVisible = true;
+                  });
+                }
+              } else if (notification.metrics.pixels <= 30) {
+                if (!_isFabVisible || !_isFabExpanded) {
+                  setState(() {
+                    _isFabVisible = true;
+                    _isFabExpanded = true;
+                  });
+                }
               }
               return false;
             },

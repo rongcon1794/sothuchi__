@@ -27,6 +27,7 @@ class BudgetsScreen extends ConsumerStatefulWidget {
 
 class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
   bool _isFabExpanded = true;
+  bool _isFabVisible = true;
 
   Future<void> _openBudgetForm(
     BuildContext context, {
@@ -129,12 +130,26 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
           Expanded(
             child: NotificationListener<UserScrollNotification>(
               onNotification: (notification) {
-                if (notification.direction == ScrollDirection.reverse && _isFabExpanded) {
-                  setState(() => _isFabExpanded = false);
-                } else if (notification.direction == ScrollDirection.forward && !_isFabExpanded) {
-                  setState(() => _isFabExpanded = true);
-                } else if (notification.metrics.pixels <= 30 && !_isFabExpanded) {
-                  setState(() => _isFabExpanded = true);
+                if (notification.direction == ScrollDirection.reverse) {
+                  if (_isFabVisible) {
+                    setState(() {
+                      _isFabVisible = false;
+                      _isFabExpanded = false;
+                    });
+                  }
+                } else if (notification.direction == ScrollDirection.forward) {
+                  if (!_isFabVisible) {
+                    setState(() {
+                      _isFabVisible = true;
+                    });
+                  }
+                } else if (notification.metrics.pixels <= 30) {
+                  if (!_isFabVisible || !_isFabExpanded) {
+                    setState(() {
+                      _isFabVisible = true;
+                      _isFabExpanded = true;
+                    });
+                  }
                 }
                 return false;
               },
@@ -204,6 +219,7 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
       floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
       floatingActionButton: AppleAdaptiveExpandableFab(
         heroTag: 'budgets_add_fab',
+        isVisible: _isFabVisible,
         isExpanded: _isFabExpanded && !isLargeText,
         icon: const Icon(CupertinoIcons.plus),
         label: Text(l10n.addBudget),

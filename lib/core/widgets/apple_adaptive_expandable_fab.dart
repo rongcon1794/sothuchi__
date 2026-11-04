@@ -19,6 +19,7 @@ class AppleAdaptiveExpandableFab extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onPressed,
+    this.isVisible = true,
     this.heroTag,
     this.backgroundColor,
     this.foregroundColor = Colors.white,
@@ -28,6 +29,7 @@ class AppleAdaptiveExpandableFab extends StatelessWidget {
   });
 
   final bool isExpanded;
+  final bool isVisible;
   final Widget icon;
   final Widget label;
   final VoidCallback onPressed;
@@ -133,12 +135,32 @@ class AppleAdaptiveExpandableFab extends StatelessWidget {
       ),
     );
 
+    final fabBody = AnimatedSlide(
+      offset: isVisible ? Offset.zero : const Offset(0, 1.6),
+      duration: duration,
+      curve: isVisible ? Curves.easeOutBack : Curves.easeInOutCubic,
+      child: AnimatedScale(
+        scale: isVisible ? 1.0 : 0.75,
+        duration: duration,
+        curve: isVisible ? Curves.easeOutBack : Curves.easeInOutCubic,
+        child: AnimatedOpacity(
+          opacity: isVisible ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeInOut,
+          child: IgnorePointer(
+            ignoring: !isVisible,
+            child: content,
+          ),
+        ),
+      ),
+    );
+
     if (tooltip != null) {
       return Tooltip(
         message: tooltip!,
-        child: content,
+        child: fabBody,
       );
     }
-    return content;
+    return fabBody;
   }
 }

@@ -152,7 +152,10 @@ class AppleGlassCard extends StatelessWidget {
         borderRadius: radius,
         border: Border.all(color: border, width: AppleTokens.hairline),
       ),
-      child: child,
+      child: Material(
+        color: Colors.transparent,
+        child: child,
+      ),
     );
 
     if (blurSigma > 0) {
@@ -458,6 +461,198 @@ class AppleSegmentedPill<T> extends StatelessWidget {
                           : (isDark
                               ? const Color(0xFF8E8E93)
                               : const Color(0xFF6C6C70)),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Tactile Apple Icon Button with haptic response, subtle squircle container, and optional badge.
+class AppleIconButton extends StatelessWidget {
+  const AppleIconButton({
+    super.key,
+    required this.icon,
+    required this.onTap,
+    this.tooltip,
+    this.size = 38.0,
+    this.iconSize = 18.0,
+    this.backgroundColor,
+    this.foregroundColor,
+    this.borderColor,
+    this.badgeText,
+  });
+
+  final IconData icon;
+  final VoidCallback? onTap;
+  final String? tooltip;
+  final double size;
+  final double iconSize;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
+  final Color? borderColor;
+  final String? badgeText;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final bg = backgroundColor ??
+        (isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary);
+    final fg = foregroundColor ?? (isDark ? Colors.white : Colors.black87);
+    final border = borderColor ??
+        (isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.06));
+
+    Widget button = ApplePressable(
+      onTap: onTap,
+      scaleDown: 0.92,
+      borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+      child: Container(
+        width: size,
+        height: size,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+          border: Border.all(color: border, width: AppleTokens.hairline),
+        ),
+        child: Icon(icon, size: iconSize, color: fg),
+      ),
+    );
+
+    if (badgeText != null && badgeText!.isNotEmpty) {
+      button = Badge(
+        label: Text(badgeText!, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+        backgroundColor: AppleTokens.systemRed,
+        child: button,
+      );
+    }
+
+    if (tooltip != null) {
+      return Tooltip(message: tooltip!, child: button);
+    }
+
+    return button;
+  }
+}
+
+/// Model describing an icon-based item in an [AppleIconSegmentedPill].
+class AppleIconSegment<T> {
+  const AppleIconSegment({
+    required this.value,
+    required this.icon,
+    this.label,
+    this.tooltip,
+    this.accentColor,
+  });
+
+  final T value;
+  final IconData icon;
+  final String? label;
+  final String? tooltip;
+  final Color? accentColor;
+}
+
+/// Compact Icon-Driven Segmented Pill Switch for Apple HIG controls.
+/// Replaces text-heavy buttons with elegant icon glyphs to minimize space and maximize clarity.
+class AppleIconSegmentedPill<T> extends StatelessWidget {
+  const AppleIconSegmentedPill({
+    super.key,
+    required this.segments,
+    required this.selected,
+    required this.onChanged,
+    this.height = 36.0,
+    this.padding = const EdgeInsets.all(3),
+    this.backgroundColor,
+  });
+
+  final List<AppleIconSegment<T>> segments;
+  final T selected;
+  final ValueChanged<T> onChanged;
+  final double height;
+  final EdgeInsetsGeometry padding;
+  final Color? backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final bg = backgroundColor ??
+        (isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary);
+
+    return Container(
+      height: height,
+      padding: padding,
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final seg in segments)
+            Flexible(
+              child: Tooltip(
+                message: seg.tooltip ?? seg.label ?? '',
+                child: GestureDetector(
+                  onTap: () {
+                    if (seg.value != selected) {
+                      HapticFeedback.selectionClick();
+                      onChanged(seg.value);
+                    }
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeOutCubic,
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: seg.value == selected
+                          ? (isDark ? AppleTokens.bgDarkCard : Colors.white)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                      boxShadow: seg.value == selected
+                          ? [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              )
+                            ]
+                          : null,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          seg.icon,
+                          size: 16,
+                          color: seg.value == selected
+                              ? (seg.accentColor ?? (isDark ? Colors.white : Colors.black87))
+                              : (isDark ? const Color(0xFF8E8E93) : const Color(0xFF6C6C70)),
+                        ),
+                        if (seg.label != null && seg.label!.isNotEmpty) ...[
+                          const SizedBox(width: 5),
+                          Text(
+                            seg.label!,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: seg.value == selected ? FontWeight.w600 : FontWeight.w400,
+                              color: seg.value == selected
+                                  ? (seg.accentColor ?? (isDark ? Colors.white : Colors.black87))
+                                  : (isDark ? const Color(0xFF8E8E93) : const Color(0xFF6C6C70)),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ),

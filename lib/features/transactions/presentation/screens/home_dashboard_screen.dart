@@ -33,13 +33,15 @@ class HomeDashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
-  bool _isFabExpanded = true;
+  bool _isFabExpanded = false;
+  bool _isFabVisible = true;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     final financeColors = context.financeColors;
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final isLargeText = textScale >= 1.35;
@@ -146,12 +148,26 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
       ),
       body: NotificationListener<UserScrollNotification>(
         onNotification: (notification) {
-          if (notification.direction == ScrollDirection.reverse && _isFabExpanded) {
-            setState(() => _isFabExpanded = false);
-          } else if (notification.direction == ScrollDirection.forward && !_isFabExpanded) {
-            setState(() => _isFabExpanded = true);
-          } else if (notification.metrics.pixels <= 30 && !_isFabExpanded) {
-            setState(() => _isFabExpanded = true);
+          if (notification.direction == ScrollDirection.reverse) {
+            if (_isFabVisible) {
+              setState(() {
+                _isFabVisible = false;
+                _isFabExpanded = false;
+              });
+            }
+          } else if (notification.direction == ScrollDirection.forward) {
+            if (!_isFabVisible) {
+              setState(() {
+                _isFabVisible = true;
+              });
+            }
+          } else if (notification.metrics.pixels <= 20) {
+            if (!_isFabVisible || _isFabExpanded) {
+              setState(() {
+                _isFabVisible = true;
+                _isFabExpanded = false;
+              });
+            }
           }
           return false;
         },
@@ -285,15 +301,16 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
               // Recent Transactions List / Loading / Empty
               txStream.when(
                 loading: () => const SkeletonListView(itemCount: 3),
-                error: (err, _) => Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(context.localizeError(err)),
-                  ),
+                error: (err, _) => AppleGlassCard(
+                  padding: const EdgeInsets.all(16),
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                  child: Text(context.localizeError(err)),
                 ),
                 data: (_) {
                   if (recentTxs.isEmpty) {
-                    return Card(
+                    return AppleGlassCard(
+                      padding: const EdgeInsets.all(16),
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
                       child: EmptyStateView(
                         icon: Icons.receipt_long_outlined,
                         title: l10n.emptyTransactionsTitle,
@@ -304,12 +321,18 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                     );
                   }
 
-                  return Card(
-                    clipBehavior: Clip.antiAlias,
+                  return AppleGlassCard(
+                    padding: EdgeInsets.zero,
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
                     child: Column(
                       children: [
                         for (var i = 0; i < recentTxs.length; i++) ...[
-                          if (i > 0) const Divider(indent: 68),
+                          if (i > 0)
+                            Divider(
+                              height: AppleTokens.hairline,
+                              indent: 68,
+                              color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
+                            ),
                           TransactionTile(
                             transaction: recentTxs[i],
                             category: categoriesMap[recentTxs[i].categoryId],
@@ -336,6 +359,7 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
       floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
       floatingActionButton: AppleAdaptiveExpandableFab(
         heroTag: 'home_quick_add_fab',
+        isVisible: _isFabVisible,
         isExpanded: _isFabExpanded && !isLargeText,
         icon: const Icon(CupertinoIcons.plus),
         label: Text(l10n.quickAddTransaction),

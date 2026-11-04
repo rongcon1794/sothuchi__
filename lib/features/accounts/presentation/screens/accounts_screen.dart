@@ -16,8 +16,16 @@ import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_c
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:so_thu_chi/l10n/app_localizations.dart';
 
-class AccountsScreen extends ConsumerWidget {
+class AccountsScreen extends ConsumerStatefulWidget {
   const AccountsScreen({super.key});
+
+  @override
+  ConsumerState<AccountsScreen> createState() => _AccountsScreenState();
+}
+
+class _AccountsScreenState extends ConsumerState<AccountsScreen> {
+  bool _isFabExpanded = true;
+  bool _isFabVisible = true;
 
   String _typeLabel(AppLocalizations l10n, AccountType type) => switch (type) {
     AccountType.cash => l10n.walletTypeCash,
@@ -45,8 +53,7 @@ class AccountsScreen extends ConsumerWidget {
   }
 
   Future<void> _handleToggleArchive(
-    BuildContext context,
-    WidgetRef ref, {
+    BuildContext context, {
     required String accountId,
     required bool archived,
   }) async {
@@ -66,7 +73,7 @@ class AccountsScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
@@ -95,22 +102,52 @@ class AccountsScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: accountsAsync.when(
-        loading: () => const SkeletonListView(),
-        error: (err, _) => Center(child: Text(context.localizeError(err))),
-        data: (all) {
-          if (all.isEmpty) {
-            return EmptyStateView(
-              icon: Icons.account_balance_wallet_outlined,
-              title: l10n.emptyWalletsTitle,
-              subtitle: l10n.emptyWalletsSubtitle,
-              actionLabel: l10n.addWallet,
-              onAction: () => _openWalletForm(context),
-            );
+      body: NotificationListener<UserScrollNotification>(
+        onNotification: (notification) {
+          if (notification.direction == ScrollDirection.reverse) {
+            if (_isFabVisible) {
+              setState(() {
+                _isFabVisible = false;
+                _isFabExpanded = false;
+              });
+            }
+          } else if (notification.direction == ScrollDirection.forward) {
+            if (!_isFabVisible) {
+              setState(() {
+                _isFabVisible = true;
+              });
+            }
+          } else if (notification.metrics.pixels <= 30) {
+            if (!_isFabVisible || !_isFabExpanded) {
+              setState(() {
+                _isFabVisible = true;
+                _isFabExpanded = true;
+              });
+            }
           }
+          return false;
+        },
+        child: accountsAsync.when(
+          loading: () => const SkeletonListView(),
+          error: (err, _) => Center(child: Text(context.localizeError(err))),
+          data: (all) {
+            if (all.isEmpty) {
+              return EmptyStateView(
+                icon: Icons.account_balance_wallet_outlined,
+                title: l10n.emptyWalletsTitle,
+                subtitle: l10n.emptyWalletsSubtitle,
+                actionLabel: l10n.addWallet,
+                onAction: () => _openWalletForm(context),
+              );
+            }
 
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(
+                16,
+                8,
+                16,
+                AppleTokens.scrollBottomPaddingWithFab,
+              ),
             children: [
               Container(
                 padding: const EdgeInsets.all(20),
@@ -180,7 +217,6 @@ class AccountsScreen extends ConsumerWidget {
                     onEdit: () => _openWalletForm(context, existing: account),
                     onToggleArchive: () => _handleToggleArchive(
                       context,
-                      ref,
                       accountId: account.id,
                       archived: true,
                     ),
@@ -208,7 +244,6 @@ class AccountsScreen extends ConsumerWidget {
                                 _openWalletForm(context, existing: account),
                             onToggleArchive: () => _handleToggleArchive(
                               context,
-                              ref,
                               accountId: account.id,
                               archived: false,
                             ),
@@ -222,11 +257,17 @@ class AccountsScreen extends ConsumerWidget {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _openWalletForm(context),
-        icon: const Icon(Icons.add_rounded),
-        label: Text(l10n.addWallet),
-      ),
+    ),
+    floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
+    floatingActionButton: AppleAdaptiveExpandableFab(
+      heroTag: 'accounts_add_fab',
+      isVisible: _isFabVisible,
+      isExpanded: _isFabExpanded,
+      icon: const Icon(Icons.add_rounded),
+      label: Text(l10n.addWallet),
+      onPressed: () => _openWalletForm(context),
+      tooltip: l10n.addWallet,
+    ),
     );
   }
 }
@@ -278,11 +319,10 @@ class _WalletTile extends StatelessWidget {
     return ApplePressable(
       borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
       onTap: onEdit,
-      child: Card(
-        clipBehavior: Clip.antiAlias,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 14, 8, 14),
-          child: Row(
+      child: AppleGlassCard(
+        padding: const EdgeInsets.fromLTRB(16, 14, 8, 14),
+        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+        child: Row(
             children: [
               Container(
                 width: 44,
@@ -352,8 +392,7 @@ class _WalletTile extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 }
 

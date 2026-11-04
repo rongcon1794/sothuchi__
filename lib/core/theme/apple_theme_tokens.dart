@@ -91,6 +91,6 @@ abstract final class AppleTokens {
 
   // --- Navigation Bar & Content Clearance Tokens ---
   static const double navBarHeight = 52.0;
-  static const double scrollBottomPaddingWithFab = 96.0;
-  static const double scrollBottomPaddingNoFab = 32.0;
+  static const double scrollBottomPaddingWithFab = 120.0;
+  static const double scrollBottomPaddingNoFab = 40.0;
 }

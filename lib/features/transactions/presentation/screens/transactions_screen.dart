@@ -29,6 +29,7 @@ class TransactionsScreen extends ConsumerStatefulWidget {
 class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
   final TextEditingController _searchController = TextEditingController();
   bool _isFabExpanded = true;
+  bool _isFabVisible = true;
 
   @override
   void dispose() {
@@ -171,6 +172,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
             child: Row(
               children: [
                 FilterChip(
+                  avatar: const Icon(CupertinoIcons.square_grid_2x2, size: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                   ),
@@ -181,6 +183,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 ),
                 const SizedBox(width: 8),
                 FilterChip(
+                  avatar: const Icon(CupertinoIcons.arrow_up_right, size: 14, color: AppleTokens.rubyExpense),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                   ),
@@ -192,6 +195,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 ),
                 const SizedBox(width: 8),
                 FilterChip(
+                  avatar: const Icon(CupertinoIcons.arrow_down_left, size: 14, color: AppleTokens.emeraldIncome),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                   ),
@@ -203,6 +207,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 ),
                 const SizedBox(width: 8),
                 FilterChip(
+                  avatar: const Icon(CupertinoIcons.arrow_right_arrow_left, size: 14, color: AppleTokens.cobaltTransfer),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                   ),
@@ -234,12 +239,26 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
           Expanded(
             child: NotificationListener<UserScrollNotification>(
               onNotification: (notification) {
-                if (notification.direction == ScrollDirection.reverse && _isFabExpanded) {
-                  setState(() => _isFabExpanded = false);
-                } else if (notification.direction == ScrollDirection.forward && !_isFabExpanded) {
-                  setState(() => _isFabExpanded = true);
-                } else if (notification.metrics.pixels <= 30 && !_isFabExpanded) {
-                  setState(() => _isFabExpanded = true);
+                if (notification.direction == ScrollDirection.reverse) {
+                  if (_isFabVisible) {
+                    setState(() {
+                      _isFabVisible = false;
+                      _isFabExpanded = false;
+                    });
+                  }
+                } else if (notification.direction == ScrollDirection.forward) {
+                  if (!_isFabVisible) {
+                    setState(() {
+                      _isFabVisible = true;
+                    });
+                  }
+                } else if (notification.metrics.pixels <= 30) {
+                  if (!_isFabVisible || !_isFabExpanded) {
+                    setState(() {
+                      _isFabVisible = true;
+                      _isFabExpanded = true;
+                    });
+                  }
                 }
                 return false;
               },
@@ -331,8 +350,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                               ],
                             ),
                           ),
-                          Card(
-                            clipBehavior: Clip.antiAlias,
+                          AppleGlassCard(
+                            padding: EdgeInsets.zero,
+                            borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
                             child: Column(
                               children: [
                                 for (
@@ -340,7 +360,14 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                                   i < group.transactions.length;
                                   i++
                                 ) ...[
-                                  if (i > 0) const Divider(indent: 68),
+                                  if (i > 0)
+                                    Divider(
+                                      height: AppleTokens.hairline,
+                                      indent: 68,
+                                      color: isDark
+                                          ? AppleTokens.separatorDark
+                                          : AppleTokens.separatorLight,
+                                    ),
                                   TransactionTile(
                                     transaction: group.transactions[i],
                                     category:
@@ -393,6 +420,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
       floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
       floatingActionButton: AppleAdaptiveExpandableFab(
         heroTag: 'transactions_add_fab',
+        isVisible: _isFabVisible,
         isExpanded: _isFabExpanded,
         icon: const Icon(CupertinoIcons.plus),
         label: Text(l10n.addTransaction),

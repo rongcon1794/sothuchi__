@@ -9,6 +9,7 @@ import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/date_formatter.dart';
+import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/core/widgets/empty_state_view.dart';
 import 'package:so_thu_chi/core/widgets/skeleton_box.dart';
 import 'package:so_thu_chi/features/reports/domain/entities/monthly_report.dart';
@@ -45,10 +46,10 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
           // Month Switcher
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                child: Row(
+            child: AppleGlassCard(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+              borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+              child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(
@@ -91,7 +92,6 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                 ),
               ),
             ),
-          ),
 
           Expanded(
             child: txStream.when(
@@ -129,10 +129,10 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                     const SizedBox(height: 16),
 
                     // Donut Chart: Expense by Category
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
+                    AppleGlassCard(
+                      padding: const EdgeInsets.all(16),
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                      child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
@@ -252,14 +252,13 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                           ],
                         ),
                       ),
-                    ),
                     const SizedBox(height: 16),
 
                     // Bar Chart: 6-Month Income vs Expense Trend
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
+                    AppleGlassCard(
+                      padding: const EdgeInsets.all(16),
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                      child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
@@ -293,7 +292,6 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                           ],
                         ),
                       ),
-                    ),
                   ],
                 );
               },
@@ -388,53 +386,51 @@ class _MonthlySummaryHeader extends StatelessWidget {
     );
 
     if (stackSingleCol) {
-      return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              incStat,
-              const SizedBox(height: 10),
-              expStat,
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 10),
-                child: Divider(),
-              ),
-              netStat,
-              const SizedBox(height: 10),
-              rateStat,
-            ],
-          ),
+      return AppleGlassCard(
+        padding: const EdgeInsets.all(16),
+        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            incStat,
+            const SizedBox(height: 10),
+            expStat,
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 10),
+              child: Divider(),
+            ),
+            netStat,
+            const SizedBox(height: 10),
+            rateStat,
+          ],
         ),
       );
     }
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(child: incStat),
-                const SizedBox(width: 8),
-                Expanded(child: expStat),
-              ],
-            ),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Divider(),
-            ),
-            Row(
-              children: [
-                Expanded(child: netStat),
-                const SizedBox(width: 8),
-                Expanded(child: rateStat),
-              ],
-            ),
-          ],
-        ),
+    return AppleGlassCard(
+      padding: const EdgeInsets.all(16),
+      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(child: incStat),
+              const SizedBox(width: 8),
+              Expanded(child: expStat),
+            ],
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Divider(),
+          ),
+          Row(
+            children: [
+              Expanded(child: netStat),
+              const SizedBox(width: 8),
+              Expanded(child: rateStat),
+            ],
+          ),
+        ],
       ),
     );
   }

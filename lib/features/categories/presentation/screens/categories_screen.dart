@@ -18,6 +18,8 @@ class CategoriesScreen extends ConsumerStatefulWidget {
 
 class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
   CategoryType _selectedType = CategoryType.expense;
+  bool _isFabExpanded = true;
+  bool _isFabVisible = true;
 
   void _openCategorySheet({Category? existing}) {
     showModalBottomSheet<void>(
@@ -95,12 +97,42 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             ),
           ),
           Expanded(
-            child: categoriesAsync.when(
-              loading: () => const SkeletonListView(),
-              error: (err, _) =>
-                  Center(child: Text(context.localizeError(err))),
-              data: (_) => ListView.separated(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
+            child: NotificationListener<UserScrollNotification>(
+              onNotification: (notification) {
+                if (notification.direction == ScrollDirection.reverse) {
+                  if (_isFabVisible) {
+                    setState(() {
+                      _isFabVisible = false;
+                      _isFabExpanded = false;
+                    });
+                  }
+                } else if (notification.direction == ScrollDirection.forward) {
+                  if (!_isFabVisible) {
+                    setState(() {
+                      _isFabVisible = true;
+                    });
+                  }
+                } else if (notification.metrics.pixels <= 30) {
+                  if (!_isFabVisible || !_isFabExpanded) {
+                    setState(() {
+                      _isFabVisible = true;
+                      _isFabExpanded = true;
+                    });
+                  }
+                }
+                return false;
+              },
+              child: categoriesAsync.when(
+                loading: () => const SkeletonListView(),
+                error: (err, _) =>
+                    Center(child: Text(context.localizeError(err))),
+                data: (_) => ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(
+                    16,
+                    4,
+                    16,
+                    AppleTokens.scrollBottomPaddingWithFab,
+                  ),
                 itemCount: items.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 10),
                 itemBuilder: (context, index) {
@@ -121,7 +153,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                     borderRadius:
                         BorderRadius.circular(AppleTokens.radiusCard),
                     onTap: () => _openCategorySheet(existing: cat),
-                    child: Card(
+                    child: AppleGlassCard(
+                      padding: EdgeInsets.zero,
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
                       child: ListTile(
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -179,12 +213,18 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               ),
             ),
           ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _openCategorySheet,
+        ),
+      ],
+    ),
+    floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
+    floatingActionButton: AppleAdaptiveExpandableFab(
+      heroTag: 'categories_add_fab',
+      isVisible: _isFabVisible,
+      isExpanded: _isFabExpanded,
         icon: const Icon(Icons.add_rounded),
         label: Text(l10n.addCategory),
+        onPressed: _openCategorySheet,
+        tooltip: l10n.addCategory,
       ),
     );
   }
