@@ -165,23 +165,11 @@ class _DebtRepaymentSheetState extends ConsumerState<DebtRepaymentSheet> {
           const SizedBox(height: 20),
 
           // Amount text field
-          TextField(
+          AppleTextField(
             controller: _amountController,
             keyboardType: TextInputType.number,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-            decoration: InputDecoration(
-              labelText: 'Số tiền trả (${widget.debt.currency})',
-              filled: true,
-              fillColor: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightSecondary,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-                borderSide: BorderSide.none,
-              ),
-              suffixIcon: IconButton(
-                icon: const Icon(CupertinoIcons.clear_circled, size: 18),
-                onPressed: () => _amountController.clear(),
-              ),
-            ),
+            label: 'Số tiền trả (${widget.debt.currency})',
+            clearable: true,
           ),
           const SizedBox(height: 10),
 
@@ -301,27 +289,11 @@ class _DebtRepaymentSheetState extends ConsumerState<DebtRepaymentSheet> {
           ],
 
           // Submit Button
-          ApplePressable(
-            onTap: _isSubmitting ? null : _submit,
-            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-            child: Container(
-              height: 48,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: isLent ? AppleTokens.systemGreen : AppleTokens.systemOrange,
-                borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-              ),
-              child: _isSubmitting
-                  ? const CupertinoActivityIndicator(color: Colors.white)
-                  : Text(
-                      isLent ? 'Xác nhận thu nợ' : 'Xác nhận trả nợ',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15,
-                      ),
-                    ),
-            ),
+          AppleButton.primary(
+            label: isLent ? 'Xác nhận thu nợ' : 'Xác nhận trả nợ',
+            color: isLent ? AppleTokens.systemGreen : AppleTokens.systemOrange,
+            isLoading: _isSubmitting,
+            onPressed: _submit,
           ),
         ],
         ),

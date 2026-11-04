@@ -77,6 +77,35 @@ abstract final class AppDateUtils {
     return '$d/$m/${date.year}';
   }
 
+  static String formatFullDate(DateTime date, {String locale = 'vi'}) {
+    final short = formatShortDate(date, locale: locale);
+    if (locale.toLowerCase().startsWith('vi')) {
+      const weekdays = [
+        '',
+        'Thứ Hai',
+        'Thứ Ba',
+        'Thứ Tư',
+        'Thứ Năm',
+        'Thứ Sáu',
+        'Thứ Bảy',
+        'Chủ Nhật',
+      ];
+      final w = (date.weekday >= 1 && date.weekday <= 7)
+          ? weekdays[date.weekday]
+          : '';
+      return w.isNotEmpty ? '$w, $short' : short;
+    }
+    try {
+      final weekday = DateFormat('EEEE', locale).format(date);
+      final capitalized = weekday.isEmpty
+          ? ''
+          : '${weekday[0].toUpperCase()}${weekday.substring(1)}';
+      return '$capitalized, $short';
+    } catch (_) {
+      return short;
+    }
+  }
+
   static String formatVnDate(DateTime date) =>
       formatShortDate(date, locale: 'vi');
 }

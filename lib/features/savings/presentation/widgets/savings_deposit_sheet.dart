@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
+import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_controller.dart';
 import 'package:so_thu_chi/features/savings/domain/entities/savings_goal.dart';
 import 'package:so_thu_chi/features/savings/presentation/controllers/savings_goals_controller.dart';
@@ -282,16 +283,12 @@ class _SavingsDepositSheetState extends ConsumerState<SavingsDepositSheet> {
                     const SizedBox(height: 16),
 
                     // Amount input
-                    TextFormField(
+                    AppleTextField(
                       controller: _amountController,
                       keyboardType: TextInputType.number,
                       autofocus: true,
-                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                      decoration: InputDecoration(
-                        labelText: _isWithdraw ? 'Số tiền rút' : 'Số tiền nạp',
-                        prefixIcon: const Icon(CupertinoIcons.money_dollar_circle),
-                        suffixText: widget.goal.currency,
-                      ),
+                      label: _isWithdraw ? 'Số tiền rút' : 'Số tiền nạp',
+                      prefixIcon: const Icon(CupertinoIcons.money_dollar_circle, size: 18),
                     ),
                     const SizedBox(height: 10),
 
@@ -357,27 +354,18 @@ class _SavingsDepositSheetState extends ConsumerState<SavingsDepositSheet> {
                     const SizedBox(height: 14),
 
                     // Note input
-                    TextFormField(
+                    AppleTextField(
                       controller: _noteController,
-                      decoration: const InputDecoration(
-                        labelText: 'Ghi chú (Tùy chọn)',
-                        prefixIcon: Icon(CupertinoIcons.pencil),
-                      ),
+                      label: 'Ghi chú (Tùy chọn)',
+                      prefixIcon: const Icon(CupertinoIcons.pencil, size: 18),
                     ),
                     const SizedBox(height: 24),
 
                     // Submit button
-                    FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: _isWithdraw ? AppleTokens.rubyExpense : accentColor,
-                        minimumSize: const Size.fromHeight(50),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppleTokens.radiusControl)),
-                      ),
+                    AppleButton.primary(
+                      color: _isWithdraw ? AppleTokens.rubyExpense : accentColor,
+                      label: _isWithdraw ? 'Xác nhận rút tiền' : 'Xác nhận tích lũy',
                       onPressed: _submit,
-                      child: Text(
-                        _isWithdraw ? 'Xác nhận rút tiền' : 'Xác nhận tích lũy',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
                     ),
                     const SizedBox(height: 24),
                   ],

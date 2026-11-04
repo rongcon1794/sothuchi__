@@ -283,18 +283,10 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
               const SizedBox(height: 16),
 
               // Person Name
-              TextFormField(
+              AppleTextField(
                 controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: isLent ? 'Người vay (Ai nợ bạn?) *' : 'Người cho vay (Bạn nợ ai?) *',
-                  prefixIcon: const Icon(CupertinoIcons.person_fill, size: 18),
-                  filled: true,
-                  fillColor: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightSecondary,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
+                label: isLent ? 'Người vay (Ai nợ bạn?) *' : 'Người cho vay (Bạn nợ ai?) *',
+                prefixIcon: const Icon(CupertinoIcons.person_fill, size: 18),
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) {
                     return 'Vui lòng nhập tên';
@@ -305,37 +297,20 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
               const SizedBox(height: 12),
 
               // Phone number
-              TextFormField(
+              AppleTextField(
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
-                decoration: InputDecoration(
-                  labelText: 'Số điện thoại (tùy chọn)',
-                  prefixIcon: const Icon(CupertinoIcons.phone_fill, size: 18),
-                  filled: true,
-                  fillColor: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightSecondary,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
+                label: 'Số điện thoại (tùy chọn)',
+                prefixIcon: const Icon(CupertinoIcons.phone_fill, size: 18),
               ),
               const SizedBox(height: 12),
 
               // Amount
-              TextFormField(
+              AppleTextField(
                 controller: _amountController,
                 keyboardType: TextInputType.number,
-                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
-                decoration: InputDecoration(
-                  labelText: 'Số tiền nợ (VND) *',
-                  prefixIcon: const Icon(CupertinoIcons.money_dollar, size: 18),
-                  filled: true,
-                  fillColor: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightSecondary,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
+                label: 'Số tiền nợ (VND) *',
+                prefixIcon: const Icon(CupertinoIcons.money_dollar, size: 18),
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) return 'Vui lòng nhập số tiền';
                   final num = int.tryParse(val.replaceAll(RegExp(r'[^0-9]'), ''));
@@ -482,43 +457,19 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
               ],
 
               // Note
-              TextFormField(
+              AppleTextField(
                 controller: _noteController,
-                decoration: InputDecoration(
-                  labelText: 'Ghi chú / lý do vay',
-                  prefixIcon: const Icon(CupertinoIcons.doc_text, size: 18),
-                  filled: true,
-                  fillColor: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightSecondary,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
+                label: 'Ghi chú / lý do vay',
+                prefixIcon: const Icon(CupertinoIcons.doc_text, size: 18),
               ),
               const SizedBox(height: 24),
 
               // Save Button
-              ApplePressable(
-                onTap: _isSaving ? null : _save,
-                borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                child: Container(
-                  height: 48,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: isLent ? AppleTokens.systemGreen : AppleTokens.systemOrange,
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                  ),
-                  child: _isSaving
-                      ? const CupertinoActivityIndicator(color: Colors.white)
-                      : Text(
-                          isEditing ? 'Lưu thay đổi' : 'Ghi nhận nợ',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
-                          ),
-                        ),
-                ),
+              AppleButton.primary(
+                label: isEditing ? 'Lưu thay đổi' : 'Ghi nhận nợ',
+                color: isLent ? AppleTokens.systemGreen : AppleTokens.systemOrange,
+                isLoading: _isSaving,
+                onPressed: _save,
               ),
             ],
           ),

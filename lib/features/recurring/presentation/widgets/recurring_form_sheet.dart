@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
-import 'package:so_thu_chi/core/utils/date_formatter.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_controller.dart';
@@ -87,18 +86,6 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
         return 'Hàng tháng';
       case RecurringInterval.yearly:
         return 'Hàng năm';
-    }
-  }
-
-  Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _startDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2035),
-    );
-    if (picked != null && mounted) {
-      setState(() => _startDate = picked);
     }
   }
 
@@ -228,24 +215,20 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     children: [
                       // Title input
-                      TextFormField(
+                      AppleTextField(
                         controller: _titleController,
-                        decoration: const InputDecoration(
-                          labelText: 'Tên gói / Khoản chi (VD: Netflix, Tiền phòng, Internet)',
-                          prefixIcon: Icon(CupertinoIcons.tag),
-                        ),
+                        label: 'Tên gói / Khoản chi (VD: Netflix, Tiền phòng, Internet)',
+                        prefixIcon: const Icon(CupertinoIcons.tag, size: 18),
                         validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập tên gói' : null,
                       ),
                       const SizedBox(height: 12),
 
                       // Amount input
-                      TextFormField(
+                      AppleTextField(
                         controller: _amountController,
                         keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          labelText: 'Số tiền định kỳ',
-                          prefixIcon: Icon(CupertinoIcons.money_dollar_circle),
-                        ),
+                        label: 'Số tiền định kỳ',
+                        prefixIcon: const Icon(CupertinoIcons.money_dollar_circle, size: 18),
                         validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập số tiền' : null,
                       ),
                       const SizedBox(height: 14),
@@ -333,13 +316,13 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                       const SizedBox(height: 14),
 
                       // Start Date selector
-                      AppleListTile(
-                        title: 'Ngày bắt đầu / Đến hạn kế tiếp',
-                        subtitle: AppDateUtils.formatDayHeader(_startDate, locale: 'vi', todayLabel: l10n.today, yesterdayLabel: l10n.yesterday),
-                        leading: const Icon(CupertinoIcons.calendar, color: AppleTokens.systemIndigo),
-                        onTap: _pickDate,
+                      AppleDatePickerTile(
+                        label: 'Ngày bắt đầu / Đến hạn kế tiếp',
+                        selectedDate: _startDate,
+                        onDateSelected: (d) => setState(() => _startDate = d),
+                        iconColor: AppleTokens.systemIndigo,
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 12),
 
                       // Auto execute toggle
                       SwitchListTile.adaptive(
@@ -352,14 +335,10 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                       const SizedBox(height: 20),
 
                       // Submit Button
-                      FilledButton(
-                        style: FilledButton.styleFrom(
-                          backgroundColor: AppleTokens.jadePrimary,
-                          minimumSize: const Size.fromHeight(50),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppleTokens.radiusControl)),
-                        ),
+                      AppleButton.primary(
+                        label: _isEditing ? 'Cập nhật định kỳ' : 'Tạo gói định kỳ',
+                        color: AppleTokens.jadePrimary,
                         onPressed: _submit,
-                        child: Text(_isEditing ? 'Cập nhật định kỳ' : 'Tạo gói định kỳ', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       ),
                       const SizedBox(height: 24),
                     ],

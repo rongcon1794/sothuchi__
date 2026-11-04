@@ -215,25 +215,20 @@ class _SavingsGoalFormSheetState extends ConsumerState<SavingsGoalFormSheet> {
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     children: [
                       // Title
-                      TextFormField(
+                      AppleTextField(
                         controller: _titleController,
-                        decoration: const InputDecoration(
-                          labelText: 'Tên mục tiêu (VD: Quỹ khẩn cấp, Mua xe, Du lịch Đà Lạt)',
-                          prefixIcon: Icon(CupertinoIcons.flag),
-                        ),
+                        label: 'Tên mục tiêu (VD: Quỹ khẩn cấp, Mua xe, Du lịch Đà Lạt)',
+                        prefixIcon: const Icon(CupertinoIcons.flag, size: 18),
                         validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập tên mục tiêu' : null,
                       ),
                       const SizedBox(height: 14),
 
                       // Target amount
-                      TextFormField(
+                      AppleTextField(
                         controller: _targetAmountController,
                         keyboardType: TextInputType.number,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                        decoration: const InputDecoration(
-                          labelText: 'Số tiền cần đạt được',
-                          prefixIcon: Icon(CupertinoIcons.money_dollar_circle),
-                        ),
+                        label: 'Số tiền cần đạt được',
+                        prefixIcon: const Icon(CupertinoIcons.money_dollar_circle, size: 18),
                         validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập số tiền' : null,
                       ),
                       const SizedBox(height: 16),
@@ -355,27 +350,18 @@ class _SavingsGoalFormSheetState extends ConsumerState<SavingsGoalFormSheet> {
                       const SizedBox(height: 16),
 
                       // Note
-                      TextFormField(
+                      AppleTextField(
                         controller: _noteController,
-                        decoration: const InputDecoration(
-                          labelText: 'Ghi chú động lực',
-                          prefixIcon: Icon(CupertinoIcons.quote_bubble),
-                        ),
+                        label: 'Ghi chú động lực',
+                        prefixIcon: const Icon(CupertinoIcons.quote_bubble, size: 18),
                       ),
                       const SizedBox(height: 24),
 
                       // Submit
-                      FilledButton(
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Color(_selectedColor),
-                          minimumSize: const Size.fromHeight(50),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppleTokens.radiusControl)),
-                        ),
+                      AppleButton.primary(
+                        color: Color(_selectedColor),
+                        label: _isEditing ? 'Cập nhật mục tiêu' : 'Tạo mục tiêu tích lũy',
                         onPressed: _submit,
-                        child: Text(
-                          _isEditing ? 'Cập nhật mục tiêu' : 'Tạo mục tiêu tích lũy',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
                       ),
                       const SizedBox(height: 24),
                     ],

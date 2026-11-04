@@ -571,7 +571,7 @@ class _BudgetFormBottomSheetState
               const SizedBox(height: 16),
 
               // Monthly Limit Amount
-              TextFormField(
+              AppleTextField(
                 controller: _amountController,
                 keyboardType: TextInputType.numberWithOptions(
                   decimal: currencyInfo.decimalDigits > 0,
@@ -582,13 +582,11 @@ class _BudgetFormBottomSheetState
                     locale: locale,
                   ),
                 ],
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontFeatures: AppTheme.tabularFigures,
-                ),
-                decoration: InputDecoration(
-                  labelText: l10n.budgetLimit,
-                  suffixText: currencyInfo.symbol,
-                  hintText: '0',
+                label: l10n.budgetLimit,
+                placeholder: '0',
+                suffix: Text(
+                  currencyInfo.symbol,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 validator: (val) {
                   final m = Money.tryParse(
@@ -619,12 +617,9 @@ class _BudgetFormBottomSheetState
               ),
               const SizedBox(height: 16),
 
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: _save,
-                  child: Text(l10n.save),
-                ),
+              AppleButton.primary(
+                onPressed: _save,
+                label: l10n.save,
               ),
             ],
           ),

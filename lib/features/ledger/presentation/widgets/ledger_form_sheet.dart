@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
+import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
 import 'package:so_thu_chi/features/ledger/presentation/controllers/ledgers_controller.dart';
 
@@ -167,12 +168,10 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     children: [
                       // Name input
-                      TextFormField(
+                      AppleTextField(
                         controller: _nameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Tên sổ (VD: Sổ Chi Tiêu Gia Đình, Sổ Quỹ Lớp)',
-                          prefixIcon: Icon(CupertinoIcons.book),
-                        ),
+                        label: 'Tên sổ (VD: Sổ Chi Tiêu Gia Đình, Sổ Quỹ Lớp)',
+                        prefixIcon: const Icon(CupertinoIcons.book, size: 18),
                         validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập tên sổ' : null,
                       ),
                       const SizedBox(height: 16),
@@ -271,17 +270,10 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
                       const SizedBox(height: 24),
 
                       // Submit button
-                      FilledButton(
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Color(_selectedColor),
-                          minimumSize: const Size.fromHeight(50),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppleTokens.radiusControl)),
-                        ),
+                      AppleButton.primary(
+                        color: Color(_selectedColor),
+                        label: _isEditing ? 'Cập nhật sổ' : 'Tạo sổ thu chi',
                         onPressed: _submit,
-                        child: Text(
-                          _isEditing ? 'Cập nhật sổ' : 'Tạo sổ thu chi',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
                       ),
                       const SizedBox(height: 24),
                     ],

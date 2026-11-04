@@ -330,14 +330,11 @@ class _CategoryFormSheetState extends ConsumerState<_CategoryFormSheet> {
                     : (s) => setState(() => _type = s.first),
               ),
               const SizedBox(height: 16),
-              TextFormField(
+              AppleTextField(
                 controller: _nameController,
                 maxLength: 100,
-                decoration: InputDecoration(
-                  labelText: l10n.categoryName,
-                  hintText: l10n.categoryNameHint,
-                  counterText: '',
-                ),
+                label: l10n.categoryName,
+                placeholder: l10n.categoryNameHint,
                 validator: (v) {
                   final trimmed = v?.trim() ?? '';
                   if (trimmed.isEmpty || trimmed.length > 100) {
@@ -356,9 +353,9 @@ class _CategoryFormSheetState extends ConsumerState<_CategoryFormSheet> {
                 colorSectionLabel: l10n.selectColor,
               ),
               const SizedBox(height: 24),
-              FilledButton(
+              AppleButton.primary(
                 onPressed: _submit,
-                child: Text(l10n.save),
+                label: l10n.save,
               ),
             ],
           ),

@@ -508,15 +508,12 @@ class _WalletFormSheetState extends ConsumerState<_WalletFormSheet> {
                 style: theme.textTheme.titleLarge,
               ),
               const SizedBox(height: 16),
-              TextFormField(
+              AppleTextField(
                 controller: _nameController,
                 maxLength: 100,
                 textInputAction: TextInputAction.next,
-                decoration: InputDecoration(
-                  labelText: l10n.walletName,
-                  hintText: l10n.walletNameHint,
-                  counterText: '',
-                ),
+                label: l10n.walletName,
+                placeholder: l10n.walletNameHint,
                 validator: (v) {
                   final trimmed = v?.trim() ?? '';
                   if (trimmed.isEmpty || trimmed.length > 100) {
@@ -558,7 +555,7 @@ class _WalletFormSheetState extends ConsumerState<_WalletFormSheet> {
                 },
               ),
               const SizedBox(height: 14),
-              TextFormField(
+              AppleTextField(
                 controller: _balanceController,
                 keyboardType: TextInputType.numberWithOptions(
                   decimal: currencyInfo.decimalDigits > 0,
@@ -566,11 +563,12 @@ class _WalletFormSheetState extends ConsumerState<_WalletFormSheet> {
                 inputFormatters: [
                   MoneyInputFormatter(currencyCode: _currency, locale: locale),
                 ],
-                decoration: InputDecoration(
-                  labelText: widget.existing == null
-                      ? l10n.initialBalance
-                      : l10n.currentBalance,
-                  suffixText: currencyInfo.symbol,
+                label: widget.existing == null
+                    ? l10n.initialBalance
+                    : l10n.currentBalance,
+                suffix: Text(
+                  currencyInfo.symbol,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
               ),
               const SizedBox(height: 18),
@@ -583,9 +581,9 @@ class _WalletFormSheetState extends ConsumerState<_WalletFormSheet> {
                 colorSectionLabel: l10n.selectColor,
               ),
               const SizedBox(height: 24),
-              FilledButton(
+              AppleButton.primary(
                 onPressed: _submit,
-                child: Text(l10n.save),
+                label: l10n.save,
               ),
             ],
           ),
@@ -769,7 +767,7 @@ class _TransferBetweenWalletsSheetState
                 onChanged: (v) => setState(() => _toId = v),
               ),
               const SizedBox(height: 14),
-              TextFormField(
+              AppleTextField(
                 controller: _amountController,
                 keyboardType: TextInputType.numberWithOptions(
                   decimal: currencyInfo.decimalDigits > 0,
@@ -777,9 +775,10 @@ class _TransferBetweenWalletsSheetState
                 inputFormatters: [
                   MoneyInputFormatter(currencyCode: currency, locale: locale),
                 ],
-                decoration: InputDecoration(
-                  labelText: l10n.amount,
-                  suffixText: currencyInfo.symbol,
+                label: l10n.amount,
+                suffix: Text(
+                  currencyInfo.symbol,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 validator: (v) {
                   final parsed = Money.tryParse(v ?? '', currencyCode: currency);
@@ -790,20 +789,17 @@ class _TransferBetweenWalletsSheetState
                 },
               ),
               const SizedBox(height: 14),
-              TextFormField(
+              AppleTextField(
                 controller: _noteController,
                 maxLength: 1000,
-                decoration: InputDecoration(
-                  labelText: l10n.note,
-                  hintText: l10n.noteHint,
-                  counterText: '',
-                ),
+                label: l10n.note,
+                placeholder: l10n.noteHint,
               ),
               const SizedBox(height: 24),
-              FilledButton.icon(
+              AppleButton.primary(
                 onPressed: _submit,
-                icon: const Icon(Icons.swap_horiz_rounded),
-                label: Text(l10n.confirm),
+                icon: Icons.swap_horiz_rounded,
+                label: l10n.confirm,
               ),
             ],
           ),

@@ -886,64 +886,14 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               ),
             ),
           ),
-          child: ApplePressable(
-            scaleDown: 0.96,
+          child: AppleButton.primary(
+            height: 50,
             borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-            onTap: isSaving ? null : _submit,
-            child: Container(
-              height: 52,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: isSaving
-                      ? [Colors.grey.shade400, Colors.grey.shade600]
-                      : const [
-                          Color(0xFF00C781),
-                          AppleTokens.jadePrimary,
-                          Color(0xFF007552),
-                        ],
-                ),
-                borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.3),
-                  width: AppleTokens.hairline,
-                ),
-                boxShadow: isSaving
-                    ? []
-                    : [
-                        BoxShadow(
-                          color: AppleTokens.jadePrimary.withValues(alpha: 0.35),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
-              ),
-              child: Center(
-                child: isSaving
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CupertinoActivityIndicator(color: Colors.white),
-                      )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(CupertinoIcons.checkmark_alt, color: Colors.white, size: 20),
-                          const SizedBox(width: 8),
-                          Text(
-                            _isEditing ? 'Cập nhật giao dịch' : l10n.save,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.2,
-                            ),
-                          ),
-                        ],
-                      ),
-              ),
-            ),
+            isLoading: isSaving,
+            icon: CupertinoIcons.checkmark_alt,
+            label: _isEditing ? 'Cập nhật giao dịch' : l10n.save,
+            color: AppleTokens.jadePrimary,
+            onPressed: isSaving ? null : _submit,
           ),
         ),
       ),
