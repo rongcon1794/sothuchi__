@@ -33,18 +33,18 @@ class FinanceColors extends ThemeExtension<FinanceColors> {
   final Color onWarningContainer;
 
   static const FinanceColors light = FinanceColors(
-    income: Color(0xFF0B7A5C),
-    incomeContainer: Color(0xFFE3F6EF),
-    onIncomeContainer: Color(0xFF064B38),
-    expense: Color(0xFFC0352B),
-    expenseContainer: Color(0xFFFCEAE8),
-    onExpenseContainer: Color(0xFF7A1C15),
-    transfer: Color(0xFF1D5BD6),
-    transferContainer: Color(0xFFE8F0FE),
-    onTransferContainer: Color(0xFF103888),
-    warning: Color(0xFFA65606),
-    warningContainer: Color(0xFFFEF3E2),
-    onWarningContainer: Color(0xFF6E3803),
+    income: Color(0xFF059669),
+    incomeContainer: Color(0xFFECFDF5),
+    onIncomeContainer: Color(0xFF065F46),
+    expense: Color(0xFFE11D48),
+    expenseContainer: Color(0xFFFFF1F2),
+    onExpenseContainer: Color(0xFF9F1239),
+    transfer: Color(0xFF0284C7),
+    transferContainer: Color(0xFFF0F9FF),
+    onTransferContainer: Color(0xFF075985),
+    warning: Color(0xFFD97706),
+    warningContainer: Color(0xFFFFFBEB),
+    onWarningContainer: Color(0xFF92400E),
   );
 
   static const FinanceColors dark = FinanceColors(
@@ -143,7 +143,7 @@ class FinanceColors extends ThemeExtension<FinanceColors> {
 
 /// Material 3 "Jade Ledger" design system with dynamic seed color & tabular numerals.
 abstract final class AppTheme {
-  static const Color seedColor = Color(0xFF0D7C66);
+  static const Color seedColor = Color(0xFF00A86B);
   static const List<FontFeature> tabularFigures = [
     FontFeature.tabularFigures(),
   ];

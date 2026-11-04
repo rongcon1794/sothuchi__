@@ -33,7 +33,7 @@ class HomeDashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
-  bool _isFabVisible = true;
+  bool _isFabExpanded = true;
 
   @override
   Widget build(BuildContext context) {
@@ -147,12 +147,12 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
       ),
       body: NotificationListener<UserScrollNotification>(
         onNotification: (notification) {
-          if (notification.direction == ScrollDirection.reverse && _isFabVisible) {
-            setState(() => _isFabVisible = false);
-          } else if (notification.direction == ScrollDirection.forward && !_isFabVisible) {
-            setState(() => _isFabVisible = true);
-          } else if (notification.metrics.pixels <= 30 && !_isFabVisible) {
-            setState(() => _isFabVisible = true);
+          if (notification.direction == ScrollDirection.reverse && _isFabExpanded) {
+            setState(() => _isFabExpanded = false);
+          } else if (notification.direction == ScrollDirection.forward && !_isFabExpanded) {
+            setState(() => _isFabExpanded = true);
+          } else if (notification.metrics.pixels <= 30 && !_isFabExpanded) {
+            setState(() => _isFabExpanded = true);
           }
           return false;
         },
@@ -180,7 +180,11 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                 onToggleVisibility: () =>
                     ref.read(settingsControllerProvider.notifier).toggleHideBalance(),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
+
+              // Smart 4-Capsule Quick Actions
+              const _HomeQuickActionBar(),
+              const SizedBox(height: 14),
 
               // Future AI quick entry slot (extensible without modifying Home)
               ?aiQuickSlot,
@@ -335,35 +339,13 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
         ),
       ),
       floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
-      floatingActionButton: ScrollReactiveFab(
-        visible: _isFabVisible,
-        child: isLargeText
-            ? FloatingActionButton(
-                heroTag: 'home_quick_add_fab',
-                tooltip: l10n.quickAddTransaction,
-                backgroundColor: AppleTokens.jadePrimary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                ),
-                onPressed: () => context.push(AppRoutes.transactionNew),
-                child: const Icon(Icons.add_rounded),
-              )
-            : FloatingActionButton.extended(
-                heroTag: 'home_quick_add_fab',
-                backgroundColor: AppleTokens.jadePrimary,
-                foregroundColor: Colors.white,
-                elevation: 3,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                ),
-                onPressed: () => context.push(AppRoutes.transactionNew),
-                icon: const Icon(Icons.add_rounded),
-                label: Text(
-                  l10n.quickAddTransaction,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-              ),
+      floatingActionButton: AppleAdaptiveExpandableFab(
+        heroTag: 'home_quick_add_fab',
+        isExpanded: _isFabExpanded && !isLargeText,
+        icon: const Icon(CupertinoIcons.plus),
+        label: Text(l10n.quickAddTransaction),
+        onPressed: () => context.push(AppRoutes.transactionNew),
+        tooltip: l10n.quickAddTransaction,
       ),
     );
   }
@@ -394,13 +376,19 @@ class _HeroBalanceCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF0F7A62),
-            Color(0xFF094638),
-          ],
+          colors: isDark
+              ? const [
+                  Color(0xFF007552),
+                  Color(0xFF004D36),
+                ]
+              : const [
+                  Color(0xFF00B074),
+                  Color(0xFF0D7C66),
+                  Color(0xFF043927),
+                ],
         ),
         borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
         border: Border.all(
@@ -411,8 +399,8 @@ class _HeroBalanceCard extends StatelessWidget {
             ? AppleTokens.cardShadowDark
             : [
                 BoxShadow(
-                  color: const Color(0xFF094638).withValues(alpha: 0.25),
-                  blurRadius: 18,
+                  color: const Color(0xFF00A86B).withValues(alpha: 0.28),
+                  blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
               ],
@@ -540,6 +528,104 @@ class _HeroBalanceCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _HomeQuickActionBar extends StatelessWidget {
+  const _HomeQuickActionBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _QuickActionItem(
+            icon: CupertinoIcons.plus,
+            label: 'Thêm thu chi',
+            color: AppleTokens.jadePrimary,
+            onTap: () => context.push(AppRoutes.transactionNew),
+          ),
+          _QuickActionItem(
+            icon: CupertinoIcons.creditcard,
+            label: 'Ví tài khoản',
+            color: AppleTokens.systemBlue,
+            onTap: () => context.push(AppRoutes.accounts),
+          ),
+          _QuickActionItem(
+            icon: CupertinoIcons.person_2,
+            label: 'Sổ Ghi Nợ',
+            color: AppleTokens.systemIndigo,
+            onTap: () => context.push(AppRoutes.debts),
+          ),
+          _QuickActionItem(
+            icon: CupertinoIcons.chart_pie,
+            label: 'Ngân sách',
+            color: AppleTokens.systemOrange,
+            onTap: () => context.push(AppRoutes.budgets),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickActionItem extends StatelessWidget {
+  const _QuickActionItem({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Expanded(
+      child: ApplePressable(
+        scaleDown: 0.94,
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: isDark ? 0.22 : 0.12),
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(
+                  color: color.withValues(alpha: isDark ? 0.35 : 0.2),
+                  width: 0.8,
+                ),
+              ),
+              child: Icon(icon, color: color, size: 21),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                fontSize: 11.5,
+                letterSpacing: -0.2,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

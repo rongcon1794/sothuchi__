@@ -28,7 +28,7 @@ class TransactionsScreen extends ConsumerStatefulWidget {
 
 class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
   final TextEditingController _searchController = TextEditingController();
-  bool _isFabVisible = true;
+  bool _isFabExpanded = true;
 
   @override
   void dispose() {
@@ -234,12 +234,12 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
           Expanded(
             child: NotificationListener<UserScrollNotification>(
               onNotification: (notification) {
-                if (notification.direction == ScrollDirection.reverse && _isFabVisible) {
-                  setState(() => _isFabVisible = false);
-                } else if (notification.direction == ScrollDirection.forward && !_isFabVisible) {
-                  setState(() => _isFabVisible = true);
-                } else if (notification.metrics.pixels <= 30 && !_isFabVisible) {
-                  setState(() => _isFabVisible = true);
+                if (notification.direction == ScrollDirection.reverse && _isFabExpanded) {
+                  setState(() => _isFabExpanded = false);
+                } else if (notification.direction == ScrollDirection.forward && !_isFabExpanded) {
+                  setState(() => _isFabExpanded = true);
+                } else if (notification.metrics.pixels <= 30 && !_isFabExpanded) {
+                  setState(() => _isFabExpanded = true);
                 }
                 return false;
               },
@@ -391,14 +391,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
       ],
       ),
       floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
-      floatingActionButton: ScrollReactiveFab(
-        visible: _isFabVisible,
-        child: FloatingActionButton(
-          heroTag: 'transactions_add_fab',
-          tooltip: l10n.addTransaction,
-          onPressed: () => context.push(AppRoutes.transactionNew),
-          child: const Icon(Icons.add_rounded),
-        ),
+      floatingActionButton: AppleAdaptiveExpandableFab(
+        heroTag: 'transactions_add_fab',
+        isExpanded: _isFabExpanded,
+        icon: const Icon(CupertinoIcons.plus),
+        label: Text(l10n.addTransaction),
+        onPressed: () => context.push(AppRoutes.transactionNew),
+        tooltip: l10n.addTransaction,
       ),
     );
   }

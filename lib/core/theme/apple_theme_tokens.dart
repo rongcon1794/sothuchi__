@@ -17,20 +17,20 @@ abstract final class AppleTokens {
   static const Color systemCyan = Color(0xFF32ADE6);
   static const Color systemGray = Color(0xFF8E8E93);
 
-  // Financial Semantics (Jade & Ruby Apple-styled)
-  static const Color jadePrimary = Color(0xFF00897B);
-  static const Color jadeDark = Color(0xFF004D40);
-  static const Color rubyExpense = Color(0xFFFF3B30);
-  static const Color emeraldIncome = Color(0xFF34C759);
-  static const Color cobaltTransfer = Color(0xFF007AFF);
+  // Financial Semantics (Vibrant Fresh Jade & Ruby Apple-styled)
+  static const Color jadePrimary = Color(0xFF00A86B);
+  static const Color jadeDark = Color(0xFF034A3C);
+  static const Color rubyExpense = Color(0xFFF43F5E);
+  static const Color emeraldIncome = Color(0xFF10B981);
+  static const Color cobaltTransfer = Color(0xFF0284C7);
 
-  // --- Backgrounds & Grouped Surfaces (iOS 18) ---
+  // --- Backgrounds & Grouped Surfaces (iOS 18 Fresh Luminous Canvas) ---
   // Light Mode
-  static const Color bgLightGrouped = Color(0xFFF2F2F7);
+  static const Color bgLightGrouped = Color(0xFFF8FAFC);
   static const Color bgLightPrimary = bgLightGrouped;
   static const Color bgLightCard = Color(0xFFFFFFFF);
-  static const Color bgLightSecondary = Color(0xFFE5E5EA);
-  static const Color borderLight = Color(0xFFE5E5EA);
+  static const Color bgLightSecondary = Color(0xFFF1F5F9);
+  static const Color borderLight = Color(0xFFE2E8F0);
 
   // Dark Mode
   static const Color bgDarkGrouped = Color(0xFF000000);

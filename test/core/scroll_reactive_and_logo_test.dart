@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
-import 'package:so_thu_chi/core/widgets/scroll_reactive_fab.dart';
-import 'package:so_thu_chi/core/widgets/so_thu_chi_logo.dart';
 
 void main() {
   group('SoThuChiLogo widget tests', () {

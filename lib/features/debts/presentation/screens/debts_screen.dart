@@ -19,7 +19,7 @@ class DebtsScreen extends ConsumerStatefulWidget {
 }
 
 class _DebtsScreenState extends ConsumerState<DebtsScreen> {
-  bool _isFabVisible = true;
+  bool _isFabExpanded = true;
 
   @override
   Widget build(BuildContext context) {
@@ -49,22 +49,17 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
         ],
       ),
       floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
-      floatingActionButton: ScrollReactiveFab(
-        visible: _isFabVisible,
-        child: FloatingActionButton.extended(
-          heroTag: 'debts_add_fab',
-          backgroundColor: AppleTokens.jadeDark,
-          elevation: 4,
-          icon: const Icon(CupertinoIcons.plus, color: Colors.white, size: 20),
-          label: const Text(
-            'Ghi nợ mới',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
-          ),
-          onPressed: () {
-            HapticFeedback.mediumImpact();
-            DebtFormSheet.show(context);
-          },
-        ),
+      floatingActionButton: AppleAdaptiveExpandableFab(
+        heroTag: 'debts_add_fab',
+        isExpanded: _isFabExpanded,
+        icon: const Icon(CupertinoIcons.plus),
+        label: const Text('Ghi nợ mới'),
+        backgroundColor: AppleTokens.jadeDark,
+        onPressed: () {
+          HapticFeedback.mediumImpact();
+          DebtFormSheet.show(context);
+        },
+        tooltip: 'Ghi nợ mới',
       ),
       body: debtsAsync.when(
         loading: () => const Center(child: CupertinoActivityIndicator()),
@@ -72,12 +67,12 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
         data: (allDebts) {
           return NotificationListener<UserScrollNotification>(
             onNotification: (notification) {
-              if (notification.direction == ScrollDirection.reverse && _isFabVisible) {
-                setState(() => _isFabVisible = false);
-              } else if (notification.direction == ScrollDirection.forward && !_isFabVisible) {
-                setState(() => _isFabVisible = true);
-              } else if (notification.metrics.pixels <= 30 && !_isFabVisible) {
-                setState(() => _isFabVisible = true);
+              if (notification.direction == ScrollDirection.reverse && _isFabExpanded) {
+                setState(() => _isFabExpanded = false);
+              } else if (notification.direction == ScrollDirection.forward && !_isFabExpanded) {
+                setState(() => _isFabExpanded = true);
+              } else if (notification.metrics.pixels <= 30 && !_isFabExpanded) {
+                setState(() => _isFabExpanded = true);
               }
               return false;
             },

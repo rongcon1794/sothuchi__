@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
@@ -25,7 +26,7 @@ class BudgetsScreen extends ConsumerStatefulWidget {
 }
 
 class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
-  bool _isFabVisible = true;
+  bool _isFabExpanded = true;
 
   Future<void> _openBudgetForm(
     BuildContext context, {
@@ -128,12 +129,12 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
           Expanded(
             child: NotificationListener<UserScrollNotification>(
               onNotification: (notification) {
-                if (notification.direction == ScrollDirection.reverse && _isFabVisible) {
-                  setState(() => _isFabVisible = false);
-                } else if (notification.direction == ScrollDirection.forward && !_isFabVisible) {
-                  setState(() => _isFabVisible = true);
-                } else if (notification.metrics.pixels <= 30 && !_isFabVisible) {
-                  setState(() => _isFabVisible = true);
+                if (notification.direction == ScrollDirection.reverse && _isFabExpanded) {
+                  setState(() => _isFabExpanded = false);
+                } else if (notification.direction == ScrollDirection.forward && !_isFabExpanded) {
+                  setState(() => _isFabExpanded = true);
+                } else if (notification.metrics.pixels <= 30 && !_isFabExpanded) {
+                  setState(() => _isFabExpanded = true);
                 }
                 return false;
               },
@@ -201,23 +202,13 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
         ],
       ),
       floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
-      floatingActionButton: ScrollReactiveFab(
-        visible: _isFabVisible,
-        child: isLargeText
-            ? FloatingActionButton(
-                heroTag: 'budgets_add_fab',
-                tooltip: l10n.addBudget,
-                onPressed: () =>
-                    _openBudgetForm(context, selectedMonth: selectedMonth),
-                child: const Icon(Icons.add_rounded),
-              )
-            : FloatingActionButton.extended(
-                heroTag: 'budgets_add_fab',
-                onPressed: () =>
-                    _openBudgetForm(context, selectedMonth: selectedMonth),
-                icon: const Icon(Icons.add_rounded),
-                label: Text(l10n.addBudget),
-              ),
+      floatingActionButton: AppleAdaptiveExpandableFab(
+        heroTag: 'budgets_add_fab',
+        isExpanded: _isFabExpanded && !isLargeText,
+        icon: const Icon(CupertinoIcons.plus),
+        label: Text(l10n.addBudget),
+        onPressed: () => _openBudgetForm(context, selectedMonth: selectedMonth),
+        tooltip: l10n.addBudget,
       ),
     );
   }

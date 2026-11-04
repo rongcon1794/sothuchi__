@@ -156,8 +156,12 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('•••••• ₫'), findsAtLeastNWidgets(1));
 
-        // Scroll down to Recent Transactions section on 600px test viewport
-        await tester.drag(find.byType(ListView).first, const Offset(0, -320));
+        // Scroll down to Recent Transactions section on test viewport
+        await tester.scrollUntilVisible(
+          find.textContaining('Cà phê sáng'),
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
         await tester.pumpAndSettle();
         expect(find.textContaining('Cà phê sáng'), findsOneWidget);
       },
