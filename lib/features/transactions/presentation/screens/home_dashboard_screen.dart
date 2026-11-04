@@ -21,6 +21,7 @@ import 'package:so_thu_chi/features/auth/presentation/controllers/auth_controlle
 import 'package:so_thu_chi/features/budgets/presentation/controllers/budgets_controller.dart';
 import 'package:so_thu_chi/features/budgets/presentation/widgets/budget_alert_banner.dart';
 import 'package:so_thu_chi/features/categories/presentation/controllers/categories_controller.dart';
+import 'package:so_thu_chi/features/recurring/presentation/controllers/recurring_controller.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
 import 'package:so_thu_chi/features/transactions/presentation/widgets/transaction_tile.dart';
@@ -60,6 +61,7 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
     final recentTxs = ref.watch(recentTransactionsProvider);
     final customBudgetBanner = ref.watch(dashboardBudgetAlertSlotProvider);
     final triggeredBudgets = ref.watch(currentMonthTriggeredBudgetsProvider);
+    final dueBills = ref.watch(dueRecurringListProvider);
     final budgetAlertBanner =
         customBudgetBanner ??
         (triggeredBudgets.isNotEmpty ? const BudgetAlertBanner() : null);
@@ -190,6 +192,39 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
               // Smart 4-Capsule Quick Actions
               const _HomeQuickActionBar(),
               const SizedBox(height: 14),
+
+              // Due Recurring Bills Notification Banner
+              if (dueBills.isNotEmpty) ...[
+                ApplePressable(
+                  onTap: () => context.push(AppRoutes.recurring),
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: AppleTokens.systemOrange.withValues(alpha: isDark ? 0.2 : 0.12),
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                      border: Border.all(
+                        color: AppleTokens.systemOrange.withValues(alpha: 0.35),
+                        width: AppleTokens.hairline,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(CupertinoIcons.bell_fill, color: AppleTokens.systemOrange, size: 20),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Bạn có ${dueBills.length} hóa đơn định kỳ cần thanh toán',
+                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                          ),
+                        ),
+                        const Icon(CupertinoIcons.chevron_right, size: 14, color: AppleTokens.systemOrange),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+              ],
 
               // Budget alert slot (injected by Budgets feature in Milestone e)
               ?budgetAlertBanner,
@@ -467,14 +502,15 @@ class _HeroBalanceCard extends StatelessWidget {
               child: FittedBox(
                 fit: BoxFit.scaleDown,
                 alignment: Alignment.centerLeft,
-                child: Text(
-                  totalBalance.format(locale: locale, masked: hideBalance),
+                child: AppleAnimatedMoneyText(
+                  money: totalBalance,
+                  locale: locale,
+                  masked: hideBalance,
                   semanticsLabel: hideBalance ? l10n.balanceHidden : null,
                   style: theme.textTheme.displaySmall?.copyWith(
                     color: fgColor,
                     fontWeight: FontWeight.w700,
                     letterSpacing: -0.6,
-                    fontFeatures: AppTheme.tabularFigures,
                   ),
                 ),
               ),

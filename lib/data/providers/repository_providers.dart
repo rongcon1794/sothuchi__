@@ -12,6 +12,8 @@ import 'package:so_thu_chi/features/categories/data/repositories/firestore_categ
 import 'package:so_thu_chi/features/categories/domain/repositories/category_repository.dart';
 import 'package:so_thu_chi/features/debts/data/repositories/firestore_debt_repository.dart';
 import 'package:so_thu_chi/features/debts/domain/repositories/debt_repository.dart';
+import 'package:so_thu_chi/features/recurring/data/repositories/firestore_recurring_repository.dart';
+import 'package:so_thu_chi/features/recurring/domain/repositories/recurring_repository.dart';
 import 'package:so_thu_chi/features/reports/data/repositories/reports_repository_impl.dart';
 import 'package:so_thu_chi/features/reports/domain/repositories/reports_repository.dart';
 import 'package:so_thu_chi/features/settings/data/repositories/settings_repository_impl.dart';
@@ -45,6 +47,12 @@ final inMemoryBudgetRepoProvider = Provider<InMemoryBudgetRepository>((ref) {
 final inMemoryDebtRepoProvider = Provider<InMemoryDebtRepository>((ref) {
   return InMemoryDebtRepository(
     accountRepo: ref.watch(inMemoryAccountRepoProvider),
+  );
+});
+
+final inMemoryRecurringRepoProvider = Provider<InMemoryRecurringRepository>((ref) {
+  return InMemoryRecurringRepository(
+    transactionRepository: ref.watch(inMemoryTransactionRepoProvider),
   );
 });
 
@@ -168,6 +176,20 @@ final debtRepositoryProvider = Provider<DebtRepository>((ref) {
     return ref.watch(inMemoryDebtRepoProvider);
   }
   return FirestoreDebtRepository(firestore: firestore, uid: user.uid);
+});
+
+final recurringRepositoryProvider = Provider<RecurringRepository>((ref) {
+  final user = ref.watch(currentUserProvider);
+  final firestore = ref.watch(firestoreProvider);
+  final txRepo = ref.watch(transactionRepositoryProvider);
+  if (user == null || user.isDemoUser || firestore == null) {
+    return ref.watch(inMemoryRecurringRepoProvider);
+  }
+  return FirestoreRecurringRepository(
+    firestore: firestore,
+    currentUserIdGetter: () => user.uid,
+    transactionRepository: txRepo,
+  );
 });
 
 final reportsRepositoryProvider = Provider<ReportsRepository>((ref) {

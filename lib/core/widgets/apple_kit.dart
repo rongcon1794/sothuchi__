@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 
 export 'package:so_thu_chi/core/widgets/apple_adaptive_expandable_fab.dart';
+export 'package:so_thu_chi/core/widgets/apple_animated_money_text.dart';
 export 'package:so_thu_chi/core/widgets/scroll_reactive_fab.dart';
 export 'package:so_thu_chi/core/widgets/so_thu_chi_logo.dart';
 
