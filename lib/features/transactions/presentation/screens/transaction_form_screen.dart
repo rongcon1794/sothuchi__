@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,7 +7,6 @@ import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/contracts/transaction_draft_contract.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
-import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/date_formatter.dart';
@@ -21,6 +21,9 @@ import 'package:so_thu_chi/features/settings/presentation/controllers/settings_c
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
 
+/// Redesigned, state-of-the-art Apple HIG Add / Edit Transaction Screen.
+/// Features interactive semantic hero amount card, instant category picker,
+/// grouped Apple inset cards, wallet selection sheet, and tactile sticky action dock.
 class TransactionFormScreen extends ConsumerStatefulWidget {
   const TransactionFormScreen({
     super.key,
@@ -158,6 +161,72 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     setState(() {
       _amountController.text = newText;
     });
+  }
+
+  void _clearAmount() {
+    HapticFeedback.lightImpact();
+    setState(() {
+      _amountController.clear();
+    });
+  }
+
+  void _swapTransferWallets() {
+    if (_type != TransactionType.transfer) return;
+    HapticFeedback.mediumImpact();
+    setState(() {
+      final temp = _accountId;
+      _accountId = _toAccountId;
+      _toAccountId = temp;
+    });
+  }
+
+  Future<void> _openWalletPicker(
+    BuildContext context, {
+    required List<Account> wallets,
+    required bool isDestination,
+    required String locale,
+  }) async {
+    final selectedId = isDestination ? _toAccountId : _accountId;
+    final result = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _WalletPickerSheet(
+        wallets: wallets,
+        selectedId: selectedId,
+        locale: locale,
+        title: isDestination ? 'Chọn ví nhận tiền' : 'Chọn ví thanh toán',
+      ),
+    );
+
+    if (result != null && mounted) {
+      setState(() {
+        if (isDestination) {
+          _toAccountId = result;
+        } else {
+          _accountId = result;
+        }
+      });
+    }
+  }
+
+  Future<void> _openCategoryPicker(
+    BuildContext context, {
+    required List<Category> categories,
+  }) async {
+    final result = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _CategoryPickerSheet(
+        categories: categories,
+        selectedId: _categoryId,
+      ),
+    );
+
+    if (result != null && mounted) {
+      setState(() => _categoryId = result);
+    }
   }
 
   Future<void> _submit() async {
@@ -320,6 +389,31 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     }
   }
 
+  Future<void> _confirmDelete() async {
+    final l10n = context.l10n;
+    final confirmed = await showCupertinoModalPopup<bool>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text(l10n.delete),
+        message: const Text('Bạn có chắc chắn muốn xóa giao dịch này?'),
+        actions: [
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.delete),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.of(ctx).pop(false),
+          child: Text(l10n.cancel),
+        ),
+      ),
+    );
+    if (confirmed == true && mounted) {
+      await _deleteCurrent();
+    }
+  }
+
   Future<void> _deleteCurrent() async {
     final existing = _existingTx;
     if (existing == null) return;
@@ -404,73 +498,569 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       yesterdayLabel: l10n.yesterday,
     );
 
+    // Resolved Selected Account and Category entities
+    Account? selectedAccount;
+    for (final w in walletsForDropdown) {
+      if (w.id == _accountId) {
+        selectedAccount = w;
+        break;
+      }
+    }
+
+    Account? selectedToAccount;
+    for (final w in walletsForDropdown) {
+      if (w.id == _toAccountId) {
+        selectedToAccount = w;
+        break;
+      }
+    }
+
+    Category? selectedCategory;
+    for (final c in availableCategories) {
+      if (c.id == _categoryId) {
+        selectedCategory = c;
+        break;
+      }
+    }
+
     return Scaffold(
+      backgroundColor: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightPrimary,
       appBar: AppBar(
-        title: Text(_isEditing ? l10n.editTransaction : l10n.addTransaction),
+        title: Text(
+          _isEditing ? l10n.editTransaction : l10n.addTransaction,
+          style: const TextStyle(fontWeight: FontWeight.w700),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(CupertinoIcons.chevron_left, size: 24),
+          tooltip: 'Quay lại',
+          onPressed: () => context.pop(),
+        ),
         actions: [
           if (_isEditing && _existingTx != null)
             IconButton(
               tooltip: l10n.delete,
-              onPressed: isSaving ? null : _deleteCurrent,
-              icon: Icon(
-                Icons.delete_outline_rounded,
-                color: theme.colorScheme.error,
+              onPressed: isSaving ? null : _confirmDelete,
+              icon: const Icon(
+                CupertinoIcons.trash,
+                color: AppleTokens.rubyExpense,
+                size: 22,
               ),
             ),
+          const SizedBox(width: 4),
         ],
       ),
       body: _loadingExisting
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CupertinoActivityIndicator())
           : Form(
               key: _formKey,
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Type Segmented Control
-                  SegmentedButton<TransactionType>(
-                    segments: [
-                      ButtonSegment(
-                        value: TransactionType.expense,
-                        icon: const Icon(Icons.north_east_rounded),
-                        label: Text(l10n.expense),
-                      ),
-                      ButtonSegment(
-                        value: TransactionType.income,
-                        icon: const Icon(Icons.south_west_rounded),
-                        label: Text(l10n.income),
-                      ),
-                      ButtonSegment(
-                        value: TransactionType.transfer,
-                        icon: const Icon(Icons.swap_horiz_rounded),
-                        label: Text(l10n.transfer),
-                      ),
-                    ],
-                    selected: {_type},
-                    onSelectionChanged: (selection) {
-                      final next = selection.first;
+                  // 1. Hero Amount & Mode Card
+                  _HeroAmountCard(
+                    type: _type,
+                    amountController: _amountController,
+                    currencyInfo: currencyInfo,
+                    currencyCode: currencyCode,
+                    locale: locale,
+                    isEditing: _isEditing,
+                    onTypeChanged: (newType) {
                       setState(() {
-                        _type = next;
-                        if (next != TransactionType.transfer) {
-                          final list = next == TransactionType.income
+                        _type = newType;
+                        if (newType != TransactionType.transfer) {
+                          final list = newType == TransactionType.income
                               ? incomeCategories
                               : expenseCategories;
                           if (!list.any((c) => c.id == _categoryId)) {
-                            _categoryId = list.isNotEmpty
-                                ? list.first.id
-                                : null;
+                            _categoryId = list.isNotEmpty ? list.first.id : null;
                           }
                         }
                       });
                     },
+                    onAddShortcut: (amount) => _addAmountShortcut(amount, currencyCode, locale),
+                    onClear: _clearAmount,
                   ),
                   const SizedBox(height: 20),
 
-                  // Amount Field
-                  TextFormField(
-                    controller: _amountController,
-                    autofocus: !_isEditing,
+                  // 2. Classification & Wallet Section
+                  AppleListGroup(
+                    header: 'PHÂN LOẠI & VÍ TIỀN',
+                    margin: const EdgeInsets.only(bottom: 20),
+                    children: [
+                      if (_type != TransactionType.transfer) ...[
+                        // Category Picker Tile
+                        ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                          leading: AppleSquircleBadge(
+                            icon: selectedCategory != null
+                                ? AppIconCatalog.resolve(selectedCategory.icon)
+                                : CupertinoIcons.square_grid_2x2,
+                            backgroundColor: selectedCategory != null
+                                ? AppIconCatalog.contrastSafeColor(
+                                    Color(selectedCategory.color),
+                                    theme.brightness,
+                                  )
+                                : AppleTokens.systemBlue,
+                            size: 38,
+                            iconSize: 20,
+                            radius: 10,
+                          ),
+                          title: Text(
+                            l10n.selectCategory,
+                            style: const TextStyle(fontSize: 13, color: AppleTokens.systemGray),
+                          ),
+                          subtitle: Text(
+                            selectedCategory != null
+                                ? DefaultCategoryLocalization.resolveName(
+                                    l10n,
+                                    categoryId: selectedCategory.id,
+                                    fallbackName: selectedCategory.name,
+                                  )
+                                : 'Chọn danh mục',
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                          ),
+                          trailing: const Icon(CupertinoIcons.chevron_right, size: 16, color: AppleTokens.systemGray),
+                          onTap: () => _openCategoryPicker(context, categories: availableCategories),
+                        ),
+                      ],
+
+                      if (_type == TransactionType.transfer) ...[
+                        // Source Wallet (From)
+                        ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                          leading: const AppleSquircleBadge(
+                            icon: CupertinoIcons.arrow_up_right,
+                            backgroundColor: AppleTokens.systemOrange,
+                            size: 38,
+                            iconSize: 18,
+                            radius: 10,
+                          ),
+                          title: Text(
+                            l10n.fromWallet,
+                            style: const TextStyle(fontSize: 13, color: AppleTokens.systemGray),
+                          ),
+                          subtitle: Text(
+                            selectedAccount != null
+                                ? '${selectedAccount.name} (${selectedAccount.balanceMoney.format(locale: locale)})'
+                                : 'Chọn ví chuyển',
+                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                          ),
+                          trailing: const Icon(CupertinoIcons.chevron_right, size: 16, color: AppleTokens.systemGray),
+                          onTap: () => _openWalletPicker(
+                            context,
+                            wallets: walletsForDropdown,
+                            isDestination: false,
+                            locale: locale,
+                          ),
+                        ),
+
+                        // Transfer Inversion / Swap row
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                          color: isDark ? Colors.white.withValues(alpha: 0.02) : Colors.black.withValues(alpha: 0.02),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ApplePressable(
+                                scaleDown: 0.92,
+                                onTap: _swapTransferWallets,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
+                                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                                    border: Border.all(
+                                      color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.08),
+                                      width: AppleTokens.hairline,
+                                    ),
+                                  ),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(CupertinoIcons.arrow_2_squarepath, size: 14, color: AppleTokens.systemBlue),
+                                      SizedBox(width: 6),
+                                      Text(
+                                        'Đổi chiều chuyển',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppleTokens.systemBlue,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Destination Wallet (To)
+                        ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                          leading: const AppleSquircleBadge(
+                            icon: CupertinoIcons.arrow_down_left,
+                            backgroundColor: AppleTokens.systemGreen,
+                            size: 38,
+                            iconSize: 18,
+                            radius: 10,
+                          ),
+                          title: Text(
+                            l10n.toWallet,
+                            style: const TextStyle(fontSize: 13, color: AppleTokens.systemGray),
+                          ),
+                          subtitle: Text(
+                            selectedToAccount != null
+                                ? '${selectedToAccount.name} (${selectedToAccount.balanceMoney.format(locale: locale)})'
+                                : 'Chọn ví nhận',
+                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                          ),
+                          trailing: const Icon(CupertinoIcons.chevron_right, size: 16, color: AppleTokens.systemGray),
+                          onTap: () => _openWalletPicker(
+                            context,
+                            wallets: walletsForDropdown,
+                            isDestination: true,
+                            locale: locale,
+                          ),
+                        ),
+                      ] else ...[
+                        // Source Wallet (Single Payment Wallet)
+                        ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                          leading: AppleSquircleBadge(
+                            icon: selectedAccount != null
+                                ? AppIconCatalog.resolve(selectedAccount.icon)
+                                : CupertinoIcons.creditcard,
+                            backgroundColor: selectedAccount != null
+                                ? Color(selectedAccount.color)
+                                : AppleTokens.systemBlue,
+                            size: 38,
+                            iconSize: 20,
+                            radius: 10,
+                          ),
+                          title: Text(
+                            l10n.walletsTitle,
+                            style: const TextStyle(fontSize: 13, color: AppleTokens.systemGray),
+                          ),
+                          subtitle: Text(
+                            selectedAccount != null
+                                ? '${selectedAccount.name} (${selectedAccount.balanceMoney.format(locale: locale)})'
+                                : 'Chọn ví',
+                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                          ),
+                          trailing: const Icon(CupertinoIcons.chevron_right, size: 16, color: AppleTokens.systemGray),
+                          onTap: () => _openWalletPicker(
+                            context,
+                            wallets: walletsForDropdown,
+                            isDestination: false,
+                            locale: locale,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+
+                  // Quick Category Grid for 1-Tap selection (when in Expense / Income mode)
+                  if (_type != TransactionType.transfer && availableCategories.isNotEmpty) ...[
+                    _QuickCategoryCarousel(
+                      categories: availableCategories,
+                      selectedId: _categoryId,
+                      onSelected: (id) {
+                        HapticFeedback.selectionClick();
+                        setState(() => _categoryId = id);
+                      },
+                      onOpenMore: () => _openCategoryPicker(context, categories: availableCategories),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+
+                  // 3. Transaction Details & Metadata Section
+                  AppleListGroup(
+                    header: 'THỜI GIAN & CHI TIẾT',
+                    margin: const EdgeInsets.only(bottom: 24),
+                    children: [
+                      // Date Selector Row
+                      ListTile(
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        leading: const AppleSquircleBadge(
+                          icon: CupertinoIcons.calendar,
+                          backgroundColor: AppleTokens.systemIndigo,
+                          size: 38,
+                          iconSize: 20,
+                          radius: 10,
+                        ),
+                        title: Text(
+                          l10n.date,
+                          style: const TextStyle(fontSize: 13, color: AppleTokens.systemGray),
+                        ),
+                        subtitle: Text(
+                          formattedSelectedDate,
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
+                                borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                              ),
+                              child: Text(
+                                _selectedDate.day == DateTime.now().day &&
+                                        _selectedDate.month == DateTime.now().month &&
+                                        _selectedDate.year == DateTime.now().year
+                                    ? 'Hôm nay'
+                                    : 'Thay đổi',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppleTokens.systemBlue,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(CupertinoIcons.chevron_right, size: 16, color: AppleTokens.systemGray),
+                          ],
+                        ),
+                        onTap: _pickDate,
+                      ),
+
+                      // Note Input Row
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const AppleSquircleBadge(
+                              icon: CupertinoIcons.pencil_ellipsis_rectangle,
+                              backgroundColor: AppleTokens.systemYellow,
+                              size: 38,
+                              iconSize: 20,
+                              radius: 10,
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: TextFormField(
+                                controller: _noteController,
+                                maxLines: null,
+                                maxLength: 1000,
+                                style: const TextStyle(fontSize: 15),
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  isDense: true,
+                                  contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                                  hintText: l10n.noteHint,
+                                  hintStyle: TextStyle(
+                                    fontSize: 14,
+                                    color: isDark ? const Color(0xFF6C6C70) : const Color(0xFF8E8E93),
+                                  ),
+                                  counterText: '',
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Tags Input Row
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const AppleSquircleBadge(
+                              icon: CupertinoIcons.tag,
+                              backgroundColor: AppleTokens.systemPink,
+                              size: 38,
+                              iconSize: 18,
+                              radius: 10,
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: TextFormField(
+                                controller: _tagsController,
+                                style: const TextStyle(fontSize: 15),
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  isDense: true,
+                                  contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                                  hintText: l10n.tagsHint,
+                                  hintStyle: TextStyle(
+                                    fontSize: 14,
+                                    color: isDark ? const Color(0xFF6C6C70) : const Color(0xFF8E8E93),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+          decoration: BoxDecoration(
+            color: isDark
+                ? AppleTokens.bgDarkCard.withValues(alpha: 0.92)
+                : Colors.white.withValues(alpha: 0.92),
+            border: Border(
+              top: BorderSide(
+                color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
+                width: AppleTokens.hairline,
+              ),
+            ),
+          ),
+          child: ApplePressable(
+            scaleDown: 0.96,
+            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+            onTap: isSaving ? null : _submit,
+            child: Container(
+              height: 52,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: isSaving
+                      ? [Colors.grey.shade400, Colors.grey.shade600]
+                      : const [
+                          Color(0xFF00C781),
+                          AppleTokens.jadePrimary,
+                          Color(0xFF007552),
+                        ],
+                ),
+                borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.3),
+                  width: AppleTokens.hairline,
+                ),
+                boxShadow: isSaving
+                    ? []
+                    : [
+                        BoxShadow(
+                          color: AppleTokens.jadePrimary.withValues(alpha: 0.35),
+                          blurRadius: 16,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+              ),
+              child: Center(
+                child: isSaving
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CupertinoActivityIndicator(color: Colors.white),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(CupertinoIcons.checkmark_alt, color: Colors.white, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            _isEditing ? 'Cập nhật giao dịch' : l10n.save,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The centerpiece: Expressive, tactile Apple-style Hero Amount & Type Selector Card.
+class _HeroAmountCard extends StatelessWidget {
+  const _HeroAmountCard({
+    required this.type,
+    required this.amountController,
+    required this.currencyInfo,
+    required this.currencyCode,
+    required this.locale,
+    required this.isEditing,
+    required this.onTypeChanged,
+    required this.onAddShortcut,
+    required this.onClear,
+  });
+
+  final TransactionType type;
+  final TextEditingController amountController;
+  final CurrencyInfo currencyInfo;
+  final String currencyCode;
+  final String locale;
+  final bool isEditing;
+  final ValueChanged<TransactionType> onTypeChanged;
+  final ValueChanged<int> onAddShortcut;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final typeColor = switch (type) {
+      TransactionType.expense => AppleTokens.rubyExpense,
+      TransactionType.income => AppleTokens.jadePrimary,
+      TransactionType.transfer => AppleTokens.cobaltTransfer,
+    };
+
+    final typeSign = switch (type) {
+      TransactionType.expense => '-',
+      TransactionType.income => '+',
+      TransactionType.transfer => '⇄',
+    };
+
+    return AppleGlassCard(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+      borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+      borderColor: typeColor.withValues(alpha: isDark ? 0.35 : 0.25),
+      child: Column(
+        children: [
+          // 1. Sliding Segmented Type Pill
+          _TransactionTypeSegmentedPill(
+            selected: type,
+            onChanged: onTypeChanged,
+          ),
+          const SizedBox(height: 18),
+
+          // 2. Large Amount Input Display
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                typeSign,
+                style: TextStyle(
+                  fontSize: 34,
+                  fontWeight: FontWeight.w800,
+                  color: typeColor,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Flexible(
+                child: IntrinsicWidth(
+                  child: TextFormField(
+                    controller: amountController,
+                    autofocus: !isEditing,
+                    textAlign: TextAlign.center,
                     keyboardType: TextInputType.numberWithOptions(
                       decimal: currencyInfo.decimalDigits > 0,
                     ),
@@ -480,318 +1070,695 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                         locale: locale,
                       ),
                     ],
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
+                    style: theme.textTheme.displaySmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: typeColor,
+                      letterSpacing: -0.8,
                       fontFeatures: AppTheme.tabularFigures,
                     ),
                     decoration: InputDecoration(
-                      labelText: l10n.amount,
-                      suffixText: currencyInfo.symbol,
+                      border: InputBorder.none,
+                      isDense: true,
                       hintText: '0',
+                      hintStyle: TextStyle(
+                        color: typeColor.withValues(alpha: 0.3),
+                        fontWeight: FontWeight.w800,
+                      ),
+                      contentPadding: EdgeInsets.zero,
                     ),
                     validator: (val) {
-                      final m = Money.tryParse(
-                        val ?? '',
-                        currencyCode: currencyCode,
-                      );
+                      final m = Money.tryParse(val ?? '', currencyCode: currencyCode);
                       if (m == null || m.minorUnits <= 0) {
-                        return l10n.amountRequiredError;
+                        return context.l10n.amountRequiredError;
                       }
                       return null;
                     },
                   ),
-                  const SizedBox(height: 10),
-
-                  // Quick Amount Addition Pills (Apple style)
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        for (final shortcut in [
-                          (label: '+20k', amount: 20000),
-                          (label: '+50k', amount: 50000),
-                          (label: '+100k', amount: 100000),
-                          (label: '+200k', amount: 200000),
-                          (label: '+500k', amount: 500000),
-                          (label: '+1tr', amount: 1000000),
-                        ])
-                          Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: ApplePressable(
-                              borderRadius:
-                                  BorderRadius.circular(AppleTokens.radiusPill),
-                              onTap: () => _addAmountShortcut(
-                                shortcut.amount,
-                                currencyCode,
-                                locale,
-                              ),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: isDark
-                                      ? AppleTokens.bgDarkSecondary
-                                      : AppleTokens.bgLightSecondary,
-                                  borderRadius: BorderRadius.circular(
-                                    AppleTokens.radiusPill,
-                                  ),
-                                ),
-                                child: Text(
-                                  shortcut.label,
-                                  style: theme.textTheme.labelMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: theme.colorScheme.onSurface,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Source Wallet Selector
-                  DropdownButtonFormField<String>(
-                    isExpanded: true,
-                    initialValue:
-                        walletsForDropdown.any((w) => w.id == _accountId)
-                        ? _accountId
-                        : null,
-                    decoration: InputDecoration(
-                      labelText: _type == TransactionType.transfer
-                          ? l10n.fromWallet
-                          : l10n.walletsTitle,
-                      prefixIcon: const Icon(
-                        Icons.account_balance_wallet_outlined,
-                      ),
-                    ),
-                    items: [
-                      for (final wallet in walletsForDropdown)
-                        DropdownMenuItem(
-                          value: wallet.id,
-                          child: Text(
-                            '${wallet.name} (${wallet.balanceMoney.format(locale: locale)})',
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                    ],
-                    onChanged: (val) => setState(() => _accountId = val),
-                    validator: (val) => val == null || val.isEmpty
-                        ? l10n.walletRequiredError
-                        : null,
-                  ),
-
-                  // Destination Wallet Selector (for Transfers)
-                  if (_type == TransactionType.transfer) ...[
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      isExpanded: true,
-                      initialValue:
-                          walletsForDropdown.any((w) => w.id == _toAccountId)
-                          ? _toAccountId
-                          : null,
-                      decoration: InputDecoration(
-                        labelText: l10n.toWallet,
-                        prefixIcon: const Icon(Icons.east_rounded),
-                      ),
-                      items: [
-                        for (final wallet in walletsForDropdown)
-                          DropdownMenuItem(
-                            value: wallet.id,
-                            child: Text(
-                              '${wallet.name} (${wallet.balanceMoney.format(locale: locale)})',
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                      ],
-                      onChanged: (val) => setState(() => _toAccountId = val),
-                      validator: (val) {
-                        if (val == null || val.isEmpty) {
-                          return l10n.walletRequiredError;
-                        }
-                        if (val == _accountId) {
-                          return l10n.sameWalletTransferError;
-                        }
-                        Account? fromAcc;
-                        Account? toAcc;
-                        for (final w in walletsForDropdown) {
-                          if (w.id == _accountId) fromAcc = w;
-                          if (w.id == val) toAcc = w;
-                        }
-                        if (fromAcc != null &&
-                            toAcc != null &&
-                            fromAcc.currency != toAcc.currency) {
-                          return l10n.differentCurrencyTransferError;
-                        }
-                        return null;
-                      },
-                    ),
-                  ],
-
-                  // Category Picker Grid (for Income / Expense)
-                  if (_type != TransactionType.transfer) ...[
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            l10n.selectCategory,
-                            style: theme.textTheme.titleSmall,
-                          ),
-                        ),
-                        Flexible(
-                          flex: 0,
-                          child: TextButton.icon(
-                            onPressed: () => context.push(AppRoutes.categories),
-                            icon: const Icon(Icons.edit_note_rounded, size: 18),
-                            label: Text(l10n.manageCategories),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    _CategorySelectionGrid(
-                      categories: availableCategories,
-                      selectedId: _categoryId,
-                      onSelected: (id) => setState(() => _categoryId = id),
-                    ),
-                  ],
-
-                  const SizedBox(height: 20),
-
-                  // Date Picker Row
-                  Semantics(
-                    button: true,
-                    excludeSemantics: true,
-                    label: '${l10n.date}: $formattedSelectedDate',
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(12),
-                      onTap: _pickDate,
-                      child: InputDecorator(
-                        decoration: InputDecoration(
-                          labelText: l10n.date,
-                          prefixIcon: const Icon(Icons.calendar_today_rounded),
-                        ),
-                        child: Text(formattedSelectedDate),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Note Field
-                  TextFormField(
-                    controller: _noteController,
-                    maxLines: 2,
-                    maxLength: 1000,
-                    decoration: InputDecoration(
-                      labelText: l10n.note,
-                      hintText: l10n.noteHint,
-                      prefixIcon: const Icon(Icons.notes_rounded),
-                      counterText: '',
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Tags Field
-                  TextFormField(
-                    controller: _tagsController,
-                    decoration: InputDecoration(
-                      labelText: l10n.tags,
-                      hintText: l10n.tagsHint,
-                      prefixIcon: const Icon(Icons.sell_outlined),
-                    ),
-                  ),
-                  const SizedBox(height: 28),
-
-                  FilledButton.icon(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppleTokens.jadePrimary,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size.fromHeight(52),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppleTokens.radiusPill),
-                      ),
-                      elevation: 0,
-                    ),
-                    onPressed: isSaving ? null : _submit,
-                    icon: isSaving
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Icon(Icons.check_rounded),
-                    label: Text(
-                      l10n.save,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: typeColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  currencyInfo.symbol,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: typeColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // 3. Quick Amount Shortcut Pills
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                ApplePressable(
+                  scaleDown: 0.92,
+                  onTap: onClear,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                      border: Border.all(
+                        color: isDark ? Colors.white.withValues(alpha: 0.12) : Colors.black.withValues(alpha: 0.08),
+                        width: AppleTokens.hairline,
+                      ),
+                    ),
+                    child: const Text(
+                      'Xóa',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppleTokens.rubyExpense,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                for (final shortcut in [
+                  (label: '+20k', amount: 20000),
+                  (label: '+50k', amount: 50000),
+                  (label: '+100k', amount: 100000),
+                  (label: '+200k', amount: 200000),
+                  (label: '+500k', amount: 500000),
+                  (label: '+1tr', amount: 1000000),
+                ])
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ApplePressable(
+                      scaleDown: 0.92,
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                      onTap: () => onAddShortcut(shortcut.amount),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
+                          borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                          border: Border.all(
+                            color: isDark ? Colors.white.withValues(alpha: 0.12) : Colors.black.withValues(alpha: 0.08),
+                            width: AppleTokens.hairline,
+                          ),
+                        ),
+                        child: Text(
+                          shortcut.label,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
+        ],
+      ),
     );
   }
 }
 
-class _CategorySelectionGrid extends StatelessWidget {
-  const _CategorySelectionGrid({
+/// 3-State Sliding Segmented Pill for Transaction Type with Semantic Accent Color.
+class _TransactionTypeSegmentedPill extends StatelessWidget {
+  const _TransactionTypeSegmentedPill({
+    required this.selected,
+    required this.onChanged,
+  });
+
+  final TransactionType selected;
+  final ValueChanged<TransactionType> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final segments = [
+      (
+        type: TransactionType.expense,
+        label: 'Chi tiêu',
+        icon: CupertinoIcons.arrow_up_right,
+        color: AppleTokens.rubyExpense,
+      ),
+      (
+        type: TransactionType.income,
+        label: 'Thu nhập',
+        icon: CupertinoIcons.arrow_down_left,
+        color: AppleTokens.jadePrimary,
+      ),
+      (
+        type: TransactionType.transfer,
+        label: 'Chuyển khoản',
+        icon: CupertinoIcons.arrow_right_arrow_left,
+        color: AppleTokens.cobaltTransfer,
+      ),
+    ];
+
+    return Container(
+      height: 40,
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
+        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+      ),
+      child: Row(
+        children: [
+          for (final item in segments)
+            Expanded(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  if (item.type != selected) {
+                    HapticFeedback.selectionClick();
+                    onChanged(item.type);
+                  }
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 240),
+                  curve: Curves.easeOutCubic,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: item.type == selected
+                        ? (isDark ? AppleTokens.bgDarkCard : Colors.white)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                    boxShadow: item.type == selected
+                        ? [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.08),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        item.icon,
+                        size: 15,
+                        color: item.type == selected
+                            ? item.color
+                            : (isDark ? const Color(0xFF8E8E93) : const Color(0xFF6C6C70)),
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        item.label,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: item.type == selected ? FontWeight.w700 : FontWeight.w500,
+                          color: item.type == selected
+                              ? (isDark ? Colors.white : Colors.black)
+                              : (isDark ? const Color(0xFF8E8E93) : const Color(0xFF6C6C70)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Horizontal Quick Category Carousel for 1-Tap selection on form.
+class _QuickCategoryCarousel extends StatelessWidget {
+  const _QuickCategoryCarousel({
     required this.categories,
     required this.selectedId,
     required this.onSelected,
+    required this.onOpenMore,
   });
 
   final List<Category> categories;
   final String? selectedId;
   final ValueChanged<String> onSelected;
+  final VoidCallback onOpenMore;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final l10n = context.l10n;
 
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+    // Show up to 7 quick categories + 1 "More" button
+    final previewCategories = categories.take(7).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final cat in categories)
-          Builder(
-            builder: (context) {
-              final selected = cat.id == selectedId;
-              final catColor = AppIconCatalog.contrastSafeColor(
-                Color(cat.color),
-                theme.brightness,
-              );
-              final label = DefaultCategoryLocalization.resolveName(
-                l10n,
-                categoryId: cat.id,
-                fallbackName: cat.name,
-              );
-              return ChoiceChip(
-                avatar: Icon(
-                  AppIconCatalog.resolve(cat.icon),
-                  size: 18,
-                  color: selected
-                      ? theme.colorScheme.onPrimaryContainer
-                      : catColor,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'CHỌN NHANH DANH MỤC',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6C6C70),
+                  letterSpacing: 0.5,
                 ),
-                label: Text(label),
-                selected: selected,
-                onSelected: (_) => onSelected(cat.id),
+              ),
+              GestureDetector(
+                onTap: onOpenMore,
+                child: const Text(
+                  'Xem tất cả',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppleTokens.systemBlue,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 84,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: previewCategories.length + 1,
+            separatorBuilder: (_, _) => const SizedBox(width: 10),
+            itemBuilder: (context, index) {
+              if (index < previewCategories.length) {
+                final cat = previewCategories[index];
+                final isSelected = cat.id == selectedId;
+                final catColor = AppIconCatalog.contrastSafeColor(
+                  Color(cat.color),
+                  theme.brightness,
+                );
+                final name = DefaultCategoryLocalization.resolveName(
+                  l10n,
+                  categoryId: cat.id,
+                  fallbackName: cat.name,
+                );
+
+                return ApplePressable(
+                  scaleDown: 0.94,
+                  onTap: () => onSelected(cat.id),
+                  child: Container(
+                    width: 70,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? catColor.withValues(alpha: 0.16)
+                          : (isDark ? AppleTokens.bgDarkCard : Colors.white),
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+                      border: Border.all(
+                        color: isSelected
+                            ? catColor
+                            : (isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.06)),
+                        width: isSelected ? 1.5 : AppleTokens.hairline,
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          AppIconCatalog.resolve(cat.icon),
+                          size: 24,
+                          color: catColor,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                            color: isSelected ? catColor : theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+              // "More" category button
+              return ApplePressable(
+                scaleDown: 0.94,
+                onTap: onOpenMore,
+                child: Container(
+                  width: 70,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+                    border: Border.all(
+                      color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.06),
+                      width: AppleTokens.hairline,
+                    ),
+                  ),
+                  child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        CupertinoIcons.square_grid_2x2,
+                        size: 22,
+                        color: AppleTokens.systemBlue,
+                      ),
+                      SizedBox(height: 6),
+                      Text(
+                        'Tất cả',
+                        maxLines: 1,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: AppleTokens.systemBlue,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               );
             },
           ),
+        ),
       ],
+    );
+  }
+}
+
+/// Cupertino-styled Bottom Sheet for Picking a Wallet with Live Balances.
+class _WalletPickerSheet extends StatelessWidget {
+  const _WalletPickerSheet({
+    required this.wallets,
+    required this.selectedId,
+    required this.locale,
+    required this.title,
+  });
+
+  final List<Account> wallets;
+  final String? selectedId;
+  final String locale;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.72,
+      ),
+      decoration: BoxDecoration(
+        color: isDark ? AppleTokens.bgDarkCard : Colors.white,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(AppleTokens.radiusSheet),
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: SafeArea(
+          top: false,
+          child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Drag handle
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 10),
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(CupertinoIcons.xmark_circle_fill, color: AppleTokens.systemGray),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: AppleTokens.hairline),
+            Expanded(
+              child: ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                itemCount: wallets.length,
+                separatorBuilder: (_, _) => const Divider(indent: 56, height: AppleTokens.hairline),
+                itemBuilder: (context, index) {
+                  final wallet = wallets[index];
+                  final isSelected = wallet.id == selectedId;
+                  final walletColor = Color(wallet.color);
+
+                  return ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    leading: AppleSquircleBadge(
+                      icon: AppIconCatalog.resolve(wallet.icon),
+                      backgroundColor: walletColor,
+                      size: 40,
+                      iconSize: 20,
+                    ),
+                    title: Text(
+                      wallet.name,
+                      style: TextStyle(
+                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                    subtitle: Text(
+                      wallet.balanceMoney.format(locale: locale),
+                      style: TextStyle(
+                        fontFeatures: AppTheme.tabularFigures,
+                        color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6C6C70),
+                      ),
+                    ),
+                    trailing: isSelected
+                        ? const Icon(CupertinoIcons.checkmark_circle_fill, color: AppleTokens.jadePrimary)
+                        : null,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      Navigator.of(context).pop(wallet.id);
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+      ),
+    );
+  }
+}
+
+/// Cupertino-styled Bottom Sheet for Category Picker with Search and Squircle Grid.
+class _CategoryPickerSheet extends StatefulWidget {
+  const _CategoryPickerSheet({
+    required this.categories,
+    required this.selectedId,
+  });
+
+  final List<Category> categories;
+  final String? selectedId;
+
+  @override
+  State<_CategoryPickerSheet> createState() => _CategoryPickerSheetState();
+}
+
+class _CategoryPickerSheetState extends State<_CategoryPickerSheet> {
+  String _searchQuery = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final l10n = context.l10n;
+
+    final filtered = widget.categories.where((cat) {
+      if (_searchQuery.isEmpty) return true;
+      final name = DefaultCategoryLocalization.resolveName(
+        l10n,
+        categoryId: cat.id,
+        fallbackName: cat.name,
+      ).toLowerCase();
+      return name.contains(_searchQuery.toLowerCase());
+    }).toList();
+
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.8,
+      ),
+      decoration: BoxDecoration(
+        color: isDark ? AppleTokens.bgDarkCard : Colors.white,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(AppleTokens.radiusSheet),
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: SafeArea(
+          top: false,
+          child: Column(
+          children: [
+            // Drag handle
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 10),
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Chọn danh mục',
+                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(CupertinoIcons.xmark_circle_fill, color: AppleTokens.systemGray),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+            ),
+
+            // Search Bar
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: CupertinoSearchTextField(
+                placeholder: 'Tìm kiếm danh mục...',
+                onChanged: (val) => setState(() => _searchQuery = val),
+              ),
+            ),
+
+            const Divider(height: AppleTokens.hairline),
+
+            // 4-Column Squircle Category Grid
+            Expanded(
+              child: GridView.builder(
+                padding: const EdgeInsets.all(16),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 0.8,
+                ),
+                itemCount: filtered.length,
+                itemBuilder: (context, index) {
+                  final cat = filtered[index];
+                  final isSelected = cat.id == widget.selectedId;
+                  final catColor = AppIconCatalog.contrastSafeColor(
+                    Color(cat.color),
+                    theme.brightness,
+                  );
+                  final name = DefaultCategoryLocalization.resolveName(
+                    l10n,
+                    categoryId: cat.id,
+                    fallbackName: cat.name,
+                  );
+
+                  return ApplePressable(
+                    scaleDown: 0.92,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      Navigator.of(context).pop(cat.id);
+                    },
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
+                              width: 52,
+                              height: 52,
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? catColor.withValues(alpha: 0.2)
+                                    : (isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? catColor
+                                      : (isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.08)),
+                                  width: isSelected ? 2 : AppleTokens.hairline,
+                                ),
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  AppIconCatalog.resolve(cat.icon),
+                                  size: 26,
+                                  color: catColor,
+                                ),
+                              ),
+                            ),
+                            if (isSelected)
+                              Positioned(
+                                right: -4,
+                                top: -4,
+                                child: Container(
+                                  padding: const EdgeInsets.all(2),
+                                  decoration: const BoxDecoration(
+                                    color: AppleTokens.jadePrimary,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    CupertinoIcons.checkmark,
+                                    size: 12,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                            color: isSelected ? catColor : theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+      ),
     );
   }
 }
