@@ -141,6 +141,60 @@ function validDebt(id = 'debt_1') {
   };
 }
 
+function validRecurring(id = 'rec_1') {
+  return {
+    id,
+    title: 'Tiền thuê nhà',
+    amount: 5000000,
+    currency: 'VND',
+    type: 'expense',
+    frequency: 'monthly',
+    dayOfMonth: 5,
+    categoryId: 'default_housing',
+    accountId: 'acc_bank',
+    note: 'Chuyển khoản ngày 5 hàng tháng',
+    isActive: true,
+    nextDueDate: t1,
+    lastExecutedDate: null,
+    createdAt: t0,
+    updatedAt: t0,
+    deletedAt: null,
+  };
+}
+
+function validSavingsGoal(id = 'goal_1') {
+  return {
+    id,
+    name: 'Mua xe máy mới',
+    targetAmount: 40000000,
+    currentAmount: 10000000,
+    currency: 'VND',
+    deadline: t2,
+    accountId: 'acc_bank',
+    icon: 'motorcycle',
+    color: 0xff0d7c66,
+    note: 'Mục tiêu mua xe trước quý 4',
+    createdAt: t0,
+    updatedAt: t0,
+    deletedAt: null,
+  };
+}
+
+function validLedger(id = 'ledger_1') {
+  return {
+    id,
+    name: 'Sổ chi tiêu gia đình',
+    description: 'Quản lý thu chi sinh hoạt gia đình',
+    icon: 'family',
+    color: 0xff0d7c66,
+    isDefault: false,
+    sharedMemberEmails: ['alice@sothuchi.vn', 'bob@sothuchi.vn'],
+    createdAt: t0,
+    updatedAt: t0,
+    deletedAt: null,
+  };
+}
+
 let testEnv;
 
 describe('Sổ Thu Chi — Firestore Security Rules', () => {
@@ -555,5 +609,330 @@ describe('Sổ Thu Chi — Firestore Security Rules', () => {
     await assertSucceeds(updateDoc(debtRef, { deletedAt: t2, updatedAt: t2 }));
     await assertSucceeds(deleteDoc(debtRef));
     await assertSucceeds(deleteDoc(borrowedRef));
+  });
+
+  it('enforces /users/{uid}/recurring/{recurringId} ownership, schema, frequency/bounds, and immutability', async () => {
+    const aliceDb = testEnv.authenticatedContext(ALICE_UID).firestore();
+    const bobDb = testEnv.authenticatedContext(BOB_UID).firestore();
+
+    const recRef = doc(aliceDb, `users/${ALICE_UID}/recurring/rec_1`);
+    const recWeeklyRef = doc(aliceDb, `users/${ALICE_UID}/recurring/rec_2`);
+
+    // Owner create monthly expense recurring with dayOfMonth
+    await assertSucceeds(setDoc(recRef, validRecurring('rec_1')));
+
+    // Owner create weekly income recurring without dayOfMonth (null)
+    await assertSucceeds(
+      setDoc(recWeeklyRef, {
+        ...validRecurring('rec_2'),
+        type: 'income',
+        frequency: 'weekly',
+        dayOfMonth: null,
+      }),
+    );
+
+    // Cross-user read/update/delete denied
+    await assertFails(getDoc(doc(bobDb, `users/${ALICE_UID}/recurring/rec_1`)));
+    await assertFails(
+      updateDoc(doc(bobDb, `users/${ALICE_UID}/recurring/rec_1`), {
+        isActive: false,
+        updatedAt: t1,
+      }),
+    );
+    await assertFails(
+      deleteDoc(doc(bobDb, `users/${ALICE_UID}/recurring/rec_1`)),
+    );
+
+    // Rejects non-positive amount and float amounts
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/recurring/rec_bad_amt_0`), {
+        ...validRecurring('rec_bad_amt_0'),
+        amount: 0,
+      }),
+    );
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/recurring/rec_bad_amt_neg`), {
+        ...validRecurring('rec_bad_amt_neg'),
+        amount: -5000,
+      }),
+    );
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/recurring/rec_bad_amt_float`), {
+        ...validRecurring('rec_bad_amt_float'),
+        amount: 50000.5,
+      }),
+    );
+
+    // Rejects invalid frequency and invalid recurring type
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/recurring/rec_bad_freq`), {
+        ...validRecurring('rec_bad_freq'),
+        frequency: 'hourly',
+      }),
+    );
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/recurring/rec_bad_type`), {
+        ...validRecurring('rec_bad_type'),
+        type: 'transfer',
+      }),
+    );
+
+    // Rejects dayOfMonth out of bounds (0, 32, float)
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/recurring/rec_bad_dom_0`), {
+        ...validRecurring('rec_bad_dom_0'),
+        dayOfMonth: 0,
+      }),
+    );
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/recurring/rec_bad_dom_32`), {
+        ...validRecurring('rec_bad_dom_32'),
+        dayOfMonth: 32,
+      }),
+    );
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/recurring/rec_bad_dom_float`), {
+        ...validRecurring('rec_bad_dom_float'),
+        dayOfMonth: 15.5,
+      }),
+    );
+
+    // Rejects oversized note (> 1000 chars) and extraneous fields
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/recurring/rec_bad_note`), {
+        ...validRecurring('rec_bad_note'),
+        note: 'x'.repeat(1001),
+      }),
+    );
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/recurring/rec_extra`), {
+        ...validRecurring('rec_extra'),
+        extraKey: true,
+      }),
+    );
+
+    // Partial update allowed for owner
+    await assertSucceeds(
+      updateDoc(recRef, {
+        isActive: false,
+        lastExecutedDate: t1,
+        updatedAt: t1,
+      }),
+    );
+
+    // Protects immutable `id` and `createdAt` on update
+    await assertFails(updateDoc(recRef, { id: 'tampered', updatedAt: t2 }));
+    await assertFails(updateDoc(recRef, { createdAt: t2, updatedAt: t2 }));
+
+    // Soft-delete and hard-delete allowed for owner
+    await assertSucceeds(updateDoc(recRef, { deletedAt: t2, updatedAt: t2 }));
+    await assertSucceeds(deleteDoc(recRef));
+    await assertSucceeds(deleteDoc(recWeeklyRef));
+  });
+
+  it('enforces /users/{uid}/savings_goals/{goalId} ownership, schema, non-negative amounts, and immutability', async () => {
+    const aliceDb = testEnv.authenticatedContext(ALICE_UID).firestore();
+    const bobDb = testEnv.authenticatedContext(BOB_UID).firestore();
+
+    const goalRef = doc(aliceDb, `users/${ALICE_UID}/savings_goals/goal_1`);
+    const goal2Ref = doc(aliceDb, `users/${ALICE_UID}/savings_goals/goal_2`);
+
+    // Owner create valid savings goal
+    await assertSucceeds(setDoc(goalRef, validSavingsGoal('goal_1')));
+
+    // Owner create goal with currentAmount 0, null deadline and accountId
+    await assertSucceeds(
+      setDoc(goal2Ref, {
+        ...validSavingsGoal('goal_2'),
+        currentAmount: 0,
+        deadline: null,
+        accountId: null,
+      }),
+    );
+
+    // Cross-user read/update/delete denied
+    await assertFails(
+      getDoc(doc(bobDb, `users/${ALICE_UID}/savings_goals/goal_1`)),
+    );
+    await assertFails(
+      updateDoc(doc(bobDb, `users/${ALICE_UID}/savings_goals/goal_1`), {
+        currentAmount: 0,
+        updatedAt: t1,
+      }),
+    );
+    await assertFails(
+      deleteDoc(doc(bobDb, `users/${ALICE_UID}/savings_goals/goal_1`)),
+    );
+
+    // Rejects non-positive targetAmount and floats
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/savings_goals/g_bad_target_0`), {
+        ...validSavingsGoal('g_bad_target_0'),
+        targetAmount: 0,
+      }),
+    );
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/savings_goals/g_bad_target_fl`), {
+        ...validSavingsGoal('g_bad_target_fl'),
+        targetAmount: 1000.5,
+      }),
+    );
+
+    // Rejects negative currentAmount and float currentAmount
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/savings_goals/g_bad_cur_neg`), {
+        ...validSavingsGoal('g_bad_cur_neg'),
+        currentAmount: -100,
+      }),
+    );
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/savings_goals/g_bad_cur_fl`), {
+        ...validSavingsGoal('g_bad_cur_fl'),
+        currentAmount: 50.75,
+      }),
+    );
+
+    // Rejects invalid currency and invalid color int
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/savings_goals/g_bad_cur`), {
+        ...validSavingsGoal('g_bad_cur'),
+        currency: 'INVALID',
+      }),
+    );
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/savings_goals/g_bad_col`), {
+        ...validSavingsGoal('g_bad_col'),
+        color: 'red',
+      }),
+    );
+
+    // Rejects oversized note (> 1000) and oversized name (> 100)
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/savings_goals/g_big_name`), {
+        ...validSavingsGoal('g_big_name'),
+        name: 'x'.repeat(101),
+      }),
+    );
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/savings_goals/g_big_note`), {
+        ...validSavingsGoal('g_big_note'),
+        note: 'x'.repeat(1001),
+      }),
+    );
+
+    // Owner partial update (deposit progress)
+    await assertSucceeds(
+      updateDoc(goalRef, {
+        currentAmount: increment(5000000),
+        updatedAt: t1,
+      }),
+    );
+
+    // Protects immutable `id` and `createdAt` on update
+    await assertFails(updateDoc(goalRef, { id: 'tampered', updatedAt: t2 }));
+    await assertFails(updateDoc(goalRef, { createdAt: t2, updatedAt: t2 }));
+
+    // Soft-delete and hard-delete allowed for owner
+    await assertSucceeds(updateDoc(goalRef, { deletedAt: t2, updatedAt: t2 }));
+    await assertSucceeds(deleteDoc(goalRef));
+    await assertSucceeds(deleteDoc(goal2Ref));
+  });
+
+  it('enforces /users/{uid}/ledgers/{ledgerId} ownership, schema, sharedMemberEmails bounds, and immutability', async () => {
+    const aliceDb = testEnv.authenticatedContext(ALICE_UID).firestore();
+    const bobDb = testEnv.authenticatedContext(BOB_UID).firestore();
+
+    const ledgerRef = doc(aliceDb, `users/${ALICE_UID}/ledgers/ledger_1`);
+    const ledgerEmptyRef = doc(aliceDb, `users/${ALICE_UID}/ledgers/ledger_2`);
+
+    // Owner create valid ledger with shared member emails
+    await assertSucceeds(setDoc(ledgerRef, validLedger('ledger_1')));
+
+    // Owner create valid ledger with empty sharedMemberEmails list
+    await assertSucceeds(
+      setDoc(ledgerEmptyRef, {
+        ...validLedger('ledger_2'),
+        sharedMemberEmails: [],
+        description: '',
+      }),
+    );
+
+    // Cross-user read/update/delete denied
+    await assertFails(
+      getDoc(doc(bobDb, `users/${ALICE_UID}/ledgers/ledger_1`)),
+    );
+    await assertFails(
+      updateDoc(doc(bobDb, `users/${ALICE_UID}/ledgers/ledger_1`), {
+        name: 'Hacked Ledger',
+        updatedAt: t1,
+      }),
+    );
+    await assertFails(
+      deleteDoc(doc(bobDb, `users/${ALICE_UID}/ledgers/ledger_1`)),
+    );
+
+    // Rejects oversized description (> 500 chars)
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/ledgers/l_big_desc`), {
+        ...validLedger('l_big_desc'),
+        description: 'x'.repeat(501),
+      }),
+    );
+
+    // Rejects > 20 shared member emails
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/ledgers/l_too_many_emails`), {
+        ...validLedger('l_too_many_emails'),
+        sharedMemberEmails: Array.from(
+          { length: 21 },
+          (_, i) => `member_${i}@example.com`,
+        ),
+      }),
+    );
+
+    // Rejects oversized email (> 320 chars) and non-string elements
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/ledgers/l_big_email`), {
+        ...validLedger('l_big_email'),
+        sharedMemberEmails: [`${'a'.repeat(310)}@example.com`],
+      }),
+    );
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/ledgers/l_non_str_email`), {
+        ...validLedger('l_non_str_email'),
+        sharedMemberEmails: ['alice@example.com', 12345],
+      }),
+    );
+
+    // Rejects invalid color int and non-boolean isDefault
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/ledgers/l_bad_color`), {
+        ...validLedger('l_bad_color'),
+        color: 'blue',
+      }),
+    );
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/ledgers/l_bad_def`), {
+        ...validLedger('l_bad_def'),
+        isDefault: 'true',
+      }),
+    );
+
+    // Owner partial update (toggle default status)
+    await assertSucceeds(
+      updateDoc(ledgerRef, {
+        isDefault: true,
+        updatedAt: t1,
+      }),
+    );
+
+    // Protects immutable `id` and `createdAt` on update
+    await assertFails(updateDoc(ledgerRef, { id: 'tampered', updatedAt: t2 }));
+    await assertFails(updateDoc(ledgerRef, { createdAt: t2, updatedAt: t2 }));
+
+    // Soft-delete and hard-delete allowed for owner
+    await assertSucceeds(updateDoc(ledgerRef, { deletedAt: t2, updatedAt: t2 }));
+    await assertSucceeds(deleteDoc(ledgerRef));
+    await assertSucceeds(deleteDoc(ledgerEmptyRef));
   });
 });

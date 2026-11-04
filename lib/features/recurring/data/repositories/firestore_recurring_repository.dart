@@ -230,6 +230,11 @@ class InMemoryRecurringRepository implements RecurringRepository {
     return const Success(null);
   }
 
+  void clear() {
+    _store.clear();
+    _emit();
+  }
+
   void dispose() {
     _controller.close();
   }

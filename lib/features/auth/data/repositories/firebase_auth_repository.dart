@@ -315,6 +315,10 @@ class FirebaseAuthRepository implements AuthRepository {
       'budgets',
       'accounts',
       'categories',
+      'debts',
+      'recurring',
+      'savings_goals',
+      'ledgers',
     ];
 
     for (final name in subcollections) {

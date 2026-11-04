@@ -94,6 +94,54 @@ rules_version = '2';
 //      - updatedAt: timestamp (required)
 //      - deletedAt: timestamp | null (optional)
 //
+// 7. Collection: users/{uid}/recurring/{recurringId} (RecurringTransactionDto)
+//    Fields:
+//      - id: string (required, 1..128 chars, immutable)
+//      - title: string (required, 1..100 chars)
+//      - amount: int (required, > 0, integer minor units; never float)
+//      - currency: string in ['VND', 'USD', 'EUR', 'JPY', 'KRW'] (required)
+//      - type: string in ['income', 'expense'] (required)
+//      - frequency: string in ['daily', 'weekly', 'biweekly', 'monthly', 'yearly'] (required)
+//      - dayOfMonth: int | null (optional, 1..31 when int)
+//      - categoryId: string (required, 1..128 chars)
+//      - accountId: string (required, 1..128 chars)
+//      - note: string (required, 0..1000 chars)
+//      - isActive: bool (required)
+//      - nextDueDate: timestamp (required)
+//      - lastExecutedDate: timestamp | null (optional)
+//      - createdAt: timestamp (required, immutable)
+//      - updatedAt: timestamp (required)
+//      - deletedAt: timestamp | null (optional)
+//
+// 8. Collection: users/{uid}/savings_goals/{goalId} (SavingsGoalDto)
+//    Fields:
+//      - id: string (required, 1..128 chars, immutable)
+//      - name: string (required, 1..100 chars)
+//      - targetAmount: int (required, > 0, integer minor units; never float)
+//      - currentAmount: int (required, >= 0, integer minor units; never float)
+//      - currency: string in ['VND', 'USD', 'EUR', 'JPY', 'KRW'] (required)
+//      - deadline: timestamp | null (optional)
+//      - accountId: string | null (optional, 1..128 chars when string)
+//      - icon: string (required, 1..64 chars)
+//      - color: int (required, 32-bit signed/unsigned ARGB integer)
+//      - note: string (required, 0..1000 chars)
+//      - createdAt: timestamp (required, immutable)
+//      - updatedAt: timestamp (required)
+//      - deletedAt: timestamp | null (optional)
+//
+// 9. Collection: users/{uid}/ledgers/{ledgerId} (LedgerBookDto)
+//    Fields:
+//      - id: string (required, 1..128 chars, immutable)
+//      - name: string (required, 1..100 chars)
+//      - description: string (required, 0..500 chars)
+//      - icon: string (required, 1..64 chars)
+//      - color: int (required, 32-bit signed/unsigned ARGB integer)
+//      - isDefault: bool (required)
+//      - sharedMemberEmails: list<string> (required, <= 20 items, each 1..320 chars)
+//      - createdAt: timestamp (required, immutable)
+//      - updatedAt: timestamp (required)
+//      - deletedAt: timestamp | null (optional)
+//
 // ===============================================================
 
 service cloud.firestore {
@@ -139,6 +187,12 @@ service cloud.firestore {
              data[field] is timestamp;
     }
 
+    function isOptionalNullableInt(data, field, minVal, maxVal) {
+      return !(field in data) ||
+             data[field] == null ||
+             (data[field] is int && data[field] >= minVal && data[field] <= maxVal);
+    }
+
     function isValidCurrency(value) {
       return value is string &&
              value in ['VND', 'USD', 'EUR', 'JPY', 'KRW'];
@@ -166,6 +220,12 @@ service cloud.firestore {
     function isValidPositiveMinorUnits(value) {
       return value is int &&
              value > 0 &&
+             value <= 9000000000000000;
+    }
+
+    function isValidNonNegativeMinorUnits(value) {
+      return value is int &&
+             value >= 0 &&
              value <= 9000000000000000;
     }
 
@@ -198,6 +258,37 @@ service cloud.firestore {
              isValidTagAt(tags, 17) &&
              isValidTagAt(tags, 18) &&
              isValidTagAt(tags, 19);
+    }
+
+    function isValidMemberEmailAt(emails, index) {
+      return emails.size() <= index ||
+             isBoundedString(emails[index], 1, 320);
+    }
+
+    // Validates list size (<= 20) AND ensures every member email is a valid string (1..320 chars).
+    function isValidSharedMemberEmailsList(emails) {
+      return emails is list &&
+             emails.size() <= 20 &&
+             isValidMemberEmailAt(emails, 0) &&
+             isValidMemberEmailAt(emails, 1) &&
+             isValidMemberEmailAt(emails, 2) &&
+             isValidMemberEmailAt(emails, 3) &&
+             isValidMemberEmailAt(emails, 4) &&
+             isValidMemberEmailAt(emails, 5) &&
+             isValidMemberEmailAt(emails, 6) &&
+             isValidMemberEmailAt(emails, 7) &&
+             isValidMemberEmailAt(emails, 8) &&
+             isValidMemberEmailAt(emails, 9) &&
+             isValidMemberEmailAt(emails, 10) &&
+             isValidMemberEmailAt(emails, 11) &&
+             isValidMemberEmailAt(emails, 12) &&
+             isValidMemberEmailAt(emails, 13) &&
+             isValidMemberEmailAt(emails, 14) &&
+             isValidMemberEmailAt(emails, 15) &&
+             isValidMemberEmailAt(emails, 16) &&
+             isValidMemberEmailAt(emails, 17) &&
+             isValidMemberEmailAt(emails, 18) &&
+             isValidMemberEmailAt(emails, 19);
     }
 
     // Protects `createdAt` against modification once present on an existing document.
@@ -499,6 +590,148 @@ service cloud.firestore {
              isOptionalNullableTimestamp(data, 'deletedAt');
     }
 
+    function isValidRecurring(data) {
+      let requiredKeys = [
+        'id',
+        'title',
+        'amount',
+        'currency',
+        'type',
+        'frequency',
+        'categoryId',
+        'accountId',
+        'note',
+        'isActive',
+        'nextDueDate',
+        'createdAt',
+        'updatedAt'
+      ];
+      let allowedKeys = [
+        'id',
+        'title',
+        'amount',
+        'currency',
+        'type',
+        'frequency',
+        'dayOfMonth',
+        'categoryId',
+        'accountId',
+        'note',
+        'isActive',
+        'nextDueDate',
+        'lastExecutedDate',
+        'createdAt',
+        'updatedAt',
+        'deletedAt'
+      ];
+
+      return hasRequiredKeys(data, requiredKeys) &&
+             hasOnlyAllowedKeys(data, allowedKeys) &&
+             isBoundedString(data.id, 1, 128) &&
+             isBoundedString(data.title, 1, 100) &&
+             isValidPositiveMinorUnits(data.amount) &&
+             isValidCurrency(data.currency) &&
+             data.type is string &&
+             data.type in ['income', 'expense'] &&
+             data.frequency is string &&
+             data.frequency in ['daily', 'weekly', 'biweekly', 'monthly', 'yearly'] &&
+             isOptionalNullableInt(data, 'dayOfMonth', 1, 31) &&
+             isBoundedString(data.categoryId, 1, 128) &&
+             isBoundedString(data.accountId, 1, 128) &&
+             isBoundedString(data.note, 0, 1000) &&
+             data.isActive is bool &&
+             data.nextDueDate is timestamp &&
+             isOptionalNullableTimestamp(data, 'lastExecutedDate') &&
+             data.createdAt is timestamp &&
+             data.updatedAt is timestamp &&
+             isOptionalNullableTimestamp(data, 'deletedAt');
+    }
+
+    function isValidSavingsGoal(data) {
+      let requiredKeys = [
+        'id',
+        'name',
+        'targetAmount',
+        'currentAmount',
+        'currency',
+        'icon',
+        'color',
+        'note',
+        'createdAt',
+        'updatedAt'
+      ];
+      let allowedKeys = [
+        'id',
+        'name',
+        'targetAmount',
+        'currentAmount',
+        'currency',
+        'deadline',
+        'accountId',
+        'icon',
+        'color',
+        'note',
+        'createdAt',
+        'updatedAt',
+        'deletedAt'
+      ];
+
+      return hasRequiredKeys(data, requiredKeys) &&
+             hasOnlyAllowedKeys(data, allowedKeys) &&
+             isBoundedString(data.id, 1, 128) &&
+             isBoundedString(data.name, 1, 100) &&
+             isValidPositiveMinorUnits(data.targetAmount) &&
+             isValidNonNegativeMinorUnits(data.currentAmount) &&
+             isValidCurrency(data.currency) &&
+             isOptionalNullableTimestamp(data, 'deadline') &&
+             isOptionalNullableString(data, 'accountId', 1, 128) &&
+             isBoundedString(data.icon, 1, 64) &&
+             isValidColorInt(data.color) &&
+             isBoundedString(data.note, 0, 1000) &&
+             data.createdAt is timestamp &&
+             data.updatedAt is timestamp &&
+             isOptionalNullableTimestamp(data, 'deletedAt');
+    }
+
+    function isValidLedger(data) {
+      let requiredKeys = [
+        'id',
+        'name',
+        'description',
+        'icon',
+        'color',
+        'isDefault',
+        'sharedMemberEmails',
+        'createdAt',
+        'updatedAt'
+      ];
+      let allowedKeys = [
+        'id',
+        'name',
+        'description',
+        'icon',
+        'color',
+        'isDefault',
+        'sharedMemberEmails',
+        'createdAt',
+        'updatedAt',
+        'deletedAt'
+      ];
+
+      return hasRequiredKeys(data, requiredKeys) &&
+             hasOnlyAllowedKeys(data, allowedKeys) &&
+             isBoundedString(data.id, 1, 128) &&
+             isBoundedString(data.name, 1, 100) &&
+             isBoundedString(data.description, 0, 500) &&
+             isBoundedString(data.icon, 1, 64) &&
+             isValidColorInt(data.color) &&
+             data.isDefault is bool &&
+             isValidSharedMemberEmailsList(data.sharedMemberEmails) &&
+             data.createdAt is timestamp &&
+             data.updatedAt is timestamp &&
+             isOptionalNullableTimestamp(data, 'deletedAt');
+    }
+
     // ===============================================================
     // User Namespace & Subcollection Rules
     // ===============================================================
@@ -563,6 +796,39 @@ service cloud.firestore {
                          isValidDebt(request.resource.data);
         allow update: if isOwner(uid) &&
                          isValidDebt(request.resource.data) &&
+                         isIdUnchanged() &&
+                         isCreatedAtUnchanged();
+        allow delete: if isOwner(uid);
+      }
+
+      match /recurring/{recurringId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) &&
+                         isValidRecurring(request.resource.data);
+        allow update: if isOwner(uid) &&
+                         isValidRecurring(request.resource.data) &&
+                         isIdUnchanged() &&
+                         isCreatedAtUnchanged();
+        allow delete: if isOwner(uid);
+      }
+
+      match /savings_goals/{goalId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) &&
+                         isValidSavingsGoal(request.resource.data);
+        allow update: if isOwner(uid) &&
+                         isValidSavingsGoal(request.resource.data) &&
+                         isIdUnchanged() &&
+                         isCreatedAtUnchanged();
+        allow delete: if isOwner(uid);
+      }
+
+      match /ledgers/{ledgerId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) &&
+                         isValidLedger(request.resource.data);
+        allow update: if isOwner(uid) &&
+                         isValidLedger(request.resource.data) &&
                          isIdUnchanged() &&
                          isCreatedAtUnchanged();
         allow delete: if isOwner(uid);

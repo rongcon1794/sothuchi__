@@ -193,6 +193,12 @@ class InMemoryLedgerRepository implements LedgerRepository {
     }
   }
 
+  void clear() {
+    _store.clear();
+    _seedDefault();
+    _emit();
+  }
+
   void dispose() {
     _controller.close();
   }

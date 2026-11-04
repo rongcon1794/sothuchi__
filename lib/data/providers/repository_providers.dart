@@ -104,6 +104,9 @@ final demoDataCleanupCallbackProvider = Provider<Future<void> Function()?>(
     ref.read(inMemoryTransactionRepoProvider).clear();
     ref.read(inMemoryAccountRepoProvider).clear();
     ref.read(inMemoryCategoryRepoProvider).clear();
+    ref.read(inMemoryRecurringRepoProvider).clear();
+    ref.read(inMemorySavingsGoalRepoProvider).clear();
+    ref.read(inMemoryLedgerRepoProvider).clear();
   },
 );
 
