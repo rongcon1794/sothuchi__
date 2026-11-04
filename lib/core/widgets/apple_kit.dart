@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 
+export 'package:so_thu_chi/core/widgets/scroll_reactive_fab.dart';
+export 'package:so_thu_chi/core/widgets/so_thu_chi_logo.dart';
+
 /// Tactile bounce wrapper delivering the signature Apple spring-press interaction.
 /// Scales slightly down (`scale: 0.97`) on tap-down and triggers subtle haptics.
 class ApplePressable extends StatefulWidget {

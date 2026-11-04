@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
+import 'package:so_thu_chi/core/widgets/so_thu_chi_logo.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -16,23 +17,17 @@ class SplashScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 84,
-                height: 84,
-                decoration: BoxDecoration(
-                  color: scheme.primary,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Icon(
-                  Icons.account_balance_wallet_rounded,
-                  size: 44,
-                  color: scheme.onPrimary,
-                ),
+              const SoThuChiLogo(
+                size: 88,
+                heroTag: 'app_logo_hero',
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               Text(
                 l10n.appTitle,
-                style: theme.textTheme.headlineMedium,
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.4,
+                ),
               ),
               const SizedBox(height: 8),
               Text(

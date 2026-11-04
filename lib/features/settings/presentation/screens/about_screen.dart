@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
+import 'package:so_thu_chi/core/widgets/so_thu_chi_logo.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -23,18 +24,9 @@ class AboutScreen extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
-                  Container(
-                    width: 72,
-                    height: 72,
-                    decoration: BoxDecoration(
-                      color: scheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Icon(
-                      Icons.account_balance_wallet_rounded,
-                      size: 38,
-                      color: scheme.primary,
-                    ),
+                  const SoThuChiLogo(
+                    size: 72,
+                    heroTag: 'about_logo_hero',
                   ),
                   const SizedBox(height: 16),
                   Text(l10n.appTitle, style: theme.textTheme.headlineSmall),

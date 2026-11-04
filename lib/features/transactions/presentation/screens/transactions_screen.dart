@@ -28,6 +28,7 @@ class TransactionsScreen extends ConsumerStatefulWidget {
 
 class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
   final TextEditingController _searchController = TextEditingController();
+  bool _isFabVisible = true;
 
   @override
   void dispose() {
@@ -231,7 +232,18 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
           ),
           const SizedBox(height: 8),
           Expanded(
-            child: txStream.when(
+            child: NotificationListener<UserScrollNotification>(
+              onNotification: (notification) {
+                if (notification.direction == ScrollDirection.reverse && _isFabVisible) {
+                  setState(() => _isFabVisible = false);
+                } else if (notification.direction == ScrollDirection.forward && !_isFabVisible) {
+                  setState(() => _isFabVisible = true);
+                } else if (notification.metrics.pixels <= 30 && !_isFabVisible) {
+                  setState(() => _isFabVisible = true);
+                }
+                return false;
+              },
+              child: txStream.when(
               loading: () => const SkeletonListView(itemCount: 5),
               error: (err, _) => Center(
                 child: Padding(
@@ -375,14 +387,18 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
               },
             ),
           ),
-        ],
+        ),
+      ],
       ),
       floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'transactions_add_fab',
-        tooltip: l10n.addTransaction,
-        onPressed: () => context.push(AppRoutes.transactionNew),
-        child: const Icon(Icons.add_rounded),
+      floatingActionButton: ScrollReactiveFab(
+        visible: _isFabVisible,
+        child: FloatingActionButton(
+          heroTag: 'transactions_add_fab',
+          tooltip: l10n.addTransaction,
+          onPressed: () => context.push(AppRoutes.transactionNew),
+          child: const Icon(Icons.add_rounded),
+        ),
       ),
     );
   }

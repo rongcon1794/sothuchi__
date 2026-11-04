@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
+import 'package:so_thu_chi/core/widgets/so_thu_chi_logo.dart';
 import 'package:so_thu_chi/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 
@@ -133,19 +134,10 @@ class LoginScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 28),
-                  Center(
-                    child: Container(
-                      width: 88,
-                      height: 88,
-                      decoration: BoxDecoration(
-                        color: scheme.primary,
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: Icon(
-                        Icons.account_balance_wallet_rounded,
-                        size: 46,
-                        color: scheme.onPrimary,
-                      ),
+                  const Center(
+                    child: SoThuChiLogo(
+                      size: 84,
+                      heroTag: 'app_logo_hero',
                     ),
                   ),
                   const SizedBox(height: 28),

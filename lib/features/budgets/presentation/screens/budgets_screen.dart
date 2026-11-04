@@ -17,8 +17,15 @@ import 'package:so_thu_chi/features/categories/domain/entities/category.dart';
 import 'package:so_thu_chi/features/categories/presentation/controllers/categories_controller.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 
-class BudgetsScreen extends ConsumerWidget {
+class BudgetsScreen extends ConsumerStatefulWidget {
   const BudgetsScreen({super.key});
+
+  @override
+  ConsumerState<BudgetsScreen> createState() => _BudgetsScreenState();
+}
+
+class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
+  bool _isFabVisible = true;
 
   Future<void> _openBudgetForm(
     BuildContext context, {
@@ -39,7 +46,6 @@ class BudgetsScreen extends ConsumerWidget {
 
   Future<void> _deleteBudget(
     BuildContext context,
-    WidgetRef ref,
     String budgetId,
   ) async {
     final messenger = ScaffoldMessenger.of(context);
@@ -58,7 +64,7 @@ class BudgetsScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final textScale = MediaQuery.textScalerOf(context).scale(1);
@@ -120,84 +126,99 @@ class BudgetsScreen extends ConsumerWidget {
             ),
 
           Expanded(
-            child: budgetsStream.when(
-              loading: () => const SkeletonListView(itemCount: 3),
-              error: (err, _) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(context.localizeError(err)),
-                ),
-              ),
-              data: (_) {
-                if (progressList.isEmpty) {
-                  return EmptyStateView(
-                    icon: Icons.pie_chart_outline_rounded,
-                    title: l10n.emptyBudgetsTitle,
-                    subtitle: l10n.emptyBudgetsSubtitle,
-                    actionLabel: l10n.addBudget,
-                    onAction: () => _openBudgetForm(
-                      context,
-                      selectedMonth: selectedMonth,
-                    ),
-                  );
+            child: NotificationListener<UserScrollNotification>(
+              onNotification: (notification) {
+                if (notification.direction == ScrollDirection.reverse && _isFabVisible) {
+                  setState(() => _isFabVisible = false);
+                } else if (notification.direction == ScrollDirection.forward && !_isFabVisible) {
+                  setState(() => _isFabVisible = true);
+                } else if (notification.metrics.pixels <= 30 && !_isFabVisible) {
+                  setState(() => _isFabVisible = true);
                 }
-
-                return ListView(
-                  padding: const EdgeInsets.fromLTRB(
-                    16,
-                    4,
-                    16,
-                    AppleTokens.scrollBottomPaddingWithFab,
-                  ),
-                  children: [
-                    if (triggered.isNotEmpty) ...[
-                      BudgetAlertBanner(
-                        progressOverride: triggered,
-                        navigateOnTap: false,
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                    for (final item in progressList) ...[
-                      _BudgetProgressCard(
-                        progress: item,
-                        category: item.budget.categoryId != null
-                            ? categoriesMap[item.budget.categoryId!]
-                            : null,
-                        locale: locale,
-                        hideBalance: hideBalance,
-                        onEdit: () => _openBudgetForm(
-                          context,
-                          selectedMonth: selectedMonth,
-                          existing: item.budget,
-                        ),
-                        onDelete: () =>
-                            _deleteBudget(context, ref, item.budget.id),
-                      ),
-                      const SizedBox(height: 12),
-                    ],
-                  ],
-                );
+                return false;
               },
+              child: budgetsStream.when(
+                loading: () => const SkeletonListView(itemCount: 3),
+                error: (err, _) => Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Text(context.localizeError(err)),
+                  ),
+                ),
+                data: (_) {
+                  if (progressList.isEmpty) {
+                    return EmptyStateView(
+                      icon: Icons.pie_chart_outline_rounded,
+                      title: l10n.emptyBudgetsTitle,
+                      subtitle: l10n.emptyBudgetsSubtitle,
+                      actionLabel: l10n.addBudget,
+                      onAction: () => _openBudgetForm(
+                        context,
+                        selectedMonth: selectedMonth,
+                      ),
+                    );
+                  }
+
+                  return ListView(
+                    padding: const EdgeInsets.fromLTRB(
+                      16,
+                      4,
+                      16,
+                      AppleTokens.scrollBottomPaddingWithFab,
+                    ),
+                    children: [
+                      if (triggered.isNotEmpty) ...[
+                        BudgetAlertBanner(
+                          progressOverride: triggered,
+                          navigateOnTap: false,
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                      for (final item in progressList) ...[
+                        _BudgetProgressCard(
+                          progress: item,
+                          category: item.budget.categoryId != null
+                              ? categoriesMap[item.budget.categoryId!]
+                              : null,
+                          locale: locale,
+                          hideBalance: hideBalance,
+                          onEdit: () => _openBudgetForm(
+                            context,
+                            selectedMonth: selectedMonth,
+                            existing: item.budget,
+                          ),
+                          onDelete: () =>
+                              _deleteBudget(context, item.budget.id),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ],
       ),
       floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
-      floatingActionButton: isLargeText
-          ? FloatingActionButton(
-              heroTag: 'budgets_add_fab',
-              tooltip: l10n.addBudget,
-              onPressed: () =>
-                  _openBudgetForm(context, selectedMonth: selectedMonth),
-              child: const Icon(Icons.add_rounded),
-            )
-          : FloatingActionButton.extended(
-              heroTag: 'budgets_add_fab',
-              onPressed: () =>
-                  _openBudgetForm(context, selectedMonth: selectedMonth),
-              icon: const Icon(Icons.add_rounded),
-              label: Text(l10n.addBudget),
-            ),
+      floatingActionButton: ScrollReactiveFab(
+        visible: _isFabVisible,
+        child: isLargeText
+            ? FloatingActionButton(
+                heroTag: 'budgets_add_fab',
+                tooltip: l10n.addBudget,
+                onPressed: () =>
+                    _openBudgetForm(context, selectedMonth: selectedMonth),
+                child: const Icon(Icons.add_rounded),
+              )
+            : FloatingActionButton.extended(
+                heroTag: 'budgets_add_fab',
+                onPressed: () =>
+                    _openBudgetForm(context, selectedMonth: selectedMonth),
+                icon: const Icon(Icons.add_rounded),
+                label: Text(l10n.addBudget),
+              ),
+      ),
     );
   }
 }

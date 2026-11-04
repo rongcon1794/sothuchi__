@@ -11,11 +11,18 @@ import 'package:so_thu_chi/features/debts/presentation/controllers/debts_control
 import 'package:so_thu_chi/features/debts/presentation/widgets/debt_form_sheet.dart';
 import 'package:so_thu_chi/features/debts/presentation/widgets/debt_repayment_sheet.dart';
 
-class DebtsScreen extends ConsumerWidget {
+class DebtsScreen extends ConsumerStatefulWidget {
   const DebtsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DebtsScreen> createState() => _DebtsScreenState();
+}
+
+class _DebtsScreenState extends ConsumerState<DebtsScreen> {
+  bool _isFabVisible = true;
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final debtsAsync = ref.watch(debtsStreamProvider);
@@ -41,24 +48,40 @@ class DebtsScreen extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppleTokens.jadeDark,
-        elevation: 4,
-        icon: const Icon(CupertinoIcons.plus, color: Colors.white, size: 20),
-        label: const Text(
-          'Ghi nợ mới',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+      floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
+      floatingActionButton: ScrollReactiveFab(
+        visible: _isFabVisible,
+        child: FloatingActionButton.extended(
+          heroTag: 'debts_add_fab',
+          backgroundColor: AppleTokens.jadeDark,
+          elevation: 4,
+          icon: const Icon(CupertinoIcons.plus, color: Colors.white, size: 20),
+          label: const Text(
+            'Ghi nợ mới',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          ),
+          onPressed: () {
+            HapticFeedback.mediumImpact();
+            DebtFormSheet.show(context);
+          },
         ),
-        onPressed: () {
-          HapticFeedback.mediumImpact();
-          DebtFormSheet.show(context);
-        },
       ),
       body: debtsAsync.when(
         loading: () => const Center(child: CupertinoActivityIndicator()),
         error: (err, _) => Center(child: Text(context.localizeError(err))),
         data: (allDebts) {
-          return CustomScrollView(
+          return NotificationListener<UserScrollNotification>(
+            onNotification: (notification) {
+              if (notification.direction == ScrollDirection.reverse && _isFabVisible) {
+                setState(() => _isFabVisible = false);
+              } else if (notification.direction == ScrollDirection.forward && !_isFabVisible) {
+                setState(() => _isFabVisible = true);
+              } else if (notification.metrics.pixels <= 30 && !_isFabVisible) {
+                setState(() => _isFabVisible = true);
+              }
+              return false;
+            },
+            child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
             slivers: [
               // Summary Cards
@@ -272,14 +295,15 @@ class DebtsScreen extends ConsumerWidget {
                 ),
 
               const SliverToBoxAdapter(
-                child: SizedBox(height: 80),
+                child: SizedBox(height: AppleTokens.scrollBottomPaddingWithFab),
               ),
             ],
-          );
-        },
-      ),
-    );
-  }
+          ),
+        );
+      },
+    ),
+  );
+}
 }
 
 class _DebtCard extends ConsumerWidget {

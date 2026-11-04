@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
@@ -24,11 +25,18 @@ import 'package:so_thu_chi/features/settings/presentation/controllers/settings_c
 import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
 import 'package:so_thu_chi/features/transactions/presentation/widgets/transaction_tile.dart';
 
-class HomeDashboardScreen extends ConsumerWidget {
+class HomeDashboardScreen extends ConsumerStatefulWidget {
   const HomeDashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeDashboardScreen> createState() => _HomeDashboardScreenState();
+}
+
+class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
+  bool _isFabVisible = true;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
@@ -86,288 +94,277 @@ class HomeDashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
           children: [
-            Text(
-              l10n.appTitle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleLarge,
-            ),
-            if (user?.displayName != null && user!.displayName!.isNotEmpty)
-              Text(
-                user.displayName!,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                ),
+            const SoThuChiLogo(size: 34),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    l10n.appTitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                  if (user?.displayName != null && user!.displayName!.isNotEmpty)
+                    Text(
+                      user.displayName!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                ],
               ),
+            ),
           ],
         ),
         actions: [
           IconButton(
+            tooltip: 'Sổ Ghi Nợ',
+            onPressed: () => context.push(AppRoutes.debts),
+            icon: const Icon(CupertinoIcons.person_2),
+          ),
+          IconButton(
             tooltip: l10n.walletsTitle,
             onPressed: () => context.push(AppRoutes.accounts),
-            icon: const Icon(Icons.account_balance_wallet_outlined),
+            icon: const Icon(CupertinoIcons.creditcard),
           ),
           IconButton(
             tooltip: l10n.categoriesTitle,
             onPressed: () => context.push(AppRoutes.categories),
-            icon: const Icon(Icons.category_outlined),
+            icon: const Icon(CupertinoIcons.square_grid_2x2),
           ),
           const SizedBox(width: 4),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          ref
-            ..invalidate(accountsStreamProvider)
-            ..invalidate(transactionsStreamProvider)
-            ..invalidate(categoriesStreamProvider);
+      body: NotificationListener<UserScrollNotification>(
+        onNotification: (notification) {
+          if (notification.direction == ScrollDirection.reverse && _isFabVisible) {
+            setState(() => _isFabVisible = false);
+          } else if (notification.direction == ScrollDirection.forward && !_isFabVisible) {
+            setState(() => _isFabVisible = true);
+          } else if (notification.metrics.pixels <= 30 && !_isFabVisible) {
+            setState(() => _isFabVisible = true);
+          }
+          return false;
         },
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            16,
-            8,
-            16,
-            AppleTokens.scrollBottomPaddingWithFab,
-          ),
-          children: [
-            // Hero Total Balance Card
-            _HeroBalanceCard(
-              totalBalance: totalBalance,
-              monthSummary: monthSummary,
-              locale: locale,
-              hideBalance: hideBalance,
-              onToggleVisibility: () =>
-                  ref.read(settingsControllerProvider.notifier).toggleHideBalance(),
+        child: RefreshIndicator(
+          onRefresh: () async {
+            ref
+              ..invalidate(accountsStreamProvider)
+              ..invalidate(transactionsStreamProvider)
+              ..invalidate(categoriesStreamProvider);
+          },
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(
+              16,
+              8,
+              16,
+              AppleTokens.scrollBottomPaddingWithFab,
             ),
-            const SizedBox(height: 16),
+            children: [
+              // Hero Total Balance Card
+              _HeroBalanceCard(
+                totalBalance: totalBalance,
+                monthSummary: monthSummary,
+                locale: locale,
+                hideBalance: hideBalance,
+                onToggleVisibility: () =>
+                    ref.read(settingsControllerProvider.notifier).toggleHideBalance(),
+              ),
+              const SizedBox(height: 16),
 
-            // Future AI quick entry slot (extensible without modifying Home)
-            ?aiQuickSlot,
-            if (aiQuickSlot != null) const SizedBox(height: 12),
+              // Future AI quick entry slot (extensible without modifying Home)
+              ?aiQuickSlot,
+              if (aiQuickSlot != null) const SizedBox(height: 12),
 
-            // Budget alert slot (injected by Budgets feature in Milestone e)
-            ?budgetAlertBanner,
-            if (budgetAlertBanner != null) const SizedBox(height: 16),
+              // Budget alert slot (injected by Budgets feature in Milestone e)
+              ?budgetAlertBanner,
+              if (budgetAlertBanner != null) const SizedBox(height: 16),
 
-            // This Month's Income vs Expense Cards
-            Text(
-              '${l10n.thisMonthSummary} • ${AppDateUtils.formatMonthYear(DateTime.now(), locale: locale)}',
-              style: theme.textTheme.titleMedium,
-            ),
-            const SizedBox(height: 10),
-            if (isLargeText)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  incomeMetric,
-                  const SizedBox(height: 10),
-                  expenseMetric,
-                ],
-              )
-            else
+              // This Month's Income vs Expense Cards
+              Text(
+                '${l10n.thisMonthSummary} • ${AppDateUtils.formatMonthYear(DateTime.now(), locale: locale)}',
+                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 10),
+              if (isLargeText)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    incomeMetric,
+                    const SizedBox(height: 10),
+                    expenseMetric,
+                  ],
+                )
+              else
+                Row(
+                  children: [
+                    Expanded(child: incomeMetric),
+                    const SizedBox(width: 12),
+                    Expanded(child: expenseMetric),
+                  ],
+                ),
+              const SizedBox(height: 20),
+
+              // Active Wallets & Debts Strip
               Row(
                 children: [
-                  Expanded(child: incomeMetric),
-                  const SizedBox(width: 12),
-                  Expanded(child: expenseMetric),
+                  Expanded(
+                    child: Text(
+                      l10n.walletsTitle,
+                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                  Flexible(
+                    flex: 0,
+                    child: TextButton(
+                      onPressed: () => context.push(AppRoutes.accounts),
+                      child: Text(l10n.manageWallets),
+                    ),
+                  ),
                 ],
               ),
-            const SizedBox(height: 20),
-
-            // Active Wallets Strip
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    l10n.walletsTitle,
-                    style: theme.textTheme.titleMedium,
-                  ),
-                ),
-                Flexible(
-                  flex: 0,
-                  child: TextButton(
-                    onPressed: () => context.push(AppRoutes.accounts),
-                    child: Text(l10n.manageWallets),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            if (activeWallets.isEmpty)
-              Card(
-                child: ListTile(
-                  leading: Icon(
-                    Icons.account_balance_wallet_outlined,
-                    color: scheme.primary,
-                  ),
-                  title: Text(l10n.emptyWalletsTitle),
-                  subtitle: Text(l10n.emptyWalletsSubtitle),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () => context.push(AppRoutes.accounts),
-                ),
-              )
-            else
+              const SizedBox(height: 6),
               SizedBox(
                 height: walletStripHeight,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
-                  itemCount: activeWallets.length,
+                  itemCount: activeWallets.length + 2,
                   separatorBuilder: (_, _) => const SizedBox(width: 10),
                   itemBuilder: (context, index) {
-                    final wallet = activeWallets[index];
-                    return _MiniWalletCard(
-                      account: wallet,
-                      locale: locale,
-                      hideBalance: hideBalance,
+                    if (index < activeWallets.length) {
+                      final wallet = activeWallets[index];
+                      return _MiniWalletCard(
+                        account: wallet,
+                        locale: locale,
+                        hideBalance: hideBalance,
+                        onTap: () => context.push(AppRoutes.accounts),
+                      );
+                    }
+                    if (index == activeWallets.length) {
+                      return _MiniDebtCard(
+                        onTap: () => context.push(AppRoutes.debts),
+                      );
+                    }
+                    return _AddWalletCard(
                       onTap: () => context.push(AppRoutes.accounts),
                     );
                   },
                 ),
               ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
-            // Sổ Ghi Nợ Quick Capsule
-            ApplePressable(
-              onTap: () => context.push(AppRoutes.debts),
-              child: AppleGlassCard(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-                borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                child: Row(
-                  children: [
-                    const AppleSquircleBadge(
-                      icon: CupertinoIcons.person_2_fill,
-                      color: AppleTokens.systemIndigo,
-                      size: 32,
-                      iconSize: 18,
+              // Recent Transactions Header
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.recentTransactions,
+                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Sổ Ghi Nợ',
-                            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
-                          ),
-                          Text(
-                            'Theo dõi các khoản cho vay & đi vay',
-                            style: TextStyle(
-                              fontSize: 11.5,
-                              color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  Flexible(
+                    flex: 0,
+                    child: TextButton(
+                      onPressed: () => context.go(AppRoutes.transactions),
+                      child: Text(l10n.viewAll),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+
+              // Recent Transactions List / Loading / Empty
+              txStream.when(
+                loading: () => const SkeletonListView(itemCount: 3),
+                error: (err, _) => Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(context.localizeError(err)),
+                  ),
+                ),
+                data: (_) {
+                  if (recentTxs.isEmpty) {
+                    return Card(
+                      child: EmptyStateView(
+                        icon: Icons.receipt_long_outlined,
+                        title: l10n.emptyTransactionsTitle,
+                        subtitle: l10n.emptyTransactionsSubtitle,
+                        actionLabel: l10n.quickAddTransaction,
+                        onAction: () => context.push(AppRoutes.transactionNew),
+                      ),
+                    );
+                  }
+
+                  return Card(
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
+                      children: [
+                        for (var i = 0; i < recentTxs.length; i++) ...[
+                          if (i > 0) const Divider(indent: 68),
+                          TransactionTile(
+                            transaction: recentTxs[i],
+                            category: categoriesMap[recentTxs[i].categoryId],
+                            sourceAccount: accountsMap[recentTxs[i].accountId],
+                            destinationAccount: recentTxs[i].toAccountId != null
+                                ? accountsMap[recentTxs[i].toAccountId!]
+                                : null,
+                            locale: locale,
+                            hideAmount: hideBalance,
+                            onTap: () => context.push(
+                              AppRoutes.transactionEdit(recentTxs[i].id),
                             ),
                           ),
                         ],
-                      ),
-                    ),
-                    const Icon(CupertinoIcons.chevron_right, size: 14, color: AppleTokens.systemGray),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Recent Transactions Header
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    l10n.recentTransactions,
-                    style: theme.textTheme.titleMedium,
-                  ),
-                ),
-                Flexible(
-                  flex: 0,
-                  child: TextButton(
-                    onPressed: () => context.go(AppRoutes.transactions),
-                    child: Text(l10n.viewAll),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-
-            // Recent Transactions List / Loading / Empty
-            txStream.when(
-              loading: () => const SkeletonListView(itemCount: 3),
-              error: (err, _) => Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(context.localizeError(err)),
-                ),
-              ),
-              data: (_) {
-                if (recentTxs.isEmpty) {
-                  return Card(
-                    child: EmptyStateView(
-                      icon: Icons.receipt_long_outlined,
-                      title: l10n.emptyTransactionsTitle,
-                      subtitle: l10n.emptyTransactionsSubtitle,
-                      actionLabel: l10n.quickAddTransaction,
-                      onAction: () => context.push(AppRoutes.transactionNew),
+                      ],
                     ),
                   );
-                }
-
-                return Card(
-                  clipBehavior: Clip.antiAlias,
-                  child: Column(
-                    children: [
-                      for (var i = 0; i < recentTxs.length; i++) ...[
-                        if (i > 0) const Divider(indent: 68),
-                        TransactionTile(
-                          transaction: recentTxs[i],
-                          category: categoriesMap[recentTxs[i].categoryId],
-                          sourceAccount: accountsMap[recentTxs[i].accountId],
-                          destinationAccount: recentTxs[i].toAccountId != null
-                              ? accountsMap[recentTxs[i].toAccountId!]
-                              : null,
-                          locale: locale,
-                          hideAmount: hideBalance,
-                          onTap: () => context.push(
-                            AppRoutes.transactionEdit(recentTxs[i].id),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
+                },
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
-      floatingActionButton: isLargeText
-          ? FloatingActionButton(
-              heroTag: 'home_quick_add_fab',
-              tooltip: l10n.quickAddTransaction,
-              backgroundColor: AppleTokens.jadePrimary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+      floatingActionButton: ScrollReactiveFab(
+        visible: _isFabVisible,
+        child: isLargeText
+            ? FloatingActionButton(
+                heroTag: 'home_quick_add_fab',
+                tooltip: l10n.quickAddTransaction,
+                backgroundColor: AppleTokens.jadePrimary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                ),
+                onPressed: () => context.push(AppRoutes.transactionNew),
+                child: const Icon(Icons.add_rounded),
+              )
+            : FloatingActionButton.extended(
+                heroTag: 'home_quick_add_fab',
+                backgroundColor: AppleTokens.jadePrimary,
+                foregroundColor: Colors.white,
+                elevation: 3,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                ),
+                onPressed: () => context.push(AppRoutes.transactionNew),
+                icon: const Icon(Icons.add_rounded),
+                label: Text(
+                  l10n.quickAddTransaction,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
               ),
-              onPressed: () => context.push(AppRoutes.transactionNew),
-              child: const Icon(Icons.add_rounded),
-            )
-          : FloatingActionButton.extended(
-              heroTag: 'home_quick_add_fab',
-              backgroundColor: AppleTokens.jadePrimary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-              ),
-              onPressed: () => context.push(AppRoutes.transactionNew),
-              icon: const Icon(Icons.add_rounded),
-              label: Text(
-                l10n.quickAddTransaction,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
+      ),
     );
   }
 }
@@ -709,6 +706,128 @@ class _MiniWalletCard extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniDebtCard extends StatelessWidget {
+  const _MiniDebtCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    final cardWidth = math.max(168.0, 136.0 * textScale);
+
+    return SizedBox(
+      width: cardWidth,
+      child: ApplePressable(
+        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+        onTap: onTap,
+        child: Card(
+          clipBehavior: Clip.antiAlias,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: AppleTokens.systemIndigo.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        CupertinoIcons.person_2_fill,
+                        size: 16,
+                        color: AppleTokens.systemIndigo,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Sổ Ghi Nợ',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  'Cho vay & Vay',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: AppleTokens.systemIndigo,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AddWalletCard extends StatelessWidget {
+  const _AddWalletCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    final cardWidth = math.max(120.0, 96.0 * textScale);
+
+    return SizedBox(
+      width: cardWidth,
+      child: ApplePressable(
+        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDark
+                ? AppleTokens.bgDarkSecondary.withValues(alpha: 0.5)
+                : AppleTokens.bgLightSecondary.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+            border: Border.all(
+              color: isDark ? AppleTokens.bgDarkTertiary : AppleTokens.borderLight,
+              width: 1,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                CupertinoIcons.plus_circle_fill,
+                color: theme.colorScheme.primary,
+                size: 22,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Thêm ví',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ],
           ),
         ),
       ),
