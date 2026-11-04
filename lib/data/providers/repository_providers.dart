@@ -43,7 +43,9 @@ final inMemoryBudgetRepoProvider = Provider<InMemoryBudgetRepository>((ref) {
 });
 
 final inMemoryDebtRepoProvider = Provider<InMemoryDebtRepository>((ref) {
-  return InMemoryDebtRepository();
+  return InMemoryDebtRepository(
+    accountRepo: ref.watch(inMemoryAccountRepoProvider),
+  );
 });
 
 /// Bootstrapper invoked when a user signs in: idempotently seeds Vietnamese

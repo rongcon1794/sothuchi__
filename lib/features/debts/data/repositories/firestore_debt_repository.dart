@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/core/errors/app_exception.dart';
 import 'package:so_thu_chi/core/errors/result.dart';
+import 'package:so_thu_chi/features/accounts/data/repositories/firestore_account_repository.dart';
 import 'package:so_thu_chi/features/debts/data/models/debt_dto.dart';
 import 'package:so_thu_chi/features/debts/domain/entities/debt.dart';
 import 'package:so_thu_chi/features/debts/domain/repositories/debt_repository.dart';
@@ -101,18 +102,30 @@ class FirestoreDebtRepository implements DebtRepository {
       final debtDocRef = _debtsCol.doc(id);
       batch.set(debtDocRef, DebtDto.fromDomain(debt).toJson());
 
-      // If linked with a wallet, update wallet balance atomically
+      // If linked with a wallet, update wallet balance atomically if account exists
       if (accountId != null && accountId.isNotEmpty) {
         final accDocRef = _accountsCol.doc(accountId);
-        final delta = type == DebtType.lent ? -amount : amount;
-        batch.update(accDocRef, {
-          'balance': FieldValue.increment(delta),
-          'updatedAt': Timestamp.fromDate(now),
-        });
+        final accSnap = await accDocRef.get();
+        if (accSnap.exists) {
+          final delta = type == DebtType.lent ? -amount : amount;
+          batch.update(accDocRef, {
+            'balance': FieldValue.increment(delta),
+            'updatedAt': Timestamp.fromDate(now),
+          });
+        }
       }
 
       await batch.commit();
       return Success(debt);
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        return Failure(
+          PermissionDeniedException('Không có quyền ghi dữ liệu: ${e.message}'),
+        );
+      }
+      return Failure(
+        StorageException('Lỗi cơ sở dữ liệu (${e.code}): ${e.message}'),
+      );
     } catch (e) {
       return Failure(
         StorageException('Không thể lưu sổ nợ: $e'),
@@ -129,6 +142,10 @@ class FirestoreDebtRepository implements DebtRepository {
             SetOptions(merge: true),
           );
       return Success(updated);
+    } on FirebaseException catch (e) {
+      return Failure(
+        StorageException('Lỗi cơ sở dữ liệu (${e.code}): ${e.message}'),
+      );
     } catch (e) {
       return Failure(
         StorageException('Không thể cập nhật sổ nợ: $e'),
@@ -167,20 +184,25 @@ class FirestoreDebtRepository implements DebtRepository {
         'updatedAt': Timestamp.fromDate(now),
       });
 
-      // Update linked wallet if specified
+      // Update linked wallet if specified and exists
       if (accountId != null && accountId.isNotEmpty) {
         final accDocRef = _accountsCol.doc(accountId);
-        // If we lent money, receiving repayment increases our wallet balance.
-        // If we borrowed money, paying debt decreases our wallet balance.
-        final delta = debt.type == DebtType.lent ? amount : -amount;
-        batch.update(accDocRef, {
-          'balance': FieldValue.increment(delta),
-          'updatedAt': Timestamp.fromDate(now),
-        });
+        final accSnap = await accDocRef.get();
+        if (accSnap.exists) {
+          final delta = debt.type == DebtType.lent ? amount : -amount;
+          batch.update(accDocRef, {
+            'balance': FieldValue.increment(delta),
+            'updatedAt': Timestamp.fromDate(now),
+          });
+        }
       }
 
       await batch.commit();
       return const Success(null);
+    } on FirebaseException catch (e) {
+      return Failure(
+        StorageException('Lỗi cơ sở dữ liệu (${e.code}): ${e.message}'),
+      );
     } catch (e) {
       return Failure(
         StorageException('Không thể ghi nhận trả nợ: $e'),
@@ -196,6 +218,10 @@ class FirestoreDebtRepository implements DebtRepository {
         'updatedAt': Timestamp.fromDate(DateTime.now()),
       });
       return const Success(null);
+    } on FirebaseException catch (e) {
+      return Failure(
+        StorageException('Lỗi cơ sở dữ liệu (${e.code}): ${e.message}'),
+      );
     } catch (e) {
       return Failure(
         StorageException('Không thể xóa khoản nợ: $e'),
@@ -206,10 +232,14 @@ class FirestoreDebtRepository implements DebtRepository {
 
 /// In-memory implementation of [DebtRepository] for offline demo mode and unit testing.
 class InMemoryDebtRepository implements DebtRepository {
-  InMemoryDebtRepository({Uuid? uuid}) : _uuid = uuid ?? const Uuid() {
+  InMemoryDebtRepository({
+    this.accountRepo,
+    Uuid? uuid,
+  }) : _uuid = uuid ?? const Uuid() {
     _seedDefaultDemoDebts();
   }
 
+  final InMemoryAccountRepository? accountRepo;
   final Uuid _uuid;
   final Map<String, Debt> _store = {};
   final StreamController<void> _changes = StreamController<void>.broadcast();
@@ -321,6 +351,19 @@ class InMemoryDebtRepository implements DebtRepository {
     );
 
     _store[id] = debt;
+
+    if (accountId != null && accountId.isNotEmpty && accountRepo != null) {
+      final acc = accountRepo!.rawStore[accountId];
+      if (acc != null) {
+        final delta = type == DebtType.lent ? -amount : amount;
+        accountRepo!.rawStore[accountId] = acc.copyWith(
+          balance: acc.balance + delta,
+          updatedAt: now,
+        );
+        accountRepo!.notifyExternalMutation();
+      }
+    }
+
     _notify();
     return Success(debt);
   }
@@ -354,6 +397,19 @@ class InMemoryDebtRepository implements DebtRepository {
       updatedAt: DateTime.now(),
     );
     _store[debtId] = updated;
+
+    if (accountId != null && accountId.isNotEmpty && accountRepo != null) {
+      final acc = accountRepo!.rawStore[accountId];
+      if (acc != null) {
+        final delta = debt.type == DebtType.lent ? amount : -amount;
+        accountRepo!.rawStore[accountId] = acc.copyWith(
+          balance: acc.balance + delta,
+          updatedAt: DateTime.now(),
+        );
+        accountRepo!.notifyExternalMutation();
+      }
+    }
+
     _notify();
     return const Success(null);
   }

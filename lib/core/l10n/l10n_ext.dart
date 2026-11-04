@@ -11,8 +11,14 @@ extension AppLocalizationsX on BuildContext {
       NetworkException() => l.errorNetwork,
       AuthCancelledException() => l.errorAuthCancelled,
       AuthFailedException() => l.errorAuthFailed,
-      PermissionDeniedException() => l.errorPermissionDenied,
-      ValidationException() => l.errorValidation,
+      PermissionDeniedException(:final debugMessage) =>
+        debugMessage.isNotEmpty ? debugMessage : l.errorPermissionDenied,
+      ValidationException(:final debugMessage) =>
+        debugMessage.isNotEmpty ? debugMessage : l.errorValidation,
+      StorageException(:final debugMessage) =>
+        debugMessage.isNotEmpty ? debugMessage : l.errorGeneric,
+      NotFoundException(:final debugMessage) =>
+        debugMessage.isNotEmpty ? debugMessage : l.errorGeneric,
       _ => l.errorGeneric,
     };
   }

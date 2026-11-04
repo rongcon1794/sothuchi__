@@ -160,5 +160,48 @@ void main() {
       expect(find.text('Nguyễn Văn Nam'), findsNothing);
       expect(find.text('Anh Ba Hàng Xóm'), findsOneWidget);
     });
+
+    testWidgets('creates a new debt via DebtFormSheet', (tester) async {
+      final inMem = InMemoryDebtRepository();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            debtRepositoryProvider.overrideWithValue(inMem),
+          ],
+          child: const MaterialApp(
+            home: DebtsScreen(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Tap "Ghi nợ mới" button
+      await tester.tap(find.text('Ghi nợ mới'));
+      await tester.pumpAndSettle();
+
+      // Form Sheet should be open
+      expect(find.text('Ghi nhận nợ mới'), findsOneWidget);
+
+      // Enter person name
+      final nameField = find.widgetWithText(TextFormField, 'Người vay (Ai nợ bạn?) *');
+      await tester.enterText(nameField, 'Chị Lan');
+
+      // Enter amount
+      final amountField = find.widgetWithText(TextFormField, 'Số tiền nợ (VND) *');
+      await tester.enterText(amountField, '750000');
+
+      // Tap Save button
+      final saveBtn = find.text('Ghi nhận nợ');
+      await tester.ensureVisible(saveBtn);
+      await tester.tap(saveBtn);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Form sheet should close and list should now have "Chị Lan"
+      expect(find.text('Chị Lan'), findsOneWidget);
+    });
   });
 }

@@ -128,7 +128,11 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
         },
         onFailure: (err) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.localizeError(err))),
+            SnackBar(
+              content: Text(context.localizeError(err)),
+              backgroundColor: Theme.of(context).colorScheme.error,
+              behavior: SnackBarBehavior.floating,
+            ),
           );
         },
       );
@@ -153,7 +157,11 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
         },
         onFailure: (err) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.localizeError(err))),
+            SnackBar(
+              content: Text(context.localizeError(err)),
+              backgroundColor: Theme.of(context).colorScheme.error,
+              behavior: SnackBarBehavior.floating,
+            ),
           );
         },
       );

@@ -61,7 +61,6 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
     final budgetAlertBanner =
         customBudgetBanner ??
         (triggeredBudgets.isNotEmpty ? const BudgetAlertBanner() : null);
-    final aiQuickSlot = ref.watch(aiQuickEntrySlotProvider);
 
     final incomeMetric = _CashflowMetricCard(
       label: l10n.income,
@@ -185,10 +184,6 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
               // Smart 4-Capsule Quick Actions
               const _HomeQuickActionBar(),
               const SizedBox(height: 14),
-
-              // Future AI quick entry slot (extensible without modifying Home)
-              ?aiQuickSlot,
-              if (aiQuickSlot != null) const SizedBox(height: 12),
 
               // Budget alert slot (injected by Budgets feature in Milestone e)
               ?budgetAlertBanner,

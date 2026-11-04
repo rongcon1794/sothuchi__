@@ -84,21 +84,25 @@ class DebtDto {
         'deletedAt': deletedAt != null ? Timestamp.fromDate(deletedAt!) : null,
       };
 
-  factory DebtDto.fromDomain(Debt entity) => DebtDto(
-        id: entity.id,
-        personName: entity.personName,
-        phoneNumber: entity.phoneNumber,
-        type: entity.type.name,
-        amount: entity.amount,
-        remainingAmount: entity.remainingAmount,
-        currency: entity.currency,
-        dueDate: entity.dueDate,
-        accountId: entity.accountId,
-        note: entity.note,
-        createdAt: entity.createdAt,
-        updatedAt: entity.updatedAt,
-        deletedAt: entity.deletedAt,
-      );
+  factory DebtDto.fromDomain(Debt entity) {
+    final cleanPhone = entity.phoneNumber?.trim();
+    final cleanAccount = entity.accountId?.trim();
+    return DebtDto(
+      id: entity.id,
+      personName: entity.personName.trim(),
+      phoneNumber: (cleanPhone != null && cleanPhone.isNotEmpty) ? cleanPhone : null,
+      type: entity.type.name,
+      amount: entity.amount,
+      remainingAmount: entity.remainingAmount,
+      currency: entity.currency,
+      dueDate: entity.dueDate,
+      accountId: (cleanAccount != null && cleanAccount.isNotEmpty) ? cleanAccount : null,
+      note: entity.note.trim(),
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      deletedAt: entity.deletedAt,
+    );
+  }
 
   Debt toDomain() {
     final parsedType = DebtType.values.firstWhere(
