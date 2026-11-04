@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
@@ -29,6 +32,45 @@ class ReportsScreen extends ConsumerStatefulWidget {
 class _ReportsScreenState extends ConsumerState<ReportsScreen> {
   int _touchedPieIndex = -1;
 
+  Future<void> _shareFinancialSummary(
+    MonthlyReportData report,
+    DateTime month,
+    String locale,
+  ) async {
+    unawaited(HapticFeedback.lightImpact());
+    final monthStr = AppDateUtils.formatMonthYear(month, locale: locale);
+    final savingsRate = report.totalIncomeMinor > 0
+        ? ((report.netMinor / report.totalIncomeMinor) * 100).clamp(0, 100).toStringAsFixed(1)
+        : '0.0';
+
+    final sb = StringBuffer()
+      ..writeln('📊 BÁO CÁO TÀI CHÍNH THÁNG $monthStr — SỔ THU CHI')
+      ..writeln('----------------------------------------')
+      ..writeln('💰 Thu nhập: ${report.incomeMoney.format(locale: locale)}')
+      ..writeln('💸 Chi tiêu: ${report.expenseMoney.format(locale: locale)}')
+      ..writeln('📈 Thặng dư ròng: ${report.netMoney.format(locale: locale, showPlusSign: true)}')
+      ..writeln('🛡️ Tỷ lệ tích lũy: $savingsRate%')
+      ..writeln('----------------------------------------');
+
+    if (report.categorySlices.isNotEmpty) {
+      sb.writeln('TOP DANH MỤC CHI TIÊU:');
+      for (final s in report.categorySlices.take(5)) {
+        sb.writeln(
+          ' • ${s.fallbackName}: ${s.amountMoney.format(locale: locale)} (${s.percentage}%)',
+        );
+      }
+      sb.writeln('----------------------------------------');
+    }
+    sb.writeln('Quản lý chi tiêu thông minh cùng Sổ Thu Chi.');
+
+    await SharePlus.instance.share(
+      ShareParams(
+        text: sb.toString(),
+        subject: 'Báo cáo tài chính tháng $monthStr',
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -42,7 +84,17 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
     final report = ref.watch(monthlyReportProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.reportsTitle)),
+      appBar: AppBar(
+        title: Text(l10n.reportsTitle),
+        actions: [
+          IconButton(
+            tooltip: 'Chia sẻ báo cáo',
+            icon: const Icon(CupertinoIcons.share, size: 20),
+            onPressed: () => _shareFinancialSummary(report, selectedMonth, locale),
+          ),
+          const SizedBox(width: 4),
+        ],
+      ),
       body: Column(
         children: [
           // Month Switcher

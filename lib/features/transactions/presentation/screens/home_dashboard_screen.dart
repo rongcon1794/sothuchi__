@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
@@ -606,39 +607,81 @@ class _HomeQuickActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _QuickActionItem(
-            icon: CupertinoIcons.plus,
-            label: 'Thêm thu chi',
-            color: AppleTokens.jadePrimary,
-            onTap: () => context.push(AppRoutes.transactionNew),
-          ),
-          _QuickActionItem(
-            icon: CupertinoIcons.creditcard,
-            label: 'Ví tài khoản',
-            color: AppleTokens.systemBlue,
-            onTap: () => context.push(AppRoutes.accounts),
-          ),
-          _QuickActionItem(
-            icon: CupertinoIcons.person_2,
-            label: 'Sổ Ghi Nợ',
-            color: AppleTokens.systemIndigo,
-            onTap: () => context.push(AppRoutes.debts),
-          ),
-          _QuickActionItem(
-            icon: CupertinoIcons.square_grid_2x2,
-            label: 'Danh mục',
-            color: AppleTokens.systemOrange,
-            onTap: () => context.push(AppRoutes.categories),
-          ),
-        ],
+    const actions = [
+      _ActionItemData(
+        icon: CupertinoIcons.plus,
+        label: 'Giao dịch',
+        color: AppleTokens.jadePrimary,
+        route: AppRoutes.transactionNew,
+      ),
+      _ActionItemData(
+        icon: CupertinoIcons.creditcard,
+        label: 'Ví tiền',
+        color: AppleTokens.systemBlue,
+        route: AppRoutes.accounts,
+      ),
+      _ActionItemData(
+        icon: CupertinoIcons.sparkles,
+        label: 'Tiết kiệm',
+        color: AppleTokens.systemPink,
+        route: AppRoutes.savings,
+      ),
+      _ActionItemData(
+        icon: CupertinoIcons.repeat,
+        label: 'Định kỳ',
+        color: AppleTokens.systemPurple,
+        route: AppRoutes.recurring,
+      ),
+      _ActionItemData(
+        icon: CupertinoIcons.person_2,
+        label: 'Sổ Ghi Nợ',
+        color: AppleTokens.systemIndigo,
+        route: AppRoutes.debts,
+      ),
+      _ActionItemData(
+        icon: CupertinoIcons.square_grid_2x2,
+        label: 'Danh mục',
+        color: AppleTokens.systemOrange,
+        route: AppRoutes.categories,
+      ),
+    ];
+
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    final barHeight = math.max(82.0, 56.0 + (26.0 * textScale));
+
+    return SizedBox(
+      height: barHeight,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        itemCount: actions.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final action = actions[index];
+          return _QuickActionItem(
+            icon: action.icon,
+            label: action.label,
+            color: action.color,
+            onTap: () => context.push(action.route),
+          );
+        },
       ),
     );
   }
+}
+
+class _ActionItemData {
+  const _ActionItemData({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.route,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final String route;
 }
 
 class _QuickActionItem extends StatelessWidget {
@@ -659,10 +702,14 @@ class _QuickActionItem extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Expanded(
+    return SizedBox(
+      width: 70,
       child: ApplePressable(
         scaleDown: 0.94,
-        onTap: onTap,
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
         borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -680,16 +727,20 @@ class _QuickActionItem extends StatelessWidget {
               ),
               child: Icon(icon, color: color, size: 21),
             ),
-            const SizedBox(height: 6),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                fontSize: 11.5,
-                letterSpacing: -0.2,
+            const SizedBox(height: 5),
+            Flexible(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 11.5,
+                    letterSpacing: -0.2,
+                  ),
+                ),
               ),
             ),
           ],

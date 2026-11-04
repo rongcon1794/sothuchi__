@@ -31,7 +31,7 @@ class AboutScreen extends StatelessWidget {
                 Text(l10n.appTitle, style: theme.textTheme.headlineSmall),
                 const SizedBox(height: 4),
                 Text(
-                  'Version 1.0.0 (Phase 1 MVP)',
+                  'Version 2.0.0 (Apple HIG Edition)',
                   style: theme.textTheme.labelMedium?.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
