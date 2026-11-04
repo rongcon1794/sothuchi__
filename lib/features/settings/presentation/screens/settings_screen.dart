@@ -598,6 +598,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onTap: () => context.push(AppRoutes.savings),
               ),
               ListTile(
+                leading: const AppleSquircleBadge(
+                  icon: CupertinoIcons.layers_alt_fill,
+                  backgroundColor: AppleTokens.systemBlue,
+                ),
+                title: const Text('Quản lý Sổ Thu Chi', style: TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: const Text('Đa sổ cá nhân, gia đình, công việc', style: TextStyle(fontSize: 12)),
+                trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                onTap: () => context.push(AppRoutes.ledgers),
+              ),
+              ListTile(
                 leading: _exportingCsv
                     ? const SizedBox(
                         width: 32,

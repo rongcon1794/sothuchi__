@@ -24,3 +24,4 @@ abstract interface class SavingsGoalRepository {
     String note = '',
   });
 }
+

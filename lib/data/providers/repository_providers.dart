@@ -12,6 +12,8 @@ import 'package:so_thu_chi/features/categories/data/repositories/firestore_categ
 import 'package:so_thu_chi/features/categories/domain/repositories/category_repository.dart';
 import 'package:so_thu_chi/features/debts/data/repositories/firestore_debt_repository.dart';
 import 'package:so_thu_chi/features/debts/domain/repositories/debt_repository.dart';
+import 'package:so_thu_chi/features/ledger/data/repositories/firestore_ledger_repository.dart';
+import 'package:so_thu_chi/features/ledger/domain/repositories/ledger_repository.dart';
 import 'package:so_thu_chi/features/recurring/data/repositories/firestore_recurring_repository.dart';
 import 'package:so_thu_chi/features/recurring/domain/repositories/recurring_repository.dart';
 import 'package:so_thu_chi/features/savings/data/repositories/firestore_savings_goal_repository.dart';
@@ -63,6 +65,10 @@ final inMemorySavingsGoalRepoProvider =
   return InMemorySavingsGoalRepository(
     transactionRepository: ref.watch(inMemoryTransactionRepoProvider),
   );
+});
+
+final inMemoryLedgerRepoProvider = Provider<InMemoryLedgerRepository>((ref) {
+  return InMemoryLedgerRepository();
 });
 
 /// Bootstrapper invoked when a user signs in: idempotently seeds Vietnamese
@@ -212,6 +218,18 @@ final savingsGoalRepositoryProvider = Provider<SavingsGoalRepository>((ref) {
     firestore: firestore,
     currentUserIdGetter: () => user.uid,
     transactionRepository: txRepo,
+  );
+});
+
+final ledgerRepositoryProvider = Provider<LedgerRepository>((ref) {
+  final user = ref.watch(currentUserProvider);
+  final firestore = ref.watch(firestoreProvider);
+  if (user == null || user.isDemoUser || firestore == null) {
+    return ref.watch(inMemoryLedgerRepoProvider);
+  }
+  return FirestoreLedgerRepository(
+    firestore: firestore,
+    currentUserIdGetter: () => user.uid,
   );
 });
 

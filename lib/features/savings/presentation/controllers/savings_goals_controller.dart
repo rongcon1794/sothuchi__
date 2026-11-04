@@ -149,3 +149,4 @@ final savingsGoalsActionControllerProvider =
     NotifierProvider<SavingsGoalsActionController, AsyncValue<void>>(
   SavingsGoalsActionController.new,
 );
+

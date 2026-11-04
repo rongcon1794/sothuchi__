@@ -21,6 +21,7 @@ import 'package:so_thu_chi/features/auth/presentation/controllers/auth_controlle
 import 'package:so_thu_chi/features/budgets/presentation/controllers/budgets_controller.dart';
 import 'package:so_thu_chi/features/budgets/presentation/widgets/budget_alert_banner.dart';
 import 'package:so_thu_chi/features/categories/presentation/controllers/categories_controller.dart';
+import 'package:so_thu_chi/features/ledger/presentation/widgets/ledger_selector_pill.dart';
 import 'package:so_thu_chi/features/recurring/presentation/controllers/recurring_controller.dart';
 import 'package:so_thu_chi/features/savings/domain/entities/savings_goal.dart';
 import 'package:so_thu_chi/features/savings/presentation/controllers/savings_goals_controller.dart';
@@ -134,6 +135,8 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
           ],
         ),
         actions: [
+          const LedgerSelectorPill(),
+          const SizedBox(width: 4),
           IconButton(
             tooltip: 'Tìm kiếm giao dịch',
             onPressed: () => context.go(AppRoutes.transactions),

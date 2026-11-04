@@ -352,3 +352,4 @@ class InMemorySavingsGoalRepository implements SavingsGoalRepository {
     _controller.close();
   }
 }
+

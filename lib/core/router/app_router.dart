@@ -14,6 +14,7 @@ import 'package:so_thu_chi/features/auth/presentation/screens/splash_screen.dart
 import 'package:so_thu_chi/features/budgets/presentation/screens/budgets_screen.dart';
 import 'package:so_thu_chi/features/categories/presentation/screens/categories_screen.dart';
 import 'package:so_thu_chi/features/debts/presentation/screens/debts_screen.dart';
+import 'package:so_thu_chi/features/ledger/presentation/screens/ledgers_management_screen.dart';
 import 'package:so_thu_chi/features/recurring/presentation/screens/recurring_transactions_screen.dart';
 import 'package:so_thu_chi/features/reports/presentation/screens/reports_screen.dart';
 import 'package:so_thu_chi/features/savings/presentation/screens/savings_goals_screen.dart';
@@ -54,6 +55,7 @@ class AppScreenRegistry {
     required this.debtsBuilder,
     required this.recurringBuilder,
     required this.savingsBuilder,
+    required this.ledgersBuilder,
     required this.privacyBuilder,
     required this.aboutBuilder,
   });
@@ -73,6 +75,7 @@ class AppScreenRegistry {
   final WidgetBuilder debtsBuilder;
   final WidgetBuilder recurringBuilder;
   final WidgetBuilder savingsBuilder;
+  final WidgetBuilder ledgersBuilder;
   final WidgetBuilder privacyBuilder;
   final WidgetBuilder aboutBuilder;
 
@@ -100,6 +103,7 @@ class AppScreenRegistry {
       debtsBuilder: (_) => const DebtsScreen(),
       recurringBuilder: (_) => const RecurringTransactionsScreen(),
       savingsBuilder: (_) => const SavingsGoalsScreen(),
+      ledgersBuilder: (_) => const LedgersManagementScreen(),
       privacyBuilder: (_) => const PrivacyPolicyScreen(),
       aboutBuilder: (_) => const AboutScreen(),
     );
@@ -266,6 +270,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.savings,
         builder: (context, _) => screens.savingsBuilder(context),
+      ),
+      GoRoute(
+        path: AppRoutes.ledgers,
+        builder: (context, _) => screens.ledgersBuilder(context),
       ),
     ],
   );
