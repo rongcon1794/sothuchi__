@@ -175,6 +175,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                   avatar: const Icon(CupertinoIcons.square_grid_2x2, size: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                    side: BorderSide.none,
                   ),
                   label: Text(l10n.all),
                   selected: filter.type == null,
@@ -186,6 +187,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                   avatar: const Icon(CupertinoIcons.arrow_up_right, size: 14, color: AppleTokens.rubyExpense),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                    side: BorderSide.none,
                   ),
                   label: Text(l10n.expense),
                   selected: filter.type == TransactionType.expense,
@@ -198,6 +200,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                   avatar: const Icon(CupertinoIcons.arrow_down_left, size: 14, color: AppleTokens.emeraldIncome),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                    side: BorderSide.none,
                   ),
                   label: Text(l10n.income),
                   selected: filter.type == TransactionType.income,
@@ -210,6 +213,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                   avatar: const Icon(CupertinoIcons.arrow_right_arrow_left, size: 14, color: AppleTokens.cobaltTransfer),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                    side: BorderSide.none,
                   ),
                   label: Text(l10n.transfer),
                   selected: filter.type == TransactionType.transfer,
@@ -223,6 +227,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius:
                           BorderRadius.circular(AppleTokens.radiusPill),
+                      side: BorderSide.none,
                     ),
                     avatar: const Icon(Icons.filter_alt_off_rounded, size: 16),
                     label: Text(l10n.clearFilters),

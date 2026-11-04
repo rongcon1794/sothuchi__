@@ -62,13 +62,6 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.categoriesTitle),
-        actions: [
-          IconButton(
-            tooltip: l10n.addCategory,
-            onPressed: _openCategorySheet,
-            icon: const Icon(Icons.add_rounded),
-          ),
-        ],
       ),
       body: Column(
         children: [

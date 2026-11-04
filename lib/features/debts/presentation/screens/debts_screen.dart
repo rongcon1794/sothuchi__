@@ -38,16 +38,6 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
         centerTitle: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(CupertinoIcons.plus_circle_fill, color: AppleTokens.systemBlue, size: 28),
-            tooltip: 'Thêm khoản nợ',
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              DebtFormSheet.show(context);
-            },
-          ),
-        ],
       ),
       floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
       floatingActionButton: AppleAdaptiveExpandableFab(

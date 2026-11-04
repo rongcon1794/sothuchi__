@@ -89,17 +89,14 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
       appBar: AppBar(
         title: Text(l10n.walletsTitle),
         actions: [
-          if (activeAccounts.length >= 2)
+          if (activeAccounts.length >= 2) ...[
             IconButton(
               tooltip: l10n.transferBetweenWallets,
               onPressed: () => _openTransferSheet(context),
               icon: const Icon(Icons.swap_horiz_rounded),
             ),
-          IconButton(
-            tooltip: l10n.addWallet,
-            onPressed: () => _openWalletForm(context),
-            icon: const Icon(Icons.add_rounded),
-          ),
+            const SizedBox(width: 4),
+          ],
         ],
       ),
       body: NotificationListener<UserScrollNotification>(

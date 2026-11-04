@@ -129,19 +129,9 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
         ),
         actions: [
           IconButton(
-            tooltip: 'Sổ Ghi Nợ',
-            onPressed: () => context.push(AppRoutes.debts),
-            icon: const Icon(CupertinoIcons.person_2),
-          ),
-          IconButton(
-            tooltip: l10n.walletsTitle,
-            onPressed: () => context.push(AppRoutes.accounts),
-            icon: const Icon(CupertinoIcons.creditcard),
-          ),
-          IconButton(
-            tooltip: l10n.categoriesTitle,
-            onPressed: () => context.push(AppRoutes.categories),
-            icon: const Icon(CupertinoIcons.square_grid_2x2),
+            tooltip: 'Tìm kiếm giao dịch',
+            onPressed: () => context.go(AppRoutes.transactions),
+            icon: const Icon(CupertinoIcons.search),
           ),
           const SizedBox(width: 4),
         ],
@@ -253,7 +243,7 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                 height: walletStripHeight,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
-                  itemCount: activeWallets.length + 2,
+                  itemCount: activeWallets.length + 1,
                   separatorBuilder: (_, _) => const SizedBox(width: 10),
                   itemBuilder: (context, index) {
                     if (index < activeWallets.length) {
@@ -263,11 +253,6 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                         locale: locale,
                         hideBalance: hideBalance,
                         onTap: () => context.push(AppRoutes.accounts),
-                      );
-                    }
-                    if (index == activeWallets.length) {
-                      return _MiniDebtCard(
-                        onTap: () => context.push(AppRoutes.debts),
                       );
                     }
                     return _AddWalletCard(
@@ -432,31 +417,19 @@ class _HeroBalanceCard extends StatelessWidget {
               Expanded(
                 child: Row(
                   children: [
-                    // Apple Wallet EMV Chip Ornament
-                    Container(
-                      width: 28,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.amber.shade200.withValues(alpha: 0.8),
-                            Colors.amber.shade400.withValues(alpha: 0.8),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.3),
-                          width: AppleTokens.hairline,
-                        ),
-                      ),
+                    Icon(
+                      CupertinoIcons.shield_fill,
+                      size: 15,
+                      color: fgColor.withValues(alpha: 0.8),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 8),
                     Text(
-                      l10n.totalBalance,
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: fgColor.withValues(alpha: 0.9),
-                        letterSpacing: 0.2,
-                        fontWeight: FontWeight.w600,
+                      l10n.totalBalance.toUpperCase(),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: fgColor.withValues(alpha: 0.85),
+                        letterSpacing: 0.8,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 11.5,
                       ),
                     ),
                   ],
@@ -581,10 +554,10 @@ class _HomeQuickActionBar extends StatelessWidget {
             onTap: () => context.push(AppRoutes.debts),
           ),
           _QuickActionItem(
-            icon: CupertinoIcons.chart_pie,
-            label: 'Ngân sách',
+            icon: CupertinoIcons.square_grid_2x2,
+            label: 'Danh mục',
             color: AppleTokens.systemOrange,
-            onTap: () => context.push(AppRoutes.budgets),
+            onTap: () => context.push(AppRoutes.categories),
           ),
         ],
       ),
@@ -674,51 +647,50 @@ class _CashflowMetricCard extends StatelessWidget {
     final theme = Theme.of(context);
     return ApplePressable(
       borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 34,
-                    height: 34,
-                    decoration: BoxDecoration(
-                      color: containerColor,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(icon, size: 18, color: onContainerColor),
+      child: AppleGlassCard(
+        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: containerColor,
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                amountText,
-                semanticsLabel: semanticsAmount,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: accentColor,
-                  fontWeight: FontWeight.w700,
-                  fontFeatures: AppTheme.tabularFigures,
+                  child: Icon(icon, size: 18, color: onContainerColor),
                 ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              amountText,
+              semanticsLabel: semanticsAmount,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: accentColor,
+                fontWeight: FontWeight.w700,
+                fontFeatures: AppTheme.tabularFigures,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -758,86 +730,14 @@ class _MiniWalletCard extends StatelessWidget {
       child: ApplePressable(
         borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
         onTap: onTap,
-        child: Card(
-          clipBehavior: Clip.antiAlias,
+        child: AppleGlassCard(
+          borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+          padding: const EdgeInsets.all(12),
           child: Semantics(
             button: true,
             excludeSemantics: true,
             label:
                 '${account.name}, ${hideBalance ? l10n.balanceHidden : formattedBalance}',
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 28,
-                        height: 28,
-                        decoration: BoxDecoration(
-                          color: color.withValues(alpha: 0.16),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(
-                          AppIconCatalog.resolve(account.icon),
-                          size: 16,
-                          color: color,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          account.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Text(
-                    formattedBalance,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      fontFeatures: AppTheme.tabularFigures,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _MiniDebtCard extends StatelessWidget {
-  const _MiniDebtCard({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textScale = MediaQuery.textScalerOf(context).scale(1);
-    final cardWidth = math.max(168.0, 136.0 * textScale);
-
-    return SizedBox(
-      width: cardWidth,
-      child: ApplePressable(
-        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-        onTap: onTap,
-        child: Card(
-          clipBehavior: Clip.antiAlias,
-          child: Padding(
-            padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -848,19 +748,19 @@ class _MiniDebtCard extends StatelessWidget {
                       width: 28,
                       height: 28,
                       decoration: BoxDecoration(
-                        color: AppleTokens.systemIndigo.withValues(alpha: 0.16),
+                        color: color.withValues(alpha: 0.16),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(
-                        CupertinoIcons.person_2_fill,
+                      child: Icon(
+                        AppIconCatalog.resolve(account.icon),
                         size: 16,
-                        color: AppleTokens.systemIndigo,
+                        color: color,
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Sổ Ghi Nợ',
+                        account.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.labelLarge?.copyWith(
@@ -871,12 +771,12 @@ class _MiniDebtCard extends StatelessWidget {
                   ],
                 ),
                 Text(
-                  'Cho vay & Vay',
+                  formattedBalance,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleSmall?.copyWith(
-                    color: AppleTokens.systemIndigo,
                     fontWeight: FontWeight.w700,
+                    fontFeatures: AppTheme.tabularFigures,
                   ),
                 ),
               ],
