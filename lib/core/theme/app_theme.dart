@@ -144,6 +144,18 @@ class FinanceColors extends ThemeExtension<FinanceColors> {
 /// Material 3 "Jade Ledger" design system with dynamic seed color & tabular numerals.
 abstract final class AppTheme {
   static const Color seedColor = Color(0xFF00A86B);
+  static const List<Color> palettes = [
+    Color(0xFF00A86B), // Ngọc Bích (Fresh Jade)
+    Color(0xFF007AFF), // Đại Dương (Ocean Blue)
+    Color(0xFFFF9500), // Hoàng Hôn (Sunset Amber)
+    Color(0xFFAF52DE), // Thạch Anh (Amethyst Violet)
+  ];
+  static const List<String> paletteNames = [
+    'Ngọc Bích',
+    'Đại Dương',
+    'Hoàng Hôn',
+    'Thạch Anh',
+  ];
   static const List<FontFeature> tabularFigures = [
     FontFeature.tabularFigures(),
   ];

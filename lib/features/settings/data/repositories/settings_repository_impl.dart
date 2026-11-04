@@ -19,6 +19,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
   static const String _keyHideBalance = 'settings.hide_balance';
   static const String _keyOnboardingDone = 'settings.onboarding_completed';
   static const String _keyBiometricLock = 'settings.biometric_lock_enabled';
+  static const String _keyAccentColor = 'settings.accent_color_index';
 
   final SharedPreferences prefs;
   final FlutterSecureStorage secureStorage;
@@ -38,6 +39,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
     ).code;
     final hideBalance = prefs.getBool(_keyHideBalance) ?? false;
     final onboardingCompleted = prefs.getBool(_keyOnboardingDone) ?? false;
+    final accentColorIndex = prefs.getInt(_keyAccentColor) ?? 0;
 
     var biometricEnabled = false;
     try {
@@ -54,6 +56,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
       biometricLockEnabled: biometricEnabled,
       hideBalance: hideBalance,
       onboardingCompleted: onboardingCompleted,
+      accentColorIndex: accentColorIndex,
     );
   }
 
@@ -123,6 +126,16 @@ class SettingsRepositoryImpl implements SettingsRepository {
   Future<Result<void>> setOnboardingCompleted(bool completed) async {
     try {
       await prefs.setBool(_keyOnboardingDone, completed);
+      return const Success(null);
+    } catch (e) {
+      return Failure(StorageException(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> setAccentColorIndex(int index) async {
+    try {
+      await prefs.setInt(_keyAccentColor, index);
       return const Success(null);
     } catch (e) {
       return Failure(StorageException(e.toString()));

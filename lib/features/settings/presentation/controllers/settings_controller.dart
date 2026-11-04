@@ -109,6 +109,15 @@ class SettingsController extends AsyncNotifier<AppSettings> {
     }
     return res;
   }
+
+  Future<Result<void>> updateAccentColor(int index) async {
+    final repo = ref.read(settingsRepositoryProvider);
+    final res = await repo.setAccentColorIndex(index);
+    if (res.isSuccess) {
+      state = AsyncData(currentOrDefaults.copyWith(accentColorIndex: index));
+    }
+    return res;
+  }
 }
 
 final settingsControllerProvider =

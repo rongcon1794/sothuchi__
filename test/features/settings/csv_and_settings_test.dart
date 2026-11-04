@@ -187,6 +187,46 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.textContaining('Đã tạo tệp CSV'), findsOneWidget);
     });
+
+    testWidgets('renders and updates theme accent palette', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      FlutterSecureStorage.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      final fakeBio = FakeBiometricService();
+      final fakeCsv = FakeWidgetCsvExportService();
+      final accRepo = InMemoryAccountRepository();
+      final catRepo = InMemoryCategoryRepository();
+      final txRepo = InMemoryTransactionRepository(accountRepo: accRepo);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            biometricServiceProvider.overrideWithValue(fakeBio),
+            csvExportServiceProvider.overrideWithValue(fakeCsv),
+            accountRepositoryProvider.overrideWithValue(accRepo),
+            categoryRepositoryProvider.overrideWithValue(catRepo),
+            transactionRepositoryProvider.overrideWithValue(txRepo),
+          ],
+          child: MaterialApp(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: AppTheme.light(),
+            home: const SettingsScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Gam màu chủ đạo'), findsOneWidget);
+    });
   });
 }
 

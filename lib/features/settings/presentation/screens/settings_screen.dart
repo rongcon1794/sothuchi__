@@ -1,10 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
+import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_controller.dart';
@@ -686,6 +688,71 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           tooltip: l10n.themeDark,
                           accentColor: AppleTokens.systemIndigo,
                         ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: Row(
+                  children: [
+                    const AppleSquircleBadge(
+                      icon: CupertinoIcons.sparkles,
+                      backgroundColor: AppleTokens.systemPink,
+                    ),
+                    const SizedBox(width: 14),
+                    const Expanded(
+                      child: Text(
+                        'Gam màu chủ đạo',
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                      ),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        for (int i = 0; i < AppTheme.palettes.length; i++) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: ApplePressable(
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                ref
+                                    .read(settingsControllerProvider.notifier)
+                                    .updateAccentColor(i);
+                              },
+                              child: Container(
+                                width: 28,
+                                height: 28,
+                                decoration: BoxDecoration(
+                                  color: AppTheme.palettes[i],
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: (settings.accentColorIndex == i)
+                                        ? (isDark ? Colors.white : Colors.black87)
+                                        : Colors.transparent,
+                                    width: 2.5,
+                                  ),
+                                  boxShadow: [
+                                    if (settings.accentColorIndex == i)
+                                      BoxShadow(
+                                        color: AppTheme.palettes[i].withValues(alpha: 0.4),
+                                        blurRadius: 6,
+                                        spreadRadius: 1,
+                                      ),
+                                  ],
+                                ),
+                                child: settings.accentColorIndex == i
+                                    ? const Icon(
+                                        CupertinoIcons.checkmark,
+                                        size: 14,
+                                        color: Colors.white,
+                                      )
+                                    : null,
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ],

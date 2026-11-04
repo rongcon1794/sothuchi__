@@ -10,5 +10,6 @@ abstract interface class SettingsRepository {
   Future<Result<void>> setBiometricLockEnabled(bool enabled);
   Future<Result<void>> setHideBalance(bool hidden);
   Future<Result<void>> setOnboardingCompleted(bool completed);
+  Future<Result<void>> setAccentColorIndex(int index);
 }
 
