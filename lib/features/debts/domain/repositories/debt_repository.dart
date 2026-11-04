@@ -38,3 +38,4 @@ abstract interface class DebtRepository {
   /// Soft deletes a debt record.
   Future<Result<void>> softDeleteDebt(String id);
 }
+

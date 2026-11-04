@@ -126,49 +126,52 @@ class _BiometricLockGateState extends ConsumerState<BiometricLockGate>
           child: Material(
             color: scheme.surface,
             child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 84,
-                      height: 84,
-                      decoration: BoxDecoration(
-                        color: scheme.primaryContainer,
-                        shape: BoxShape.circle,
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 84,
+                        height: 84,
+                        decoration: BoxDecoration(
+                          color: scheme.primaryContainer,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.fingerprint_rounded,
+                          size: 44,
+                          color: scheme.primary,
+                        ),
                       ),
-                      child: Icon(
-                        Icons.fingerprint_rounded,
-                        size: 44,
-                        color: scheme.primary,
+                      const SizedBox(height: 24),
+                      Semantics(
+                        header: true,
+                        liveRegion: true,
+                        child: Text(
+                          l10n.appLockedTitle,
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.headlineSmall,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    Semantics(
-                      header: true,
-                      liveRegion: true,
-                      child: Text(
-                        l10n.appLockedTitle,
+                      const SizedBox(height: 10),
+                      Text(
+                        l10n.appLockedSubtitle,
                         textAlign: TextAlign.center,
-                        style: theme.textTheme.headlineSmall,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      l10n.appLockedSubtitle,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: scheme.onSurfaceVariant,
+                      const SizedBox(height: 28),
+                      FilledButton.icon(
+                        onPressed: _authenticating ? null : _triggerUnlock,
+                        icon: const Icon(Icons.lock_open_rounded),
+                        label: Text(l10n.unlockNow),
                       ),
-                    ),
-                    const SizedBox(height: 28),
-                    FilledButton.icon(
-                      onPressed: _authenticating ? null : _triggerUnlock,
-                      icon: const Icon(Icons.lock_open_rounded),
-                      label: Text(l10n.unlockNow),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

@@ -123,6 +123,24 @@ function validBudget(id = 'budget_overall_2026_03') {
   };
 }
 
+function validDebt(id = 'debt_1') {
+  return {
+    id,
+    personName: 'Nguyễn Văn Nam',
+    phoneNumber: '0901234567',
+    type: 'lent',
+    amount: 1500000,
+    remainingAmount: 1500000,
+    currency: 'VND',
+    dueDate: t2,
+    accountId: 'acc_cash',
+    note: 'Vay tiền mua vé máy bay',
+    createdAt: t0,
+    updatedAt: t0,
+    deletedAt: null,
+  };
+}
+
 let testEnv;
 
 describe('Sổ Thu Chi — Firestore Security Rules', () => {
@@ -451,5 +469,91 @@ describe('Sổ Thu Chi — Firestore Security Rules', () => {
     await assertFails(
       updateDoc(accRef, { balance: increment(12.34), updatedAt: t2 }),
     );
+  });
+
+  it('enforces /users/{uid}/debts/{debtId} ownership, schema, repayment bounds, and immutability', async () => {
+    const aliceDb = testEnv.authenticatedContext(ALICE_UID).firestore();
+    const bobDb = testEnv.authenticatedContext(BOB_UID).firestore();
+
+    const accRef = doc(aliceDb, `users/${ALICE_UID}/accounts/acc_cash`);
+    const debtRef = doc(aliceDb, `users/${ALICE_UID}/debts/debt_1`);
+    const borrowedRef = doc(aliceDb, `users/${ALICE_UID}/debts/debt_2`);
+
+    await assertSucceeds(setDoc(accRef, validAccount('acc_cash')));
+
+    // Owner create lent & borrowed debts (with optional nullable fields)
+    await assertSucceeds(setDoc(debtRef, validDebt('debt_1')));
+    await assertSucceeds(
+      setDoc(borrowedRef, {
+        ...validDebt('debt_2'),
+        type: 'borrowed',
+        phoneNumber: null,
+        dueDate: null,
+        accountId: null,
+      }),
+    );
+
+    // Cross-user read/update/delete denied
+    await assertFails(getDoc(doc(bobDb, `users/${ALICE_UID}/debts/debt_1`)));
+    await assertFails(
+      updateDoc(doc(bobDb, `users/${ALICE_UID}/debts/debt_1`), {
+        remainingAmount: 0,
+        updatedAt: t1,
+      }),
+    );
+    await assertFails(deleteDoc(doc(bobDb, `users/${ALICE_UID}/debts/debt_1`)));
+
+    // Repayment batch update (remainingAmount reduced, then paid in full = 0)
+    const repayBatch = writeBatch(aliceDb);
+    repayBatch.update(debtRef, { remainingAmount: 500000, updatedAt: t1 });
+    repayBatch.update(accRef, { balance: increment(1000000), updatedAt: t1 });
+    await assertSucceeds(repayBatch.commit());
+    await assertSucceeds(
+      updateDoc(debtRef, { remainingAmount: 0, updatedAt: t2 }),
+    );
+
+    // Rejects remainingAmount > amount, remainingAmount < 0, and floats
+    await assertFails(
+      updateDoc(debtRef, { remainingAmount: 1500001, updatedAt: t2 }),
+    );
+    await assertFails(
+      updateDoc(debtRef, { remainingAmount: -1, updatedAt: t2 }),
+    );
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/debts/debt_float`), {
+        ...validDebt('debt_float'),
+        amount: 100.5,
+        remainingAmount: 50,
+      }),
+    );
+
+    // Rejects invalid debt type, oversized phoneNumber (> 20 chars), and extraneous keys
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/debts/debt_bad_type`), {
+        ...validDebt('debt_bad_type'),
+        type: 'mortgage',
+      }),
+    );
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/debts/debt_bad_phone`), {
+        ...validDebt('debt_bad_phone'),
+        phoneNumber: '012345678901234567890',
+      }),
+    );
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/debts/debt_extra`), {
+        ...validDebt('debt_extra'),
+        extra: true,
+      }),
+    );
+
+    // Protects immutable `id` and `createdAt` on update
+    await assertFails(updateDoc(debtRef, { id: 'hijacked', updatedAt: t2 }));
+    await assertFails(updateDoc(debtRef, { createdAt: t2, updatedAt: t2 }));
+
+    // Allows soft-delete and hard-delete for owner
+    await assertSucceeds(updateDoc(debtRef, { deletedAt: t2, updatedAt: t2 }));
+    await assertSucceeds(deleteDoc(debtRef));
+    await assertSucceeds(deleteDoc(borrowedRef));
   });
 });

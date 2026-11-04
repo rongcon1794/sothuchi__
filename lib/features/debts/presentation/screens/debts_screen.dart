@@ -98,12 +98,16 @@ class DebtsScreen extends ConsumerWidget {
                                     ],
                                   ),
                                   const SizedBox(height: 10),
-                                  Text(
-                                    summary.totalLent.format(locale: 'vi'),
-                                    style: const TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w800,
-                                      color: AppleTokens.systemGreen,
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      summary.totalLent.format(locale: 'vi'),
+                                      style: const TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w800,
+                                        color: AppleTokens.systemGreen,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -139,12 +143,16 @@ class DebtsScreen extends ConsumerWidget {
                                     ],
                                   ),
                                   const SizedBox(height: 10),
-                                  Text(
-                                    summary.totalBorrowed.format(locale: 'vi'),
-                                    style: const TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w800,
-                                      color: AppleTokens.systemOrange,
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      summary.totalBorrowed.format(locale: 'vi'),
+                                      style: const TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w800,
+                                        color: AppleTokens.systemOrange,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -422,12 +430,19 @@ class _DebtCard extends ConsumerWidget {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
-              Text(
-                debt.remainingMoney.format(locale: 'vi'),
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: accentColor,
+              const SizedBox(width: 8),
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    debt.remainingMoney.format(locale: 'vi'),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: accentColor,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -452,10 +467,14 @@ class _DebtCard extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Tổng nợ: ${debt.totalMoney.format(locale: 'vi')}',
-                style: TextStyle(fontSize: 11.5, color: theme.colorScheme.onSurfaceVariant),
+              Expanded(
+                child: Text(
+                  'Tổng nợ: ${debt.totalMoney.format(locale: 'vi')}',
+                  style: TextStyle(fontSize: 11.5, color: theme.colorScheme.onSurfaceVariant),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
+              const SizedBox(width: 8),
               if (debt.dueDate != null)
                 Row(
                   mainAxisSize: MainAxisSize.min,

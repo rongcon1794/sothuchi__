@@ -115,6 +115,9 @@ class _DebtRepaymentSheetState extends ConsumerState<DebtRepaymentSheet> {
     final title = isLent ? 'Thu hồi nợ từ ${widget.debt.personName}' : 'Trả nợ cho ${widget.debt.personName}';
 
     return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.88,
+      ),
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom + 24,
         left: 20,
@@ -125,10 +128,11 @@ class _DebtRepaymentSheetState extends ConsumerState<DebtRepaymentSheet> {
         color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightPrimary,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(AppleTokens.radiusHero)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
           // Cupertino Grabber
           Center(
             child: Container(
@@ -320,7 +324,9 @@ class _DebtRepaymentSheetState extends ConsumerState<DebtRepaymentSheet> {
             ),
           ),
         ],
+        ),
       ),
     );
   }
 }
+

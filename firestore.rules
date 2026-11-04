@@ -78,6 +78,22 @@ rules_version = '2';
 //      - updatedAt: timestamp (required)
 //      - deletedAt: timestamp | null (optional)
 //
+// 6. Collection: users/{uid}/debts/{debtId} (DebtDto)
+//    Fields:
+//      - id: string (required, 1..128 chars, immutable)
+//      - personName: string (required, 1..100 chars)
+//      - phoneNumber: string | null (optional, 1..20 chars when string)
+//      - type: string in ['lent', 'borrowed'] (required)
+//      - amount: int (required, > 0, integer minor units; never float)
+//      - remainingAmount: int (required, 0..amount, integer minor units; never float)
+//      - currency: string in ['VND', 'USD', 'EUR', 'JPY', 'KRW'] (required)
+//      - dueDate: timestamp | null (optional)
+//      - accountId: string | null (optional, 1..128 chars when string)
+//      - note: string (required, 0..1000 chars)
+//      - createdAt: timestamp (required, immutable)
+//      - updatedAt: timestamp (required)
+//      - deletedAt: timestamp | null (optional)
+//
 // ===============================================================
 
 service cloud.firestore {
@@ -435,6 +451,54 @@ service cloud.firestore {
              isOptionalNullableTimestamp(data, 'deletedAt');
     }
 
+    function isValidDebt(data) {
+      let requiredKeys = [
+        'id',
+        'personName',
+        'type',
+        'amount',
+        'remainingAmount',
+        'currency',
+        'note',
+        'createdAt',
+        'updatedAt'
+      ];
+      let allowedKeys = [
+        'id',
+        'personName',
+        'phoneNumber',
+        'type',
+        'amount',
+        'remainingAmount',
+        'currency',
+        'dueDate',
+        'accountId',
+        'note',
+        'createdAt',
+        'updatedAt',
+        'deletedAt'
+      ];
+
+      return hasRequiredKeys(data, requiredKeys) &&
+             hasOnlyAllowedKeys(data, allowedKeys) &&
+             isBoundedString(data.id, 1, 128) &&
+             isBoundedString(data.personName, 1, 100) &&
+             isOptionalNullableString(data, 'phoneNumber', 1, 20) &&
+             data.type is string &&
+             data.type in ['lent', 'borrowed'] &&
+             isValidPositiveMinorUnits(data.amount) &&
+             data.remainingAmount is int &&
+             data.remainingAmount >= 0 &&
+             data.remainingAmount <= data.amount &&
+             isValidCurrency(data.currency) &&
+             isOptionalNullableTimestamp(data, 'dueDate') &&
+             isOptionalNullableString(data, 'accountId', 1, 128) &&
+             isBoundedString(data.note, 0, 1000) &&
+             data.createdAt is timestamp &&
+             data.updatedAt is timestamp &&
+             isOptionalNullableTimestamp(data, 'deletedAt');
+    }
+
     // ===============================================================
     // User Namespace & Subcollection Rules
     // ===============================================================
@@ -488,6 +552,17 @@ service cloud.firestore {
                          isValidBudget(request.resource.data);
         allow update: if isOwner(uid) &&
                          isValidBudget(request.resource.data) &&
+                         isIdUnchanged() &&
+                         isCreatedAtUnchanged();
+        allow delete: if isOwner(uid);
+      }
+
+      match /debts/{debtId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) &&
+                         isValidDebt(request.resource.data);
+        allow update: if isOwner(uid) &&
+                         isValidDebt(request.resource.data) &&
                          isIdUnchanged() &&
                          isCreatedAtUnchanged();
         allow delete: if isOwner(uid);

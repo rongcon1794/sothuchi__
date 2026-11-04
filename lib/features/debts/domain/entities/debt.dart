@@ -134,3 +134,4 @@ class DebtSummary {
   final Money netBalance;
   final int overdueCount;
 }
+
