@@ -63,41 +63,33 @@ class AppShellScaffold extends StatelessWidget {
     ];
 
     return Scaffold(
-      extendBody: true,
       body: Column(
         children: [
           ?topBanner,
           Expanded(child: navigationShell),
         ],
       ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Container(
-          margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
-            boxShadow: isDark
-                ? AppleTokens.floatingBarShadowDark
-                : AppleTokens.floatingBarShadowLight,
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-              child: Container(
-                height: 64,
-                decoration: BoxDecoration(
+      bottomNavigationBar: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+          child: Container(
+            decoration: BoxDecoration(
+              color: isDark
+                  ? const Color(0xFF1C1C1E).withValues(alpha: 0.88)
+                  : Colors.white.withValues(alpha: 0.88),
+              border: Border(
+                top: BorderSide(
                   color: isDark
-                      ? const Color(0xFF1C1C1E).withValues(alpha: 0.82)
-                      : Colors.white.withValues(alpha: 0.85),
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
-                  border: Border.all(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.12)
-                        : Colors.black.withValues(alpha: 0.06),
-                    width: AppleTokens.hairline,
-                  ),
+                      ? Colors.white.withValues(alpha: 0.12)
+                      : Colors.black.withValues(alpha: 0.08),
+                  width: AppleTokens.hairline,
                 ),
+              ),
+            ),
+            child: SafeArea(
+              top: false,
+              child: SizedBox(
+                height: 52,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [

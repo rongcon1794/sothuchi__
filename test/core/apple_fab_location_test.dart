@@ -40,10 +40,9 @@ void main() {
 
       final fabRect = tester.getRect(fabFinder);
 
-      // Total bottom clearance:
-      // Bar height (64) + bottom margin (8) + gap (16) = 88 + safeArea (34) = 122
-      // Screen height: 844. FAB bottom should be: 844 - 122 = 722.
-      expect(fabRect.bottom, 722.0);
+      // Standard bottom clearance: 16px from bottom
+      // Screen height: 844. FAB bottom should be: 844 - 16 = 828.
+      expect(fabRect.bottom, 828.0);
 
       // FAB is aligned to the right margin (16px from right edge):
       // 390 - 16 = 374.
@@ -90,3 +89,4 @@ void main() {
     });
   });
 }
+
