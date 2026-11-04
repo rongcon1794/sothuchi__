@@ -115,3 +115,4 @@ class _AppleAnimatedMoneyTextState extends State<AppleAnimatedMoneyText>
     );
   }
 }
+

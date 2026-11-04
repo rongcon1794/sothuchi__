@@ -14,6 +14,8 @@ import 'package:so_thu_chi/features/debts/data/repositories/firestore_debt_repos
 import 'package:so_thu_chi/features/debts/domain/repositories/debt_repository.dart';
 import 'package:so_thu_chi/features/recurring/data/repositories/firestore_recurring_repository.dart';
 import 'package:so_thu_chi/features/recurring/domain/repositories/recurring_repository.dart';
+import 'package:so_thu_chi/features/savings/data/repositories/firestore_savings_goal_repository.dart';
+import 'package:so_thu_chi/features/savings/domain/repositories/savings_goal_repository.dart';
 import 'package:so_thu_chi/features/reports/data/repositories/reports_repository_impl.dart';
 import 'package:so_thu_chi/features/reports/domain/repositories/reports_repository.dart';
 import 'package:so_thu_chi/features/settings/data/repositories/settings_repository_impl.dart';
@@ -52,6 +54,13 @@ final inMemoryDebtRepoProvider = Provider<InMemoryDebtRepository>((ref) {
 
 final inMemoryRecurringRepoProvider = Provider<InMemoryRecurringRepository>((ref) {
   return InMemoryRecurringRepository(
+    transactionRepository: ref.watch(inMemoryTransactionRepoProvider),
+  );
+});
+
+final inMemorySavingsGoalRepoProvider =
+    Provider<InMemorySavingsGoalRepository>((ref) {
+  return InMemorySavingsGoalRepository(
     transactionRepository: ref.watch(inMemoryTransactionRepoProvider),
   );
 });
@@ -186,6 +195,20 @@ final recurringRepositoryProvider = Provider<RecurringRepository>((ref) {
     return ref.watch(inMemoryRecurringRepoProvider);
   }
   return FirestoreRecurringRepository(
+    firestore: firestore,
+    currentUserIdGetter: () => user.uid,
+    transactionRepository: txRepo,
+  );
+});
+
+final savingsGoalRepositoryProvider = Provider<SavingsGoalRepository>((ref) {
+  final user = ref.watch(currentUserProvider);
+  final firestore = ref.watch(firestoreProvider);
+  final txRepo = ref.watch(transactionRepositoryProvider);
+  if (user == null || user.isDemoUser || firestore == null) {
+    return ref.watch(inMemorySavingsGoalRepoProvider);
+  }
+  return FirestoreSavingsGoalRepository(
     firestore: firestore,
     currentUserIdGetter: () => user.uid,
     transactionRepository: txRepo,

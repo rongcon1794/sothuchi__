@@ -16,6 +16,7 @@ import 'package:so_thu_chi/features/categories/presentation/screens/categories_s
 import 'package:so_thu_chi/features/debts/presentation/screens/debts_screen.dart';
 import 'package:so_thu_chi/features/recurring/presentation/screens/recurring_transactions_screen.dart';
 import 'package:so_thu_chi/features/reports/presentation/screens/reports_screen.dart';
+import 'package:so_thu_chi/features/savings/presentation/screens/savings_goals_screen.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:so_thu_chi/features/settings/presentation/screens/about_screen.dart';
 import 'package:so_thu_chi/features/settings/presentation/screens/privacy_policy_screen.dart';
@@ -52,6 +53,7 @@ class AppScreenRegistry {
     required this.categoriesBuilder,
     required this.debtsBuilder,
     required this.recurringBuilder,
+    required this.savingsBuilder,
     required this.privacyBuilder,
     required this.aboutBuilder,
   });
@@ -70,6 +72,7 @@ class AppScreenRegistry {
   final WidgetBuilder categoriesBuilder;
   final WidgetBuilder debtsBuilder;
   final WidgetBuilder recurringBuilder;
+  final WidgetBuilder savingsBuilder;
   final WidgetBuilder privacyBuilder;
   final WidgetBuilder aboutBuilder;
 
@@ -96,6 +99,7 @@ class AppScreenRegistry {
       categoriesBuilder: (_) => const CategoriesScreen(),
       debtsBuilder: (_) => const DebtsScreen(),
       recurringBuilder: (_) => const RecurringTransactionsScreen(),
+      savingsBuilder: (_) => const SavingsGoalsScreen(),
       privacyBuilder: (_) => const PrivacyPolicyScreen(),
       aboutBuilder: (_) => const AboutScreen(),
     );
@@ -258,6 +262,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.recurring,
         builder: (context, _) => screens.recurringBuilder(context),
+      ),
+      GoRoute(
+        path: AppRoutes.savings,
+        builder: (context, _) => screens.savingsBuilder(context),
       ),
     ],
   );

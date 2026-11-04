@@ -9,3 +9,4 @@ abstract class RecurringRepository {
   Future<Result<void>> togglePause(String id, bool isPaused);
   Future<Result<void>> executeRecurring(String id);
 }
+

@@ -22,6 +22,9 @@ import 'package:so_thu_chi/features/budgets/presentation/controllers/budgets_con
 import 'package:so_thu_chi/features/budgets/presentation/widgets/budget_alert_banner.dart';
 import 'package:so_thu_chi/features/categories/presentation/controllers/categories_controller.dart';
 import 'package:so_thu_chi/features/recurring/presentation/controllers/recurring_controller.dart';
+import 'package:so_thu_chi/features/savings/domain/entities/savings_goal.dart';
+import 'package:so_thu_chi/features/savings/presentation/controllers/savings_goals_controller.dart';
+import 'package:so_thu_chi/features/savings/presentation/widgets/savings_arc_progress.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
 import 'package:so_thu_chi/features/transactions/presentation/widgets/transaction_tile.dart';
@@ -62,6 +65,7 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
     final customBudgetBanner = ref.watch(dashboardBudgetAlertSlotProvider);
     final triggeredBudgets = ref.watch(currentMonthTriggeredBudgetsProvider);
     final dueBills = ref.watch(dueRecurringListProvider);
+    final activeGoals = ref.watch(activeSavingsGoalsProvider);
     final budgetAlertBanner =
         customBudgetBanner ??
         (triggeredBudgets.isNotEmpty ? const BudgetAlertBanner() : null);
@@ -297,6 +301,42 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                 ),
               ),
               const SizedBox(height: 20),
+
+              // Active Savings Goals Strip
+              if (activeGoals.isNotEmpty) ...[
+                Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'Heo đất & Tiết kiệm',
+                        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => context.push(AppRoutes.savings),
+                      child: Text(l10n.viewAll),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                SizedBox(
+                  height: 94,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: activeGoals.length,
+                    separatorBuilder: (_, _) => const SizedBox(width: 10),
+                    itemBuilder: (context, index) {
+                      final goal = activeGoals[index];
+                      return _MiniSavingsGoalCard(
+                        goal: goal,
+                        hideBalance: hideBalance,
+                        onTap: () => context.push(AppRoutes.savings),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
 
               // Recent Transactions Header
               Row(
@@ -870,6 +910,110 @@ class _AddWalletCard extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniSavingsGoalCard extends StatelessWidget {
+  const _MiniSavingsGoalCard({
+    required this.goal,
+    required this.hideBalance,
+    required this.onTap,
+  });
+
+  final SavingsGoal goal;
+  final bool hideBalance;
+  final VoidCallback onTap;
+
+  IconData _resolveIcon(String key) {
+    switch (key) {
+      case 'house':
+        return CupertinoIcons.house;
+      case 'car':
+        return CupertinoIcons.car;
+      case 'airplane':
+        return CupertinoIcons.airplane;
+      case 'shield':
+        return CupertinoIcons.shield_fill;
+      case 'laptop':
+        return CupertinoIcons.device_laptop;
+      case 'gift':
+        return CupertinoIcons.gift;
+      case 'heart':
+        return CupertinoIcons.heart_fill;
+      case 'star':
+        return CupertinoIcons.star_fill;
+      case 'bag':
+        return CupertinoIcons.bag;
+      case 'piggy_bank':
+      default:
+        return CupertinoIcons.cube_box;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final accentColor = Color(goal.color);
+
+    return ApplePressable(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+      child: Container(
+        width: 220,
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: isDark ? AppleTokens.bgDarkCard : Colors.white,
+          borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+          border: Border.all(
+            color: accentColor.withValues(alpha: isDark ? 0.25 : 0.2),
+            width: AppleTokens.hairline,
+          ),
+        ),
+        child: Row(
+          children: [
+            SavingsArcProgressIndicator(
+              progress: goal.progress,
+              color: accentColor,
+              size: 48,
+              strokeWidth: 4.5,
+              child: Icon(
+                _resolveIcon(goal.icon),
+                size: 18,
+                color: accentColor,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    goal.title,
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    goal.currentMoney.format(locale: 'vi', masked: hideBalance),
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${goal.progressPercent}% của ${goal.targetMoney.format(locale: 'vi', masked: hideBalance)}',
+                    style: const TextStyle(fontSize: 10, color: AppleTokens.systemGray),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
