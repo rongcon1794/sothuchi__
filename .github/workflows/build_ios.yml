@@ -1,4 +1,4 @@
-name: Build iOS IPA
+name: Build Mobile Apps (Android & iOS)
 
 on:
   workflow_dispatch: # Cho phép nhấn nút "Run workflow" thủ công trên GitHub bất cứ lúc nào
@@ -6,9 +6,9 @@ on:
     branches: [ main, master ]
 
 jobs:
-  build-ios:
-    name: Build iOS IPA (Unsigned / Ad-hoc)
-    runs-on: macos-15 # Máy Mac Apple Silicon macOS 15 Sequoia (Xcode 16.2+ / Swift 6.2+)
+  build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest # Chạy trên Ubuntu với tài nguyên dồi dào, bắt đầu ngay lập tức không bị nghẽn queue
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -18,6 +18,37 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.9'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies & Generate code
+        run: |
+          flutter pub get
+          flutter gen-l10n
+          dart run build_runner build --delete-conflicting-outputs || dart run build_runner build
+
+      - name: Build Android APK (.apk)
+        run: |
+          flutter build apk --release
+
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SoThuChi-Android-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 7
+
+  build-ios:
+    name: Build iOS IPA (Unsigned / Ad-hoc)
+    runs-on: macos-14 # Sử dụng macos-14 ổn định, pool runner lớn hơn nhiều so với macos-15 (tránh lỗi runner capacity)
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -38,10 +69,6 @@ jobs:
           dart run build_runner build --delete-conflicting-outputs || dart run build_runner build
           cd ios && pod install && cd ..
 
-      - name: Build Android APK (.apk)
-        run: |
-          flutter build apk --release
-
       - name: Build iOS App (.app)
         run: |
           flutter build ios --release --no-codesign
@@ -55,12 +82,9 @@ jobs:
           zip -r SoThuChi.ipa Payload
           cd ../../..
 
-      - name: Upload IPA & APK Artifacts
+      - name: Upload iOS IPA
         uses: actions/upload-artifact@v4
         with:
-          name: SoThuChi-Builds
-          path: |
-            build/ios/iphoneos/SoThuChi.ipa
-            build/app/outputs/flutter-apk/app-release.apk
+          name: SoThuChi-iOS-IPA
+          path: build/ios/iphoneos/SoThuChi.ipa
           retention-days: 7
-
