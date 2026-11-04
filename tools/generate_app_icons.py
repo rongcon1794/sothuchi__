@@ -30,3 +30,4 @@ def generate_icons(source_path: str):
 if __name__ == "__main__":
     src = sys.argv[1] if len(sys.argv) > 1 else "assets/icon/app_icon_1024.png"
     generate_icons(src)
+

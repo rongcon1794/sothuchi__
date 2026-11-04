@@ -76,3 +76,4 @@ def create_masked_app_icon():
 
 if __name__ == "__main__":
     create_masked_app_icon()
+
