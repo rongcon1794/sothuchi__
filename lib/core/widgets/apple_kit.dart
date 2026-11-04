@@ -465,3 +465,42 @@ class AppleSegmentedPill<T> extends StatelessWidget {
   }
 }
 
+/// Standard Apple HIG floating action button location that floats gracefully
+/// above the [AppShellScaffold]'s floating frosted glass navigation bar.
+class AppleFloatingActionButtonLocation extends FloatingActionButtonLocation {
+  const AppleFloatingActionButtonLocation({this.offsetFromBar = 16.0});
+
+  final double offsetFromBar;
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    final double fabX;
+    if (scaffoldGeometry.textDirection == TextDirection.rtl) {
+      fabX = 16.0;
+    } else {
+      fabX = scaffoldGeometry.scaffoldSize.width -
+          scaffoldGeometry.floatingActionButtonSize.width -
+          16.0;
+    }
+
+    // Clearance for the floating bottom navigation bar:
+    // Bar height (64) + Bar margin-bottom (8) + offsetFromBar (16)
+    final double barClearance = (AppleTokens.floatingBarHeight +
+            AppleTokens.floatingBarBottomMargin +
+            offsetFromBar) +
+        scaffoldGeometry.minViewPadding.bottom;
+    final double keyboardInset = scaffoldGeometry.minInsets.bottom;
+
+    final double bottomOffset = keyboardInset > 0
+        ? keyboardInset + 16.0
+        : barClearance;
+
+    final double fabY = scaffoldGeometry.scaffoldSize.height -
+        scaffoldGeometry.floatingActionButtonSize.height -
+        bottomOffset;
+
+    return Offset(fabX, fabY);
+  }
+}
+
+

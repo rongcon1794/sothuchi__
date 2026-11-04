@@ -113,7 +113,12 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                 }
 
                 return ListView(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 40),
+                  padding: const EdgeInsets.fromLTRB(
+                    16,
+                    4,
+                    16,
+                    AppleTokens.scrollBottomPaddingNoFab,
+                  ),
                   children: [
                     // Monthly Summary Grid
                     _MonthlySummaryHeader(

@@ -128,7 +128,12 @@ class HomeDashboardScreen extends ConsumerWidget {
             ..invalidate(categoriesStreamProvider);
         },
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+          padding: const EdgeInsets.fromLTRB(
+            16,
+            8,
+            16,
+            AppleTokens.scrollBottomPaddingWithFab,
+          ),
           children: [
             // Hero Total Balance Card
             _HeroBalanceCard(
@@ -336,6 +341,7 @@ class HomeDashboardScreen extends ConsumerWidget {
           ],
         ),
       ),
+      floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
       floatingActionButton: isLargeText
           ? FloatingActionButton(
               heroTag: 'home_quick_add_fab',

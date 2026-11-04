@@ -143,7 +143,12 @@ class BudgetsScreen extends ConsumerWidget {
                 }
 
                 return ListView(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
+                  padding: const EdgeInsets.fromLTRB(
+                    16,
+                    4,
+                    16,
+                    AppleTokens.scrollBottomPaddingWithFab,
+                  ),
                   children: [
                     if (triggered.isNotEmpty) ...[
                       BudgetAlertBanner(
@@ -177,6 +182,7 @@ class BudgetsScreen extends ConsumerWidget {
           ),
         ],
       ),
+      floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
       floatingActionButton: isLargeText
           ? FloatingActionButton(
               heroTag: 'budgets_add_fab',

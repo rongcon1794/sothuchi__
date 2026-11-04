@@ -88,4 +88,11 @@ abstract final class AppleTokens {
       offset: const Offset(0, 10),
     ),
   ];
+
+  // --- Floating Navigation Bar & Content Clearance Tokens ---
+  static const double floatingBarHeight = 64.0;
+  static const double floatingBarBottomMargin = 8.0;
+  static const double floatingBarClearance = 88.0; // 64 (height) + 8 (margin) + 16 (gap)
+  static const double scrollBottomPaddingWithFab = 150.0;
+  static const double scrollBottomPaddingNoFab = 110.0;
 }

@@ -235,7 +235,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settingsTitle)),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
+        padding: const EdgeInsets.fromLTRB(
+          16,
+          8,
+          16,
+          AppleTokens.scrollBottomPaddingNoFab,
+        ),
         children: [
           // User Profile Header Card
           if (user != null) ...[

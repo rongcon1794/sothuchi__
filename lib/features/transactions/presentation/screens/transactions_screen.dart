@@ -9,6 +9,7 @@ import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/date_formatter.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
+import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/core/widgets/empty_state_view.dart';
 import 'package:so_thu_chi/core/widgets/skeleton_box.dart';
 import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_controller.dart';
@@ -262,7 +263,12 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 }
 
                 return ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
+                  padding: const EdgeInsets.fromLTRB(
+                    16,
+                    4,
+                    16,
+                    AppleTokens.scrollBottomPaddingWithFab,
+                  ),
                   itemCount: grouped.length,
                   itemBuilder: (context, groupIndex) {
                     final group = grouped[groupIndex];
@@ -371,6 +377,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
           ),
         ],
       ),
+      floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
       floatingActionButton: FloatingActionButton(
         heroTag: 'transactions_add_fab',
         tooltip: l10n.addTransaction,
