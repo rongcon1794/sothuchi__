@@ -105,23 +105,10 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            if (user?.photoUrl != null && user!.photoUrl!.trim().isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(right: 10),
-                child: AppleUserAvatar(
-                  photoUrl: user.photoUrl,
-                  displayName: user.displayName,
-                  email: user.email,
-                  size: 34,
-                  borderRadius: 10,
-                  onTap: () => context.push(AppRoutes.settings),
-                ),
-              )
-            else
-              const Padding(
-                padding: EdgeInsets.only(right: 10),
-                child: SoThuChiLogo(size: 34),
-              ),
+            const Padding(
+              padding: EdgeInsets.only(right: 10),
+              child: SoThuChiLogo(size: 36),
+            ),
             Expanded(
               child: Builder(
                 builder: (context) {
@@ -178,7 +165,21 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
             onPressed: () => context.go(AppRoutes.transactions),
             icon: const Icon(CupertinoIcons.search),
           ),
-          const SizedBox(width: 4),
+          if (user?.photoUrl != null && user!.photoUrl!.trim().isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.only(right: 12, left: 2),
+              child: AppleUserAvatar(
+                photoUrl: user.photoUrl,
+                displayName: user.displayName,
+                email: user.email,
+                size: 32,
+                borderRadius: 10,
+                onTap: () => context.push(AppRoutes.settings),
+              ),
+            ),
+          ] else ...[
+            const SizedBox(width: 4),
+          ],
         ],
       ),
       body: NotificationListener<UserScrollNotification>(
@@ -498,215 +499,354 @@ class _HeroBalanceCard extends StatelessWidget {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final primary = theme.colorScheme.primary;
-    final primaryDark = Color.alphaBlend(
-      Colors.black.withValues(alpha: isDark ? 0.5 : 0.35),
-      primary,
-    );
-    final primaryLight = isDark
-        ? primary
-        : Color.alphaBlend(Colors.white.withValues(alpha: 0.18), primary);
+
+    final cardGradient = isDark
+        ? const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF0F1816),
+              Color(0xFF0A2922),
+              Color(0xFF021612),
+            ],
+            stops: [0.0, 0.55, 1.0],
+          )
+        : const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF00A86B),
+              Color(0xFF047857),
+              Color(0xFF024434),
+            ],
+            stops: [0.0, 0.6, 1.0],
+          );
+
     const fgColor = Colors.white;
 
     return Container(
-      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [primaryLight, primary, primaryDark],
-        ),
         borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.22),
-          width: AppleTokens.hairline,
-        ),
         boxShadow: [
           BoxShadow(
-            color: primary.withValues(alpha: isDark ? 0.35 : 0.28),
-            blurRadius: 22,
-            offset: const Offset(0, 8),
+            color: isDark
+                ? const Color(0xFF00E5B0).withValues(alpha: 0.16)
+                : const Color(0xFF00A86B).withValues(alpha: 0.28),
+            blurRadius: 26,
+            offset: const Offset(0, 10),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.55 : 0.12),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+        child: Container(
+          padding: const EdgeInsets.all(22),
+          decoration: BoxDecoration(
+            gradient: cardGradient,
+            borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: isDark ? 0.18 : 0.28),
+              width: AppleTokens.hairline,
+            ),
+          ),
+          child: Stack(
             children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    Icon(
-                      CupertinoIcons.shield_fill,
-                      size: 15,
-                      color: fgColor.withValues(alpha: 0.8),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      l10n.totalBalance.toUpperCase(),
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: fgColor.withValues(alpha: 0.85),
-                        letterSpacing: 0.8,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 11.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              IconButton(
-                tooltip: hideBalance ? l10n.showBalance : l10n.hideBalance,
-                onPressed: onToggleVisibility,
-                style: IconButton.styleFrom(
-                  foregroundColor: fgColor,
-                  backgroundColor: fgColor.withValues(alpha: 0.16),
-                ),
-                icon: AnimatedRotation(
-                  turns: hideBalance ? 0.5 : 0.0,
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeOutBack,
-                  child: Icon(
-                    hideBalance
-                        ? Icons.visibility_off_outlined
-                        : Icons.visibility_outlined,
-                    size: 20,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 220),
-            switchInCurve: Curves.easeOutCubic,
-            switchOutCurve: Curves.easeInCubic,
-            child: SizedBox(
-              key: ValueKey<bool>(hideBalance),
-              width: double.infinity,
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: AppleAnimatedMoneyText(
-                  money: totalBalance,
-                  locale: locale,
-                  masked: hideBalance,
-                  semanticsLabel: hideBalance ? l10n.balanceHidden : null,
-                  style: theme.textTheme.displaySmall?.copyWith(
-                    color: fgColor,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.6,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              color: fgColor.withValues(alpha: 0.16),
-              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-              border: Border.all(
-                color: fgColor.withValues(alpha: 0.12),
-                width: AppleTokens.hairline,
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  monthSummary.net.minorUnits >= 0
-                      ? Icons.trending_up_rounded
-                      : Icons.trending_down_rounded,
-                  size: 18,
-                  color: fgColor,
-                ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    '${l10n.netBalance}: ${monthSummary.net.format(locale: locale, showPlusSign: true, masked: hideBalance)}',
-                    semanticsLabel: hideBalance
-                        ? '${l10n.netBalance}: ${l10n.balanceHidden}'
-                        : null,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: fgColor,
-                      fontWeight: FontWeight.w600,
-                      fontFeatures: AppTheme.tabularFigures,
+              // Subtle luxury watermark emblem in top-right
+              Positioned(
+                top: -18,
+                right: -18,
+                child: IgnorePointer(
+                  child: Opacity(
+                    opacity: isDark ? 0.10 : 0.12,
+                    child: Image.asset(
+                      'assets/icon/app_icon.png',
+                      width: 130,
+                      height: 130,
+                      fit: BoxFit.contain,
                     ),
                   ),
                 ),
-              ],
-            ),
-          ),
-          // Intelligent Cashflow Segmented Bar
-          Builder(
-            builder: (context) {
-              final totalFlow = monthSummary.income.minorUnits + monthSummary.expense.minorUnits;
-              if (totalFlow <= 0) return const SizedBox.shrink();
-              final incomeRatio = ((monthSummary.income.minorUnits / totalFlow) * 100).round().clamp(1, 99);
-              final expenseRatio = 100 - incomeRatio;
+              ),
 
-              return Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 16),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                    child: SizedBox(
-                      height: 6,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            flex: incomeRatio,
-                            child: Container(color: AppleTokens.systemGreen),
-                          ),
-                          const SizedBox(width: 2),
-                          Expanded(
-                            flex: expenseRatio,
-                            child: Container(color: AppleTokens.systemRed.withValues(alpha: 0.9)),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Flexible(
-                        child: Text(
-                          l10n.incomeRatio(incomeRatio),
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: fgColor.withValues(alpha: 0.85),
-                            fontFeatures: AppTheme.tabularFigures,
-                          ),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 22,
+                              height: 16,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(3),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.4),
+                                  width: 0.5,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Container(width: 1, color: Colors.white38),
+                                  Container(width: 1, color: Colors.white38),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              l10n.totalBalance.toUpperCase(),
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: fgColor.withValues(alpha: 0.85),
+                                letterSpacing: 0.9,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 11.5,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          l10n.expenseRatio(expenseRatio),
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: fgColor.withValues(alpha: 0.85),
-                            fontFeatures: AppTheme.tabularFigures,
+                      IconButton(
+                        tooltip: hideBalance ? l10n.showBalance : l10n.hideBalance,
+                        onPressed: onToggleVisibility,
+                        style: IconButton.styleFrom(
+                          foregroundColor: fgColor,
+                          backgroundColor: fgColor.withValues(alpha: 0.16),
+                        ),
+                        icon: AnimatedRotation(
+                          turns: hideBalance ? 0.5 : 0.0,
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeOutBack,
+                          child: Icon(
+                            hideBalance
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                            size: 20,
                           ),
                         ),
                       ),
                     ],
                   ),
+                  const SizedBox(height: 12),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 220),
+                    switchInCurve: Curves.easeOutCubic,
+                    switchOutCurve: Curves.easeInCubic,
+                    child: SizedBox(
+                      key: ValueKey<bool>(hideBalance),
+                      width: double.infinity,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: AppleAnimatedMoneyText(
+                          money: totalBalance,
+                          locale: locale,
+                          masked: hideBalance,
+                          semanticsLabel: hideBalance ? l10n.balanceHidden : null,
+                          style: theme.textTheme.displaySmall?.copyWith(
+                            color: fgColor,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.6,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Cashflow Micro-Metrics Row (Thu nhập, Chi tiêu, Ròng)
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        // Net Balance Pill
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: fgColor.withValues(alpha: 0.16),
+                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                            border: Border.all(
+                              color: fgColor.withValues(alpha: 0.14),
+                              width: AppleTokens.hairline,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                monthSummary.net.minorUnits >= 0
+                                    ? Icons.trending_up_rounded
+                                    : Icons.trending_down_rounded,
+                                size: 16,
+                                color: fgColor,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                '${l10n.netBalance}: ${monthSummary.net.format(locale: locale, showPlusSign: true, masked: hideBalance)}',
+                                semanticsLabel: hideBalance
+                                    ? '${l10n.netBalance}: ${l10n.balanceHidden}'
+                                    : null,
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  color: fgColor,
+                                  fontWeight: FontWeight.w600,
+                                  fontFeatures: AppTheme.tabularFigures,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // Quick Income Pill
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF10B981).withValues(alpha: 0.22),
+                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                            border: Border.all(
+                              color: const Color(0xFF34D399).withValues(alpha: 0.35),
+                              width: AppleTokens.hairline,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(CupertinoIcons.arrow_down_left, size: 12, color: Color(0xFF34D399)),
+                              const SizedBox(width: 4),
+                              Text(
+                                monthSummary.income.format(locale: locale, showPlusSign: true, masked: hideBalance),
+                                style: const TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFFE6FFFA),
+                                  fontFeatures: AppTheme.tabularFigures,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // Quick Expense Pill
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF43F5E).withValues(alpha: 0.22),
+                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                            border: Border.all(
+                              color: const Color(0xFFFB7185).withValues(alpha: 0.35),
+                              width: AppleTokens.hairline,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(CupertinoIcons.arrow_up_right, size: 12, color: Color(0xFFFB7185)),
+                              const SizedBox(width: 4),
+                              Text(
+                                monthSummary.expense.format(locale: locale, masked: hideBalance),
+                                style: const TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFFFFECEE),
+                                  fontFeatures: AppTheme.tabularFigures,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Intelligent Cashflow Segmented Bar
+                  Builder(
+                    builder: (context) {
+                      final totalFlow = monthSummary.income.minorUnits + monthSummary.expense.minorUnits;
+                      if (totalFlow <= 0) return const SizedBox.shrink();
+                      final incomeRatio = ((monthSummary.income.minorUnits / totalFlow) * 100).round().clamp(1, 99);
+                      final expenseRatio = 100 - incomeRatio;
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 16),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                            child: SizedBox(
+                              height: 6,
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    flex: incomeRatio,
+                                    child: Container(
+                                      decoration: const BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [Color(0xFF34D399), Color(0xFF059669)],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 2),
+                                  Expanded(
+                                    flex: expenseRatio,
+                                    child: Container(
+                                      decoration: const BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [Color(0xFFF43F5E), Color(0xFFBE123C)],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  l10n.incomeRatio(incomeRatio),
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: fgColor.withValues(alpha: 0.85),
+                                    fontFeatures: AppTheme.tabularFigures,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  l10n.expenseRatio(expenseRatio),
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: fgColor.withValues(alpha: 0.85),
+                                    fontFeatures: AppTheme.tabularFigures,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                 ],
-              );
-            },
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -965,43 +1105,49 @@ class _HomeQuickActionBar extends StatelessWidget {
       _ActionItemData(
         icon: CupertinoIcons.plus,
         label: l10n.homeActionTransaction,
-        color: AppleTokens.jadePrimary,
+        gradient: const [Color(0xFF00E5B0), Color(0xFF00A86B)],
+        accentColor: const Color(0xFF00BFA5),
         route: AppRoutes.transactionNew,
       ),
       _ActionItemData(
         icon: CupertinoIcons.creditcard,
         label: l10n.homeActionWallet,
-        color: AppleTokens.systemBlue,
+        gradient: const [Color(0xFF38BDF8), Color(0xFF0284C7)],
+        accentColor: const Color(0xFF0284C7),
         route: AppRoutes.accounts,
       ),
       _ActionItemData(
         icon: CupertinoIcons.sparkles,
         label: l10n.homeActionSavings,
-        color: AppleTokens.systemPink,
+        gradient: const [Color(0xFFFBBF24), Color(0xFFD97706)],
+        accentColor: const Color(0xFFF59E0B),
         route: AppRoutes.savings,
       ),
       _ActionItemData(
         icon: CupertinoIcons.repeat,
         label: l10n.homeActionRecurring,
-        color: AppleTokens.systemPurple,
+        gradient: const [Color(0xFFC084FC), Color(0xFF7E22CE)],
+        accentColor: const Color(0xFF9333EA),
         route: AppRoutes.recurring,
       ),
       _ActionItemData(
         icon: CupertinoIcons.person_2,
         label: l10n.homeActionDebts,
-        color: AppleTokens.systemIndigo,
+        gradient: const [Color(0xFFFB7185), Color(0xFFE11D48)],
+        accentColor: const Color(0xFFE11D48),
         route: AppRoutes.debts,
       ),
       _ActionItemData(
         icon: CupertinoIcons.square_grid_2x2,
         label: l10n.homeActionCategories,
-        color: AppleTokens.systemOrange,
+        gradient: const [Color(0xFF2DD4BF), Color(0xFF0F766E)],
+        accentColor: const Color(0xFF0D9488),
         route: AppRoutes.categories,
       ),
     ];
 
     final textScale = MediaQuery.textScalerOf(context).scale(1);
-    final barHeight = math.max(82.0, 56.0 + (26.0 * textScale));
+    final barHeight = math.max(88.0, 60.0 + (28.0 * textScale));
 
     return SizedBox(
       height: barHeight,
@@ -1009,13 +1155,14 @@ class _HomeQuickActionBar extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         itemCount: actions.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
           final action = actions[index];
           return _QuickActionItem(
             icon: action.icon,
             label: action.label,
-            color: action.color,
+            gradient: action.gradient,
+            accentColor: action.accentColor,
             onTap: () => context.push(action.route),
           );
         },
@@ -1028,13 +1175,15 @@ class _ActionItemData {
   const _ActionItemData({
     required this.icon,
     required this.label,
-    required this.color,
+    required this.gradient,
+    required this.accentColor,
     required this.route,
   });
 
   final IconData icon;
   final String label;
-  final Color color;
+  final List<Color> gradient;
+  final Color accentColor;
   final String route;
 }
 
@@ -1042,13 +1191,15 @@ class _QuickActionItem extends StatelessWidget {
   const _QuickActionItem({
     required this.icon,
     required this.label,
-    required this.color,
+    required this.gradient,
+    required this.accentColor,
     required this.onTap,
   });
 
   final IconData icon;
   final String label;
-  final Color color;
+  final List<Color> gradient;
+  final Color accentColor;
   final VoidCallback onTap;
 
   @override
@@ -1057,9 +1208,9 @@ class _QuickActionItem extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return SizedBox(
-      width: 70,
+      width: 74,
       child: ApplePressable(
-        scaleDown: 0.94,
+        scaleDown: 0.92,
         onTap: () {
           HapticFeedback.selectionClick();
           onTap();
@@ -1069,19 +1220,34 @@ class _QuickActionItem extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 48,
-              height: 48,
+              width: 52,
+              height: 52,
               decoration: BoxDecoration(
-                color: color.withValues(alpha: isDark ? 0.22 : 0.12),
-                borderRadius: BorderRadius.circular(15),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: gradient,
+                ),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: color.withValues(alpha: isDark ? 0.35 : 0.2),
+                  color: Colors.white.withValues(alpha: 0.28),
                   width: 0.8,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: accentColor.withValues(alpha: isDark ? 0.35 : 0.25),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              child: Icon(icon, color: color, size: 21),
+              child: Icon(
+                icon,
+                size: 24,
+                color: Colors.white,
+              ),
             ),
-            const SizedBox(height: 5),
+            const SizedBox(height: 6),
             Flexible(
               child: FittedBox(
                 fit: BoxFit.scaleDown,
@@ -1091,7 +1257,7 @@ class _QuickActionItem extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: theme.textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.w600,
-                    fontSize: 11.5,
+                    fontSize: 12,
                     letterSpacing: -0.2,
                   ),
                 ),
@@ -1195,8 +1361,9 @@ class _MiniWalletCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final textScale = MediaQuery.textScalerOf(context).scale(1);
-    final cardWidth = math.max(176.0, 140.0 * textScale);
+    final cardWidth = math.max(180.0, 144.0 * textScale);
     final color = AppIconCatalog.contrastSafeColor(
       Color(account.color),
       theme.brightness,
@@ -1211,9 +1378,23 @@ class _MiniWalletCard extends StatelessWidget {
       child: ApplePressable(
         borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
         onTap: onTap,
-        child: AppleGlassCard(
-          borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+        child: Container(
           padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isDark ? AppleTokens.bgDarkCard : AppleTokens.bgLightCard,
+            borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+            border: Border.all(
+              color: color.withValues(alpha: isDark ? 0.35 : 0.22),
+              width: 1.0,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: color.withValues(alpha: isDark ? 0.14 : 0.08),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
           child: Semantics(
             button: true,
             excludeSemantics: true,
@@ -1256,8 +1437,9 @@ class _MiniWalletCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                     fontFeatures: AppTheme.tabularFigures,
+                    color: isDark ? Colors.white : const Color(0xFF1C1C1E),
                   ),
                 ),
               ],
