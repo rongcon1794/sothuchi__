@@ -69,7 +69,7 @@ void main() {
       );
     }
 
-    testWidgets('renders Hero Amount card, Quick Actions, and Segmented Type Pill', (tester) async {
+    testWidgets('renders Hero Amount card with active cursor and Segmented Type Pill', (tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pumpAndSettle();
 
@@ -81,35 +81,31 @@ void main() {
       expect(find.text('Thu nhập'), findsOneWidget);
       expect(find.text('Chuyển khoản'), findsOneWidget);
 
-      // Verify quick increment pills
-      expect(find.text('+20k'), findsOneWidget);
-      expect(find.text('+50k'), findsOneWidget);
-      expect(find.text('+100k'), findsOneWidget);
-      expect(find.text('+500k'), findsOneWidget);
-      expect(find.text('Xóa'), findsOneWidget);
+      // Verify cursor is visible for clear interactive feedback
+      final textField = tester.widget<TextField>(find.byType(TextField).first);
+      expect(textField.showCursor, isTrue);
 
       // Verify Save button (l10n.save in Vietnamese is 'Lưu')
       expect(find.text('Lưu'), findsOneWidget);
     });
 
-    testWidgets('tapping quick increment pills increments amount, and Xóa clears it', (tester) async {
+    testWidgets('entering amount shows inline clear button, and tapping it clears amount', (tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pumpAndSettle();
 
-      // Tap +50k
-      await tester.tap(find.text('+50k'));
+      final amountField = find.byType(TextField).first;
+      await tester.enterText(amountField, '50000');
       await tester.pumpAndSettle();
       expect(find.text('50.000'), findsOneWidget);
 
-      // Tap +100k -> 150.000
-      await tester.tap(find.text('+100k'));
-      await tester.pumpAndSettle();
-      expect(find.text('150.000'), findsOneWidget);
+      // Inline clear button appears
+      final clearIcon = find.byIcon(CupertinoIcons.clear_circled_solid);
+      expect(clearIcon, findsOneWidget);
 
-      // Tap Xóa -> clears
-      await tester.tap(find.text('Xóa'));
+      // Tap clear button -> clears
+      await tester.tap(clearIcon);
       await tester.pumpAndSettle();
-      expect(find.text('150.000'), findsNothing);
+      expect(find.text('50.000'), findsNothing);
     });
 
     testWidgets('switching to Chuyển khoản mode displays source and destination wallet pickers', (tester) async {
@@ -166,11 +162,11 @@ void main() {
       expect(find.text('Khác'), findsOneWidget);
       expect(find.text('Thêm'), findsOneWidget);
 
-      // Verify TextField for amount has showCursor: false and no border
+      // Verify TextField for amount has showCursor: true for active user feedback
       final textField = tester.widget<TextField>(
         find.byType(TextField).first,
       );
-      expect(textField.showCursor, isFalse);
+      expect(textField.showCursor, isTrue);
     });
 
     testWidgets('when categories are empty, it automatically seeds defaults and displays categories', (tester) async {
@@ -210,19 +206,18 @@ void main() {
       await tester.enterText(amountField, '5');
       await tester.pumpAndSettle();
 
-      // Suggestions should appear: 500, 5.000, 50.000, +00, +000
-      expect(find.text('+00'), findsWidgets);
-      expect(find.text('+000'), findsWidgets);
-      expect(find.text('500'), findsOneWidget);
-      expect(find.text('5.000'), findsOneWidget);
-      expect(find.text('50.000'), findsOneWidget);
+      // Suggestions header appears with actual calculated amounts
+      expect(find.text('Gợi ý thêm số 0'), findsOneWidget);
+      expect(find.text('50.000 ₫'), findsOneWidget);
+      expect(find.text('500.000 ₫'), findsOneWidget);
+      expect(find.text('5.000.000 ₫'), findsOneWidget);
 
-      // Tap '50.000'
-      await tester.tap(find.text('50.000'));
+      // Tap '50.000 ₫'
+      await tester.tap(find.text('50.000 ₫'));
       await tester.pumpAndSettle();
 
       // Amount field text should now be '50.000'
-      expect(find.text('50.000'), findsWidgets);
+      expect(find.text('50.000'), findsOneWidget);
     });
 
     testWidgets('tapping suggested note sets note text and clear button clears it', (tester) async {

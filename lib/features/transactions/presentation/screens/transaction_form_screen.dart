@@ -43,6 +43,7 @@ class TransactionFormScreen extends ConsumerStatefulWidget {
 class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
+  final _amountFocusNode = FocusNode();
   final _noteController = TextEditingController();
   final _tagsController = TextEditingController();
   final _tagInputController = TextEditingController();
@@ -130,6 +131,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   @override
   void dispose() {
     _amountController.dispose();
+    _amountFocusNode.dispose();
     _noteController.dispose();
     _tagsController.dispose();
     _tagInputController.dispose();
@@ -160,22 +162,6 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     }
   }
 
-  void _addAmountShortcut(int additionMinorUnits, String currencyCode, String locale) {
-    HapticFeedback.lightImpact();
-    final current =
-        Money.tryParse(_amountController.text, currencyCode: currencyCode)
-            ?.minorUnits ??
-        0;
-    final updated = current + additionMinorUnits;
-    final newText = Money(
-      minorUnits: updated,
-      currencyCode: currencyCode,
-    ).toInputString(locale: locale);
-    setState(() {
-      _amountController.text = newText;
-    });
-  }
-
   void _clearAmount() {
     HapticFeedback.lightImpact();
     setState(() {
@@ -187,24 +173,6 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     HapticFeedback.lightImpact();
     final newText = Money(
       minorUnits: minorUnits,
-      currencyCode: currencyCode,
-    ).toInputString(locale: locale);
-    setState(() {
-      _amountController.text = newText;
-    });
-  }
-
-  void _appendZeros(int multiplier, String currencyCode, String locale) {
-    HapticFeedback.lightImpact();
-    final current =
-        Money.tryParse(_amountController.text, currencyCode: currencyCode)
-            ?.minorUnits ??
-        0;
-    if (current <= 0) return;
-    final updated = current * multiplier;
-    if (updated > 9000000000000000) return;
-    final newText = Money(
-      minorUnits: updated,
       currencyCode: currencyCode,
     ).toInputString(locale: locale);
     setState(() {
@@ -657,6 +625,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                   _HeroAmountCard(
                     type: _type,
                     amountController: _amountController,
+                    focusNode: _amountFocusNode,
                     currencyInfo: currencyInfo,
                     currencyCode: currencyCode,
                     locale: locale,
@@ -674,9 +643,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                         }
                       });
                     },
-                    onAddShortcut: (amount) => _addAmountShortcut(amount, currencyCode, locale),
                     onSetAmount: (amount) => _setAmount(amount, currencyCode, locale),
-                    onAppendZeros: (multiplier) => _appendZeros(multiplier, currencyCode, locale),
                     onClear: _clearAmount,
                   ),
                   const SizedBox(height: 18),
@@ -1084,45 +1051,74 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 }
 
 /// The centerpiece: Expressive, tactile Apple-style Hero Amount & Type Selector Card.
-class _HeroAmountCard extends StatelessWidget {
+class _HeroAmountCard extends StatefulWidget {
   const _HeroAmountCard({
     required this.type,
     required this.amountController,
+    required this.focusNode,
     required this.currencyInfo,
     required this.currencyCode,
     required this.locale,
     required this.isEditing,
     required this.onTypeChanged,
-    required this.onAddShortcut,
     required this.onSetAmount,
-    required this.onAppendZeros,
     required this.onClear,
   });
 
   final TransactionType type;
   final TextEditingController amountController;
+  final FocusNode focusNode;
   final CurrencyInfo currencyInfo;
   final String currencyCode;
   final String locale;
   final bool isEditing;
   final ValueChanged<TransactionType> onTypeChanged;
-  final ValueChanged<int> onAddShortcut;
   final ValueChanged<int> onSetAmount;
-  final ValueChanged<int> onAppendZeros;
   final VoidCallback onClear;
+
+  @override
+  State<_HeroAmountCard> createState() => _HeroAmountCardState();
+}
+
+class _HeroAmountCardState extends State<_HeroAmountCard> {
+  @override
+  void initState() {
+    super.initState();
+    widget.focusNode.addListener(_onFocusChange);
+  }
+
+  @override
+  void didUpdateWidget(covariant _HeroAmountCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.focusNode != widget.focusNode) {
+      oldWidget.focusNode.removeListener(_onFocusChange);
+      widget.focusNode.addListener(_onFocusChange);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.focusNode.removeListener(_onFocusChange);
+    super.dispose();
+  }
+
+  void _onFocusChange() {
+    if (mounted) setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final isFocused = widget.focusNode.hasFocus;
 
-    final typeColor = switch (type) {
+    final typeColor = switch (widget.type) {
       TransactionType.expense => AppleTokens.rubyExpense,
       TransactionType.income => AppleTokens.jadePrimary,
       TransactionType.transfer => AppleTokens.cobaltTransfer,
     };
 
-    final typeSign = switch (type) {
+    final typeSign = switch (widget.type) {
       TransactionType.expense => '-',
       TransactionType.income => '+',
       TransactionType.transfer => '⇄',
@@ -1131,148 +1127,194 @@ class _HeroAmountCard extends StatelessWidget {
     return AppleGlassCard(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
       borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
-      borderColor: typeColor.withValues(alpha: isDark ? 0.35 : 0.25),
+      borderColor: isFocused
+          ? typeColor.withValues(alpha: isDark ? 0.6 : 0.45)
+          : typeColor.withValues(alpha: isDark ? 0.35 : 0.25),
       child: Column(
         children: [
           // 1. Sliding Segmented Type Pill
           _TransactionTypeSegmentedPill(
-            selected: type,
-            onChanged: onTypeChanged,
+            selected: widget.type,
+            onChanged: widget.onTypeChanged,
           ),
           const SizedBox(height: 18),
 
-          // 2. Large Amount Input Display
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Text(
-                  typeSign,
-                  style: TextStyle(
-                    fontSize: 34,
-                    fontWeight: FontWeight.w800,
-                    color: typeColor,
-                    height: 1.0,
-                  ),
+          // 2. Large Amount Input Display with Active Focus Effect
+          GestureDetector(
+            onTap: () {
+              if (!widget.focusNode.hasFocus) {
+                widget.focusNode.requestFocus();
+              }
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: isFocused
+                    ? typeColor.withValues(alpha: isDark ? 0.12 : 0.07)
+                    : (isDark
+                        ? Colors.white.withValues(alpha: 0.04)
+                        : Colors.black.withValues(alpha: 0.02)),
+                borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                border: Border.all(
+                  color: isFocused
+                      ? typeColor
+                      : (isDark
+                          ? Colors.white.withValues(alpha: 0.12)
+                          : Colors.black.withValues(alpha: 0.08)),
+                  width: isFocused ? 2.0 : 1.0,
                 ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: IntrinsicWidth(
-                    child: TextFormField(
-                      controller: amountController,
-                      autofocus: !isEditing,
-                      textAlign: TextAlign.center,
-                      showCursor: false,
-                      keyboardType: TextInputType.numberWithOptions(
-                        decimal: currencyInfo.decimalDigits > 0,
-                      ),
-                      inputFormatters: [
-                        MoneyInputFormatter(
-                          currencyCode: currencyCode,
-                          locale: locale,
+                boxShadow: isFocused
+                    ? [
+                        BoxShadow(
+                          color: typeColor.withValues(alpha: isDark ? 0.35 : 0.22),
+                          blurRadius: 16,
+                          spreadRadius: 1,
+                          offset: const Offset(0, 2),
                         ),
-                      ],
-                      style: theme.textTheme.displaySmall?.copyWith(
-                        fontSize: 38,
-                        fontWeight: FontWeight.w800,
-                        color: typeColor,
-                        letterSpacing: -0.8,
-                        fontFeatures: AppTheme.tabularFigures,
-                        height: 1.1,
-                      ),
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        errorBorder: InputBorder.none,
-                        focusedErrorBorder: InputBorder.none,
-                        disabledBorder: InputBorder.none,
-                        filled: false,
-                        fillColor: Colors.transparent,
-                        isDense: true,
-                        hintText: '0',
-                        hintStyle: TextStyle(
-                          color: typeColor.withValues(alpha: 0.25),
-                          fontWeight: FontWeight.w800,
-                        ),
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                      validator: (val) {
-                        final m = Money.tryParse(val ?? '', currencyCode: currencyCode);
-                        if (m == null || m.minorUnits <= 0) {
-                          return context.l10n.amountRequiredError;
-                        }
-                        return null;
-                      },
+                      ]
+                    : null,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    typeSign,
+                    style: TextStyle(
+                      fontSize: 34,
+                      fontWeight: FontWeight.w800,
+                      color: typeColor,
+                      height: 1.0,
                     ),
                   ),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  currencyInfo.symbol,
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    color: typeColor.withValues(alpha: 0.85),
-                    height: 1.0,
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: IntrinsicWidth(
+                      child: TextFormField(
+                        controller: widget.amountController,
+                        focusNode: widget.focusNode,
+                        autofocus: !widget.isEditing,
+                        textAlign: TextAlign.center,
+                        showCursor: true,
+                        cursorColor: typeColor,
+                        cursorWidth: 3.0,
+                        cursorRadius: const Radius.circular(2),
+                        keyboardType: TextInputType.numberWithOptions(
+                          decimal: widget.currencyInfo.decimalDigits > 0,
+                        ),
+                        inputFormatters: [
+                          MoneyInputFormatter(
+                            currencyCode: widget.currencyCode,
+                            locale: widget.locale,
+                          ),
+                        ],
+                        style: theme.textTheme.displaySmall?.copyWith(
+                          fontSize: 38,
+                          fontWeight: FontWeight.w800,
+                          color: typeColor,
+                          letterSpacing: -0.8,
+                          fontFeatures: AppTheme.tabularFigures,
+                          height: 1.1,
+                        ),
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          errorBorder: InputBorder.none,
+                          focusedErrorBorder: InputBorder.none,
+                          disabledBorder: InputBorder.none,
+                          filled: false,
+                          fillColor: Colors.transparent,
+                          isDense: true,
+                          hintText: '0',
+                          hintStyle: TextStyle(
+                            color: typeColor.withValues(alpha: 0.25),
+                            fontWeight: FontWeight.w800,
+                          ),
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                        validator: (val) {
+                          final m = Money.tryParse(val ?? '', currencyCode: widget.currencyCode);
+                          if (m == null || m.minorUnits <= 0) {
+                            return context.l10n.amountRequiredError;
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 6),
+                  Text(
+                    widget.currencyInfo.symbol,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      color: typeColor.withValues(alpha: 0.85),
+                      height: 1.0,
+                    ),
+                  ),
+                  // Clear button inside when amount is non-empty
+                  ListenableBuilder(
+                    listenable: widget.amountController,
+                    builder: (context, _) {
+                      if (widget.amountController.text.trim().isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: ApplePressable(
+                          scaleDown: 0.88,
+                          onTap: widget.onClear,
+                          child: Padding(
+                            padding: const EdgeInsets.all(4),
+                            child: Icon(
+                              CupertinoIcons.clear_circled_solid,
+                              size: 20,
+                              color: typeColor.withValues(alpha: 0.75),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 16),
 
           // 3. Smart Zero Suggestions Bar (Reactive to amountController)
           ListenableBuilder(
-            listenable: amountController,
+            listenable: widget.amountController,
             builder: (context, _) {
-              final rawMoney = Money.tryParse(amountController.text, currencyCode: currencyCode);
+              final rawMoney = Money.tryParse(widget.amountController.text, currencyCode: widget.currencyCode);
               final currentMinor = rawMoney?.minorUnits ?? 0;
               if (currentMinor <= 0) return const SizedBox.shrink();
 
-              // Calculate suggestions for appending zeros
-              final List<({String label, int value, String tag})> zeroSuggestions = [];
+              // Calculate suggestions for appending zeros (x10, x100, x1.000, x10.000, x100.000, x1.000.000, x10.000.000)
+              final List<({String label, int value})> zeroSuggestions = [];
 
-              final List<int> multipliers;
-              if (currentMinor < 10) {
-                // e.g. 5 -> 50, 500, 5.000, 50.000, 500.000, 5.000.000
-                multipliers = [10, 100, 1000, 10000, 100000, 1000000];
-              } else if (currentMinor < 100) {
-                multipliers = [10, 100, 1000, 10000, 100000];
-              } else if (currentMinor < 1000) {
-                multipliers = [10, 100, 1000, 10000];
-              } else if (currentMinor < 10000) {
-                multipliers = [10, 100, 1000];
-              } else if (currentMinor < 100000) {
-                multipliers = [10, 100];
-              } else if (currentMinor < 1000000) {
-                multipliers = [10];
-              } else {
-                multipliers = [];
-              }
+              final List<int> multipliers = [10, 100, 1000, 10000, 100000, 1000000, 10000000];
 
               for (final m in multipliers) {
                 final target = currentMinor * m;
-                if (target <= 100000000000) {
-                  final formatted = Money(minorUnits: target, currencyCode: currencyCode).toInputString(locale: locale);
-                  final tag = switch (m) {
-                    10 => '+0',
-                    100 => '+00',
-                    1000 => '+000',
-                    10000 => '+4 số 0',
-                    100000 => '+5 số 0',
-                    1000000 => '+6 số 0',
-                    _ => 'x$m',
-                  };
-                  zeroSuggestions.add((label: formatted, value: target, tag: tag));
+                if (target > 0 && target <= 100000000000) {
+                  final formatted = Money(
+                    minorUnits: target,
+                    currencyCode: widget.currencyCode,
+                  ).toInputString(locale: widget.locale);
+                  zeroSuggestions.add((
+                    label: '$formatted ${widget.currencyInfo.symbol}',
+                    value: target,
+                  ));
                 }
               }
 
+              if (zeroSuggestions.isEmpty) return const SizedBox.shrink();
+
               return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.only(top: 14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -1283,113 +1325,57 @@ class _HeroAmountCard extends StatelessWidget {
                           size: 13,
                           color: typeColor,
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: 5),
                         Text(
-                          context.l10n.zeroSuggestions,
+                          'Gợi ý thêm số 0',
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            letterSpacing: 0.2,
+                            letterSpacing: -0.2,
                             color: isDark ? const Color(0xFF98989F) : const Color(0xFF6E6E73),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 8),
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Row(
                         children: [
-                          // Quick multiplier +00
-                          Padding(
-                            padding: const EdgeInsets.only(right: 6),
-                            child: ApplePressable(
-                              scaleDown: 0.92,
-                              onTap: () => onAppendZeros(100),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                decoration: BoxDecoration(
-                                  color: typeColor.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                                  border: Border.all(
-                                    color: typeColor.withValues(alpha: 0.35),
-                                    width: AppleTokens.hairline,
-                                  ),
-                                ),
-                                child: Text(
-                                  '+00',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: typeColor,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          // Quick multiplier +000
-                          Padding(
-                            padding: const EdgeInsets.only(right: 6),
-                            child: ApplePressable(
-                              scaleDown: 0.92,
-                              onTap: () => onAppendZeros(1000),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                decoration: BoxDecoration(
-                                  color: typeColor.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                                  border: Border.all(
-                                    color: typeColor.withValues(alpha: 0.35),
-                                    width: AppleTokens.hairline,
-                                  ),
-                                ),
-                                child: Text(
-                                  '+000',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: typeColor,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
                           for (final s in zeroSuggestions)
                             Padding(
-                              padding: const EdgeInsets.only(right: 6),
+                              padding: const EdgeInsets.only(right: 8),
                               child: ApplePressable(
-                                scaleDown: 0.92,
-                                onTap: () => onSetAmount(s.value),
+                                scaleDown: 0.94,
+                                onTap: () => widget.onSetAmount(s.value),
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                                   decoration: BoxDecoration(
                                     color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
                                     borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                                     border: Border.all(
                                       color: isDark
-                                          ? Colors.white.withValues(alpha: 0.12)
-                                          : Colors.black.withValues(alpha: 0.08),
-                                      width: AppleTokens.hairline,
+                                          ? typeColor.withValues(alpha: 0.3)
+                                          : typeColor.withValues(alpha: 0.25),
+                                      width: 1.0,
                                     ),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
+                                      Icon(
+                                        CupertinoIcons.arrow_right,
+                                        size: 11,
+                                        color: typeColor.withValues(alpha: 0.8),
+                                      ),
+                                      const SizedBox(width: 5),
                                       Text(
                                         s.label,
                                         style: TextStyle(
-                                          fontSize: 12,
+                                          fontSize: 13,
                                           fontWeight: FontWeight.w700,
                                           color: typeColor,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        s.tag,
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w500,
-                                          color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6C6C70),
+                                          fontFeatures: AppTheme.tabularFigures,
                                         ),
                                       ),
                                     ],
@@ -1404,74 +1390,6 @@ class _HeroAmountCard extends StatelessWidget {
                 ),
               );
             },
-          ),
-
-          // 4. Quick Amount Shortcut Pills
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                ApplePressable(
-                  scaleDown: 0.92,
-                  onTap: onClear,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
-                      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                      border: Border.all(
-                        color: isDark ? Colors.white.withValues(alpha: 0.12) : Colors.black.withValues(alpha: 0.08),
-                        width: AppleTokens.hairline,
-                      ),
-                    ),
-                    child: const Text(
-                      'Xóa',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppleTokens.rubyExpense,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                for (final shortcut in [
-                  (label: '+20k', amount: 20000),
-                  (label: '+50k', amount: 50000),
-                  (label: '+100k', amount: 100000),
-                  (label: '+200k', amount: 200000),
-                  (label: '+500k', amount: 500000),
-                  (label: '+1tr', amount: 1000000),
-                ])
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ApplePressable(
-                      scaleDown: 0.92,
-                      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                      onTap: () => onAddShortcut(shortcut.amount),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
-                          borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                          border: Border.all(
-                            color: isDark ? Colors.white.withValues(alpha: 0.12) : Colors.black.withValues(alpha: 0.08),
-                            width: AppleTokens.hairline,
-                          ),
-                        ),
-                        child: Text(
-                          shortcut.label,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: theme.colorScheme.onSurface,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
           ),
         ],
       ),
