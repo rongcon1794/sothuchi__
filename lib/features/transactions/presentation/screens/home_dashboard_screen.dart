@@ -158,7 +158,7 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
           ],
         ),
         actions: const [
-          LedgerSelectorPill(),
+          LedgerSelectorPill(compact: true),
           SizedBox(width: 12),
         ],
       ),
@@ -487,60 +487,211 @@ class _HeroBalanceCard extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color.lerp(primary, const Color(0xFF1E1E22), 0.72)!,
-              const Color(0xFF151518),
-              const Color(0xFF0F0F12),
+              Color.lerp(primary, const Color(0xFF1E1F24), 0.70)!,
+              const Color(0xFF16171B),
+              const Color(0xFF111215),
             ],
-            stops: const [0.0, 0.52, 1.0],
+            stops: const [0.0, 0.48, 1.0],
           )
         : LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color.lerp(primary, Colors.white, 0.88)!,
-              Color.lerp(primary, Colors.white, 0.95)!,
+              Color.lerp(primary, Colors.white, 0.90)!,
+              Color.lerp(primary, Colors.white, 0.96)!,
               Colors.white,
             ],
-            stops: const [0.0, 0.5, 1.0],
+            stops: const [0.0, 0.45, 1.0],
           );
 
     final titleColor = isDark
-        ? Colors.white.withValues(alpha: 0.85)
-        : Color.lerp(primary, Colors.black87, 0.35)!;
+        ? Colors.white70
+        : const Color(0xFF64748B);
 
     final balanceColor = isDark
         ? Colors.white
         : const Color(0xFF0F172A);
 
     final eyeBgColor = isDark
-        ? Colors.white.withValues(alpha: 0.12)
-        : primary.withValues(alpha: 0.10);
+        ? Colors.white.withValues(alpha: 0.10)
+        : Colors.black.withValues(alpha: 0.04);
 
     final eyeIconColor = isDark
-        ? Colors.white
-        : primary;
+        ? Colors.white70
+        : const Color(0xFF475569);
 
-    final totalFlow = monthSummary.income.minorUnits + monthSummary.expense.minorUnits;
+    final totalFlow =
+        monthSummary.income.minorUnits + monthSummary.expense.minorUnits;
     final hasFlow = totalFlow > 0;
     final incomeRatio = hasFlow
-        ? ((monthSummary.income.minorUnits / totalFlow) * 100).round().clamp(1, 99)
+        ? ((monthSummary.income.minorUnits / totalFlow) * 100)
+            .round()
+            .clamp(1, 99)
         : 50;
     final expenseRatio = 100 - incomeRatio;
     final isNetPositive = monthSummary.net.minorUnits >= 0;
+    final isLargeText = MediaQuery.textScalerOf(context).scale(1) >= 1.35;
+
+    Widget buildIncomeBox() => Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 10,
+          ),
+          decoration: BoxDecoration(
+            color: isDark
+                ? const Color(0xFF10B981).withValues(alpha: 0.10)
+                : const Color(0xFFECFDF5),
+            borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+            border: Border.all(
+              color: const Color(0xFF10B981).withValues(
+                alpha: isDark ? 0.22 : 0.20,
+              ),
+              width: AppleTokens.hairline,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 18,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF10B981).withValues(alpha: 0.20),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: const Icon(
+                      CupertinoIcons.arrow_down_left,
+                      size: 10.5,
+                      color: Color(0xFF10B981),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      l10n.income,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: isDark
+                            ? Colors.white70
+                            : const Color(0xFF047857),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                monthSummary.income.format(
+                  locale: locale,
+                  showPlusSign: true,
+                  masked: hideBalance,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w700,
+                  color: isDark
+                      ? const Color(0xFF34D399)
+                      : const Color(0xFF059669),
+                  fontFeatures: AppTheme.tabularFigures,
+                ),
+              ),
+            ],
+          ),
+        );
+
+    Widget buildExpenseBox() => Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 10,
+          ),
+          decoration: BoxDecoration(
+            color: isDark
+                ? const Color(0xFFF43F5E).withValues(alpha: 0.10)
+                : const Color(0xFFFFF1F2),
+            borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+            border: Border.all(
+              color: const Color(0xFFF43F5E).withValues(
+                alpha: isDark ? 0.22 : 0.20,
+              ),
+              width: AppleTokens.hairline,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 18,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF43F5E).withValues(alpha: 0.20),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: const Icon(
+                      CupertinoIcons.arrow_up_right,
+                      size: 10.5,
+                      color: Color(0xFFF43F5E),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      l10n.expense,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: isDark
+                            ? Colors.white70
+                            : const Color(0xFFBE123C),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                monthSummary.expense.format(
+                  locale: locale,
+                  masked: hideBalance,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w700,
+                  color: isDark
+                      ? const Color(0xFFFB7185)
+                      : const Color(0xFFE11D48),
+                  fontFeatures: AppTheme.tabularFigures,
+                ),
+              ),
+            ],
+          ),
+        );
 
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
         boxShadow: [
           BoxShadow(
-            color: primary.withValues(alpha: isDark ? 0.25 : 0.14),
+            color: primary.withValues(alpha: isDark ? 0.22 : 0.12),
             blurRadius: 28,
             offset: const Offset(0, 10),
           ),
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.55 : 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -553,474 +704,283 @@ class _HeroBalanceCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
             border: Border.all(
               color: isDark
-                  ? Colors.white.withValues(alpha: 0.14)
-                  : primary.withValues(alpha: 0.18),
+                  ? Colors.white.withValues(alpha: 0.12)
+                  : primary.withValues(alpha: 0.15),
               width: AppleTokens.hairline,
             ),
           ),
-          child: Stack(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Ambient radial glow aura in top-right
-              Positioned(
-                top: -50,
-                right: -40,
-                child: IgnorePointer(
-                  child: Container(
-                    width: 170,
-                    height: 170,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: [
-                          primary.withValues(alpha: isDark ? 0.28 : 0.16),
-                          primary.withValues(alpha: 0.0),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-              // Subtle luxury watermark emblem in top-right corner
-              Positioned(
-                top: -14,
-                right: -14,
-                child: IgnorePointer(
-                  child: Opacity(
-                    opacity: isDark ? 0.06 : 0.07,
-                    child: Image.asset(
-                      'assets/icon/app_icon.png',
-                      width: 120,
-                      height: 120,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
-              ),
-
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
+              // 1. Header Row: Emblem + Label + Currency + Eye Action
+              Row(
                 children: [
-                  // Header Row: Wealth Emblem + Title + Currency Tag + Eye Toggle
-                  Row(
-                    children: [
-                      Container(
-                        width: 28,
-                        height: 28,
-                        decoration: BoxDecoration(
-                          color: primary.withValues(alpha: isDark ? 0.22 : 0.14),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: primary.withValues(alpha: isDark ? 0.35 : 0.22),
-                            width: AppleTokens.hairline,
+                  Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: primary.withValues(alpha: isDark ? 0.22 : 0.12),
+                      borderRadius: BorderRadius.circular(7),
+                    ),
+                    child: Icon(
+                      CupertinoIcons.shield_fill,
+                      size: 13,
+                      color: primary,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            l10n.totalBalance,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600,
+                              color: titleColor,
+                              letterSpacing: 0.2,
+                            ),
                           ),
                         ),
-                        child: Icon(
-                          CupertinoIcons.sparkles,
-                          size: 14,
-                          color: isDark ? primary : primary,
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.08)
+                                : primary.withValues(alpha: 0.08),
+                            borderRadius:
+                                BorderRadius.circular(AppleTokens.radiusPill),
+                          ),
+                          child: Text(
+                            totalBalance.currencyCode,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: isDark ? Colors.white70 : primary,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
                         ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  IconButton(
+                    tooltip:
+                        hideBalance ? l10n.showBalance : l10n.hideBalance,
+                    onPressed: onToggleVisibility,
+                    style: IconButton.styleFrom(
+                      foregroundColor: eyeIconColor,
+                      backgroundColor: eyeBgColor,
+                      minimumSize: const Size(32, 32),
+                      padding: EdgeInsets.zero,
+                    ),
+                    icon: AnimatedRotation(
+                      turns: hideBalance ? 0.5 : 0.0,
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeOutBack,
+                      child: Icon(
+                        hideBalance
+                            ? CupertinoIcons.eye_slash
+                            : CupertinoIcons.eye,
+                        size: 16,
                       ),
-                      const SizedBox(width: 8),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              // 2. Hero Net Worth Balance
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 220),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                child: SizedBox(
+                  key: ValueKey<bool>(hideBalance),
+                  width: double.infinity,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: AppleAnimatedMoneyText(
+                      money: totalBalance,
+                      locale: locale,
+                      masked: hideBalance,
+                      semanticsLabel:
+                          hideBalance ? l10n.balanceHidden : null,
+                      style: theme.textTheme.displaySmall?.copyWith(
+                        color: balanceColor,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.8,
+                        fontFeatures: AppTheme.tabularFigures,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 18),
+
+              // 3. Side-by-Side (or stacked on large text) Monthly Inflow vs Outflow Cards
+              if (isLargeText) ...[
+                buildIncomeBox(),
+                const SizedBox(height: 8),
+                buildExpenseBox(),
+              ] else ...[
+                Row(
+                  children: [
+                    Expanded(child: buildIncomeBox()),
+                    const SizedBox(width: 10),
+                    Expanded(child: buildExpenseBox()),
+                  ],
+                ),
+              ],
+
+              // 4. Monthly Net Cashflow & Ratio Progress Bar
+              if (hasFlow) ...[
+                const SizedBox(height: 14),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                  child: SizedBox(
+                    height: 5,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: incomeRatio,
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Color(0xFF34D399),
+                                  Color(0xFF059669),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        Expanded(
+                          flex: expenseRatio,
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Color(0xFFF43F5E),
+                                  Color(0xFFBE123C),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                if (isLargeText) ...[
+                  Row(
+                    children: [
+                      Icon(
+                        isNetPositive
+                            ? Icons.trending_up_rounded
+                            : Icons.trending_down_rounded,
+                        size: 15,
+                        color: isNetPositive
+                            ? const Color(0xFF10B981)
+                            : const Color(0xFFF43F5E),
+                      ),
+                      const SizedBox(width: 4),
                       Expanded(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Flexible(
-                              child: Text(
-                                l10n.totalBalance.toUpperCase(),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: titleColor,
-                                  letterSpacing: 0.9,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 11.5,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 1.5,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isDark
-                                    ? Colors.white.withValues(alpha: 0.10)
-                                    : primary.withValues(alpha: 0.08),
-                                borderRadius:
-                                    BorderRadius.circular(AppleTokens.radiusPill),
-                              ),
-                              child: Text(
-                                totalBalance.currencyCode,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  color: isDark
-                                      ? Colors.white70
-                                      : const Color(0xFF64748B),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        tooltip:
-                            hideBalance ? l10n.showBalance : l10n.hideBalance,
-                        onPressed: onToggleVisibility,
-                        style: IconButton.styleFrom(
-                          foregroundColor: eyeIconColor,
-                          backgroundColor: eyeBgColor,
-                          minimumSize: const Size(34, 34),
-                          padding: EdgeInsets.zero,
-                        ),
-                        icon: AnimatedRotation(
-                          turns: hideBalance ? 0.5 : 0.0,
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.easeOutBack,
-                          child: Icon(
-                            hideBalance
-                                ? Icons.visibility_off_outlined
-                                : Icons.visibility_outlined,
-                            size: 18,
+                        child: Text(
+                          '${l10n.netBalance}: ${monthSummary.net.format(locale: locale, showPlusSign: true, masked: hideBalance)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w600,
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.85)
+                                : const Color(0xFF334155),
+                            fontFeatures: AppTheme.tabularFigures,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
-
-                  // Hero Net Worth Amount Typography
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 220),
-                    switchInCurve: Curves.easeOutCubic,
-                    switchOutCurve: Curves.easeInCubic,
-                    child: SizedBox(
-                      key: ValueKey<bool>(hideBalance),
-                      width: double.infinity,
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: AppleAnimatedMoneyText(
-                          money: totalBalance,
-                          locale: locale,
-                          masked: hideBalance,
-                          semanticsLabel:
-                              hideBalance ? l10n.balanceHidden : null,
-                          style: theme.textTheme.displaySmall?.copyWith(
-                            color: balanceColor,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.8,
-                            fontFeatures: AppTheme.tabularFigures,
-                          ),
-                        ),
-                      ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${l10n.incomeRatio(incomeRatio)} • ${l10n.expenseRatio(expenseRatio)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w500,
+                      color: isDark
+                          ? Colors.white54
+                          : const Color(0xFF64748B),
+                      fontFeatures: AppTheme.tabularFigures,
                     ),
                   ),
-                  const SizedBox(height: 18),
-
-                  // Integrated Inset Cashflow Matrix Card
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.06)
-                          : Colors.white.withValues(alpha: 0.82),
-                      borderRadius:
-                          BorderRadius.circular(AppleTokens.radiusControl),
-                      border: Border.all(
-                        color: isDark
-                            ? Colors.white.withValues(alpha: 0.08)
-                            : primary.withValues(alpha: 0.12),
-                        width: AppleTokens.hairline,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Dual Income vs Expense Matrix Columns
-                        Row(
-                          children: [
-                            // Income Column
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 24,
-                                    height: 24,
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF10B981)
-                                          .withValues(alpha: 0.16),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: const Icon(
-                                      CupertinoIcons.arrow_down_left,
-                                      size: 12,
-                                      color: Color(0xFF10B981),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          l10n.income,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w500,
-                                            color: isDark
-                                                ? Colors.white60
-                                                : const Color(0xFF64748B),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 1),
-                                        Text(
-                                          monthSummary.income.format(
-                                            locale: locale,
-                                            showPlusSign: true,
-                                            masked: hideBalance,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: 12.5,
-                                            fontWeight: FontWeight.w700,
-                                            color: isDark
-                                                ? const Color(0xFF34D399)
-                                                : const Color(0xFF059669),
-                                            fontFeatures:
-                                                AppTheme.tabularFigures,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              width: 1,
-                              height: 30,
-                              margin:
-                                  const EdgeInsets.symmetric(horizontal: 10),
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.10)
-                                  : Colors.black.withValues(alpha: 0.08),
-                            ),
-                            // Expense Column
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 24,
-                                    height: 24,
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFF43F5E)
-                                          .withValues(alpha: 0.16),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    child: const Icon(
-                                      CupertinoIcons.arrow_up_right,
-                                      size: 12,
-                                      color: Color(0xFFF43F5E),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          l10n.expense,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w500,
-                                            color: isDark
-                                                ? Colors.white60
-                                                : const Color(0xFF64748B),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 1),
-                                        Text(
-                                          monthSummary.expense.format(
-                                            locale: locale,
-                                            masked: hideBalance,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: 12.5,
-                                            fontWeight: FontWeight.w700,
-                                            color: isDark
-                                                ? const Color(0xFFFB7185)
-                                                : const Color(0xFFE11D48),
-                                            fontFeatures:
-                                                AppTheme.tabularFigures,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        if (hasFlow) ...[
-                          const SizedBox(height: 10),
-                          // Dual-tone Apple Segmented Bar
-                          ClipRRect(
-                            borderRadius:
-                                BorderRadius.circular(AppleTokens.radiusPill),
-                            child: SizedBox(
-                              height: 5,
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    flex: incomeRatio,
-                                    child: Container(
-                                      decoration: const BoxDecoration(
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            Color(0xFF34D399),
-                                            Color(0xFF059669),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 2),
-                                  Expanded(
-                                    flex: expenseRatio,
-                                    child: Container(
-                                      decoration: const BoxDecoration(
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            Color(0xFFF43F5E),
-                                            Color(0xFFBE123C),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                l10n.incomeRatio(incomeRatio),
-                                style: TextStyle(
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark
-                                      ? Colors.white60
-                                      : const Color(0xFF64748B),
-                                  fontFeatures: AppTheme.tabularFigures,
-                                ),
-                              ),
-                              Text(
-                                l10n.expenseRatio(expenseRatio),
-                                style: TextStyle(
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark
-                                      ? Colors.white60
-                                      : const Color(0xFF64748B),
-                                  fontFeatures: AppTheme.tabularFigures,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-
-                        const SizedBox(height: 8),
-                        Divider(
-                          height: 1,
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.08)
-                              : Colors.black.withValues(alpha: 0.06),
-                        ),
-                        const SizedBox(height: 8),
-
-                        // Net Monthly Cashflow Row
-                        Row(
+                ] else ...[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
                               isNetPositive
                                   ? Icons.trending_up_rounded
                                   : Icons.trending_down_rounded,
-                              size: 16,
+                              size: 15,
                               color: isNetPositive
                                   ? const Color(0xFF10B981)
                                   : const Color(0xFFF43F5E),
                             ),
-                            const SizedBox(width: 6),
-                            Text(
-                              l10n.netBalance,
-                              style: TextStyle(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w500,
-                                color: isDark
-                                    ? Colors.white70
-                                    : const Color(0xFF475569),
-                              ),
-                            ),
-                            const Spacer(),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 2.5,
-                              ),
-                              decoration: BoxDecoration(
-                                color: (isNetPositive
-                                        ? const Color(0xFF10B981)
-                                        : const Color(0xFFF43F5E))
-                                    .withValues(alpha: isDark ? 0.20 : 0.12),
-                                borderRadius: BorderRadius.circular(
-                                    AppleTokens.radiusPill),
-                              ),
+                            const SizedBox(width: 4),
+                            Flexible(
                               child: Text(
-                                monthSummary.net.format(
-                                  locale: locale,
-                                  showPlusSign: true,
-                                  masked: hideBalance,
-                                ),
+                                '${l10n.netBalance}: ${monthSummary.net.format(locale: locale, showPlusSign: true, masked: hideBalance)}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   fontSize: 11.5,
-                                  fontWeight: FontWeight.w700,
-                                  color: isNetPositive
-                                      ? (isDark
-                                          ? const Color(0xFF34D399)
-                                          : const Color(0xFF047857))
-                                      : (isDark
-                                          ? const Color(0xFFFB7185)
-                                          : const Color(0xFFBE123C)),
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.85)
+                                      : const Color(0xFF334155),
                                   fontFeatures: AppTheme.tabularFigures,
                                 ),
                               ),
                             ),
                           ],
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${l10n.incomeRatio(incomeRatio)} • ${l10n.expenseRatio(expenseRatio)}',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w500,
+                          color: isDark
+                              ? Colors.white54
+                              : const Color(0xFF64748B),
+                          fontFeatures: AppTheme.tabularFigures,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
-              ),
+              ],
             ],
           ),
         ),

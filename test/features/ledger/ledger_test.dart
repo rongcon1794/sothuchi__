@@ -121,6 +121,38 @@ void main() {
       // Active ledger on pill switched to "Sổ Gia Đình"
       expect(find.text('Sổ Gia Đình'), findsOneWidget);
     });
+
+    testWidgets('compact mode renders icon button and opens switcher modal on tap', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            ledgerRepositoryProvider.overrideWithValue(ledgerRepo),
+          ],
+          child: MaterialApp(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: AppTheme.light(),
+            home: const Scaffold(
+              body: Center(
+                child: LedgerSelectorPill(compact: true),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LedgerSelectorPill), findsOneWidget);
+      expect(find.byType(Tooltip), findsOneWidget);
+
+      await tester.tap(find.byType(LedgerSelectorPill));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LedgerSwitcherSheet), findsOneWidget);
+      expect(find.text('Chuyển Sổ Thu Chi'), findsOneWidget);
+    });
   });
 }
 

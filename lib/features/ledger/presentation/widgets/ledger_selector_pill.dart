@@ -8,7 +8,12 @@ import 'package:so_thu_chi/features/ledger/presentation/controllers/ledgers_cont
 import 'package:so_thu_chi/features/ledger/presentation/widgets/ledger_switcher_sheet.dart';
 
 class LedgerSelectorPill extends ConsumerWidget {
-  const LedgerSelectorPill({super.key});
+  const LedgerSelectorPill({
+    super.key,
+    this.compact = false,
+  });
+
+  final bool compact;
 
   IconData _resolveIcon(String iconKey) {
     switch (iconKey) {
@@ -33,6 +38,61 @@ class LedgerSelectorPill extends ConsumerWidget {
     final activeLedger = ref.watch(activeLedgerProvider);
     final color = Color(activeLedger.color);
 
+    if (compact) {
+      return Tooltip(
+        message: activeLedger.name,
+        child: ApplePressable(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            LedgerSwitcherSheet.show(context);
+          },
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: isDark
+                  ? AppleTokens.bgDarkSecondary
+                  : AppleTokens.bgLightSecondary,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: color.withValues(alpha: isDark ? 0.35 : 0.22),
+                width: AppleTokens.hairline,
+              ),
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(
+                  _resolveIcon(activeLedger.icon),
+                  size: 17,
+                  color: color,
+                ),
+                Positioned(
+                  top: 5,
+                  right: 5,
+                  child: Container(
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isDark
+                            ? AppleTokens.bgDarkSecondary
+                            : Colors.white,
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return ApplePressable(
       onTap: () {
         HapticFeedback.lightImpact();
@@ -42,7 +102,9 @@ class LedgerSelectorPill extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
+          color: isDark
+              ? AppleTokens.bgDarkSecondary
+              : AppleTokens.bgLightSecondary,
           borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
           border: Border.all(
             color: color.withValues(alpha: isDark ? 0.35 : 0.25),
@@ -75,11 +137,14 @@ class LedgerSelectorPill extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: 4),
-            const Icon(CupertinoIcons.chevron_down, size: 11, color: AppleTokens.systemGray),
+            const Icon(
+              CupertinoIcons.chevron_down,
+              size: 11,
+              color: AppleTokens.systemGray,
+            ),
           ],
         ),
       ),
     );
   }
 }
-
