@@ -157,29 +157,9 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
             ),
           ],
         ),
-        actions: [
-          const LedgerSelectorPill(),
-          const SizedBox(width: 4),
-          IconButton(
-            tooltip: l10n.searchTransactionsTooltip,
-            onPressed: () => context.go(AppRoutes.transactions),
-            icon: const Icon(CupertinoIcons.search),
-          ),
-          if (user?.photoUrl != null && user!.photoUrl!.trim().isNotEmpty) ...[
-            Padding(
-              padding: const EdgeInsets.only(right: 12, left: 2),
-              child: AppleUserAvatar(
-                photoUrl: user.photoUrl,
-                displayName: user.displayName,
-                email: user.email,
-                size: 32,
-                borderRadius: 10,
-                onTap: () => context.push(AppRoutes.settings),
-              ),
-            ),
-          ] else ...[
-            const SizedBox(width: 4),
-          ],
+        actions: const [
+          LedgerSelectorPill(),
+          SizedBox(width: 12),
         ],
       ),
       body: NotificationListener<UserScrollNotification>(
