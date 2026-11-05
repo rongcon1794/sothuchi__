@@ -128,19 +128,23 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
                                 isDark: isDark,
                               );
 
+                              final cellRadius = BorderRadius.circular(8);
                               return ApplePressable(
+                                borderRadius: cellRadius,
                                 onTap: () {
                                   HapticFeedback.selectionClick();
                                   setState(() {
                                     _selectedDay = isSelected ? null : dayNumber;
                                   });
                                 },
-                                child: Container(
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 180),
+                                  curve: Curves.easeOutCubic,
                                   width: itemSize,
                                   height: itemSize,
                                   decoration: BoxDecoration(
                                     color: cellColor,
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: cellRadius,
                                     border: isSelected
                                         ? Border.all(
                                             color: isDark ? Colors.white : AppleTokens.jadeDark,
@@ -152,14 +156,26 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
                                                 : Colors.black.withValues(alpha: 0.05),
                                             width: 0.5,
                                           ),
+                                    boxShadow: isSelected
+                                        ? [
+                                            BoxShadow(
+                                              color: (isDark ? Colors.white : AppleTokens.jadeDark)
+                                                  .withValues(alpha: 0.22),
+                                              blurRadius: 4,
+                                              spreadRadius: 0.5,
+                                            ),
+                                          ]
+                                        : null,
                                   ),
                                   alignment: Alignment.center,
                                   child: Text(
                                     '$dayNumber',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      fontWeight: dayExpense > 0 ? FontWeight.w700 : FontWeight.w500,
-                                      color: _resolveTextColor(dayExpense, avgMinor, isDark),
+                                      fontWeight: isSelected || dayExpense > 0 ? FontWeight.w700 : FontWeight.w500,
+                                      color: isSelected
+                                          ? (isDark ? Colors.white : AppleTokens.jadeDark)
+                                          : _resolveTextColor(dayExpense, avgMinor, isDark),
                                     ),
                                   ),
                                 ),

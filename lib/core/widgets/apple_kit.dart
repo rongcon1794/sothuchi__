@@ -84,9 +84,6 @@ class _ApplePressableState extends State<ApplePressable>
 
   @override
   Widget build(BuildContext context) {
-    final effectiveBorderRadius =
-        widget.borderRadius ?? BorderRadius.circular(AppleTokens.radiusCard);
-
     return MouseRegion(
       cursor: (widget.onTap != null || widget.onLongPress != null)
           ? SystemMouseCursors.click
@@ -100,10 +97,12 @@ class _ApplePressableState extends State<ApplePressable>
         onLongPress: widget.onLongPress,
         child: ScaleTransition(
           scale: _scaleAnimation,
-          child: ClipRRect(
-            borderRadius: effectiveBorderRadius,
-            child: widget.child,
-          ),
+          child: widget.borderRadius != null
+              ? ClipRRect(
+                  borderRadius: widget.borderRadius!,
+                  child: widget.child,
+                )
+              : widget.child,
         ),
       ),
     );
