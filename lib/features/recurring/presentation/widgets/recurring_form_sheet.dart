@@ -12,6 +12,7 @@ import 'package:so_thu_chi/features/categories/presentation/controllers/categori
 import 'package:so_thu_chi/features/recurring/domain/entities/recurring_transaction.dart';
 import 'package:so_thu_chi/features/recurring/presentation/controllers/recurring_controller.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
+import 'package:so_thu_chi/l10n/app_localizations.dart';
 
 class RecurringFormSheet extends ConsumerStatefulWidget {
   const RecurringFormSheet({
@@ -79,23 +80,24 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
     super.dispose();
   }
 
-  String _intervalLabel(RecurringInterval interval) {
+  String _intervalLabel(RecurringInterval interval, AppLocalizations l10n) {
     switch (interval) {
       case RecurringInterval.daily:
-        return 'Hàng ngày';
+        return l10n.recurringIntervalDaily;
       case RecurringInterval.weekly:
-        return 'Hàng tuần';
+        return l10n.recurringIntervalWeekly;
       case RecurringInterval.biweekly:
-        return '2 tuần một lần';
+        return l10n.recurringIntervalBiweekly;
       case RecurringInterval.monthly:
-        return 'Hàng tháng';
+        return l10n.recurringIntervalMonthly;
       case RecurringInterval.yearly:
-        return 'Hàng năm';
+        return l10n.recurringIntervalYearly;
     }
   }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    final l10n = context.l10n;
 
     final wallets = ref.read(activeAccountsProvider);
     final currency = wallets.isNotEmpty ? wallets.first.currency : AppCurrencies.defaultCode;
@@ -103,14 +105,14 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
 
     if (parsed == null || parsed.minorUnits <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng nhập số tiền hợp lệ')),
+        SnackBar(content: Text(l10n.recurringAmountRequired)),
       );
       return;
     }
 
     if (_accountId == null || _accountId!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng chọn ví thanh toán')),
+        SnackBar(content: Text(l10n.recurringWalletRequired)),
       );
       return;
     }
@@ -206,7 +208,7 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      _isEditing ? 'Sửa giao dịch định kỳ' : 'Thêm giao dịch định kỳ',
+                      _isEditing ? l10n.recurringEditTitle : l10n.recurringNewTitle,
                       style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
                     ),
                     IconButton(
@@ -226,9 +228,9 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                       // Title input
                       AppleTextField(
                         controller: _titleController,
-                        label: 'Tên gói / Khoản chi (VD: Netflix, Tiền phòng, Internet)',
+                        label: l10n.recurringTitleLabel,
                         prefixIcon: const Icon(CupertinoIcons.tag, size: 18),
-                        validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập tên gói' : null,
+                        validator: (v) => (v == null || v.trim().isEmpty) ? l10n.recurringTitleRequired : null,
                       ),
                       const SizedBox(height: 12),
 
@@ -236,9 +238,9 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                       AppleTextField(
                         controller: _amountController,
                         keyboardType: TextInputType.number,
-                        label: 'Số tiền định kỳ',
+                        label: l10n.recurringAmountLabel,
                         prefixIcon: const Icon(CupertinoIcons.money_dollar_circle, size: 18),
-                        validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập số tiền' : null,
+                        validator: (v) => (v == null || v.trim().isEmpty) ? l10n.recurringAmountRequired : null,
                       ),
                       const SizedBox(height: 14),
 
@@ -248,14 +250,14 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                           Expanded(
                             child: DropdownButtonFormField<RecurringInterval>(
                               initialValue: _interval,
-                              decoration: const InputDecoration(
-                                labelText: 'Chu kỳ lặp lại',
-                                prefixIcon: Icon(CupertinoIcons.repeat),
+                              decoration: InputDecoration(
+                                labelText: l10n.recurringFrequencyLabel,
+                                prefixIcon: const Icon(CupertinoIcons.repeat),
                               ),
                               items: RecurringInterval.values.map((i) {
                                 return DropdownMenuItem(
                                   value: i,
-                                  child: Text(_intervalLabel(i)),
+                                  child: Text(_intervalLabel(i, l10n)),
                                 );
                               }).toList(),
                               onChanged: (val) {
@@ -267,9 +269,9 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                           Expanded(
                             child: DropdownButtonFormField<TransactionType>(
                               initialValue: _type,
-                              decoration: const InputDecoration(
-                                labelText: 'Loại',
-                                prefixIcon: Icon(CupertinoIcons.arrow_right_arrow_left),
+                              decoration: InputDecoration(
+                                labelText: l10n.type,
+                                prefixIcon: const Icon(CupertinoIcons.arrow_right_arrow_left),
                               ),
                               items: [
                                 DropdownMenuItem(value: TransactionType.expense, child: Text(l10n.expense)),
@@ -290,9 +292,9 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                           Expanded(
                             child: DropdownButtonFormField<String>(
                               initialValue: _accountId,
-                              decoration: const InputDecoration(
-                                labelText: 'Ví thanh toán',
-                                prefixIcon: Icon(CupertinoIcons.creditcard),
+                              decoration: InputDecoration(
+                                labelText: l10n.recurringWalletLabel,
+                                prefixIcon: const Icon(CupertinoIcons.creditcard),
                               ),
                               items: wallets.map((w) {
                                 return DropdownMenuItem(
@@ -307,9 +309,9 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                           Expanded(
                             child: DropdownButtonFormField<String>(
                               initialValue: _categoryId,
-                              decoration: const InputDecoration(
-                                labelText: 'Danh mục',
-                                prefixIcon: Icon(CupertinoIcons.square_grid_2x2),
+                              decoration: InputDecoration(
+                                labelText: l10n.recurringCategoryLabel,
+                                prefixIcon: const Icon(CupertinoIcons.square_grid_2x2),
                               ),
                               items: availableCats.map((c) {
                                 return DropdownMenuItem(
@@ -326,7 +328,7 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
 
                       // Start Date selector
                       AppleDatePickerTile(
-                        label: 'Ngày bắt đầu / Đến hạn kế tiếp',
+                        label: l10n.recurringStartDateLabel,
                         selectedDate: _startDate,
                         onDateSelected: (d) => setState(() => _startDate = d),
                         iconColor: AppleTokens.systemIndigo,
@@ -336,8 +338,8 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                       // Auto execute toggle
                       SwitchListTile.adaptive(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Tự động ghi sổ khi đến hạn', style: TextStyle(fontWeight: FontWeight.w600)),
-                        subtitle: const Text('Tự trừ tiền trong ví và tạo giao dịch mà không cần xác nhận thủ công'),
+                        title: Text(l10n.recurringAutoExecute, style: const TextStyle(fontWeight: FontWeight.w600)),
+                        subtitle: Text(l10n.recurringAutoExecuteSubtitle),
                         value: _autoExecute,
                         onChanged: (v) => setState(() => _autoExecute = v),
                       ),
@@ -345,7 +347,7 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
 
                       // Submit Button
                       AppleButton.primary(
-                        label: _isEditing ? 'Cập nhật định kỳ' : 'Tạo gói định kỳ',
+                        label: _isEditing ? l10n.recurringConfirmUpdate : l10n.recurringConfirmCreate,
                         color: AppleTokens.jadePrimary,
                         onPressed: _submit,
                       ),

@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -92,7 +90,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     } else {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          unawaited(ref.read(categoriesActionControllerProvider.notifier).seedDefaultsIfNeeded());
+          ref.read(categoriesActionControllerProvider.notifier).seedDefaultsIfNeeded();
         }
       });
     }
@@ -484,9 +482,9 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     final allWallets = ref.watch(accountsStreamProvider).value ?? const [];
     final walletsForDropdown = _isEditing ? allWallets : activeWallets;
 
-    final categoriesAsync = ref.watch(categoriesStreamProvider);
     final expenseCategories = ref.watch(expenseCategoriesProvider);
     final incomeCategories = ref.watch(incomeCategoriesProvider);
+    final categoriesAsync = ref.watch(categoriesStreamProvider);
     final availableCategories = _type == TransactionType.income
         ? incomeCategories
         : expenseCategories;
@@ -639,13 +637,13 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                         borderColor: isDark
                             ? Colors.white.withValues(alpha: 0.12)
                             : AppleTokens.borderLight,
-                        child: const Row(
+                        child: Row(
                           children: [
-                            CupertinoActivityIndicator(),
-                            SizedBox(width: 12),
+                            const CupertinoActivityIndicator(),
+                            const SizedBox(width: 12),
                             Text(
-                              'Đang tải danh mục...',
-                              style: TextStyle(
+                              l10n.loadingCategories,
+                              style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
                                 color: AppleTokens.systemGray,

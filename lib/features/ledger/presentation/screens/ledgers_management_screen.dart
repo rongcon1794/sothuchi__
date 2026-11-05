@@ -5,11 +5,13 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
 import 'package:so_thu_chi/features/ledger/presentation/controllers/ledgers_controller.dart';
 import 'package:so_thu_chi/features/ledger/presentation/widgets/ledger_form_sheet.dart';
+import 'package:so_thu_chi/l10n/app_localizations.dart';
 
 class LedgersManagementScreen extends ConsumerStatefulWidget {
   const LedgersManagementScreen({super.key});
@@ -40,35 +42,36 @@ class _LedgersManagementScreenState
     }
   }
 
-  String _typeLabel(LedgerType type) {
+  String _typeLabel(LedgerType type, AppLocalizations l10n) {
     switch (type) {
       case LedgerType.personal:
-        return 'Cá nhân';
+        return l10n.ledgerPersonal;
       case LedgerType.family:
-        return 'Gia đình';
+        return l10n.ledgerFamily;
       case LedgerType.business:
-        return 'Kinh doanh / Dự án';
+        return l10n.ledgerBusiness;
       case LedgerType.custom:
-        return 'Tùy chỉnh';
+        return l10n.ledgerCustom;
     }
   }
 
   Future<void> _confirmDelete(BuildContext context, LedgerBook ledger) async {
+    final l10n = context.l10n;
     final confirmed = await showCupertinoModalPopup<bool>(
       context: context,
       builder: (ctx) => CupertinoActionSheet(
-        title: Text('Xóa sổ "${ledger.name}"'),
-        message: const Text('Thao tác này sẽ xóa sổ thu chi này khỏi thiết bị.'),
+        title: Text(l10n.ledgerDeleteConfirmTitle(ledger.name)),
+        message: Text(l10n.ledgerDeleteConfirmBody),
         actions: [
           CupertinoActionSheetAction(
             isDestructiveAction: true,
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Xác nhận xóa'),
+            child: Text(l10n.delete),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
           onPressed: () => Navigator.of(ctx).pop(false),
-          child: const Text('Hủy'),
+          child: Text(l10n.cancel),
         ),
       ),
     );
@@ -83,13 +86,14 @@ class _LedgersManagementScreenState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = context.l10n;
     final ledgersAsync = ref.watch(ledgersStreamProvider);
     final activeId = ref.watch(activeLedgerIdProvider);
 
     return Scaffold(
       backgroundColor: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightPrimary,
       appBar: AppBar(
-        title: const Text('Quản Lý Sổ Thu Chi', style: TextStyle(fontWeight: FontWeight.w700)),
+        title: Text(l10n.ledgersTitle, style: const TextStyle(fontWeight: FontWeight.w700)),
         centerTitle: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -104,13 +108,13 @@ class _LedgersManagementScreenState
         isVisible: _isFabVisible,
         isExpanded: _isFabExpanded,
         icon: const Icon(CupertinoIcons.plus),
-        label: const Text('Thêm sổ mới'),
+        label: Text(l10n.ledgerNew),
         backgroundColor: AppleTokens.jadeDark,
         onPressed: () {
           unawaited(HapticFeedback.lightImpact());
           LedgerFormSheet.show(context);
         },
-        tooltip: 'Tạo sổ thu chi mới',
+        tooltip: l10n.ledgerNewTitle,
       ),
       body: ledgersAsync.when(
         loading: () => const Center(child: CupertinoActivityIndicator()),
@@ -152,32 +156,32 @@ class _LedgersManagementScreenState
                         : const [Color(0xFFE0F2FE), Color(0xFFEFF6FF)],
                   ),
                   borderColor: AppleTokens.systemBlue.withValues(alpha: 0.3),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      AppleSquircleBadge(
+                      const AppleSquircleBadge(
                         icon: CupertinoIcons.layers_alt_fill,
                         backgroundColor: AppleTokens.systemBlue,
                         size: 42,
                         iconSize: 22,
                       ),
-                      SizedBox(width: 14),
+                      const SizedBox(width: 14),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'ĐA SỔ THU CHI THÔNG MINH',
-                              style: TextStyle(
+                              l10n.ledgersTitle.toUpperCase(),
+                              style: const TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                                 color: AppleTokens.systemBlue,
                                 letterSpacing: 0.5,
                               ),
                             ),
-                            SizedBox(height: 3),
+                            const SizedBox(height: 3),
                             Text(
-                              'Dễ dàng phân tách ví, giao dịch và báo cáo giữa các khía cạnh cuộc sống mà không sợ nhầm lẫn.',
-                              style: TextStyle(fontSize: 12),
+                              l10n.ledgerSwitcherSubtitle,
+                              style: const TextStyle(fontSize: 12),
                             ),
                           ],
                         ),
@@ -187,11 +191,11 @@ class _LedgersManagementScreenState
                 ),
                 const SizedBox(height: 20),
 
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
                   child: Text(
-                    'DANH SÁCH SỔ CỦA BẠN',
-                    style: TextStyle(
+                    l10n.ledgerSwitcherTitle.toUpperCase(),
+                    style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: AppleTokens.systemGray,
@@ -232,9 +236,9 @@ class _LedgersManagementScreenState
                                         color: AppleTokens.jadePrimary.withValues(alpha: 0.15),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
-                                      child: const Text(
-                                        'Đang chọn',
-                                        style: TextStyle(
+                                      child: Text(
+                                        l10n.ledgerActiveBadge,
+                                        style: const TextStyle(
                                           fontSize: 10,
                                           fontWeight: FontWeight.w700,
                                           color: AppleTokens.jadePrimary,
@@ -246,7 +250,7 @@ class _LedgersManagementScreenState
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                _typeLabel(item.type),
+                                _typeLabel(item.type, l10n),
                                 style: const TextStyle(fontSize: 12, color: AppleTokens.systemGray),
                               ),
                             ],
@@ -265,34 +269,34 @@ class _LedgersManagementScreenState
                           },
                           itemBuilder: (ctx) => [
                             if (item.id != activeId)
-                              const PopupMenuItem(
+                              PopupMenuItem(
                                 value: 'select',
                                 child: Row(
                                   children: [
-                                    Icon(CupertinoIcons.check_mark, size: 18),
-                                    SizedBox(width: 8),
-                                    Text('Chọn làm sổ hiện tại'),
+                                    const Icon(CupertinoIcons.check_mark, size: 18),
+                                    const SizedBox(width: 8),
+                                    Text(l10n.ledgerSelectActive),
                                   ],
                                 ),
                               ),
-                            const PopupMenuItem(
+                            PopupMenuItem(
                               value: 'edit',
                               child: Row(
                                 children: [
-                                  Icon(CupertinoIcons.pencil, size: 18),
-                                  SizedBox(width: 8),
-                                  Text('Chỉnh sửa'),
+                                  const Icon(CupertinoIcons.pencil, size: 18),
+                                  const SizedBox(width: 8),
+                                  Text(l10n.edit),
                                 ],
                               ),
                             ),
                             if (!item.isDefault)
-                              const PopupMenuItem(
+                              PopupMenuItem(
                                 value: 'delete',
                                 child: Row(
                                   children: [
-                                    Icon(CupertinoIcons.trash, color: AppleTokens.rubyExpense, size: 18),
-                                    SizedBox(width: 8),
-                                    Text('Xóa sổ', style: TextStyle(color: AppleTokens.rubyExpense)),
+                                    const Icon(CupertinoIcons.trash, color: AppleTokens.rubyExpense, size: 18),
+                                    const SizedBox(width: 8),
+                                    Text(l10n.ledgerDelete, style: const TextStyle(color: AppleTokens.rubyExpense)),
                                   ],
                                 ),
                               ),

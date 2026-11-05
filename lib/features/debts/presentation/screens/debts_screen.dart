@@ -10,6 +10,7 @@ import 'package:so_thu_chi/features/debts/domain/entities/debt.dart';
 import 'package:so_thu_chi/features/debts/presentation/controllers/debts_controller.dart';
 import 'package:so_thu_chi/features/debts/presentation/widgets/debt_form_sheet.dart';
 import 'package:so_thu_chi/features/debts/presentation/widgets/debt_repayment_sheet.dart';
+import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 
 class DebtsScreen extends ConsumerStatefulWidget {
   const DebtsScreen({super.key});
@@ -26,15 +27,18 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = context.l10n;
     final debtsAsync = ref.watch(debtsStreamProvider);
     final filteredDebts = ref.watch(filteredDebtsProvider);
     final summary = ref.watch(debtSummaryProvider);
     final currentFilter = ref.watch(debtFilterModeProvider);
+    final settings = ref.watch(settingsControllerProvider).value;
+    final locale = settings?.localeCode ?? 'vi';
 
     return Scaffold(
       backgroundColor: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightPrimary,
       appBar: AppBar(
-        title: const Text('Sổ Ghi Nợ', style: TextStyle(fontWeight: FontWeight.w700)),
+        title: Text(l10n.debtBookTitle, style: const TextStyle(fontWeight: FontWeight.w700)),
         centerTitle: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -45,13 +49,13 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
         isVisible: _isFabVisible,
         isExpanded: _isFabExpanded,
         icon: const Icon(CupertinoIcons.plus),
-        label: const Text('Ghi nợ mới'),
+        label: Text(l10n.debtNew),
         backgroundColor: AppleTokens.jadeDark,
         onPressed: () {
           HapticFeedback.mediumImpact();
           DebtFormSheet.show(context);
         },
-        tooltip: 'Ghi nợ mới',
+        tooltip: l10n.debtNew,
       ),
       body: debtsAsync.when(
         loading: () => const Center(child: CupertinoActivityIndicator()),
@@ -112,7 +116,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
-                                        'Người nợ tôi',
+                                        l10n.debtSummaryLent,
                                         style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w600,
@@ -126,7 +130,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
                                     fit: BoxFit.scaleDown,
                                     alignment: Alignment.centerLeft,
                                     child: Text(
-                                      summary.totalLent.format(locale: 'vi'),
+                                      summary.totalLent.format(locale: locale),
                                       style: const TextStyle(
                                         fontSize: 17,
                                         fontWeight: FontWeight.w800,
@@ -157,7 +161,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
-                                        'Tôi nợ người ta',
+                                        l10n.debtSummaryBorrowed,
                                         style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w600,
@@ -171,7 +175,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
                                     fit: BoxFit.scaleDown,
                                     alignment: Alignment.centerLeft,
                                     child: Text(
-                                      summary.totalBorrowed.format(locale: 'vi'),
+                                      summary.totalBorrowed.format(locale: locale),
                                       style: const TextStyle(
                                         fontSize: 17,
                                         fontWeight: FontWeight.w800,
@@ -225,7 +229,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
                         selected: currentFilter,
                         segments: {
                           for (final mode in DebtFilterMode.values)
-                            mode: mode.labelVi,
+                            mode: mode.label(l10n),
                         },
                         onChanged: (mode) {
                           ref
@@ -256,8 +260,8 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
                           const SizedBox(height: 12),
                           Text(
                             currentFilter == DebtFilterMode.settled
-                                ? 'Chưa có khoản nợ nào được thanh toán hết'
-                                : 'Không có khoản nợ nào',
+                                ? l10n.debtFilterSettled
+                                : l10n.debtEmpty,
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: theme.colorScheme.onSurfaceVariant,
@@ -265,7 +269,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'Ghi lại các khoản cho vay hoặc đi vay để luôn kiểm soát tốt dòng tiền của bạn.',
+                            l10n.debtEmptySubtitle,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 13,
@@ -316,6 +320,8 @@ class _DebtCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context).languageCode;
 
     final isLent = debt.type == DebtType.lent;
     final accentColor = debt.isSettled
@@ -379,7 +385,7 @@ class _DebtCard extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                           ),
                           child: Text(
-                            isLent ? 'Cho vay' : 'Đi vay',
+                            isLent ? l10n.debtLent : l10n.debtBorrowed,
                             style: TextStyle(
                               color: accentColor,
                               fontWeight: FontWeight.w700,
@@ -414,23 +420,23 @@ class _DebtCard extends ConsumerWidget {
                   }
                 },
                 itemBuilder: (_) => [
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'edit',
                     child: Row(
                       children: [
-                        Icon(CupertinoIcons.pencil, size: 16),
-                        SizedBox(width: 8),
-                        Text('Sửa thông tin'),
+                        const Icon(CupertinoIcons.pencil, size: 16),
+                        const SizedBox(width: 8),
+                        Text(l10n.debtEdit),
                       ],
                     ),
                   ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'delete',
                     child: Row(
                       children: [
-                        Icon(CupertinoIcons.trash, size: 16, color: AppleTokens.systemRed),
-                        SizedBox(width: 8),
-                        Text('Xóa khoản nợ', style: TextStyle(color: AppleTokens.systemRed)),
+                        const Icon(CupertinoIcons.trash, size: 16, color: AppleTokens.systemRed),
+                        const SizedBox(width: 8),
+                        Text(l10n.debtDelete, style: const TextStyle(color: AppleTokens.systemRed)),
                       ],
                     ),
                   ),
@@ -448,7 +454,7 @@ class _DebtCard extends ConsumerWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
-                debt.isSettled ? 'Đã hoàn tất' : 'Còn lại:',
+                debt.isSettled ? l10n.debtFilterSettled : '${l10n.debtRemaining}:',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -461,7 +467,7 @@ class _DebtCard extends ConsumerWidget {
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerRight,
                   child: Text(
-                    debt.remainingMoney.format(locale: 'vi'),
+                    debt.remainingMoney.format(locale: locale),
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
@@ -494,7 +500,7 @@ class _DebtCard extends ConsumerWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Tổng nợ: ${debt.totalMoney.format(locale: 'vi')}',
+                  '${l10n.amount}: ${debt.totalMoney.format(locale: locale)}',
                   style: TextStyle(fontSize: 11.5, color: theme.colorScheme.onSurfaceVariant),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -513,7 +519,7 @@ class _DebtCard extends ConsumerWidget {
                     Text(
                       debt.isOverdue
                           ? 'Quá hạn: ${AppDateUtils.formatVnDate(debt.dueDate!)}'
-                          : 'Hạn: ${AppDateUtils.formatVnDate(debt.dueDate!)}',
+                          : l10n.debtDueDate(AppDateUtils.formatVnDate(debt.dueDate!)),
                       style: TextStyle(
                         fontSize: 11.5,
                         fontWeight: debt.isOverdue ? FontWeight.w700 : FontWeight.normal,
@@ -528,7 +534,7 @@ class _DebtCard extends ConsumerWidget {
           if (debt.note.isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(
-              'Ghi chú: ${debt.note}',
+              '${l10n.note}: ${debt.note}',
               style: TextStyle(
                 fontSize: 12,
                 color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.9),
@@ -568,7 +574,7 @@ class _DebtCard extends ConsumerWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      isLent ? 'Ghi nhận thu tiền nợ' : 'Ghi nhận trả bớt nợ',
+                      isLent ? l10n.debtCollect : l10n.debtRepay,
                       style: TextStyle(
                         color: accentColor,
                         fontWeight: FontWeight.w700,
@@ -586,16 +592,17 @@ class _DebtCard extends ConsumerWidget {
   }
 
   void _confirmDelete(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     showCupertinoDialog<void>(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
-        title: const Text('Xác nhận xóa'),
-        content: Text('Bạn có chắc muốn xóa khoản nợ của ${debt.personName}?'),
+        title: Text(l10n.debtDeleteConfirmTitle),
+        content: Text(l10n.debtDeleteConfirmBody(debt.personName)),
         actions: [
           CupertinoDialogAction(
             isDefaultAction: true,
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Hủy'),
+            child: Text(l10n.cancel),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
@@ -603,7 +610,7 @@ class _DebtCard extends ConsumerWidget {
               Navigator.of(ctx).pop();
               ref.read(debtsActionControllerProvider.notifier).deleteDebt(debt.id);
             },
-            child: const Text('Xóa'),
+            child: Text(l10n.delete),
           ),
         ],
       ),

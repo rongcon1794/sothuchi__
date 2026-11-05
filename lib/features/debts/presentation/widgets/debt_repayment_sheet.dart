@@ -55,10 +55,12 @@ class _DebtRepaymentSheetState extends ConsumerState<DebtRepaymentSheet> {
   }
 
   Future<void> _submit() async {
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context).languageCode;
     final rawAmount = int.tryParse(_amountController.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
     if (rawAmount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng nhập số tiền hợp lệ lớn hơn 0')),
+        SnackBar(content: Text(l10n.debtAmountRequired)),
       );
       return;
     }
@@ -78,6 +80,7 @@ class _DebtRepaymentSheetState extends ConsumerState<DebtRepaymentSheet> {
     res.fold(
       onSuccess: (_) {
         Navigator.of(context).pop();
+        final formatted = Money(minorUnits: rawAmount, currencyCode: widget.debt.currency).format(locale: locale);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
@@ -85,9 +88,7 @@ class _DebtRepaymentSheetState extends ConsumerState<DebtRepaymentSheet> {
                 const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    'Đã ghi nhận trả ${Money(minorUnits: rawAmount, currencyCode: widget.debt.currency).format(locale: 'vi')}',
-                  ),
+                  child: Text(l10n.debtRepaymentSuccess(formatted)),
                 ),
               ],
             ),
@@ -109,10 +110,14 @@ class _DebtRepaymentSheetState extends ConsumerState<DebtRepaymentSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context).languageCode;
     final activeAccounts = ref.watch(activeAccountsProvider);
 
     final isLent = widget.debt.type == DebtType.lent;
-    final title = isLent ? 'Thu hồi nợ từ ${widget.debt.personName}' : 'Trả nợ cho ${widget.debt.personName}';
+    final title = isLent
+        ? l10n.debtRepaymentCollectTitle(widget.debt.personName)
+        : l10n.debtRepaymentPayTitle(widget.debt.personName);
 
     return Container(
       constraints: BoxConstraints(
@@ -155,7 +160,7 @@ class _DebtRepaymentSheetState extends ConsumerState<DebtRepaymentSheet> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Số tiền còn lại: ${widget.debt.remainingMoney.format(locale: 'vi')}',
+            '${l10n.debtRemaining}: ${widget.debt.remainingMoney.format(locale: locale)}',
             style: TextStyle(
               fontSize: 13,
               color: isLent ? AppleTokens.systemGreen : AppleTokens.systemOrange,
@@ -168,7 +173,7 @@ class _DebtRepaymentSheetState extends ConsumerState<DebtRepaymentSheet> {
           AppleTextField(
             controller: _amountController,
             keyboardType: TextInputType.number,
-            label: 'Số tiền trả (${widget.debt.currency})',
+            label: '${l10n.debtRepaymentAmount} (${widget.debt.currency})',
             clearable: true,
           ),
           const SizedBox(height: 10),
@@ -186,9 +191,9 @@ class _DebtRepaymentSheetState extends ConsumerState<DebtRepaymentSheet> {
                       color: AppleTokens.systemBlue.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                     ),
-                    child: const Text(
-                      'Trả toàn bộ',
-                      style: TextStyle(
+                    child: Text(
+                      l10n.debtRepaymentFull,
+                      style: const TextStyle(
                         color: AppleTokens.systemBlue,
                         fontWeight: FontWeight.w600,
                         fontSize: 12.5,
@@ -210,7 +215,7 @@ class _DebtRepaymentSheetState extends ConsumerState<DebtRepaymentSheet> {
                         borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                       ),
                       child: const Text(
-                        'Trả 50%',
+                        '50%',
                         style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12.5),
                       ),
                     ),
@@ -224,7 +229,7 @@ class _DebtRepaymentSheetState extends ConsumerState<DebtRepaymentSheet> {
           // Linked wallet selector
           if (activeAccounts.isNotEmpty) ...[
             Text(
-              isLent ? 'Nhận tiền vào ví:' : 'Thanh toán từ ví:',
+              '${l10n.debtRepaymentWallet}:',
               style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
@@ -290,7 +295,7 @@ class _DebtRepaymentSheetState extends ConsumerState<DebtRepaymentSheet> {
 
           // Submit Button
           AppleButton.primary(
-            label: isLent ? 'Xác nhận thu nợ' : 'Xác nhận trả nợ',
+            label: isLent ? l10n.debtCollect : l10n.debtRepay,
             color: isLent ? AppleTokens.systemGreen : AppleTokens.systemOrange,
             isLoading: _isSubmitting,
             onPressed: _submit,

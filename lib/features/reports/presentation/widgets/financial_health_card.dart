@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/reports/domain/entities/monthly_report.dart';
+import 'package:so_thu_chi/l10n/app_localizations.dart';
 
 class FinancialHealthCard extends StatelessWidget {
   const FinancialHealthCard({
@@ -21,8 +23,9 @@ class FinancialHealthCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = context.l10n;
 
-    final scoreData = _calculateHealthScore(report);
+    final scoreData = _calculateHealthScore(report, l10n);
     final score = scoreData.score;
     final rating = scoreData.rating;
     final badgeColor = scoreData.color;
@@ -53,7 +56,7 @@ class FinancialHealthCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Sức Khỏe Tài Chính',
+                      l10n.reportsFinancialHealth,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -141,7 +144,7 @@ class FinancialHealthCard extends StatelessWidget {
           _InsightRow(
             icon: CupertinoIcons.sparkles,
             iconColor: AppleTokens.systemOrange,
-            title: 'Tỷ lệ tích lũy',
+            title: l10n.healthSavingsRate,
             description: report.totalIncomeMinor > 0
                 ? 'Bạn đã tích lũy ${report.savingsRatePercent}% thu nhập tháng này${report.savingsRatePercent >= 20 ? ' (Đạt chuẩn tốt)' : ' (Nên phấn đấu đạt 20%)'}.'
                 : 'Chưa ghi nhận thu nhập trong tháng này.',
@@ -150,7 +153,7 @@ class FinancialHealthCard extends StatelessWidget {
           _InsightRow(
             icon: CupertinoIcons.calendar,
             iconColor: AppleTokens.systemBlue,
-            title: 'Nhịp độ chi tiêu',
+            title: l10n.healthSpendingPace,
             description: report.peakSpendingDay > 0
                 ? 'Ngày chi cao nhất là ngày ${report.peakSpendingDay} (${Money(minorUnits: report.peakSpendingAmountMinor, currencyCode: report.currencyCode).format(locale: locale, masked: hideBalance)}).'
                 : 'Không có chi tiêu nào trong tháng.',
@@ -160,7 +163,7 @@ class FinancialHealthCard extends StatelessWidget {
             _InsightRow(
               icon: CupertinoIcons.chart_pie,
               iconColor: AppleTokens.jadeDark,
-              title: 'Hạng mục chi lớn nhất',
+              title: l10n.healthTopCategory,
               description:
                   '${report.categorySlices.first.fallbackName} chiếm ${report.categorySlices.first.percentage}% tổng ngân sách chi (${report.categorySlices.first.amountMoney.format(locale: locale, masked: hideBalance)}).',
             ),
@@ -170,9 +173,9 @@ class FinancialHealthCard extends StatelessWidget {
     );
   }
 
-  static _HealthScoreResult _calculateHealthScore(MonthlyReportData r) {
+  static _HealthScoreResult _calculateHealthScore(MonthlyReportData r, AppLocalizations l10n) {
     if (r.totalIncomeMinor <= 0 && r.totalExpenseMinor <= 0) {
-      return const _HealthScoreResult(score: 50, rating: 'Chưa đủ dữ liệu', color: AppleTokens.systemGray);
+      return _HealthScoreResult(score: 50, rating: l10n.healthInsufficientData, color: AppleTokens.systemGray);
     }
 
     var score = 50;
@@ -206,13 +209,13 @@ class FinancialHealthCard extends StatelessWidget {
     score = score.clamp(10, 100);
 
     if (score >= 80) {
-      return _HealthScoreResult(score: score, rating: 'Rất Tốt', color: AppleTokens.systemGreen);
+      return _HealthScoreResult(score: score, rating: l10n.healthRatingExcellent, color: AppleTokens.systemGreen);
     } else if (score >= 60) {
-      return _HealthScoreResult(score: score, rating: 'Khá Ổn Định', color: AppleTokens.jadeDark);
+      return _HealthScoreResult(score: score, rating: l10n.healthRatingGood, color: AppleTokens.jadeDark);
     } else if (score >= 40) {
-      return _HealthScoreResult(score: score, rating: 'Trung Bình', color: AppleTokens.systemOrange);
+      return _HealthScoreResult(score: score, rating: l10n.healthRatingAverage, color: AppleTokens.systemOrange);
     } else {
-      return _HealthScoreResult(score: score, rating: 'Cần Cân Đối', color: AppleTokens.systemRed);
+      return _HealthScoreResult(score: score, rating: l10n.healthRatingNeedsAttention, color: AppleTokens.systemRed);
     }
   }
 }

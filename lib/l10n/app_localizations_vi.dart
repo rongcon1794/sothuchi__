@@ -580,4 +580,848 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get moreOptions => 'Tùy chọn khác';
+
+  @override
+  String get debtBookTitle => 'Sổ Ghi Nợ';
+
+  @override
+  String get debtNew => 'Ghi nợ mới';
+
+  @override
+  String get debtEdit => 'Sửa thông tin';
+
+  @override
+  String get debtDelete => 'Xóa khoản nợ';
+
+  @override
+  String get debtDeleteConfirmTitle => 'Xác nhận xóa';
+
+  @override
+  String debtDeleteConfirmBody(String name) {
+    return 'Bạn có chắc muốn xóa khoản nợ của $name?';
+  }
+
+  @override
+  String get debtLent => 'Cho vay';
+
+  @override
+  String get debtBorrowed => 'Đi vay';
+
+  @override
+  String get debtLentSubtitle => 'Cần thu hồi';
+
+  @override
+  String get debtBorrowedSubtitle => 'Cần thanh toán';
+
+  @override
+  String get debtTotalLent => 'Tổng cho vay';
+
+  @override
+  String get debtTotalBorrowed => 'Tổng đi vay';
+
+  @override
+  String get debtFilterAll => 'Tất cả';
+
+  @override
+  String get debtFilterUnsettled => 'Chưa thanh toán';
+
+  @override
+  String get debtFilterSettled => 'Đã thanh toán xong';
+
+  @override
+  String get debtFilterLent => 'Cho vay';
+
+  @override
+  String get debtFilterBorrowed => 'Đi vay';
+
+  @override
+  String get debtRemaining => 'Còn lại';
+
+  @override
+  String debtDueDate(String date) {
+    return 'Hạn: $date';
+  }
+
+  @override
+  String get debtRepay => 'Trả bớt';
+
+  @override
+  String get debtCollect => 'Thu hồi';
+
+  @override
+  String get debtEmpty => 'Chưa có khoản nợ nào';
+
+  @override
+  String get debtEmptySubtitle =>
+      'Ghi chép tiền cho vay hoặc đi vay để không bao giờ bị quên.';
+
+  @override
+  String get debtRepaymentTitle => 'Ghi nhận thanh toán';
+
+  @override
+  String debtRepaymentCollectTitle(String name) {
+    return 'Thu hồi nợ từ $name';
+  }
+
+  @override
+  String debtRepaymentPayTitle(String name) {
+    return 'Trả nợ cho $name';
+  }
+
+  @override
+  String get debtRepaymentAmount => 'Số tiền thanh toán';
+
+  @override
+  String get debtRepaymentWallet => 'Ví nhận / trả tiền';
+
+  @override
+  String get debtRepaymentFull => 'Trả hết toàn bộ';
+
+  @override
+  String debtRepaymentSuccess(String amount) {
+    return 'Đã ghi nhận thanh toán $amount';
+  }
+
+  @override
+  String get debtUpdatedSuccess => 'Đã cập nhật khoản nợ';
+
+  @override
+  String get debtAddedSuccess => 'Đã ghi nhận khoản nợ mới';
+
+  @override
+  String get debtPersonName => 'Người vay / cho vay';
+
+  @override
+  String get debtPersonNameHint => 'VD: Anh Tuấn, Chị Lan...';
+
+  @override
+  String get debtPhoneNumber => 'Số điện thoại (tùy chọn)';
+
+  @override
+  String get debtTypeLent => 'Tôi cho vay (Người khác nợ tôi)';
+
+  @override
+  String get debtTypeBorrowed => 'Tôi đi vay (Tôi nợ người khác)';
+
+  @override
+  String get debtAmountRequired => 'Vui lòng nhập số tiền hợp lệ lớn hơn 0';
+
+  @override
+  String get debtPersonRequired => 'Vui lòng nhập tên người vay / cho vay';
+
+  @override
+  String get savingsTitle => 'Heo Đất & Tiết Kiệm';
+
+  @override
+  String get savingsNewGoal => 'Mục tiêu mới';
+
+  @override
+  String get savingsEditGoal => 'Sửa mục tiêu';
+
+  @override
+  String get savingsDeleteGoal => 'Xóa mục tiêu';
+
+  @override
+  String savingsDeleteConfirmTitle(String title) {
+    return 'Xóa mục tiêu \"$title\"';
+  }
+
+  @override
+  String get savingsDeleteConfirmBody =>
+      'Thao tác này sẽ xóa mục tiêu tích lũy. Lịch sử giao dịch tiền trong ví vẫn được giữ nguyên.';
+
+  @override
+  String get savingsTotalSaved => 'Tổng tiền đã gom';
+
+  @override
+  String get savingsTotalTarget => 'Tổng mục tiêu';
+
+  @override
+  String get savingsSummaryProgress => 'TỔNG TIẾN ĐỘ TÍCH LŨY';
+
+  @override
+  String savingsActiveCount(int active, int completed) {
+    return '$active đang chạy • $completed hoàn thành';
+  }
+
+  @override
+  String savingsDaysRemaining(int days) {
+    return 'Còn $days ngày';
+  }
+
+  @override
+  String savingsDailyNeeded(String amount) {
+    return 'Cần $amount/ngày';
+  }
+
+  @override
+  String get savingsDeposit => 'Nạp tích lũy';
+
+  @override
+  String get savingsWithdraw => 'Rút tiền về ví';
+
+  @override
+  String get savingsGoalCompleted => 'Đã hoàn thành!';
+
+  @override
+  String savingsGoalTarget(String amount) {
+    return 'Mục tiêu: $amount';
+  }
+
+  @override
+  String savingsGoalRemaining(String amount) {
+    return 'Còn thiếu: $amount';
+  }
+
+  @override
+  String get savingsEmpty => 'Chưa có mục tiêu tiết kiệm';
+
+  @override
+  String get savingsEmptySubtitle =>
+      'Thiết lập quỹ khẩn cấp, mua sắm hoặc du lịch để theo dõi tiến độ tích lũy mỗi ngày.';
+
+  @override
+  String get savingsCreateFirst => 'Tạo mục tiêu đầu tiên';
+
+  @override
+  String get savingsGoalName => 'Tên mục tiêu';
+
+  @override
+  String get savingsGoalNameHint => 'VD: Quỹ khẩn cấp, Mua xe, Du lịch...';
+
+  @override
+  String get savingsTargetAmount => 'Số tiền cần đạt được';
+
+  @override
+  String get savingsDeadline => 'Hạn hoàn thành (Deadline)';
+
+  @override
+  String get savingsNoDeadline => 'Không đặt thời hạn';
+
+  @override
+  String get savingsLinkedWallet => 'Ví liên kết (tùy chọn)';
+
+  @override
+  String get savingsNoLinkedWallet => 'Không chỉ định ví';
+
+  @override
+  String get savingsGoalIcon => 'Biểu tượng mục tiêu';
+
+  @override
+  String get savingsGoalColor => 'Màu sắc chủ đề';
+
+  @override
+  String savingsDepositSuccess(String amount, String title) {
+    return 'Đã tích lũy thêm $amount vào $title!';
+  }
+
+  @override
+  String savingsWithdrawSuccess(String amount, String title) {
+    return 'Đã rút $amount từ $title';
+  }
+
+  @override
+  String get savingsAmountRequired => 'Vui lòng nhập số tiền mục tiêu hợp lệ';
+
+  @override
+  String get savingsNoWalletAvailable => 'Chưa có ví nào khả dụng';
+
+  @override
+  String get savingsTargetRequired => 'Vui lòng nhập tên mục tiêu';
+
+  @override
+  String get recurringTitle => 'Hóa Đơn & Định Kỳ';
+
+  @override
+  String get recurringNew => 'Thêm gói mới';
+
+  @override
+  String get recurringEdit => 'Chỉnh sửa';
+
+  @override
+  String get recurringDelete => 'Xóa gói';
+
+  @override
+  String get recurringDeleteConfirmTitle => 'Xóa gói định kỳ';
+
+  @override
+  String recurringDeleteConfirmBody(String title) {
+    return 'Bạn có chắc muốn xóa \"$title\"? Các giao dịch đã ghi trong quá khứ sẽ không bị ảnh hưởng.';
+  }
+
+  @override
+  String get recurringEstimatedMonthly => 'ƯỚC TÍNH CHI PHÍ HÀNG THÁNG';
+
+  @override
+  String recurringActiveCount(int count) {
+    return '$count gói đang chạy';
+  }
+
+  @override
+  String get recurringDueBills => 'HÓA ĐƠN ĐẾN HẠN CẦN THANH TOÁN';
+
+  @override
+  String get recurringActiveSection => 'CÁC GÓI ĐỊNH KỲ ĐANG THEO DÕI';
+
+  @override
+  String get recurringPausedSection => 'GÓI ĐANG TẠM DỪNG';
+
+  @override
+  String recurringNextDue(String date) {
+    return 'Đến hạn: $date';
+  }
+
+  @override
+  String get recurringIntervalDaily => 'Hàng ngày';
+
+  @override
+  String get recurringIntervalWeekly => 'Hàng tuần';
+
+  @override
+  String get recurringIntervalBiweekly => '2 tuần một lần';
+
+  @override
+  String get recurringIntervalMonthly => 'Hàng tháng';
+
+  @override
+  String get recurringIntervalYearly => 'Hàng năm';
+
+  @override
+  String get recurringMarkPaid => 'Ghi nhận đã thanh toán';
+
+  @override
+  String get recurringPause => 'Tạm dừng';
+
+  @override
+  String get recurringResume => 'Kích hoạt lại';
+
+  @override
+  String get recurringAutoExecute => 'Tự động ghi sổ khi đến hạn';
+
+  @override
+  String get recurringAutoExecuteSubtitle =>
+      'Tự trừ tiền trong ví và tạo giao dịch mà không cần xác nhận thủ công';
+
+  @override
+  String get recurringEmpty => 'Chưa có hóa đơn định kỳ nào';
+
+  @override
+  String get recurringEmptySubtitle =>
+      'Theo dõi tiền thuê nhà, internet, Netflix, Spotify hoặc lương định kỳ hàng tháng.';
+
+  @override
+  String recurringRecordedSuccess(String title) {
+    return 'Đã ghi nhận giao dịch: $title';
+  }
+
+  @override
+  String get recurringWalletRequired => 'Vui lòng chọn ví thanh toán';
+
+  @override
+  String get recurringFrequency => 'Tần suất lặp lại';
+
+  @override
+  String get recurringStartDate => 'Ngày bắt đầu / Đến hạn';
+
+  @override
+  String get ledgersTitle => 'Quản Lý Sổ Thu Chi';
+
+  @override
+  String get ledgerNew => 'Thêm sổ mới';
+
+  @override
+  String get ledgerEdit => 'Chỉnh sửa';
+
+  @override
+  String get ledgerDelete => 'Xóa sổ';
+
+  @override
+  String ledgerDeleteConfirmTitle(String name) {
+    return 'Xóa sổ \"$name\"';
+  }
+
+  @override
+  String get ledgerDeleteConfirmBody =>
+      'Thao tác này sẽ xóa sổ thu chi này khỏi thiết bị.';
+
+  @override
+  String get ledgerPersonal => 'Cá nhân';
+
+  @override
+  String get ledgerFamily => 'Gia đình';
+
+  @override
+  String get ledgerBusiness => 'Kinh doanh / Dự án';
+
+  @override
+  String get ledgerCustom => 'Tùy chỉnh';
+
+  @override
+  String get ledgerActiveBadge => 'Đang dùng';
+
+  @override
+  String get ledgerSelectActive => 'Chọn làm sổ hiện tại';
+
+  @override
+  String get ledgerSwitcherTitle => 'Chuyển Sổ Thu Chi';
+
+  @override
+  String get ledgerSwitcherSubtitle =>
+      'Chuyển đổi linh hoạt giữa chi tiêu cá nhân, gia đình và công việc';
+
+  @override
+  String get ledgerName => 'Tên sổ';
+
+  @override
+  String get ledgerNameHint => 'VD: Sổ cá nhân, Gia đình, Dự án freelance...';
+
+  @override
+  String get ledgerType => 'Phân loại sổ';
+
+  @override
+  String get ledgerIcon => 'Biểu tượng';
+
+  @override
+  String get ledgerColor => 'Màu sắc chủ đề';
+
+  @override
+  String get ledgerNameRequired => 'Vui lòng nhập tên sổ';
+
+  @override
+  String get txTimeAndDetails => 'THỜI GIAN & CHI TIẾT';
+
+  @override
+  String get txSourceWallet => 'Chọn ví chuyển';
+
+  @override
+  String get txDestWallet => 'Chọn ví nhận';
+
+  @override
+  String get txSelectWallet => 'Chọn ví';
+
+  @override
+  String get txSwapWallets => 'Đổi chiều chuyển';
+
+  @override
+  String get txToday => 'Hôm nay';
+
+  @override
+  String get txChangeDate => 'Thay đổi';
+
+  @override
+  String get txRestoreDefaultCategories => 'Khôi phục mẫu';
+
+  @override
+  String get txEmptyCategoriesMsg =>
+      'Vui lòng khôi phục danh mục mẫu hoặc tạo danh mục mới để phân loại giao dịch.';
+
+  @override
+  String get txCategoryOther => 'Khác';
+
+  @override
+  String get txCategoryAdd => 'Thêm';
+
+  @override
+  String get txCategorySearchPlaceholder => 'Tìm kiếm danh mục...';
+
+  @override
+  String get txCategoryNotFound => 'Không tìm thấy danh mục';
+
+  @override
+  String get txCategoryCreateNew => 'Tạo mới';
+
+  @override
+  String get txUpdateTransaction => 'Cập nhật giao dịch';
+
+  @override
+  String get txDeleteLabel => 'Xóa';
+
+  @override
+  String homeDueBillsBanner(int count) {
+    return 'Có $count hóa đơn định kỳ đến hạn cần thanh toán!';
+  }
+
+  @override
+  String get homeSavingsStripTitle => 'Mục tiêu tiết kiệm';
+
+  @override
+  String get homeDebtsStripTitle => 'Sổ ghi nợ gần đây';
+
+  @override
+  String get homeActionTransaction => 'Giao dịch';
+
+  @override
+  String get homeActionWallet => 'Ví tiền';
+
+  @override
+  String get homeActionSavings => 'Tiết kiệm';
+
+  @override
+  String get homeActionRecurring => 'Định kỳ';
+
+  @override
+  String get homeActionDebts => 'Sổ Ghi Nợ';
+
+  @override
+  String get homeActionCategories => 'Danh mục';
+
+  @override
+  String get settingsDataSection => 'DỮ LIỆU & QUẢN LÝ';
+
+  @override
+  String get settingsDebtsSubtitle => 'Quản lý tiền cho vay & đi vay';
+
+  @override
+  String get settingsRecurringSubtitle => 'Khoản chi định kỳ, hóa đơn lặp lại';
+
+  @override
+  String get settingsSavingsSubtitle => 'Mục tiêu tài chính, tích lũy mua sắm';
+
+  @override
+  String get settingsLedgersSubtitle => 'Đa sổ cá nhân, gia đình, công việc';
+
+  @override
+  String get settingsDemoTag => 'Dùng thử offline';
+
+  @override
+  String get settingsGoogleTag => 'Đã đồng bộ Google';
+
+  @override
+  String get settingsAppIcon => 'Biểu tượng ứng dụng';
+
+  @override
+  String get settingsAppIconSubtitle => 'Tùy chỉnh phong cách icon hiển thị';
+
+  @override
+  String get settingsThemeDefault => 'Mặc định (Ngọc Bích)';
+
+  @override
+  String get settingsThemeClassic => 'iOS Cổ Điển (Xanh Dương)';
+
+  @override
+  String get settingsThemeMinimal => 'Tối Giản (Đen Tuyền)';
+
+  @override
+  String get settingsThemeSunset => 'Hoàng Hôn (Cam Đào)';
+
+  @override
+  String settingsWalletsCount(int count) {
+    return '$count ví';
+  }
+
+  @override
+  String settingsCategoriesCount(int count) {
+    return '$count mục';
+  }
+
+  @override
+  String settingsDebtsCount(int count) {
+    return '$count nợ';
+  }
+
+  @override
+  String get reportsFinancialHealth => 'Sức Khỏe Tài Chính';
+
+  @override
+  String get reportsSpendingHeatmap => 'Bản đồ Chi tiêu theo Ngày';
+
+  @override
+  String get reportsMonthTotalExpense => 'Tổng chi trong tháng';
+
+  @override
+  String reportsDailyAverage(String amount) {
+    return 'Trung bình: $amount/ngày';
+  }
+
+  @override
+  String reportsMaxDay(String amount) {
+    return 'Chi nhiều nhất: $amount';
+  }
+
+  @override
+  String reportsSelectedDay(String date) {
+    return 'Chi tiết ngày $date';
+  }
+
+  @override
+  String get reportsNoExpenseOnDay => 'Không có khoản chi nào trong ngày này';
+
+  @override
+  String get categoryCreateNew => 'Tạo danh mục mới';
+
+  @override
+  String get categoryIconAndColor => 'Biểu tượng & màu sắc';
+
+  @override
+  String get categoryChooseIcon => 'Chọn biểu tượng';
+
+  @override
+  String get categoryChooseColor => 'Chọn màu sắc';
+
+  @override
+  String get savingsProgress => 'tiến độ';
+
+  @override
+  String get savingsTarget => 'Mục tiêu';
+
+  @override
+  String get savingsRemaining => 'Còn thiếu';
+
+  @override
+  String get savingsDepositAction => 'Nạp tích lũy';
+
+  @override
+  String get savingsWithdrawAction => 'Rút tiền';
+
+  @override
+  String get savingsMotivationNote => 'Ghi chú động lực';
+
+  @override
+  String get savingsQuickRemaining => 'Phần còn thiếu';
+
+  @override
+  String get savingsQuickAll => 'Rút toàn bộ';
+
+  @override
+  String get savingsWalletSource => 'Ví trích tiền nạp';
+
+  @override
+  String get savingsWalletDest => 'Ví nhận tiền';
+
+  @override
+  String get savingsConfirmDeposit => 'Xác nhận tích lũy';
+
+  @override
+  String get savingsConfirmWithdraw => 'Xác nhận rút tiền';
+
+  @override
+  String get savingsEditGoalTitle => 'Sửa mục tiêu tiết kiệm';
+
+  @override
+  String get savingsNewGoalTitle => 'Tạo mục tiêu tiết kiệm mới';
+
+  @override
+  String get recurringIntervalQuarterly => 'Hàng quý';
+
+  @override
+  String get recurringFrequencyLabel => 'Tần suất lặp lại';
+
+  @override
+  String get recurringStartDateLabel => 'Ngày bắt đầu';
+
+  @override
+  String get recurringNextDueDateLabel => 'Kỳ hạn tiếp theo';
+
+  @override
+  String get recurringTitleLabel => 'Tên hóa đơn / dịch vụ';
+
+  @override
+  String get recurringTitleRequired => 'Vui lòng nhập tên hóa đơn';
+
+  @override
+  String get recurringAmountLabel => 'Số tiền';
+
+  @override
+  String get recurringAmountRequired => 'Vui lòng nhập số tiền hợp lệ';
+
+  @override
+  String get recurringWalletLabel => 'Ví thanh toán';
+
+  @override
+  String get recurringCategoryLabel => 'Danh mục chi tiêu';
+
+  @override
+  String get recurringConfirmCreate => 'Thêm gói định kỳ';
+
+  @override
+  String get recurringConfirmUpdate => 'Cập nhật gói định kỳ';
+
+  @override
+  String get recurringEditTitle => 'Sửa gói định kỳ';
+
+  @override
+  String get recurringNewTitle => 'Thêm hóa đơn định kỳ';
+
+  @override
+  String get ledgerEditTitle => 'Sửa sổ thu chi';
+
+  @override
+  String get ledgerNewTitle => 'Thêm sổ thu chi mới';
+
+  @override
+  String get ledgerDescLabel => 'Mô tả (Tùy chọn)';
+
+  @override
+  String get ledgerDescHint => 'Mô tả chi tiết sổ';
+
+  @override
+  String get ledgerConfirmCreate => 'Tạo sổ mới';
+
+  @override
+  String get ledgerConfirmUpdate => 'Cập nhật sổ';
+
+  @override
+  String ledgerSharedWith(int count) {
+    return 'Chia sẻ với: $count thành viên';
+  }
+
+  @override
+  String get transactionTimeDetails => 'THỜI GIAN & CHI TIẾT';
+
+  @override
+  String get transactionSelectSourceWallet => 'Chọn ví nguồn';
+
+  @override
+  String get transactionSelectDestWallet => 'Chọn ví đích';
+
+  @override
+  String get transactionOther => 'Khác';
+
+  @override
+  String get transactionAdd => 'Thêm';
+
+  @override
+  String get transactionCreateNew => 'Tạo mới';
+
+  @override
+  String get settingsDataAndManagement => 'DỮ LIỆU & QUẢN LÝ';
+
+  @override
+  String get settingsAccountGoogle => 'Tài khoản Google';
+
+  @override
+  String get settingsAccountGuest => 'Khách (Offline)';
+
+  @override
+  String get selectWallet => 'Chọn ví';
+
+  @override
+  String get swapWallets => 'Đổi chiều chuyển';
+
+  @override
+  String get changeDate => 'Thay đổi';
+
+  @override
+  String get noCategories => 'Chưa có danh mục nào';
+
+  @override
+  String get noCategoriesFound => 'Không tìm thấy danh mục';
+
+  @override
+  String get searchCategories => 'Tìm kiếm danh mục...';
+
+  @override
+  String get restoreDefaultCategories => 'Khôi phục mẫu';
+
+  @override
+  String get noCategoriesDescription =>
+      'Vui lòng khôi phục danh mục mẫu hoặc tạo danh mục mới để phân loại giao dịch.';
+
+  @override
+  String get clear => 'Xóa';
+
+  @override
+  String get back => 'Quay lại';
+
+  @override
+  String get updateTransaction => 'Cập nhật giao dịch';
+
+  @override
+  String get reportsShareTooltip => 'Chia sẻ báo cáo';
+
+  @override
+  String get heatmapTapHint =>
+      'Chạm vào ngày để xem số tiền đã chi tiêu chi tiết';
+
+  @override
+  String get heatmapNoSpending => 'Không có chi tiêu';
+
+  @override
+  String get heatmapMonthlySummary => 'Tổng quan Chi tiêu Tháng';
+
+  @override
+  String get heatmapNone => 'Không có';
+
+  @override
+  String get heatmapLess => 'Ít';
+
+  @override
+  String get heatmapMore => 'Nhiều';
+
+  @override
+  String get healthSavingsRate => 'Tỷ lệ tích lũy';
+
+  @override
+  String get healthSpendingPace => 'Nhịp độ chi tiêu';
+
+  @override
+  String get healthTopCategory => 'Hạng mục chi lớn nhất';
+
+  @override
+  String get healthInsufficientData => 'Chưa đủ dữ liệu';
+
+  @override
+  String get healthRatingExcellent => 'Rất Tốt';
+
+  @override
+  String get healthRatingGood => 'Khá Ổn Định';
+
+  @override
+  String get healthRatingAverage => 'Trung Bình';
+
+  @override
+  String get healthRatingNeedsAttention => 'Cần Cân Đối';
+
+  @override
+  String get debtsTitle => 'Sổ Ghi Nợ';
+
+  @override
+  String get accentColor => 'Gam màu chủ đạo';
+
+  @override
+  String get searchTransactionsTooltip => 'Tìm kiếm giao dịch';
+
+  @override
+  String get type => 'Loại';
+
+  @override
+  String get transactionType => 'Loại giao dịch';
+
+  @override
+  String get debtSummaryLent => 'Người nợ tôi';
+
+  @override
+  String get debtSummaryBorrowed => 'Tôi nợ người ta';
+
+  @override
+  String get debtNewTitle => 'Ghi nhận nợ mới';
+
+  @override
+  String get debtEditTitle => 'Chỉnh sửa khoản nợ';
+
+  @override
+  String get debtPersonLentLabel => 'Người vay (Ai nợ bạn?) *';
+
+  @override
+  String get debtPersonBorrowedLabel => 'Người cho vay (Bạn nợ ai?) *';
+
+  @override
+  String debtAmountLabel(String currency) {
+    return 'Số tiền nợ ($currency) *';
+  }
+
+  @override
+  String get savingsDepositSheetTitle => 'Tích lũy vào heo đất';
+
+  @override
+  String get savingsWithdrawSheetTitle => 'Rút tiền tiết kiệm';
+
+  @override
+  String get debtSubmitNew => 'Ghi nhận nợ';
+
+  @override
+  String get loading => 'Đang tải...';
+
+  @override
+  String get loadingCategories => 'Đang tải danh mục...';
 }

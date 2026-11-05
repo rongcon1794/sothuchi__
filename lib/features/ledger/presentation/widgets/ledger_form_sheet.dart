@@ -113,6 +113,7 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = context.l10n;
 
     return Container(
       constraints: BoxConstraints(
@@ -149,7 +150,7 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      _isEditing ? 'Sửa Sổ Thu Chi' : 'Thêm Sổ Thu Chi Mới',
+                      _isEditing ? l10n.ledgerEditTitle : l10n.ledgerNewTitle,
                       style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
                     ),
                     IconButton(
@@ -170,24 +171,25 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
                       // Name input
                       AppleTextField(
                         controller: _nameController,
-                        label: 'Tên sổ (VD: Sổ Chi Tiêu Gia Đình, Sổ Quỹ Lớp)',
+                        label: l10n.ledgerName,
+                        placeholder: l10n.ledgerNameHint,
                         prefixIcon: const Icon(CupertinoIcons.book, size: 18),
-                        validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập tên sổ' : null,
+                        validator: (v) => (v == null || v.trim().isEmpty) ? l10n.ledgerNameRequired : null,
                       ),
                       const SizedBox(height: 16),
 
                       // Type selector
                       DropdownButtonFormField<LedgerType>(
                         initialValue: _type,
-                        decoration: const InputDecoration(
-                          labelText: 'Mục đích sử dụng',
-                          prefixIcon: Icon(CupertinoIcons.tag),
+                        decoration: InputDecoration(
+                          labelText: l10n.ledgerType,
+                          prefixIcon: const Icon(CupertinoIcons.tag),
                         ),
-                        items: const [
-                          DropdownMenuItem(value: LedgerType.personal, child: Text('Cá nhân')),
-                          DropdownMenuItem(value: LedgerType.family, child: Text('Gia đình')),
-                          DropdownMenuItem(value: LedgerType.business, child: Text('Kinh doanh / Dự án')),
-                          DropdownMenuItem(value: LedgerType.custom, child: Text('Tùy chỉnh')),
+                        items: [
+                          DropdownMenuItem(value: LedgerType.personal, child: Text(l10n.ledgerPersonal)),
+                          DropdownMenuItem(value: LedgerType.family, child: Text(l10n.ledgerFamily)),
+                          DropdownMenuItem(value: LedgerType.business, child: Text(l10n.ledgerBusiness)),
+                          DropdownMenuItem(value: LedgerType.custom, child: Text(l10n.ledgerCustom)),
                         ],
                         onChanged: (val) {
                           if (val != null) setState(() => _type = val);
@@ -196,7 +198,7 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
                       const SizedBox(height: 16),
 
                       // Icon selector
-                      const Text('Biểu tượng', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppleTokens.systemGray)),
+                      Text(l10n.ledgerIcon, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppleTokens.systemGray)),
                       const SizedBox(height: 8),
                       SizedBox(
                         height: 52,
@@ -233,7 +235,7 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
                       const SizedBox(height: 16),
 
                       // Color selector
-                      const Text('Màu sắc chủ đề', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppleTokens.systemGray)),
+                      Text(l10n.ledgerColor, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppleTokens.systemGray)),
                       const SizedBox(height: 8),
                       SizedBox(
                         height: 44,
@@ -272,7 +274,7 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
                       // Submit button
                       AppleButton.primary(
                         color: Color(_selectedColor),
-                        label: _isEditing ? 'Cập nhật sổ' : 'Tạo sổ thu chi',
+                        label: _isEditing ? l10n.ledgerConfirmUpdate : l10n.ledgerConfirmCreate,
                         onPressed: _submit,
                       ),
                       const SizedBox(height: 24),

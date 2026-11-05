@@ -90,7 +90,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
         title: Text(l10n.reportsTitle),
         actions: [
           IconButton(
-            tooltip: 'Chia sẻ báo cáo',
+            tooltip: l10n.reportsShareTooltip,
             icon: const Icon(CupertinoIcons.share, size: 20),
             onPressed: () => _shareFinancialSummary(report, selectedMonth, locale),
           ),

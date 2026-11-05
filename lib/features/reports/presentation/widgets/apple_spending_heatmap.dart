@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
@@ -33,6 +34,7 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = context.l10n;
     final report = widget.report;
     final totalDays = report.daysInMonth;
     final avgMinor = report.averageDailyExpenseMinor;
@@ -57,7 +59,7 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
             children: [
               Expanded(
                 child: Text(
-                  'Bản đồ Chi tiêu theo Ngày',
+                  l10n.reportsSpendingHeatmap,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
@@ -85,7 +87,7 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
           ),
           const SizedBox(height: 6),
           Text(
-            'Chạm vào ngày để xem số tiền đã chi tiêu chi tiết',
+            l10n.heatmapTapHint,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -392,7 +394,7 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
                       locale: widget.locale,
                       masked: widget.hideBalance,
                     )
-                  : 'Không có chi tiêu',
+                  : context.l10n.heatmapNoSpending,
               style: TextStyle(
                 fontWeight: FontWeight.w800,
                 fontSize: 16,
@@ -438,7 +440,7 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
               ),
               const SizedBox(width: 6),
               Text(
-                'Tổng quan Chi tiêu Tháng',
+                context.l10n.heatmapMonthlySummary,
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -462,7 +464,7 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
             'Ngày chi nhiều nhất:',
             report.peakSpendingDay > 0
                 ? 'Ngày ${report.peakSpendingDay} (${Money(minorUnits: report.peakSpendingAmountMinor, currencyCode: report.currencyCode).format(locale: widget.locale, masked: widget.hideBalance)})'
-                : 'Không có',
+                : context.l10n.heatmapNone,
           ),
           const SizedBox(height: 4),
           _buildStatRow(
@@ -566,7 +568,7 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
                     locale: widget.locale,
                     masked: widget.hideBalance,
                   )
-                : 'Không có chi tiêu',
+                : context.l10n.heatmapNoSpending,
             style: TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 14,
@@ -585,7 +587,7 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Text(
-          'Ít',
+          context.l10n.heatmapLess,
           style: TextStyle(
             fontSize: 11,
             color: theme.colorScheme.onSurfaceVariant,
@@ -601,7 +603,7 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
         _LegendBox(color: _heatColorLevel4(isDark)),
         const SizedBox(width: 6),
         Text(
-          'Nhiều',
+          context.l10n.heatmapMore,
           style: TextStyle(
             fontSize: 11,
             color: theme.colorScheme.onSurfaceVariant,

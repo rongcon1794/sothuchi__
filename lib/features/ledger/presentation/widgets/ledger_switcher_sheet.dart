@@ -3,11 +3,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
 import 'package:so_thu_chi/features/ledger/presentation/controllers/ledgers_controller.dart';
 import 'package:so_thu_chi/features/ledger/presentation/widgets/ledger_form_sheet.dart';
+import 'package:so_thu_chi/l10n/app_localizations.dart';
 
 class LedgerSwitcherSheet extends ConsumerWidget {
   const LedgerSwitcherSheet({super.key});
@@ -37,16 +39,16 @@ class LedgerSwitcherSheet extends ConsumerWidget {
     }
   }
 
-  String _typeLabel(LedgerType type) {
+  String _typeLabel(LedgerType type, AppLocalizations l10n) {
     switch (type) {
       case LedgerType.personal:
-        return 'Cá nhân';
+        return l10n.ledgerPersonal;
       case LedgerType.family:
-        return 'Gia đình';
+        return l10n.ledgerFamily;
       case LedgerType.business:
-        return 'Kinh doanh / Dự án';
+        return l10n.ledgerBusiness;
       case LedgerType.custom:
-        return 'Tùy chỉnh';
+        return l10n.ledgerCustom;
     }
   }
 
@@ -54,6 +56,7 @@ class LedgerSwitcherSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = context.l10n;
     final ledgersAsync = ref.watch(ledgersStreamProvider);
     final activeId = ref.watch(activeLedgerIdProvider);
 
@@ -92,12 +95,12 @@ class LedgerSwitcherSheet extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Chuyển Sổ Thu Chi',
+                          l10n.ledgerSwitcherTitle,
                           style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
                         ),
-                        const Text(
-                          'Phân tách tài chính cá nhân, gia đình và công việc',
-                          style: TextStyle(fontSize: 12, color: AppleTokens.systemGray),
+                        Text(
+                          l10n.ledgerSwitcherSubtitle,
+                          style: const TextStyle(fontSize: 12, color: AppleTokens.systemGray),
                         ),
                       ],
                     ),
@@ -113,7 +116,7 @@ class LedgerSwitcherSheet extends ConsumerWidget {
             Flexible(
               child: ledgersAsync.when(
                 loading: () => const Center(child: CupertinoActivityIndicator()),
-                error: (err, _) => Center(child: Text('Lỗi: $err')),
+                error: (err, _) => Center(child: Text(context.localizeError(err))),
                 data: (ledgers) {
                   return ListView(
                     shrinkWrap: true,
@@ -124,7 +127,7 @@ class LedgerSwitcherSheet extends ConsumerWidget {
                           ledger: ledger,
                           isSelected: ledger.id == activeId,
                           icon: _resolveIcon(ledger.icon),
-                          typeLabel: _typeLabel(ledger.type),
+                          typeLabel: _typeLabel(ledger.type, l10n),
                           onTap: () {
                             unawaited(HapticFeedback.selectionClick());
                             ref.read(ledgersActionControllerProvider.notifier).switchLedger(ledger.id);
@@ -151,14 +154,14 @@ class LedgerSwitcherSheet extends ConsumerWidget {
                               width: 1,
                             ),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(CupertinoIcons.plus_circle_fill, color: AppleTokens.jadePrimary, size: 20),
-                              SizedBox(width: 8),
+                              const Icon(CupertinoIcons.plus_circle_fill, color: AppleTokens.jadePrimary, size: 20),
+                              const SizedBox(width: 8),
                               Text(
-                                'Thêm Sổ Thu Chi Mới',
-                                style: TextStyle(
+                                l10n.ledgerNewTitle,
+                                style: const TextStyle(
                                   fontWeight: FontWeight.w700,
                                   color: AppleTokens.jadePrimary,
                                 ),
@@ -199,6 +202,7 @@ class _LedgerItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = context.l10n;
     final color = Color(ledger.color);
 
     return ApplePressable(
@@ -245,7 +249,7 @@ class _LedgerItemCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            'Mặc định',
+                            l10n.defaultCategoryBadge,
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,

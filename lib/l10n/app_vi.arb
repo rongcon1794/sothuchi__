@@ -229,6 +229,463 @@
   "nextMonth": "Tháng sau",
   "balanceHidden": "Số dư đang ẩn",
   "differentCurrencyTransferError": "Chỉ hỗ trợ chuyển khoản giữa hai ví cùng đơn vị tiền tệ",
-  "moreOptions": "Tùy chọn khác"
+  "moreOptions": "Tùy chọn khác",
+  "debtBookTitle": "Sổ Ghi Nợ",
+  "debtNew": "Ghi nợ mới",
+  "debtEdit": "Sửa thông tin",
+  "debtDelete": "Xóa khoản nợ",
+  "debtDeleteConfirmTitle": "Xác nhận xóa",
+  "debtDeleteConfirmBody": "Bạn có chắc muốn xóa khoản nợ của {name}?",
+  "@debtDeleteConfirmBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debtLent": "Cho vay",
+  "debtBorrowed": "Đi vay",
+  "debtLentSubtitle": "Cần thu hồi",
+  "debtBorrowedSubtitle": "Cần thanh toán",
+  "debtTotalLent": "Tổng cho vay",
+  "debtTotalBorrowed": "Tổng đi vay",
+  "debtFilterAll": "Tất cả",
+  "debtFilterUnsettled": "Chưa thanh toán",
+  "debtFilterSettled": "Đã thanh toán xong",
+  "debtFilterLent": "Cho vay",
+  "debtFilterBorrowed": "Đi vay",
+  "debtRemaining": "Còn lại",
+  "debtDueDate": "Hạn: {date}",
+  "@debtDueDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "debtRepay": "Trả bớt",
+  "debtCollect": "Thu hồi",
+  "debtEmpty": "Chưa có khoản nợ nào",
+  "debtEmptySubtitle": "Ghi chép tiền cho vay hoặc đi vay để không bao giờ bị quên.",
+  "debtRepaymentTitle": "Ghi nhận thanh toán",
+  "debtRepaymentCollectTitle": "Thu hồi nợ từ {name}",
+  "@debtRepaymentCollectTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debtRepaymentPayTitle": "Trả nợ cho {name}",
+  "@debtRepaymentPayTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debtRepaymentAmount": "Số tiền thanh toán",
+  "debtRepaymentWallet": "Ví nhận / trả tiền",
+  "debtRepaymentFull": "Trả hết toàn bộ",
+  "debtRepaymentSuccess": "Đã ghi nhận thanh toán {amount}",
+  "@debtRepaymentSuccess": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "debtUpdatedSuccess": "Đã cập nhật khoản nợ",
+  "debtAddedSuccess": "Đã ghi nhận khoản nợ mới",
+  "debtPersonName": "Người vay / cho vay",
+  "debtPersonNameHint": "VD: Anh Tuấn, Chị Lan...",
+  "debtPhoneNumber": "Số điện thoại (tùy chọn)",
+  "debtTypeLent": "Tôi cho vay (Người khác nợ tôi)",
+  "debtTypeBorrowed": "Tôi đi vay (Tôi nợ người khác)",
+  "debtAmountRequired": "Vui lòng nhập số tiền hợp lệ lớn hơn 0",
+  "debtPersonRequired": "Vui lòng nhập tên người vay / cho vay",
+  "savingsTitle": "Heo Đất & Tiết Kiệm",
+  "savingsNewGoal": "Mục tiêu mới",
+  "savingsEditGoal": "Sửa mục tiêu",
+  "savingsDeleteGoal": "Xóa mục tiêu",
+  "savingsDeleteConfirmTitle": "Xóa mục tiêu \"{title}\"",
+  "@savingsDeleteConfirmTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "savingsDeleteConfirmBody": "Thao tác này sẽ xóa mục tiêu tích lũy. Lịch sử giao dịch tiền trong ví vẫn được giữ nguyên.",
+  "savingsTotalSaved": "Tổng tiền đã gom",
+  "savingsTotalTarget": "Tổng mục tiêu",
+  "savingsSummaryProgress": "TỔNG TIẾN ĐỘ TÍCH LŨY",
+  "savingsActiveCount": "{active} đang chạy • {completed} hoàn thành",
+  "@savingsActiveCount": {
+    "placeholders": {
+      "active": {
+        "type": "int"
+      },
+      "completed": {
+        "type": "int"
+      }
+    }
+  },
+  "savingsDaysRemaining": "Còn {days} ngày",
+  "@savingsDaysRemaining": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "savingsDailyNeeded": "Cần {amount}/ngày",
+  "@savingsDailyNeeded": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "savingsDeposit": "Nạp tích lũy",
+  "savingsWithdraw": "Rút tiền về ví",
+  "savingsGoalCompleted": "Đã hoàn thành!",
+  "savingsGoalTarget": "Mục tiêu: {amount}",
+  "@savingsGoalTarget": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "savingsGoalRemaining": "Còn thiếu: {amount}",
+  "@savingsGoalRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "savingsEmpty": "Chưa có mục tiêu tiết kiệm",
+  "savingsEmptySubtitle": "Thiết lập quỹ khẩn cấp, mua sắm hoặc du lịch để theo dõi tiến độ tích lũy mỗi ngày.",
+  "savingsCreateFirst": "Tạo mục tiêu đầu tiên",
+  "savingsGoalName": "Tên mục tiêu",
+  "savingsGoalNameHint": "VD: Quỹ khẩn cấp, Mua xe, Du lịch...",
+  "savingsTargetAmount": "Số tiền cần đạt được",
+  "savingsDeadline": "Hạn hoàn thành (Deadline)",
+  "savingsNoDeadline": "Không đặt thời hạn",
+  "savingsLinkedWallet": "Ví liên kết (tùy chọn)",
+  "savingsNoLinkedWallet": "Không chỉ định ví",
+  "savingsGoalIcon": "Biểu tượng mục tiêu",
+  "savingsGoalColor": "Màu sắc chủ đề",
+  "savingsDepositSuccess": "Đã tích lũy thêm {amount} vào {title}!",
+  "@savingsDepositSuccess": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "savingsWithdrawSuccess": "Đã rút {amount} từ {title}",
+  "@savingsWithdrawSuccess": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "savingsAmountRequired": "Vui lòng nhập số tiền mục tiêu hợp lệ",
+  "savingsNoWalletAvailable": "Chưa có ví nào khả dụng",
+  "savingsTargetRequired": "Vui lòng nhập tên mục tiêu",
+  "recurringTitle": "Hóa Đơn & Định Kỳ",
+  "recurringNew": "Thêm gói mới",
+  "recurringEdit": "Chỉnh sửa",
+  "recurringDelete": "Xóa gói",
+  "recurringDeleteConfirmTitle": "Xóa gói định kỳ",
+  "recurringDeleteConfirmBody": "Bạn có chắc muốn xóa \"{title}\"? Các giao dịch đã ghi trong quá khứ sẽ không bị ảnh hưởng.",
+  "@recurringDeleteConfirmBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringEstimatedMonthly": "ƯỚC TÍNH CHI PHÍ HÀNG THÁNG",
+  "recurringActiveCount": "{count} gói đang chạy",
+  "@recurringActiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringDueBills": "HÓA ĐƠN ĐẾN HẠN CẦN THANH TOÁN",
+  "recurringActiveSection": "CÁC GÓI ĐỊNH KỲ ĐANG THEO DÕI",
+  "recurringPausedSection": "GÓI ĐANG TẠM DỪNG",
+  "recurringNextDue": "Đến hạn: {date}",
+  "@recurringNextDue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringIntervalDaily": "Hàng ngày",
+  "recurringIntervalWeekly": "Hàng tuần",
+  "recurringIntervalBiweekly": "2 tuần một lần",
+  "recurringIntervalMonthly": "Hàng tháng",
+  "recurringIntervalYearly": "Hàng năm",
+  "recurringMarkPaid": "Ghi nhận đã thanh toán",
+  "recurringPause": "Tạm dừng",
+  "recurringResume": "Kích hoạt lại",
+  "recurringAutoExecute": "Tự động ghi sổ khi đến hạn",
+  "recurringAutoExecuteSubtitle": "Tự trừ tiền trong ví và tạo giao dịch mà không cần xác nhận thủ công",
+  "recurringEmpty": "Chưa có hóa đơn định kỳ nào",
+  "recurringEmptySubtitle": "Theo dõi tiền thuê nhà, internet, Netflix, Spotify hoặc lương định kỳ hàng tháng.",
+  "recurringRecordedSuccess": "Đã ghi nhận giao dịch: {title}",
+  "@recurringRecordedSuccess": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringWalletRequired": "Vui lòng chọn ví thanh toán",
+  "recurringFrequency": "Tần suất lặp lại",
+  "recurringStartDate": "Ngày bắt đầu / Đến hạn",
+  "ledgersTitle": "Quản Lý Sổ Thu Chi",
+  "ledgerNew": "Thêm sổ mới",
+  "ledgerEdit": "Chỉnh sửa",
+  "ledgerDelete": "Xóa sổ",
+  "ledgerDeleteConfirmTitle": "Xóa sổ \"{name}\"",
+  "@ledgerDeleteConfirmTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ledgerDeleteConfirmBody": "Thao tác này sẽ xóa sổ thu chi này khỏi thiết bị.",
+  "ledgerPersonal": "Cá nhân",
+  "ledgerFamily": "Gia đình",
+  "ledgerBusiness": "Kinh doanh / Dự án",
+  "ledgerCustom": "Tùy chỉnh",
+  "ledgerActiveBadge": "Đang dùng",
+  "ledgerSelectActive": "Chọn làm sổ hiện tại",
+  "ledgerSwitcherTitle": "Chuyển Sổ Thu Chi",
+  "ledgerSwitcherSubtitle": "Chuyển đổi linh hoạt giữa chi tiêu cá nhân, gia đình và công việc",
+  "ledgerName": "Tên sổ",
+  "ledgerNameHint": "VD: Sổ cá nhân, Gia đình, Dự án freelance...",
+  "ledgerType": "Phân loại sổ",
+  "ledgerIcon": "Biểu tượng",
+  "ledgerColor": "Màu sắc chủ đề",
+  "ledgerNameRequired": "Vui lòng nhập tên sổ",
+  "txTimeAndDetails": "THỜI GIAN & CHI TIẾT",
+  "txSourceWallet": "Chọn ví chuyển",
+  "txDestWallet": "Chọn ví nhận",
+  "txSelectWallet": "Chọn ví",
+  "txSwapWallets": "Đổi chiều chuyển",
+  "txToday": "Hôm nay",
+  "txChangeDate": "Thay đổi",
+  "txRestoreDefaultCategories": "Khôi phục mẫu",
+  "txEmptyCategoriesMsg": "Vui lòng khôi phục danh mục mẫu hoặc tạo danh mục mới để phân loại giao dịch.",
+  "txCategoryOther": "Khác",
+  "txCategoryAdd": "Thêm",
+  "txCategorySearchPlaceholder": "Tìm kiếm danh mục...",
+  "txCategoryNotFound": "Không tìm thấy danh mục",
+  "txCategoryCreateNew": "Tạo mới",
+  "txUpdateTransaction": "Cập nhật giao dịch",
+  "txDeleteLabel": "Xóa",
+  "homeDueBillsBanner": "Có {count} hóa đơn định kỳ đến hạn cần thanh toán!",
+  "@homeDueBillsBanner": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeSavingsStripTitle": "Mục tiêu tiết kiệm",
+  "homeDebtsStripTitle": "Sổ ghi nợ gần đây",
+  "homeActionTransaction": "Giao dịch",
+  "homeActionWallet": "Ví tiền",
+  "homeActionSavings": "Tiết kiệm",
+  "homeActionRecurring": "Định kỳ",
+  "homeActionDebts": "Sổ Ghi Nợ",
+  "homeActionCategories": "Danh mục",
+  "settingsDataSection": "DỮ LIỆU & QUẢN LÝ",
+  "settingsDebtsSubtitle": "Quản lý tiền cho vay & đi vay",
+  "settingsRecurringSubtitle": "Khoản chi định kỳ, hóa đơn lặp lại",
+  "settingsSavingsSubtitle": "Mục tiêu tài chính, tích lũy mua sắm",
+  "settingsLedgersSubtitle": "Đa sổ cá nhân, gia đình, công việc",
+  "settingsDemoTag": "Dùng thử offline",
+  "settingsGoogleTag": "Đã đồng bộ Google",
+  "settingsAppIcon": "Biểu tượng ứng dụng",
+  "settingsAppIconSubtitle": "Tùy chỉnh phong cách icon hiển thị",
+  "settingsThemeDefault": "Mặc định (Ngọc Bích)",
+  "settingsThemeClassic": "iOS Cổ Điển (Xanh Dương)",
+  "settingsThemeMinimal": "Tối Giản (Đen Tuyền)",
+  "settingsThemeSunset": "Hoàng Hôn (Cam Đào)",
+  "settingsWalletsCount": "{count} ví",
+  "@settingsWalletsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsCategoriesCount": "{count} mục",
+  "@settingsCategoriesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsDebtsCount": "{count} nợ",
+  "@settingsDebtsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reportsFinancialHealth": "Sức Khỏe Tài Chính",
+  "reportsSpendingHeatmap": "Bản đồ Chi tiêu theo Ngày",
+  "reportsMonthTotalExpense": "Tổng chi trong tháng",
+  "reportsDailyAverage": "Trung bình: {amount}/ngày",
+  "@reportsDailyAverage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsMaxDay": "Chi nhiều nhất: {amount}",
+  "@reportsMaxDay": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsSelectedDay": "Chi tiết ngày {date}",
+  "@reportsSelectedDay": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsNoExpenseOnDay": "Không có khoản chi nào trong ngày này",
+  "categoryCreateNew": "Tạo danh mục mới",
+  "categoryIconAndColor": "Biểu tượng & màu sắc",
+  "categoryChooseIcon": "Chọn biểu tượng",
+  "categoryChooseColor": "Chọn màu sắc",
+  "savingsProgress": "tiến độ",
+  "savingsTarget": "Mục tiêu",
+  "savingsRemaining": "Còn thiếu",
+  "savingsDepositAction": "Nạp tích lũy",
+  "savingsWithdrawAction": "Rút tiền",
+  "savingsMotivationNote": "Ghi chú động lực",
+  "savingsQuickRemaining": "Phần còn thiếu",
+  "savingsQuickAll": "Rút toàn bộ",
+  "savingsWalletSource": "Ví trích tiền nạp",
+  "savingsWalletDest": "Ví nhận tiền",
+  "savingsConfirmDeposit": "Xác nhận tích lũy",
+  "savingsConfirmWithdraw": "Xác nhận rút tiền",
+  "savingsEditGoalTitle": "Sửa mục tiêu tiết kiệm",
+  "savingsNewGoalTitle": "Tạo mục tiêu tiết kiệm mới",
+  "recurringIntervalQuarterly": "Hàng quý",
+  "recurringFrequencyLabel": "Tần suất lặp lại",
+  "recurringStartDateLabel": "Ngày bắt đầu",
+  "recurringNextDueDateLabel": "Kỳ hạn tiếp theo",
+  "recurringTitleLabel": "Tên hóa đơn / dịch vụ",
+  "recurringTitleRequired": "Vui lòng nhập tên hóa đơn",
+  "recurringAmountLabel": "Số tiền",
+  "recurringAmountRequired": "Vui lòng nhập số tiền hợp lệ",
+  "recurringWalletLabel": "Ví thanh toán",
+  "recurringCategoryLabel": "Danh mục chi tiêu",
+  "recurringConfirmCreate": "Thêm gói định kỳ",
+  "recurringConfirmUpdate": "Cập nhật gói định kỳ",
+  "recurringEditTitle": "Sửa gói định kỳ",
+  "recurringNewTitle": "Thêm hóa đơn định kỳ",
+  "ledgerEditTitle": "Sửa sổ thu chi",
+  "ledgerNewTitle": "Thêm sổ thu chi mới",
+  "ledgerDescLabel": "Mô tả (Tùy chọn)",
+  "ledgerDescHint": "Mô tả chi tiết sổ",
+  "ledgerConfirmCreate": "Tạo sổ mới",
+  "ledgerConfirmUpdate": "Cập nhật sổ",
+  "ledgerSharedWith": "Chia sẻ với: {count} thành viên",
+  "@ledgerSharedWith": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "transactionTimeDetails": "THỜI GIAN & CHI TIẾT",
+  "transactionSelectSourceWallet": "Chọn ví nguồn",
+  "transactionSelectDestWallet": "Chọn ví đích",
+  "transactionOther": "Khác",
+  "transactionAdd": "Thêm",
+  "transactionCreateNew": "Tạo mới",
+  "settingsDataAndManagement": "DỮ LIỆU & QUẢN LÝ",
+  "settingsAccountGoogle": "Tài khoản Google",
+  "settingsAccountGuest": "Khách (Offline)",
+  "selectWallet": "Chọn ví",
+  "swapWallets": "Đổi chiều chuyển",
+  "changeDate": "Thay đổi",
+  "noCategories": "Chưa có danh mục nào",
+  "noCategoriesFound": "Không tìm thấy danh mục",
+  "searchCategories": "Tìm kiếm danh mục...",
+  "restoreDefaultCategories": "Khôi phục mẫu",
+  "noCategoriesDescription": "Vui lòng khôi phục danh mục mẫu hoặc tạo danh mục mới để phân loại giao dịch.",
+  "clear": "Xóa",
+  "back": "Quay lại",
+  "updateTransaction": "Cập nhật giao dịch",
+  "reportsShareTooltip": "Chia sẻ báo cáo",
+  "heatmapTapHint": "Chạm vào ngày để xem số tiền đã chi tiêu chi tiết",
+  "heatmapNoSpending": "Không có chi tiêu",
+  "heatmapMonthlySummary": "Tổng quan Chi tiêu Tháng",
+  "heatmapNone": "Không có",
+  "heatmapLess": "Ít",
+  "heatmapMore": "Nhiều",
+  "healthSavingsRate": "Tỷ lệ tích lũy",
+  "healthSpendingPace": "Nhịp độ chi tiêu",
+  "healthTopCategory": "Hạng mục chi lớn nhất",
+  "healthInsufficientData": "Chưa đủ dữ liệu",
+  "healthRatingExcellent": "Rất Tốt",
+  "healthRatingGood": "Khá Ổn Định",
+  "healthRatingAverage": "Trung Bình",
+  "healthRatingNeedsAttention": "Cần Cân Đối",
+  "debtsTitle": "Sổ Ghi Nợ",
+  "accentColor": "Gam màu chủ đạo",
+  "searchTransactionsTooltip": "Tìm kiếm giao dịch",
+  "type": "Loại",
+  "transactionType": "Loại giao dịch",
+  "debtSummaryLent": "Người nợ tôi",
+  "debtSummaryBorrowed": "Tôi nợ người ta",
+  "debtNewTitle": "Ghi nhận nợ mới",
+  "debtEditTitle": "Chỉnh sửa khoản nợ",
+  "debtPersonLentLabel": "Người vay (Ai nợ bạn?) *",
+  "debtPersonBorrowedLabel": "Người cho vay (Bạn nợ ai?) *",
+  "debtAmountLabel": "Số tiền nợ ({currency}) *",
+  "@debtAmountLabel": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "savingsDepositSheetTitle": "Tích lũy vào heo đất",
+  "savingsWithdrawSheetTitle": "Rút tiền tiết kiệm",
+  "debtSubmitNew": "Ghi nhận nợ",
+  "loading": "Đang tải...",
+  "loadingCategories": "Đang tải danh mục..."
 }
-

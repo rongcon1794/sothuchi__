@@ -178,6 +178,463 @@
   "nextMonth": "Next month",
   "balanceHidden": "Balance hidden",
   "differentCurrencyTransferError": "Transfers require both wallets to use the same currency",
-  "moreOptions": "More options"
+  "moreOptions": "More options",
+  "debtBookTitle": "Debt Book",
+  "debtNew": "New Debt",
+  "debtEdit": "Edit Debt",
+  "debtDelete": "Delete Debt",
+  "debtDeleteConfirmTitle": "Confirm Deletion",
+  "debtDeleteConfirmBody": "Are you sure you want to delete the debt for {name}?",
+  "@debtDeleteConfirmBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debtLent": "Lent",
+  "debtBorrowed": "Borrowed",
+  "debtLentSubtitle": "To Collect",
+  "debtBorrowedSubtitle": "To Repay",
+  "debtTotalLent": "Total Lent",
+  "debtTotalBorrowed": "Total Borrowed",
+  "debtFilterAll": "All",
+  "debtFilterUnsettled": "Unsettled",
+  "debtFilterSettled": "Settled",
+  "debtFilterLent": "Lent",
+  "debtFilterBorrowed": "Borrowed",
+  "debtRemaining": "Remaining",
+  "debtDueDate": "Due: {date}",
+  "@debtDueDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "debtRepay": "Repay",
+  "debtCollect": "Collect",
+  "debtEmpty": "No debt records yet",
+  "debtEmptySubtitle": "Track money lent or borrowed to keep clear records.",
+  "debtRepaymentTitle": "Record Payment",
+  "debtRepaymentCollectTitle": "Collect debt from {name}",
+  "@debtRepaymentCollectTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debtRepaymentPayTitle": "Repay debt to {name}",
+  "@debtRepaymentPayTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debtRepaymentAmount": "Payment Amount",
+  "debtRepaymentWallet": "Wallet",
+  "debtRepaymentFull": "Pay Full Amount",
+  "debtRepaymentSuccess": "Recorded payment of {amount}",
+  "@debtRepaymentSuccess": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "debtUpdatedSuccess": "Debt updated successfully",
+  "debtAddedSuccess": "New debt recorded successfully",
+  "debtPersonName": "Person Name",
+  "debtPersonNameHint": "e.g., John, Sarah...",
+  "debtPhoneNumber": "Phone number (optional)",
+  "debtTypeLent": "I lent (Others owe me)",
+  "debtTypeBorrowed": "I borrowed (I owe others)",
+  "debtAmountRequired": "Please enter a valid amount greater than 0",
+  "debtPersonRequired": "Please enter person name",
+  "savingsTitle": "Savings & Goals",
+  "savingsNewGoal": "New Goal",
+  "savingsEditGoal": "Edit Goal",
+  "savingsDeleteGoal": "Delete Goal",
+  "savingsDeleteConfirmTitle": "Delete goal \"{title}\"",
+  "@savingsDeleteConfirmTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "savingsDeleteConfirmBody": "This will delete the savings goal. Wallet transaction history remains unchanged.",
+  "savingsTotalSaved": "Total Saved",
+  "savingsTotalTarget": "Total Target",
+  "savingsSummaryProgress": "TOTAL SAVINGS PROGRESS",
+  "savingsActiveCount": "{active} active • {completed} completed",
+  "@savingsActiveCount": {
+    "placeholders": {
+      "active": {
+        "type": "int"
+      },
+      "completed": {
+        "type": "int"
+      }
+    }
+  },
+  "savingsDaysRemaining": "{days} days left",
+  "@savingsDaysRemaining": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "savingsDailyNeeded": "Need {amount}/day",
+  "@savingsDailyNeeded": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "savingsDeposit": "Deposit",
+  "savingsWithdraw": "Withdraw",
+  "savingsGoalCompleted": "Completed!",
+  "savingsGoalTarget": "Target: {amount}",
+  "@savingsGoalTarget": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "savingsGoalRemaining": "Remaining: {amount}",
+  "@savingsGoalRemaining": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "savingsEmpty": "No savings goals yet",
+  "savingsEmptySubtitle": "Set up emergency, travel, or purchase funds to track daily savings.",
+  "savingsCreateFirst": "Create first goal",
+  "savingsGoalName": "Goal Name",
+  "savingsGoalNameHint": "e.g., Emergency Fund, New Car, Vacation...",
+  "savingsTargetAmount": "Target Amount",
+  "savingsDeadline": "Target Deadline",
+  "savingsNoDeadline": "No deadline set",
+  "savingsLinkedWallet": "Linked Wallet (optional)",
+  "savingsNoLinkedWallet": "No specific wallet",
+  "savingsGoalIcon": "Goal Icon",
+  "savingsGoalColor": "Theme Color",
+  "savingsDepositSuccess": "Added {amount} to {title}!",
+  "@savingsDepositSuccess": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "savingsWithdrawSuccess": "Withdrew {amount} from {title}",
+  "@savingsWithdrawSuccess": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "savingsAmountRequired": "Please enter a valid target amount",
+  "savingsNoWalletAvailable": "No wallets available",
+  "savingsTargetRequired": "Please enter a goal name",
+  "recurringTitle": "Bills & Subscriptions",
+  "recurringNew": "Add Subscription",
+  "recurringEdit": "Edit",
+  "recurringDelete": "Delete",
+  "recurringDeleteConfirmTitle": "Delete recurring bill",
+  "recurringDeleteConfirmBody": "Are you sure you want to delete \"{title}\"? Past recorded transactions will not be affected.",
+  "@recurringDeleteConfirmBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringEstimatedMonthly": "ESTIMATED MONTHLY COST",
+  "recurringActiveCount": "{count} active subscriptions",
+  "@recurringActiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recurringDueBills": "BILLS DUE FOR PAYMENT",
+  "recurringActiveSection": "ACTIVE RECURRING SUBSCRIPTIONS",
+  "recurringPausedSection": "PAUSED SUBSCRIPTIONS",
+  "recurringNextDue": "Due: {date}",
+  "@recurringNextDue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringIntervalDaily": "Daily",
+  "recurringIntervalWeekly": "Weekly",
+  "recurringIntervalBiweekly": "Bi-weekly",
+  "recurringIntervalMonthly": "Monthly",
+  "recurringIntervalYearly": "Yearly",
+  "recurringMarkPaid": "Mark as Paid",
+  "recurringPause": "Pause",
+  "recurringResume": "Resume",
+  "recurringAutoExecute": "Auto-record on due date",
+  "recurringAutoExecuteSubtitle": "Automatically deduct wallet and create transaction without manual confirmation",
+  "recurringEmpty": "No recurring bills yet",
+  "recurringEmptySubtitle": "Track rent, utilities, Netflix, Spotify, or recurring salary.",
+  "recurringRecordedSuccess": "Recorded transaction: {title}",
+  "@recurringRecordedSuccess": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringWalletRequired": "Please choose a payment wallet",
+  "recurringFrequency": "Repeat Interval",
+  "recurringStartDate": "Start / Due Date",
+  "ledgersTitle": "Manage Ledgers",
+  "ledgerNew": "New Ledger",
+  "ledgerEdit": "Edit",
+  "ledgerDelete": "Delete Ledger",
+  "ledgerDeleteConfirmTitle": "Delete ledger \"{name}\"",
+  "@ledgerDeleteConfirmTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ledgerDeleteConfirmBody": "This will delete this ledger from your device.",
+  "ledgerPersonal": "Personal",
+  "ledgerFamily": "Family",
+  "ledgerBusiness": "Business / Project",
+  "ledgerCustom": "Custom",
+  "ledgerActiveBadge": "Active",
+  "ledgerSelectActive": "Set as Active Ledger",
+  "ledgerSwitcherTitle": "Select Ledger",
+  "ledgerSwitcherSubtitle": "Switch seamlessly between personal, family, and work finances",
+  "ledgerName": "Ledger Name",
+  "ledgerNameHint": "e.g., Personal, Family, Freelance Project...",
+  "ledgerType": "Ledger Type",
+  "ledgerIcon": "Icon",
+  "ledgerColor": "Theme Color",
+  "ledgerNameRequired": "Please enter ledger name",
+  "txTimeAndDetails": "TIME & DETAILS",
+  "txSourceWallet": "Source Wallet",
+  "txDestWallet": "Destination Wallet",
+  "txSelectWallet": "Select Wallet",
+  "txSwapWallets": "Swap Wallets",
+  "txToday": "Today",
+  "txChangeDate": "Change",
+  "txRestoreDefaultCategories": "Restore Defaults",
+  "txEmptyCategoriesMsg": "Please restore default categories or create a new one to categorize transactions.",
+  "txCategoryOther": "Other",
+  "txCategoryAdd": "Add",
+  "txCategorySearchPlaceholder": "Search categories...",
+  "txCategoryNotFound": "No categories found",
+  "txCategoryCreateNew": "Create New",
+  "txUpdateTransaction": "Update Transaction",
+  "txDeleteLabel": "Delete",
+  "homeDueBillsBanner": "{count} recurring bills are due for payment!",
+  "@homeDueBillsBanner": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeSavingsStripTitle": "Savings Goals",
+  "homeDebtsStripTitle": "Recent Debts",
+  "homeActionTransaction": "Transaction",
+  "homeActionWallet": "Wallets",
+  "homeActionSavings": "Savings",
+  "homeActionRecurring": "Recurring",
+  "homeActionDebts": "Debts",
+  "homeActionCategories": "Categories",
+  "settingsDataSection": "DATA & MANAGEMENT",
+  "settingsDebtsSubtitle": "Manage money lent & borrowed",
+  "settingsRecurringSubtitle": "Recurring expenses & bills",
+  "settingsSavingsSubtitle": "Financial goals & savings",
+  "settingsLedgersSubtitle": "Personal, family & work ledgers",
+  "settingsDemoTag": "Offline Demo",
+  "settingsGoogleTag": "Google Synced",
+  "settingsAppIcon": "App Icon",
+  "settingsAppIconSubtitle": "Customize app icon style",
+  "settingsThemeDefault": "Default (Emerald Jade)",
+  "settingsThemeClassic": "Classic iOS (Ocean Blue)",
+  "settingsThemeMinimal": "Minimalist (Pure Dark)",
+  "settingsThemeSunset": "Sunset (Coral Glow)",
+  "settingsWalletsCount": "{count} wallets",
+  "@settingsWalletsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsCategoriesCount": "{count} categories",
+  "@settingsCategoriesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsDebtsCount": "{count} debts",
+  "@settingsDebtsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reportsFinancialHealth": "Financial Health",
+  "reportsSpendingHeatmap": "Daily Spending Heatmap",
+  "reportsMonthTotalExpense": "Monthly Total Expense",
+  "reportsDailyAverage": "Average: {amount}/day",
+  "@reportsDailyAverage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsMaxDay": "Peak Day: {amount}",
+  "@reportsMaxDay": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsSelectedDay": "Details for {date}",
+  "@reportsSelectedDay": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsNoExpenseOnDay": "No expenses recorded on this day",
+  "categoryCreateNew": "Create New Category",
+  "categoryIconAndColor": "Icon & Color",
+  "categoryChooseIcon": "Choose Icon",
+  "categoryChooseColor": "Choose Color",
+  "savingsProgress": "progress",
+  "savingsTarget": "Target",
+  "savingsRemaining": "Remaining",
+  "savingsDepositAction": "Deposit",
+  "savingsWithdrawAction": "Withdraw",
+  "savingsMotivationNote": "Motivation note",
+  "savingsQuickRemaining": "Remaining part",
+  "savingsQuickAll": "Withdraw all",
+  "savingsWalletSource": "Source wallet",
+  "savingsWalletDest": "Destination wallet",
+  "savingsConfirmDeposit": "Confirm deposit",
+  "savingsConfirmWithdraw": "Confirm withdrawal",
+  "savingsEditGoalTitle": "Edit Savings Goal",
+  "savingsNewGoalTitle": "New Savings Goal",
+  "recurringIntervalQuarterly": "Quarterly",
+  "recurringFrequencyLabel": "Repeat frequency",
+  "recurringStartDateLabel": "Start date",
+  "recurringNextDueDateLabel": "Next due date",
+  "recurringTitleLabel": "Bill / Subscription name",
+  "recurringTitleRequired": "Please enter bill title",
+  "recurringAmountLabel": "Amount",
+  "recurringAmountRequired": "Please enter a valid amount",
+  "recurringWalletLabel": "Payment wallet",
+  "recurringCategoryLabel": "Expense category",
+  "recurringConfirmCreate": "Add recurring plan",
+  "recurringConfirmUpdate": "Update recurring plan",
+  "recurringEditTitle": "Edit Recurring Plan",
+  "recurringNewTitle": "New Recurring Bill",
+  "ledgerEditTitle": "Edit Ledger",
+  "ledgerNewTitle": "New Ledger Book",
+  "ledgerDescLabel": "Description (Optional)",
+  "ledgerDescHint": "Detailed ledger description",
+  "ledgerConfirmCreate": "Create ledger",
+  "ledgerConfirmUpdate": "Update ledger",
+  "ledgerSharedWith": "Shared with: {count} members",
+  "@ledgerSharedWith": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "transactionTimeDetails": "TIME & DETAILS",
+  "transactionSelectSourceWallet": "Select source wallet",
+  "transactionSelectDestWallet": "Select destination wallet",
+  "transactionOther": "Other",
+  "transactionAdd": "Add",
+  "transactionCreateNew": "Create new",
+  "settingsDataAndManagement": "DATA & MANAGEMENT",
+  "settingsAccountGoogle": "Google Account",
+  "settingsAccountGuest": "Guest (Offline)",
+  "selectWallet": "Select wallet",
+  "swapWallets": "Swap wallets",
+  "changeDate": "Change",
+  "noCategories": "No categories available",
+  "noCategoriesFound": "No categories found",
+  "searchCategories": "Search categories...",
+  "restoreDefaultCategories": "Restore defaults",
+  "noCategoriesDescription": "Please restore default categories or create a new category to classify transactions.",
+  "clear": "Clear",
+  "back": "Back",
+  "updateTransaction": "Update transaction",
+  "reportsShareTooltip": "Share report",
+  "heatmapTapHint": "Tap a day to view detailed daily spending",
+  "heatmapNoSpending": "No spending",
+  "heatmapMonthlySummary": "Monthly Spending Overview",
+  "heatmapNone": "None",
+  "heatmapLess": "Less",
+  "heatmapMore": "More",
+  "healthSavingsRate": "Savings rate",
+  "healthSpendingPace": "Spending pace",
+  "healthTopCategory": "Top expense category",
+  "healthInsufficientData": "Insufficient data",
+  "healthRatingExcellent": "Excellent",
+  "healthRatingGood": "Good",
+  "healthRatingAverage": "Average",
+  "healthRatingNeedsAttention": "Needs Attention",
+  "debtsTitle": "Debt Book",
+  "accentColor": "Theme Accent Color",
+  "searchTransactionsTooltip": "Search transactions",
+  "type": "Type",
+  "transactionType": "Transaction Type",
+  "debtSummaryLent": "Owed to me",
+  "debtSummaryBorrowed": "I owe",
+  "debtNewTitle": "Record New Debt",
+  "debtEditTitle": "Edit Debt Record",
+  "debtPersonLentLabel": "Borrower (Who owes you?) *",
+  "debtPersonBorrowedLabel": "Lender (Who do you owe?) *",
+  "debtAmountLabel": "Debt Amount ({currency}) *",
+  "@debtAmountLabel": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      }
+    }
+  },
+  "savingsDepositSheetTitle": "Deposit to Piggy Bank",
+  "savingsWithdrawSheetTitle": "Withdraw from Savings",
+  "debtSubmitNew": "Record Debt",
+  "loading": "Loading...",
+  "loadingCategories": "Loading categories..."
 }
-

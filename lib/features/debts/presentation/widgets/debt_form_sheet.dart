@@ -9,6 +9,7 @@ import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_controller.dart';
 import 'package:so_thu_chi/features/debts/domain/entities/debt.dart';
 import 'package:so_thu_chi/features/debts/presentation/controllers/debts_controller.dart';
+import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 
 class DebtFormSheet extends ConsumerStatefulWidget {
   const DebtFormSheet({super.key, this.initialDebt});
@@ -90,12 +91,13 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
   }
 
   Future<void> _save() async {
+    final l10n = context.l10n;
     if (!_formKey.currentState!.validate()) return;
 
     final rawAmount = int.tryParse(_amountController.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
     if (rawAmount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng nhập số tiền hợp lệ lớn hơn 0')),
+        SnackBar(content: Text(l10n.debtAmountRequired)),
       );
       return;
     }
@@ -123,7 +125,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
         onSuccess: (_) {
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Đã cập nhật khoản nợ')),
+            SnackBar(content: Text(l10n.debtUpdatedSuccess)),
           );
         },
         onFailure: (err) {
@@ -152,7 +154,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
         onSuccess: (_) {
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Đã ghi nhận khoản nợ mới')),
+            SnackBar(content: Text(l10n.debtAddedSuccess)),
           );
         },
         onFailure: (err) {
@@ -172,8 +174,10 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = context.l10n;
     final activeAccounts = ref.watch(activeAccountsProvider);
     final isEditing = widget.initialDebt != null;
+    final currency = widget.initialDebt?.currency ?? (ref.watch(settingsControllerProvider).value?.currencyCode ?? 'VND');
 
     final isLent = _selectedType == DebtType.lent;
 
@@ -212,7 +216,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
               const SizedBox(height: 16),
 
               Text(
-                isEditing ? 'Sửa thông tin nợ' : 'Ghi nhận nợ mới',
+                isEditing ? l10n.debtEditTitle : l10n.debtNewTitle,
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                   fontSize: 18,
@@ -243,7 +247,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                             borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                           ),
                           child: Text(
-                            'Cho vay (Tôi cho mượn)',
+                            l10n.debtTypeLent,
                             style: TextStyle(
                               color: isLent ? Colors.white : theme.colorScheme.onSurface,
                               fontWeight: isLent ? FontWeight.w700 : FontWeight.w500,
@@ -267,7 +271,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                             borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                           ),
                           child: Text(
-                            'Đi vay (Tôi nợ người khác)',
+                            l10n.debtTypeBorrowed,
                             style: TextStyle(
                               color: !isLent ? Colors.white : theme.colorScheme.onSurface,
                               fontWeight: !isLent ? FontWeight.w700 : FontWeight.w500,
@@ -285,11 +289,12 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
               // Person Name
               AppleTextField(
                 controller: _nameController,
-                label: isLent ? 'Người vay (Ai nợ bạn?) *' : 'Người cho vay (Bạn nợ ai?) *',
+                label: isLent ? l10n.debtPersonLentLabel : l10n.debtPersonBorrowedLabel,
+                placeholder: l10n.debtPersonNameHint,
                 prefixIcon: const Icon(CupertinoIcons.person_fill, size: 18),
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) {
-                    return 'Vui lòng nhập tên';
+                    return l10n.debtPersonRequired;
                   }
                   return null;
                 },
@@ -300,7 +305,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
               AppleTextField(
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
-                label: 'Số điện thoại (tùy chọn)',
+                label: l10n.debtPhoneNumber,
                 prefixIcon: const Icon(CupertinoIcons.phone_fill, size: 18),
               ),
               const SizedBox(height: 12),
@@ -309,12 +314,12 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
               AppleTextField(
                 controller: _amountController,
                 keyboardType: TextInputType.number,
-                label: 'Số tiền nợ (VND) *',
+                label: l10n.debtAmountLabel(currency),
                 prefixIcon: const Icon(CupertinoIcons.money_dollar, size: 18),
                 validator: (val) {
-                  if (val == null || val.trim().isEmpty) return 'Vui lòng nhập số tiền';
+                  if (val == null || val.trim().isEmpty) return l10n.debtAmountRequired;
                   final num = int.tryParse(val.replaceAll(RegExp(r'[^0-9]'), ''));
-                  if (num == null || num <= 0) return 'Số tiền phải lớn hơn 0';
+                  if (num == null || num <= 0) return l10n.debtAmountRequired;
                   return null;
                 },
               ),
@@ -370,8 +375,8 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                       Expanded(
                         child: Text(
                           _dueDate != null
-                              ? 'Hạn trả: ${AppDateUtils.formatVnDate(_dueDate!)}'
-                              : 'Chọn hạn trả nợ (tùy chọn)',
+                              ? l10n.debtDueDate(AppDateUtils.formatVnDate(_dueDate!))
+                              : l10n.savingsDeadline,
                           style: TextStyle(
                             color: _dueDate != null ? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant,
                             fontWeight: _dueDate != null ? FontWeight.w600 : FontWeight.normal,
@@ -392,7 +397,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
               // Wallet selection (optional)
               if (activeAccounts.isNotEmpty) ...[
                 Text(
-                  isLent ? 'Trích tiền từ ví (tùy chọn):' : 'Nhận tiền vào ví (tùy chọn):',
+                  '${l10n.walletsTitle} (${l10n.all.toLowerCase()}):',
                   style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 8),
@@ -459,14 +464,15 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
               // Note
               AppleTextField(
                 controller: _noteController,
-                label: 'Ghi chú / lý do vay',
+                label: l10n.note,
+                placeholder: l10n.noteHint,
                 prefixIcon: const Icon(CupertinoIcons.doc_text, size: 18),
               ),
               const SizedBox(height: 24),
 
               // Save Button
               AppleButton.primary(
-                label: isEditing ? 'Lưu thay đổi' : 'Ghi nhận nợ',
+                label: isEditing ? l10n.save : l10n.debtSubmitNew,
                 color: isLent ? AppleTokens.systemGreen : AppleTokens.systemOrange,
                 isLoading: _isSaving,
                 onPressed: _save,

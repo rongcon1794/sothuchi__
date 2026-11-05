@@ -10,6 +10,7 @@ export 'package:so_thu_chi/core/widgets/apple_card.dart';
 export 'package:so_thu_chi/core/widgets/apple_date_picker_tile.dart';
 export 'package:so_thu_chi/core/widgets/apple_modal_sheet.dart';
 export 'package:so_thu_chi/core/widgets/apple_text_field.dart';
+export 'package:so_thu_chi/core/widgets/apple_user_avatar.dart';
 export 'package:so_thu_chi/core/widgets/scroll_reactive_fab.dart';
 export 'package:so_thu_chi/core/widgets/so_thu_chi_logo.dart';
 

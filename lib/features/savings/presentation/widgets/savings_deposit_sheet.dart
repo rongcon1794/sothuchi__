@@ -66,13 +66,15 @@ class _SavingsDepositSheetState extends ConsumerState<SavingsDepositSheet> {
 
   Future<void> _submit() async {
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context).languageCode;
     final wallets = ref.read(activeAccountsProvider);
     final currency = widget.goal.currency;
     final parsed = Money.tryParse(_amountController.text, currencyCode: currency);
 
     if (parsed == null || parsed.minorUnits <= 0) {
       messenger.showSnackBar(
-        const SnackBar(content: Text('Vui lòng nhập số tiền hợp lệ')),
+        SnackBar(content: Text(l10n.savingsAmountRequired)),
       );
       return;
     }
@@ -80,7 +82,7 @@ class _SavingsDepositSheetState extends ConsumerState<SavingsDepositSheet> {
     if (_selectedAccountId == null || _selectedAccountId!.isEmpty) {
       if (wallets.isEmpty) {
         messenger.showSnackBar(
-          const SnackBar(content: Text('Chưa có ví nào khả dụng')),
+          SnackBar(content: Text(l10n.savingsNoWalletAvailable)),
         );
         return;
       }
@@ -113,8 +115,8 @@ class _SavingsDepositSheetState extends ConsumerState<SavingsDepositSheet> {
           SnackBar(
             content: Text(
               _isWithdraw
-                  ? 'Đã rút ${parsed.format(locale: 'vi')} từ ${widget.goal.title}'
-                  : 'Đã tích lũy thêm ${parsed.format(locale: 'vi')} vào ${widget.goal.title}!',
+                  ? l10n.savingsWithdrawSuccess(parsed.format(locale: locale), widget.goal.title)
+                  : l10n.savingsDepositSuccess(parsed.format(locale: locale), widget.goal.title),
             ),
             backgroundColor: Color(widget.goal.color),
           ),
@@ -132,6 +134,8 @@ class _SavingsDepositSheetState extends ConsumerState<SavingsDepositSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context).languageCode;
     final wallets = ref.watch(activeAccountsProvider);
 
     if (_selectedAccountId == null && wallets.isNotEmpty) {
@@ -178,7 +182,7 @@ class _SavingsDepositSheetState extends ConsumerState<SavingsDepositSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _isWithdraw ? 'Rút tiền tiết kiệm' : 'Tích lũy vào heo đất',
+                          _isWithdraw ? l10n.savingsWithdrawSheetTitle : l10n.savingsDepositSheetTitle,
                           style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
                         ),
                         Text(
@@ -232,7 +236,7 @@ class _SavingsDepositSheetState extends ConsumerState<SavingsDepositSheet> {
                                 ),
                                 child: Center(
                                   child: Text(
-                                    'Nạp tích lũy',
+                                    l10n.savingsDepositAction,
                                     style: TextStyle(
                                       fontWeight: FontWeight.w700,
                                       fontSize: 14,
@@ -266,7 +270,7 @@ class _SavingsDepositSheetState extends ConsumerState<SavingsDepositSheet> {
                                 ),
                                 child: Center(
                                   child: Text(
-                                    'Rút tiền',
+                                    l10n.savingsWithdrawAction,
                                     style: TextStyle(
                                       fontWeight: FontWeight.w700,
                                       fontSize: 14,
@@ -287,7 +291,7 @@ class _SavingsDepositSheetState extends ConsumerState<SavingsDepositSheet> {
                       controller: _amountController,
                       keyboardType: TextInputType.number,
                       autofocus: true,
-                      label: _isWithdraw ? 'Số tiền rút' : 'Số tiền nạp',
+                      label: _isWithdraw ? l10n.savingsWithdrawAction : l10n.savingsDepositAction,
                       prefixIcon: const Icon(CupertinoIcons.money_dollar_circle, size: 18),
                     ),
                     const SizedBox(height: 10),
@@ -307,19 +311,19 @@ class _SavingsDepositSheetState extends ConsumerState<SavingsDepositSheet> {
                             onPressed: () => _applyQuickAmount(500000),
                           ),
                           ActionChip(
-                            label: const Text('+1 Triệu'),
+                            label: const Text('+1M'),
                             onPressed: () => _applyQuickAmount(1000000),
                           ),
                           if (widget.goal.remainingAmount > 0)
                             ActionChip(
-                              label: const Text('Phần còn thiếu'),
+                              label: Text(l10n.savingsQuickRemaining),
                               backgroundColor: accentColor.withValues(alpha: 0.15),
                               onPressed: () => _applyQuickAmount(widget.goal.remainingAmount),
                             ),
                         ] else ...[
                           if (widget.goal.currentAmount > 0)
                             ActionChip(
-                              label: const Text('Rút toàn bộ'),
+                              label: Text(l10n.savingsQuickAll),
                               backgroundColor: AppleTokens.rubyExpense.withValues(alpha: 0.15),
                               onPressed: () => _applyQuickAmount(widget.goal.currentAmount),
                             ),
@@ -328,7 +332,7 @@ class _SavingsDepositSheetState extends ConsumerState<SavingsDepositSheet> {
                             onPressed: () => _applyQuickAmount(500000),
                           ),
                           ActionChip(
-                            label: const Text('1 Triệu'),
+                            label: const Text('1M'),
                             onPressed: () => _applyQuickAmount(1000000),
                           ),
                         ],
@@ -340,13 +344,13 @@ class _SavingsDepositSheetState extends ConsumerState<SavingsDepositSheet> {
                     DropdownButtonFormField<String>(
                       initialValue: _selectedAccountId,
                       decoration: InputDecoration(
-                        labelText: _isWithdraw ? 'Ví nhận tiền' : 'Ví trích tiền nạp',
+                        labelText: _isWithdraw ? l10n.savingsWalletDest : l10n.savingsWalletSource,
                         prefixIcon: const Icon(CupertinoIcons.creditcard),
                       ),
                       items: wallets.map((w) {
                         return DropdownMenuItem(
                           value: w.id,
-                          child: Text('${w.name} (${w.balanceMoney.format(locale: 'vi')})', overflow: TextOverflow.ellipsis),
+                          child: Text('${w.name} (${w.balanceMoney.format(locale: locale)})', overflow: TextOverflow.ellipsis),
                         );
                       }).toList(),
                       onChanged: (val) => setState(() => _selectedAccountId = val),
@@ -356,7 +360,7 @@ class _SavingsDepositSheetState extends ConsumerState<SavingsDepositSheet> {
                     // Note input
                     AppleTextField(
                       controller: _noteController,
-                      label: 'Ghi chú (Tùy chọn)',
+                      label: l10n.note,
                       prefixIcon: const Icon(CupertinoIcons.pencil, size: 18),
                     ),
                     const SizedBox(height: 24),
@@ -364,7 +368,7 @@ class _SavingsDepositSheetState extends ConsumerState<SavingsDepositSheet> {
                     // Submit button
                     AppleButton.primary(
                       color: _isWithdraw ? AppleTokens.rubyExpense : accentColor,
-                      label: _isWithdraw ? 'Xác nhận rút tiền' : 'Xác nhận tích lũy',
+                      label: _isWithdraw ? l10n.savingsConfirmWithdraw : l10n.savingsConfirmDeposit,
                       onPressed: _submit,
                     ),
                     const SizedBox(height: 24),

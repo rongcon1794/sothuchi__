@@ -352,38 +352,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
               child: Row(
                 children: [
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF00B074), Color(0xFF0D7C66)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(15),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppleTokens.jadePrimary.withValues(alpha: 0.25),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      (user.displayName?.isNotEmpty == true
-                              ? user.displayName![0]
-                              : user.email.isNotEmpty
-                              ? user.email[0]
-                              : 'S')
-                          .toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                  AppleUserAvatar(
+                    photoUrl: user.photoUrl,
+                    displayName: user.displayName,
+                    email: user.email,
+                    size: 52,
+                    borderRadius: 16,
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -432,7 +406,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                user.isDemoUser ? 'Dùng thử offline' : 'Đã đồng bộ Google',
+                                user.isDemoUser ? l10n.settingsAccountGuest : l10n.settingsAccountGoogle,
                                 style: TextStyle(
                                   fontSize: 10.5,
                                   fontWeight: FontWeight.w600,
@@ -483,7 +457,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
           // Section 1: Data & Features (Inset Grouped)
           AppleListGroup(
-            header: 'DỮ LIỆU & QUẢN LÝ',
+            header: l10n.settingsDataAndManagement,
             margin: const EdgeInsets.only(bottom: 20),
             children: [
               ListTile(
@@ -551,8 +525,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   icon: CupertinoIcons.person_2_fill,
                   backgroundColor: AppleTokens.systemIndigo,
                 ),
-                title: const Text('Sổ Ghi Nợ', style: TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: const Text('Quản lý tiền cho vay & đi vay', style: TextStyle(fontSize: 12)),
+                title: Text(l10n.debtsTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: Text(l10n.settingsDebtsSubtitle, style: const TextStyle(fontSize: 12)),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -584,8 +558,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   icon: CupertinoIcons.repeat,
                   backgroundColor: AppleTokens.systemTeal,
                 ),
-                title: const Text('Hóa đơn & Định kỳ', style: TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: const Text('Khoản chi định kỳ, hóa đơn lặp lại', style: TextStyle(fontSize: 12)),
+                title: Text(l10n.recurringTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: Text(l10n.settingsRecurringSubtitle, style: const TextStyle(fontSize: 12)),
                 trailing: const Icon(Icons.chevron_right_rounded, size: 20),
                 onTap: () => context.push(AppRoutes.recurring),
               ),
@@ -594,8 +568,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   icon: CupertinoIcons.cube_box_fill,
                   backgroundColor: AppleTokens.systemOrange,
                 ),
-                title: const Text('Heo đất & Tiết kiệm', style: TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: const Text('Mục tiêu tài chính, tích lũy mua sắm', style: TextStyle(fontSize: 12)),
+                title: Text(l10n.savingsTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: Text(l10n.settingsSavingsSubtitle, style: const TextStyle(fontSize: 12)),
                 trailing: const Icon(Icons.chevron_right_rounded, size: 20),
                 onTap: () => context.push(AppRoutes.savings),
               ),
@@ -604,8 +578,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   icon: CupertinoIcons.layers_alt_fill,
                   backgroundColor: AppleTokens.systemBlue,
                 ),
-                title: const Text('Quản lý Sổ Thu Chi', style: TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: const Text('Đa sổ cá nhân, gia đình, công việc', style: TextStyle(fontSize: 12)),
+                title: Text(l10n.ledgersTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: Text(l10n.settingsLedgersSubtitle, style: const TextStyle(fontSize: 12)),
                 trailing: const Icon(Icons.chevron_right_rounded, size: 20),
                 onTap: () => context.push(AppRoutes.ledgers),
               ),
@@ -702,10 +676,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       backgroundColor: AppleTokens.systemPink,
                     ),
                     const SizedBox(width: 14),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Gam màu chủ đạo',
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                        l10n.accentColor,
+                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
                       ),
                     ),
                     Row(

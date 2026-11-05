@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
@@ -49,21 +50,22 @@ class SavingsGoalCard extends ConsumerWidget {
   }
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
     final confirmed = await showCupertinoModalPopup<bool>(
       context: context,
       builder: (ctx) => CupertinoActionSheet(
-        title: Text('Xóa mục tiêu "${goal.title}"'),
-        message: const Text('Thao tác này sẽ xóa mục tiêu tích lũy. Lịch sử giao dịch tiền trong ví vẫn được giữ nguyên.'),
+        title: Text(l10n.savingsDeleteConfirmTitle(goal.title)),
+        message: Text(l10n.savingsDeleteConfirmBody),
         actions: [
           CupertinoActionSheetAction(
             isDestructiveAction: true,
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Xác nhận xóa'),
+            child: Text(l10n.delete),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
           onPressed: () => Navigator.of(ctx).pop(false),
-          child: const Text('Hủy'),
+          child: Text(l10n.cancel),
         ),
       ),
     );
@@ -80,6 +82,8 @@ class SavingsGoalCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = context.l10n;
+    final locale = Localizations.localeOf(context).languageCode;
     final accentColor = Color(goal.color);
 
     return AppleGlassCard(
@@ -128,14 +132,14 @@ class SavingsGoalCard extends ConsumerWidget {
                     color: AppleTokens.systemGreen.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(CupertinoIcons.checkmark_seal_fill, color: AppleTokens.systemGreen, size: 14),
-                      SizedBox(width: 4),
+                      const Icon(CupertinoIcons.checkmark_seal_fill, color: AppleTokens.systemGreen, size: 14),
+                      const SizedBox(width: 4),
                       Text(
-                        'Đạt mục tiêu',
-                        style: TextStyle(
+                        l10n.savingsGoalCompleted,
+                        style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                           color: AppleTokens.systemGreen,
@@ -158,43 +162,43 @@ class SavingsGoalCard extends ConsumerWidget {
                   }
                 },
                 itemBuilder: (ctx) => [
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'deposit',
                     child: Row(
                       children: [
-                        Icon(CupertinoIcons.plus_circle, size: 18),
-                        SizedBox(width: 8),
-                        Text('Nạp thêm tích lũy'),
+                        const Icon(CupertinoIcons.plus_circle, size: 18),
+                        const SizedBox(width: 8),
+                        Text(l10n.savingsDeposit),
                       ],
                     ),
                   ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'withdraw',
                     child: Row(
                       children: [
-                        Icon(CupertinoIcons.minus_circle, size: 18),
-                        SizedBox(width: 8),
-                        Text('Rút tiền về ví'),
+                        const Icon(CupertinoIcons.minus_circle, size: 18),
+                        const SizedBox(width: 8),
+                        Text(l10n.savingsWithdraw),
                       ],
                     ),
                   ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'edit',
                     child: Row(
                       children: [
-                        Icon(CupertinoIcons.pencil, size: 18),
-                        SizedBox(width: 8),
-                        Text('Chỉnh sửa'),
+                        const Icon(CupertinoIcons.pencil, size: 18),
+                        const SizedBox(width: 8),
+                        Text(l10n.edit),
                       ],
                     ),
                   ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'delete',
                     child: Row(
                       children: [
-                        Icon(CupertinoIcons.trash, color: AppleTokens.rubyExpense, size: 18),
-                        SizedBox(width: 8),
-                        Text('Xóa mục tiêu', style: TextStyle(color: AppleTokens.rubyExpense)),
+                        const Icon(CupertinoIcons.trash, color: AppleTokens.rubyExpense, size: 18),
+                        const SizedBox(width: 8),
+                        Text(l10n.savingsDeleteGoal, style: const TextStyle(color: AppleTokens.rubyExpense)),
                       ],
                     ),
                   ),
@@ -223,9 +227,9 @@ class SavingsGoalCard extends ConsumerWidget {
                         color: isDark ? Colors.white : Colors.black87,
                       ),
                     ),
-                    const Text(
-                      'tiến độ',
-                      style: TextStyle(fontSize: 10, color: AppleTokens.systemGray),
+                    Text(
+                      l10n.savingsProgress,
+                      style: const TextStyle(fontSize: 10, color: AppleTokens.systemGray),
                     ),
                   ],
                 ),
@@ -236,7 +240,7 @@ class SavingsGoalCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'ĐÃ TÍCH LŨY',
+                      l10n.savingsTotalSaved.toUpperCase(),
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
@@ -245,7 +249,7 @@ class SavingsGoalCard extends ConsumerWidget {
                       ),
                     ),
                     Text(
-                      goal.currentMoney.format(locale: 'vi', masked: hideBalance),
+                      goal.currentMoney.format(locale: locale, masked: hideBalance),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
@@ -259,9 +263,9 @@ class SavingsGoalCard extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Mục tiêu', style: TextStyle(fontSize: 11, color: AppleTokens.systemGray)),
+                              Text(l10n.savingsTarget, style: const TextStyle(fontSize: 11, color: AppleTokens.systemGray)),
                               Text(
-                                goal.targetMoney.format(locale: 'vi', masked: hideBalance),
+                                goal.targetMoney.format(locale: locale, masked: hideBalance),
                                 style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                               ),
                             ],
@@ -271,9 +275,9 @@ class SavingsGoalCard extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              const Text('Còn thiếu', style: TextStyle(fontSize: 11, color: AppleTokens.systemGray)),
+                              Text(l10n.savingsRemaining, style: const TextStyle(fontSize: 11, color: AppleTokens.systemGray)),
                               Text(
-                                goal.remainingMoney.format(locale: 'vi', masked: hideBalance),
+                                goal.remainingMoney.format(locale: locale, masked: hideBalance),
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
@@ -306,7 +310,7 @@ class SavingsGoalCard extends ConsumerWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Còn ${goal.daysRemaining} ngày • Cần ${goal.recommendedDailySavings != null ? Money(minorUnits: goal.recommendedDailySavings!).format(locale: 'vi') : ''}/ngày',
+                      '${l10n.savingsDaysRemaining(goal.daysRemaining!)} • ${goal.recommendedDailySavings != null ? l10n.savingsDailyNeeded(Money(minorUnits: goal.recommendedDailySavings!).format(locale: locale)) : ''}',
                       style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                     ),
                   ),
@@ -327,7 +331,7 @@ class SavingsGoalCard extends ConsumerWidget {
               ),
               onPressed: () => SavingsDepositSheet.show(context, goal: goal, isWithdraw: false),
               icon: const Icon(CupertinoIcons.plus_circle, size: 16),
-              label: const Text('Nạp tích lũy', style: TextStyle(fontWeight: FontWeight.bold)),
+              label: Text(l10n.savingsDepositAction, style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           ),
         ],

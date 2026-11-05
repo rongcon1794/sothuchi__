@@ -19,6 +19,7 @@ import 'package:so_thu_chi/features/recurring/presentation/widgets/recurring_for
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
+import 'package:so_thu_chi/l10n/app_localizations.dart';
 
 class RecurringTransactionsScreen extends ConsumerStatefulWidget {
   const RecurringTransactionsScreen({super.key});
@@ -33,23 +34,24 @@ class _RecurringTransactionsScreenState
   bool _isFabExpanded = true;
   bool _isFabVisible = true;
 
-  String _intervalLabel(RecurringInterval interval) {
+  String _intervalLabel(RecurringInterval interval, AppLocalizations l10n) {
     switch (interval) {
       case RecurringInterval.daily:
-        return 'Hàng ngày';
+        return l10n.recurringIntervalDaily;
       case RecurringInterval.weekly:
-        return 'Hàng tuần';
+        return l10n.recurringIntervalWeekly;
       case RecurringInterval.biweekly:
-        return '2 tuần/lần';
+        return l10n.recurringIntervalBiweekly;
       case RecurringInterval.monthly:
-        return 'Hàng tháng';
+        return l10n.recurringIntervalMonthly;
       case RecurringInterval.yearly:
-        return 'Hàng năm';
+        return l10n.recurringIntervalYearly;
     }
   }
 
   Future<void> _handleExecute(RecurringTransaction item) async {
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
     unawaited(HapticFeedback.mediumImpact());
     final res = await ref
         .read(recurringActionControllerProvider.notifier)
@@ -61,7 +63,7 @@ class _RecurringTransactionsScreenState
         unawaited(HapticFeedback.lightImpact());
         messenger.showSnackBar(
           SnackBar(
-            content: Text('Đã ghi nhận giao dịch: ${item.title}'),
+            content: Text(l10n.recurringRecordedSuccess(item.title)),
             backgroundColor: AppleTokens.jadeDark,
           ),
         );
@@ -75,21 +77,22 @@ class _RecurringTransactionsScreenState
   }
 
   Future<void> _confirmDelete(RecurringTransaction item) async {
+    final l10n = context.l10n;
     final confirmed = await showCupertinoModalPopup<bool>(
       context: context,
       builder: (ctx) => CupertinoActionSheet(
-        title: const Text('Xóa gói định kỳ'),
-        message: Text('Bạn có chắc muốn xóa "${item.title}"? Các giao dịch đã ghi trong quá khứ sẽ không bị ảnh hưởng.'),
+        title: Text(l10n.recurringDeleteConfirmTitle),
+        message: Text(l10n.recurringDeleteConfirmBody(item.title)),
         actions: [
           CupertinoActionSheetAction(
             isDestructiveAction: true,
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Xóa gói'),
+            child: Text(l10n.recurringDelete),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
           onPressed: () => Navigator.of(ctx).pop(false),
-          child: const Text('Hủy'),
+          child: Text(l10n.cancel),
         ),
       ),
     );
@@ -104,6 +107,7 @@ class _RecurringTransactionsScreenState
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final l10n = context.l10n;
+    final locale = Localizations.localeOf(context).languageCode;
     final recurringAsync = ref.watch(recurringStreamProvider);
     final dueList = ref.watch(dueRecurringListProvider);
     final monthlyTotal = ref.watch(monthlyRecurringEstimateProvider);
@@ -115,7 +119,7 @@ class _RecurringTransactionsScreenState
     return Scaffold(
       backgroundColor: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightPrimary,
       appBar: AppBar(
-        title: const Text('Hóa Đơn & Định Kỳ', style: TextStyle(fontWeight: FontWeight.w700)),
+        title: Text(l10n.recurringTitle, style: const TextStyle(fontWeight: FontWeight.w700)),
         centerTitle: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -130,13 +134,13 @@ class _RecurringTransactionsScreenState
         isVisible: _isFabVisible,
         isExpanded: _isFabExpanded,
         icon: const Icon(CupertinoIcons.plus),
-        label: const Text('Thêm gói mới'),
+        label: Text(l10n.recurringNew),
         backgroundColor: AppleTokens.jadeDark,
         onPressed: () {
           HapticFeedback.lightImpact();
           RecurringFormSheet.show(context);
         },
-        tooltip: 'Thêm gói định kỳ',
+        tooltip: l10n.recurringNew,
       ),
       body: recurringAsync.when(
         loading: () => const Center(child: CupertinoActivityIndicator()),
@@ -145,9 +149,9 @@ class _RecurringTransactionsScreenState
           if (allItems.isEmpty) {
             return EmptyStateView(
               icon: CupertinoIcons.repeat,
-              title: 'Chưa có hóa đơn hoặc giao dịch định kỳ',
-              subtitle: 'Thiết lập tiền phòng, tiền điện, internet hoặc các gói thuê bao để không bao giờ quên thanh toán.',
-              actionLabel: 'Thêm gói đầu tiên',
+              title: l10n.recurringEmpty,
+              subtitle: l10n.recurringEmptySubtitle,
+              actionLabel: l10n.recurringNew,
               onAction: () => RecurringFormSheet.show(context),
             );
           }
@@ -202,7 +206,7 @@ class _RecurringTransactionsScreenState
                       children: [
                         Expanded(
                           child: Text(
-                            'ƯỚC TÍNH CHI PHÍ / THÁNG',
+                            l10n.recurringEstimatedMonthly,
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
@@ -218,7 +222,7 @@ class _RecurringTransactionsScreenState
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            '${activeItems.length} gói đang chạy',
+                            l10n.recurringActiveCount(activeItems.length),
                             style: const TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
@@ -249,7 +253,7 @@ class _RecurringTransactionsScreenState
                     const Icon(CupertinoIcons.exclamationmark_triangle_fill, color: AppleTokens.systemOrange, size: 18),
                     const SizedBox(width: 8),
                     Text(
-                      'HÓA ĐƠN ĐẾN HẠN (${dueList.length})',
+                      '${l10n.recurringDueBills} (${dueList.length})',
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -292,14 +296,14 @@ class _RecurringTransactionsScreenState
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      'Hạn: ${AppDateUtils.formatDayHeader(item.nextDueDate, locale: 'vi', todayLabel: l10n.today, yesterdayLabel: l10n.yesterday)} • ${accountsMap[item.accountId]?.name ?? 'Ví'}',
+                                      '${l10n.recurringNextDue(AppDateUtils.formatDayHeader(item.nextDueDate, locale: locale, todayLabel: l10n.today, yesterdayLabel: l10n.yesterday))} • ${accountsMap[item.accountId]?.name ?? ''}',
                                       style: const TextStyle(fontSize: 12, color: AppleTokens.systemGray),
                                     ),
                                   ],
                                 ),
                               ),
                               Text(
-                                item.money.format(locale: 'vi', masked: hideBalance),
+                                item.money.format(locale: locale, masked: hideBalance),
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w800,
                                   fontSize: 16,
@@ -319,7 +323,7 @@ class _RecurringTransactionsScreenState
                               ),
                               onPressed: () => _handleExecute(item),
                               icon: const Icon(CupertinoIcons.checkmark_alt, size: 16),
-                              label: const Text('Ghi nhận đã thanh toán', style: TextStyle(fontWeight: FontWeight.bold)),
+                              label: Text(l10n.recurringMarkPaid, style: const TextStyle(fontWeight: FontWeight.bold)),
                             ),
                           ),
                         ],
@@ -330,11 +334,11 @@ class _RecurringTransactionsScreenState
               ],
 
               // Active recurring list
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
                 child: Text(
-                  'GÓI ĐANG HOẠT ĐỘNG',
-                  style: TextStyle(
+                  l10n.recurringActiveSection,
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: AppleTokens.systemGray,
@@ -343,9 +347,9 @@ class _RecurringTransactionsScreenState
                 ),
               ),
               if (activeItems.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Center(child: Text('Không có gói nào đang chạy', style: TextStyle(color: AppleTokens.systemGray))),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Center(child: Text(l10n.emptyTransactionsTitle, style: const TextStyle(color: AppleTokens.systemGray))),
                 ),
               for (final item in activeItems)
                 Padding(
@@ -386,14 +390,14 @@ class _RecurringTransactionsScreenState
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                       child: Text(
-                                        _intervalLabel(item.interval),
+                                        _intervalLabel(item.interval, l10n),
                                         style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppleTokens.systemBlue),
                                       ),
                                     ),
                                     const SizedBox(width: 6),
                                     Expanded(
                                       child: Text(
-                                        'Kỳ tới: ${AppDateUtils.formatDayHeader(item.nextDueDate, locale: 'vi', todayLabel: l10n.today, yesterdayLabel: l10n.yesterday)}',
+                                        l10n.recurringNextDue(AppDateUtils.formatDayHeader(item.nextDueDate, locale: locale, todayLabel: l10n.today, yesterdayLabel: l10n.yesterday)),
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(fontSize: 12, color: AppleTokens.systemGray),
                                       ),
@@ -407,7 +411,7 @@ class _RecurringTransactionsScreenState
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text(
-                                item.money.format(locale: 'vi', masked: hideBalance),
+                                item.money.format(locale: locale, masked: hideBalance),
                                 style: TextStyle(
                                   fontWeight: FontWeight.w700,
                                   fontSize: 15,
@@ -417,7 +421,7 @@ class _RecurringTransactionsScreenState
                                 ),
                               ),
                               PopupMenuButton<String>(
-                                tooltip: 'Tùy chọn',
+                                tooltip: l10n.moreOptions,
                                 padding: EdgeInsets.zero,
                                 icon: const Icon(CupertinoIcons.ellipsis, size: 16, color: AppleTokens.systemGray),
                                 onSelected: (action) {
@@ -430,9 +434,9 @@ class _RecurringTransactionsScreenState
                                   }
                                 },
                                 itemBuilder: (ctx) => [
-                                  const PopupMenuItem(value: 'edit', child: Text('Chỉnh sửa')),
-                                  const PopupMenuItem(value: 'pause', child: Text('Tạm dừng')),
-                                  const PopupMenuItem(value: 'delete', child: Text('Xóa gói', style: TextStyle(color: AppleTokens.systemRed))),
+                                  PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
+                                  PopupMenuItem(value: 'pause', child: Text(l10n.recurringPause)),
+                                  PopupMenuItem(value: 'delete', child: Text(l10n.recurringDelete, style: const TextStyle(color: AppleTokens.systemRed))),
                                 ],
                               ),
                             ],
@@ -446,11 +450,11 @@ class _RecurringTransactionsScreenState
               // Paused Section
               if (pausedItems.isNotEmpty) ...[
                 const SizedBox(height: 16),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
                   child: Text(
-                    'ĐÃ TẠM DỪNG',
-                    style: TextStyle(
+                    l10n.recurringPausedSection,
+                    style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: AppleTokens.systemGray,
@@ -483,13 +487,13 @@ class _RecurringTransactionsScreenState
                                   item.title,
                                   style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: AppleTokens.systemGray),
                                 ),
-                                const Text('Đã tạm dừng', style: TextStyle(fontSize: 12, color: AppleTokens.systemGray)),
+                                Text(l10n.recurringPause, style: const TextStyle(fontSize: 12, color: AppleTokens.systemGray)),
                               ],
                             ),
                           ),
                           TextButton(
                             onPressed: () => ref.read(recurringActionControllerProvider.notifier).togglePause(item.id, false),
-                            child: const Text('Kích hoạt lại'),
+                            child: Text(l10n.recurringResume),
                           ),
                         ],
                       ),

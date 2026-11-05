@@ -30,15 +30,17 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = context.l10n;
     final goalsAsync = ref.watch(savingsGoalsStreamProvider);
     final summary = ref.watch(savingsSummaryProvider);
     final settings = ref.watch(settingsControllerProvider).value;
+    final locale = settings?.localeCode ?? 'vi';
     final hideBalance = settings?.hideBalance ?? false;
 
     return Scaffold(
       backgroundColor: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightPrimary,
       appBar: AppBar(
-        title: const Text('Heo Đất & Tiết Kiệm', style: TextStyle(fontWeight: FontWeight.w700)),
+        title: Text(l10n.savingsTitle, style: const TextStyle(fontWeight: FontWeight.w700)),
         centerTitle: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -53,13 +55,13 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
         isVisible: _isFabVisible,
         isExpanded: _isFabExpanded,
         icon: const Icon(CupertinoIcons.plus),
-        label: const Text('Mục tiêu mới'),
+        label: Text(l10n.savingsNewGoal),
         backgroundColor: AppleTokens.jadeDark,
         onPressed: () {
           unawaited(HapticFeedback.lightImpact());
           SavingsGoalFormSheet.show(context);
         },
-        tooltip: 'Thêm mục tiêu tiết kiệm',
+        tooltip: l10n.savingsNewGoal,
       ),
       body: goalsAsync.when(
         loading: () => const Center(child: CupertinoActivityIndicator()),
@@ -68,9 +70,9 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
           if (allGoals.isEmpty) {
             return EmptyStateView(
               icon: CupertinoIcons.cube_box,
-              title: 'Chưa có mục tiêu tiết kiệm',
-              subtitle: 'Thiết lập quỹ khẩn cấp, mua sắm hoặc du lịch để theo dõi tiến độ tích lũy mỗi ngày.',
-              actionLabel: 'Tạo mục tiêu đầu tiên',
+              title: l10n.savingsEmpty,
+              subtitle: l10n.savingsEmptySubtitle,
+              actionLabel: l10n.savingsCreateFirst,
               onAction: () => SavingsGoalFormSheet.show(context),
             );
           }
@@ -121,10 +123,10 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Expanded(
+                          Expanded(
                             child: Text(
-                              'TỔNG TIẾN ĐỘ TÍCH LŨY',
-                              style: TextStyle(
+                              l10n.savingsSummaryProgress,
+                              style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.5,
@@ -139,7 +141,7 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
-                              '${summary.activeCount} đang chạy • ${summary.completedCount} hoàn thành',
+                              l10n.savingsActiveCount(summary.activeCount, summary.completedCount),
                               style: const TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
@@ -170,7 +172,7 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('Tổng tiền đã gom', style: TextStyle(fontSize: 12, color: AppleTokens.systemGray)),
+                                Text(l10n.savingsTotalSaved, style: const TextStyle(fontSize: 12, color: AppleTokens.systemGray)),
                                 const SizedBox(height: 2),
                                 AppleAnimatedMoneyText(
                                   money: summary.savedMoney,
@@ -182,7 +184,7 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  'Mục tiêu: ${summary.targetMoney.format(locale: 'vi', masked: hideBalance)}',
+                                  l10n.savingsGoalTarget(summary.targetMoney.format(locale: locale, masked: hideBalance)),
                                   style: const TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
@@ -200,11 +202,11 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
                 const SizedBox(height: 22),
 
                 // Active Goals Section
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
                   child: Text(
-                    'MỤC TIÊU ĐANG CHẠY',
-                    style: TextStyle(
+                    l10n.homeSavingsStripTitle.toUpperCase(),
+                    style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: AppleTokens.systemGray,
@@ -213,12 +215,12 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
                   ),
                 ),
                 if (activeGoals.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.all(16),
+                  Padding(
+                    padding: const EdgeInsets.all(16),
                     child: Center(
                       child: Text(
-                        'Không có mục tiêu nào đang chạy',
-                        style: TextStyle(color: AppleTokens.systemGray),
+                        l10n.savingsEmpty,
+                        style: const TextStyle(color: AppleTokens.systemGray),
                       ),
                     ),
                   ),
@@ -236,7 +238,7 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
                       const Icon(CupertinoIcons.checkmark_seal_fill, color: AppleTokens.systemGreen, size: 16),
                       const SizedBox(width: 6),
                       Text(
-                        'ĐÃ HOÀN THÀNH (${completedGoals.length})',
+                        '${l10n.savingsGoalCompleted.toUpperCase()} (${completedGoals.length})',
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,

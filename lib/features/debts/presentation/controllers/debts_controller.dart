@@ -5,12 +5,20 @@ import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/debts/domain/entities/debt.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:so_thu_chi/l10n/app_localizations.dart';
 
 enum DebtFilterMode {
   all,
   lent,
   borrowed,
   settled;
+
+  String label(AppLocalizations l10n) => switch (this) {
+        DebtFilterMode.all => l10n.debtFilterAll,
+        DebtFilterMode.lent => l10n.debtFilterLent,
+        DebtFilterMode.borrowed => l10n.debtFilterBorrowed,
+        DebtFilterMode.settled => l10n.debtFilterSettled,
+      };
 
   String get labelVi => switch (this) {
         DebtFilterMode.all => 'Tất cả',

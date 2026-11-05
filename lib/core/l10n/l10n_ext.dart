@@ -3,7 +3,9 @@ import 'package:so_thu_chi/core/errors/app_exception.dart';
 import 'package:so_thu_chi/l10n/app_localizations.dart';
 
 extension AppLocalizationsX on BuildContext {
-  AppLocalizations get l10n => AppLocalizations.of(this);
+  AppLocalizations get l10n =>
+      Localizations.of<AppLocalizations>(this, AppLocalizations) ??
+      lookupAppLocalizations(const Locale('vi'));
 
   String localizeError(Object error) {
     final l = l10n;

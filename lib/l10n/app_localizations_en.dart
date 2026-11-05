@@ -579,4 +579,848 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get moreOptions => 'More options';
+
+  @override
+  String get debtBookTitle => 'Debt Book';
+
+  @override
+  String get debtNew => 'New Debt';
+
+  @override
+  String get debtEdit => 'Edit Debt';
+
+  @override
+  String get debtDelete => 'Delete Debt';
+
+  @override
+  String get debtDeleteConfirmTitle => 'Confirm Deletion';
+
+  @override
+  String debtDeleteConfirmBody(String name) {
+    return 'Are you sure you want to delete the debt for $name?';
+  }
+
+  @override
+  String get debtLent => 'Lent';
+
+  @override
+  String get debtBorrowed => 'Borrowed';
+
+  @override
+  String get debtLentSubtitle => 'To Collect';
+
+  @override
+  String get debtBorrowedSubtitle => 'To Repay';
+
+  @override
+  String get debtTotalLent => 'Total Lent';
+
+  @override
+  String get debtTotalBorrowed => 'Total Borrowed';
+
+  @override
+  String get debtFilterAll => 'All';
+
+  @override
+  String get debtFilterUnsettled => 'Unsettled';
+
+  @override
+  String get debtFilterSettled => 'Settled';
+
+  @override
+  String get debtFilterLent => 'Lent';
+
+  @override
+  String get debtFilterBorrowed => 'Borrowed';
+
+  @override
+  String get debtRemaining => 'Remaining';
+
+  @override
+  String debtDueDate(String date) {
+    return 'Due: $date';
+  }
+
+  @override
+  String get debtRepay => 'Repay';
+
+  @override
+  String get debtCollect => 'Collect';
+
+  @override
+  String get debtEmpty => 'No debt records yet';
+
+  @override
+  String get debtEmptySubtitle =>
+      'Track money lent or borrowed to keep clear records.';
+
+  @override
+  String get debtRepaymentTitle => 'Record Payment';
+
+  @override
+  String debtRepaymentCollectTitle(String name) {
+    return 'Collect debt from $name';
+  }
+
+  @override
+  String debtRepaymentPayTitle(String name) {
+    return 'Repay debt to $name';
+  }
+
+  @override
+  String get debtRepaymentAmount => 'Payment Amount';
+
+  @override
+  String get debtRepaymentWallet => 'Wallet';
+
+  @override
+  String get debtRepaymentFull => 'Pay Full Amount';
+
+  @override
+  String debtRepaymentSuccess(String amount) {
+    return 'Recorded payment of $amount';
+  }
+
+  @override
+  String get debtUpdatedSuccess => 'Debt updated successfully';
+
+  @override
+  String get debtAddedSuccess => 'New debt recorded successfully';
+
+  @override
+  String get debtPersonName => 'Person Name';
+
+  @override
+  String get debtPersonNameHint => 'e.g., John, Sarah...';
+
+  @override
+  String get debtPhoneNumber => 'Phone number (optional)';
+
+  @override
+  String get debtTypeLent => 'I lent (Others owe me)';
+
+  @override
+  String get debtTypeBorrowed => 'I borrowed (I owe others)';
+
+  @override
+  String get debtAmountRequired => 'Please enter a valid amount greater than 0';
+
+  @override
+  String get debtPersonRequired => 'Please enter person name';
+
+  @override
+  String get savingsTitle => 'Savings & Goals';
+
+  @override
+  String get savingsNewGoal => 'New Goal';
+
+  @override
+  String get savingsEditGoal => 'Edit Goal';
+
+  @override
+  String get savingsDeleteGoal => 'Delete Goal';
+
+  @override
+  String savingsDeleteConfirmTitle(String title) {
+    return 'Delete goal \"$title\"';
+  }
+
+  @override
+  String get savingsDeleteConfirmBody =>
+      'This will delete the savings goal. Wallet transaction history remains unchanged.';
+
+  @override
+  String get savingsTotalSaved => 'Total Saved';
+
+  @override
+  String get savingsTotalTarget => 'Total Target';
+
+  @override
+  String get savingsSummaryProgress => 'TOTAL SAVINGS PROGRESS';
+
+  @override
+  String savingsActiveCount(int active, int completed) {
+    return '$active active • $completed completed';
+  }
+
+  @override
+  String savingsDaysRemaining(int days) {
+    return '$days days left';
+  }
+
+  @override
+  String savingsDailyNeeded(String amount) {
+    return 'Need $amount/day';
+  }
+
+  @override
+  String get savingsDeposit => 'Deposit';
+
+  @override
+  String get savingsWithdraw => 'Withdraw';
+
+  @override
+  String get savingsGoalCompleted => 'Completed!';
+
+  @override
+  String savingsGoalTarget(String amount) {
+    return 'Target: $amount';
+  }
+
+  @override
+  String savingsGoalRemaining(String amount) {
+    return 'Remaining: $amount';
+  }
+
+  @override
+  String get savingsEmpty => 'No savings goals yet';
+
+  @override
+  String get savingsEmptySubtitle =>
+      'Set up emergency, travel, or purchase funds to track daily savings.';
+
+  @override
+  String get savingsCreateFirst => 'Create first goal';
+
+  @override
+  String get savingsGoalName => 'Goal Name';
+
+  @override
+  String get savingsGoalNameHint =>
+      'e.g., Emergency Fund, New Car, Vacation...';
+
+  @override
+  String get savingsTargetAmount => 'Target Amount';
+
+  @override
+  String get savingsDeadline => 'Target Deadline';
+
+  @override
+  String get savingsNoDeadline => 'No deadline set';
+
+  @override
+  String get savingsLinkedWallet => 'Linked Wallet (optional)';
+
+  @override
+  String get savingsNoLinkedWallet => 'No specific wallet';
+
+  @override
+  String get savingsGoalIcon => 'Goal Icon';
+
+  @override
+  String get savingsGoalColor => 'Theme Color';
+
+  @override
+  String savingsDepositSuccess(String amount, String title) {
+    return 'Added $amount to $title!';
+  }
+
+  @override
+  String savingsWithdrawSuccess(String amount, String title) {
+    return 'Withdrew $amount from $title';
+  }
+
+  @override
+  String get savingsAmountRequired => 'Please enter a valid target amount';
+
+  @override
+  String get savingsNoWalletAvailable => 'No wallets available';
+
+  @override
+  String get savingsTargetRequired => 'Please enter a goal name';
+
+  @override
+  String get recurringTitle => 'Bills & Subscriptions';
+
+  @override
+  String get recurringNew => 'Add Subscription';
+
+  @override
+  String get recurringEdit => 'Edit';
+
+  @override
+  String get recurringDelete => 'Delete';
+
+  @override
+  String get recurringDeleteConfirmTitle => 'Delete recurring bill';
+
+  @override
+  String recurringDeleteConfirmBody(String title) {
+    return 'Are you sure you want to delete \"$title\"? Past recorded transactions will not be affected.';
+  }
+
+  @override
+  String get recurringEstimatedMonthly => 'ESTIMATED MONTHLY COST';
+
+  @override
+  String recurringActiveCount(int count) {
+    return '$count active subscriptions';
+  }
+
+  @override
+  String get recurringDueBills => 'BILLS DUE FOR PAYMENT';
+
+  @override
+  String get recurringActiveSection => 'ACTIVE RECURRING SUBSCRIPTIONS';
+
+  @override
+  String get recurringPausedSection => 'PAUSED SUBSCRIPTIONS';
+
+  @override
+  String recurringNextDue(String date) {
+    return 'Due: $date';
+  }
+
+  @override
+  String get recurringIntervalDaily => 'Daily';
+
+  @override
+  String get recurringIntervalWeekly => 'Weekly';
+
+  @override
+  String get recurringIntervalBiweekly => 'Bi-weekly';
+
+  @override
+  String get recurringIntervalMonthly => 'Monthly';
+
+  @override
+  String get recurringIntervalYearly => 'Yearly';
+
+  @override
+  String get recurringMarkPaid => 'Mark as Paid';
+
+  @override
+  String get recurringPause => 'Pause';
+
+  @override
+  String get recurringResume => 'Resume';
+
+  @override
+  String get recurringAutoExecute => 'Auto-record on due date';
+
+  @override
+  String get recurringAutoExecuteSubtitle =>
+      'Automatically deduct wallet and create transaction without manual confirmation';
+
+  @override
+  String get recurringEmpty => 'No recurring bills yet';
+
+  @override
+  String get recurringEmptySubtitle =>
+      'Track rent, utilities, Netflix, Spotify, or recurring salary.';
+
+  @override
+  String recurringRecordedSuccess(String title) {
+    return 'Recorded transaction: $title';
+  }
+
+  @override
+  String get recurringWalletRequired => 'Please choose a payment wallet';
+
+  @override
+  String get recurringFrequency => 'Repeat Interval';
+
+  @override
+  String get recurringStartDate => 'Start / Due Date';
+
+  @override
+  String get ledgersTitle => 'Manage Ledgers';
+
+  @override
+  String get ledgerNew => 'New Ledger';
+
+  @override
+  String get ledgerEdit => 'Edit';
+
+  @override
+  String get ledgerDelete => 'Delete Ledger';
+
+  @override
+  String ledgerDeleteConfirmTitle(String name) {
+    return 'Delete ledger \"$name\"';
+  }
+
+  @override
+  String get ledgerDeleteConfirmBody =>
+      'This will delete this ledger from your device.';
+
+  @override
+  String get ledgerPersonal => 'Personal';
+
+  @override
+  String get ledgerFamily => 'Family';
+
+  @override
+  String get ledgerBusiness => 'Business / Project';
+
+  @override
+  String get ledgerCustom => 'Custom';
+
+  @override
+  String get ledgerActiveBadge => 'Active';
+
+  @override
+  String get ledgerSelectActive => 'Set as Active Ledger';
+
+  @override
+  String get ledgerSwitcherTitle => 'Select Ledger';
+
+  @override
+  String get ledgerSwitcherSubtitle =>
+      'Switch seamlessly between personal, family, and work finances';
+
+  @override
+  String get ledgerName => 'Ledger Name';
+
+  @override
+  String get ledgerNameHint => 'e.g., Personal, Family, Freelance Project...';
+
+  @override
+  String get ledgerType => 'Ledger Type';
+
+  @override
+  String get ledgerIcon => 'Icon';
+
+  @override
+  String get ledgerColor => 'Theme Color';
+
+  @override
+  String get ledgerNameRequired => 'Please enter ledger name';
+
+  @override
+  String get txTimeAndDetails => 'TIME & DETAILS';
+
+  @override
+  String get txSourceWallet => 'Source Wallet';
+
+  @override
+  String get txDestWallet => 'Destination Wallet';
+
+  @override
+  String get txSelectWallet => 'Select Wallet';
+
+  @override
+  String get txSwapWallets => 'Swap Wallets';
+
+  @override
+  String get txToday => 'Today';
+
+  @override
+  String get txChangeDate => 'Change';
+
+  @override
+  String get txRestoreDefaultCategories => 'Restore Defaults';
+
+  @override
+  String get txEmptyCategoriesMsg =>
+      'Please restore default categories or create a new one to categorize transactions.';
+
+  @override
+  String get txCategoryOther => 'Other';
+
+  @override
+  String get txCategoryAdd => 'Add';
+
+  @override
+  String get txCategorySearchPlaceholder => 'Search categories...';
+
+  @override
+  String get txCategoryNotFound => 'No categories found';
+
+  @override
+  String get txCategoryCreateNew => 'Create New';
+
+  @override
+  String get txUpdateTransaction => 'Update Transaction';
+
+  @override
+  String get txDeleteLabel => 'Delete';
+
+  @override
+  String homeDueBillsBanner(int count) {
+    return '$count recurring bills are due for payment!';
+  }
+
+  @override
+  String get homeSavingsStripTitle => 'Savings Goals';
+
+  @override
+  String get homeDebtsStripTitle => 'Recent Debts';
+
+  @override
+  String get homeActionTransaction => 'Transaction';
+
+  @override
+  String get homeActionWallet => 'Wallets';
+
+  @override
+  String get homeActionSavings => 'Savings';
+
+  @override
+  String get homeActionRecurring => 'Recurring';
+
+  @override
+  String get homeActionDebts => 'Debts';
+
+  @override
+  String get homeActionCategories => 'Categories';
+
+  @override
+  String get settingsDataSection => 'DATA & MANAGEMENT';
+
+  @override
+  String get settingsDebtsSubtitle => 'Manage money lent & borrowed';
+
+  @override
+  String get settingsRecurringSubtitle => 'Recurring expenses & bills';
+
+  @override
+  String get settingsSavingsSubtitle => 'Financial goals & savings';
+
+  @override
+  String get settingsLedgersSubtitle => 'Personal, family & work ledgers';
+
+  @override
+  String get settingsDemoTag => 'Offline Demo';
+
+  @override
+  String get settingsGoogleTag => 'Google Synced';
+
+  @override
+  String get settingsAppIcon => 'App Icon';
+
+  @override
+  String get settingsAppIconSubtitle => 'Customize app icon style';
+
+  @override
+  String get settingsThemeDefault => 'Default (Emerald Jade)';
+
+  @override
+  String get settingsThemeClassic => 'Classic iOS (Ocean Blue)';
+
+  @override
+  String get settingsThemeMinimal => 'Minimalist (Pure Dark)';
+
+  @override
+  String get settingsThemeSunset => 'Sunset (Coral Glow)';
+
+  @override
+  String settingsWalletsCount(int count) {
+    return '$count wallets';
+  }
+
+  @override
+  String settingsCategoriesCount(int count) {
+    return '$count categories';
+  }
+
+  @override
+  String settingsDebtsCount(int count) {
+    return '$count debts';
+  }
+
+  @override
+  String get reportsFinancialHealth => 'Financial Health';
+
+  @override
+  String get reportsSpendingHeatmap => 'Daily Spending Heatmap';
+
+  @override
+  String get reportsMonthTotalExpense => 'Monthly Total Expense';
+
+  @override
+  String reportsDailyAverage(String amount) {
+    return 'Average: $amount/day';
+  }
+
+  @override
+  String reportsMaxDay(String amount) {
+    return 'Peak Day: $amount';
+  }
+
+  @override
+  String reportsSelectedDay(String date) {
+    return 'Details for $date';
+  }
+
+  @override
+  String get reportsNoExpenseOnDay => 'No expenses recorded on this day';
+
+  @override
+  String get categoryCreateNew => 'Create New Category';
+
+  @override
+  String get categoryIconAndColor => 'Icon & Color';
+
+  @override
+  String get categoryChooseIcon => 'Choose Icon';
+
+  @override
+  String get categoryChooseColor => 'Choose Color';
+
+  @override
+  String get savingsProgress => 'progress';
+
+  @override
+  String get savingsTarget => 'Target';
+
+  @override
+  String get savingsRemaining => 'Remaining';
+
+  @override
+  String get savingsDepositAction => 'Deposit';
+
+  @override
+  String get savingsWithdrawAction => 'Withdraw';
+
+  @override
+  String get savingsMotivationNote => 'Motivation note';
+
+  @override
+  String get savingsQuickRemaining => 'Remaining part';
+
+  @override
+  String get savingsQuickAll => 'Withdraw all';
+
+  @override
+  String get savingsWalletSource => 'Source wallet';
+
+  @override
+  String get savingsWalletDest => 'Destination wallet';
+
+  @override
+  String get savingsConfirmDeposit => 'Confirm deposit';
+
+  @override
+  String get savingsConfirmWithdraw => 'Confirm withdrawal';
+
+  @override
+  String get savingsEditGoalTitle => 'Edit Savings Goal';
+
+  @override
+  String get savingsNewGoalTitle => 'New Savings Goal';
+
+  @override
+  String get recurringIntervalQuarterly => 'Quarterly';
+
+  @override
+  String get recurringFrequencyLabel => 'Repeat frequency';
+
+  @override
+  String get recurringStartDateLabel => 'Start date';
+
+  @override
+  String get recurringNextDueDateLabel => 'Next due date';
+
+  @override
+  String get recurringTitleLabel => 'Bill / Subscription name';
+
+  @override
+  String get recurringTitleRequired => 'Please enter bill title';
+
+  @override
+  String get recurringAmountLabel => 'Amount';
+
+  @override
+  String get recurringAmountRequired => 'Please enter a valid amount';
+
+  @override
+  String get recurringWalletLabel => 'Payment wallet';
+
+  @override
+  String get recurringCategoryLabel => 'Expense category';
+
+  @override
+  String get recurringConfirmCreate => 'Add recurring plan';
+
+  @override
+  String get recurringConfirmUpdate => 'Update recurring plan';
+
+  @override
+  String get recurringEditTitle => 'Edit Recurring Plan';
+
+  @override
+  String get recurringNewTitle => 'New Recurring Bill';
+
+  @override
+  String get ledgerEditTitle => 'Edit Ledger';
+
+  @override
+  String get ledgerNewTitle => 'New Ledger Book';
+
+  @override
+  String get ledgerDescLabel => 'Description (Optional)';
+
+  @override
+  String get ledgerDescHint => 'Detailed ledger description';
+
+  @override
+  String get ledgerConfirmCreate => 'Create ledger';
+
+  @override
+  String get ledgerConfirmUpdate => 'Update ledger';
+
+  @override
+  String ledgerSharedWith(int count) {
+    return 'Shared with: $count members';
+  }
+
+  @override
+  String get transactionTimeDetails => 'TIME & DETAILS';
+
+  @override
+  String get transactionSelectSourceWallet => 'Select source wallet';
+
+  @override
+  String get transactionSelectDestWallet => 'Select destination wallet';
+
+  @override
+  String get transactionOther => 'Other';
+
+  @override
+  String get transactionAdd => 'Add';
+
+  @override
+  String get transactionCreateNew => 'Create new';
+
+  @override
+  String get settingsDataAndManagement => 'DATA & MANAGEMENT';
+
+  @override
+  String get settingsAccountGoogle => 'Google Account';
+
+  @override
+  String get settingsAccountGuest => 'Guest (Offline)';
+
+  @override
+  String get selectWallet => 'Select wallet';
+
+  @override
+  String get swapWallets => 'Swap wallets';
+
+  @override
+  String get changeDate => 'Change';
+
+  @override
+  String get noCategories => 'No categories available';
+
+  @override
+  String get noCategoriesFound => 'No categories found';
+
+  @override
+  String get searchCategories => 'Search categories...';
+
+  @override
+  String get restoreDefaultCategories => 'Restore defaults';
+
+  @override
+  String get noCategoriesDescription =>
+      'Please restore default categories or create a new category to classify transactions.';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get back => 'Back';
+
+  @override
+  String get updateTransaction => 'Update transaction';
+
+  @override
+  String get reportsShareTooltip => 'Share report';
+
+  @override
+  String get heatmapTapHint => 'Tap a day to view detailed daily spending';
+
+  @override
+  String get heatmapNoSpending => 'No spending';
+
+  @override
+  String get heatmapMonthlySummary => 'Monthly Spending Overview';
+
+  @override
+  String get heatmapNone => 'None';
+
+  @override
+  String get heatmapLess => 'Less';
+
+  @override
+  String get heatmapMore => 'More';
+
+  @override
+  String get healthSavingsRate => 'Savings rate';
+
+  @override
+  String get healthSpendingPace => 'Spending pace';
+
+  @override
+  String get healthTopCategory => 'Top expense category';
+
+  @override
+  String get healthInsufficientData => 'Insufficient data';
+
+  @override
+  String get healthRatingExcellent => 'Excellent';
+
+  @override
+  String get healthRatingGood => 'Good';
+
+  @override
+  String get healthRatingAverage => 'Average';
+
+  @override
+  String get healthRatingNeedsAttention => 'Needs Attention';
+
+  @override
+  String get debtsTitle => 'Debt Book';
+
+  @override
+  String get accentColor => 'Theme Accent Color';
+
+  @override
+  String get searchTransactionsTooltip => 'Search transactions';
+
+  @override
+  String get type => 'Type';
+
+  @override
+  String get transactionType => 'Transaction Type';
+
+  @override
+  String get debtSummaryLent => 'Owed to me';
+
+  @override
+  String get debtSummaryBorrowed => 'I owe';
+
+  @override
+  String get debtNewTitle => 'Record New Debt';
+
+  @override
+  String get debtEditTitle => 'Edit Debt Record';
+
+  @override
+  String get debtPersonLentLabel => 'Borrower (Who owes you?) *';
+
+  @override
+  String get debtPersonBorrowedLabel => 'Lender (Who do you owe?) *';
+
+  @override
+  String debtAmountLabel(String currency) {
+    return 'Debt Amount ($currency) *';
+  }
+
+  @override
+  String get savingsDepositSheetTitle => 'Deposit to Piggy Bank';
+
+  @override
+  String get savingsWithdrawSheetTitle => 'Withdraw from Savings';
+
+  @override
+  String get debtSubmitNew => 'Record Debt';
+
+  @override
+  String get loading => 'Loading...';
+
+  @override
+  String get loadingCategories => 'Loading categories...';
 }

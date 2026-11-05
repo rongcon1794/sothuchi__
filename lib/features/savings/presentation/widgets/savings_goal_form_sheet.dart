@@ -109,6 +109,7 @@ class _SavingsGoalFormSheetState extends ConsumerState<SavingsGoalFormSheet> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    final l10n = context.l10n;
 
     final wallets = ref.read(activeAccountsProvider);
     final currency = wallets.isNotEmpty ? wallets.first.currency : AppCurrencies.defaultCode;
@@ -116,7 +117,7 @@ class _SavingsGoalFormSheetState extends ConsumerState<SavingsGoalFormSheet> {
 
     if (parsedTarget == null || parsedTarget.minorUnits <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng nhập số tiền mục tiêu hợp lệ')),
+        SnackBar(content: Text(l10n.savingsAmountRequired)),
       );
       return;
     }
@@ -161,6 +162,7 @@ class _SavingsGoalFormSheetState extends ConsumerState<SavingsGoalFormSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = context.l10n;
     final wallets = ref.watch(activeAccountsProvider);
 
     return Container(
@@ -197,7 +199,7 @@ class _SavingsGoalFormSheetState extends ConsumerState<SavingsGoalFormSheet> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      _isEditing ? 'Sửa mục tiêu tiết kiệm' : 'Tạo mục tiêu tiết kiệm mới',
+                      _isEditing ? l10n.savingsEditGoalTitle : l10n.savingsNewGoalTitle,
                       style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
                     ),
                     IconButton(
@@ -217,9 +219,10 @@ class _SavingsGoalFormSheetState extends ConsumerState<SavingsGoalFormSheet> {
                       // Title
                       AppleTextField(
                         controller: _titleController,
-                        label: 'Tên mục tiêu (VD: Quỹ khẩn cấp, Mua xe, Du lịch Đà Lạt)',
+                        label: l10n.savingsGoalName,
+                        placeholder: l10n.savingsGoalNameHint,
                         prefixIcon: const Icon(CupertinoIcons.flag, size: 18),
-                        validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập tên mục tiêu' : null,
+                        validator: (v) => (v == null || v.trim().isEmpty) ? l10n.savingsTargetRequired : null,
                       ),
                       const SizedBox(height: 14),
 
@@ -227,18 +230,18 @@ class _SavingsGoalFormSheetState extends ConsumerState<SavingsGoalFormSheet> {
                       AppleTextField(
                         controller: _targetAmountController,
                         keyboardType: TextInputType.number,
-                        label: 'Số tiền cần đạt được',
+                        label: l10n.savingsTargetAmount,
                         prefixIcon: const Icon(CupertinoIcons.money_dollar_circle, size: 18),
-                        validator: (v) => (v == null || v.trim().isEmpty) ? 'Vui lòng nhập số tiền' : null,
+                        validator: (v) => (v == null || v.trim().isEmpty) ? l10n.savingsAmountRequired : null,
                       ),
                       const SizedBox(height: 16),
 
                       // Deadline selector
                       AppleListTile(
-                        title: 'Hạn hoàn thành (Deadline)',
+                        title: l10n.savingsDeadline,
                         subtitle: _deadline != null
                             ? DateFormat('dd/MM/yyyy').format(_deadline!)
-                            : 'Không đặt thời hạn',
+                            : l10n.savingsNoDeadline,
                         leading: const Icon(CupertinoIcons.calendar, color: AppleTokens.systemIndigo),
                         trailing: _deadline != null
                             ? IconButton(
@@ -253,14 +256,14 @@ class _SavingsGoalFormSheetState extends ConsumerState<SavingsGoalFormSheet> {
                       // Linked Account
                       DropdownButtonFormField<String>(
                         initialValue: _linkedAccountId,
-                        decoration: const InputDecoration(
-                          labelText: 'Ví thanh toán liên kết (Tùy chọn)',
-                          prefixIcon: Icon(CupertinoIcons.creditcard),
+                        decoration: InputDecoration(
+                          labelText: l10n.savingsLinkedWallet,
+                          prefixIcon: const Icon(CupertinoIcons.creditcard),
                         ),
                         items: [
-                          const DropdownMenuItem<String>(
+                          DropdownMenuItem<String>(
                             value: null,
-                            child: Text('Không chỉ định ví'),
+                            child: Text(l10n.savingsNoLinkedWallet),
                           ),
                           ...wallets.map((w) {
                             return DropdownMenuItem<String>(
@@ -274,7 +277,7 @@ class _SavingsGoalFormSheetState extends ConsumerState<SavingsGoalFormSheet> {
                       const SizedBox(height: 16),
 
                       // Icon selector
-                      const Text('Biểu tượng mục tiêu', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppleTokens.systemGray)),
+                      Text(l10n.savingsGoalIcon, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppleTokens.systemGray)),
                       const SizedBox(height: 8),
                       SizedBox(
                         height: 52,
@@ -313,7 +316,7 @@ class _SavingsGoalFormSheetState extends ConsumerState<SavingsGoalFormSheet> {
                       const SizedBox(height: 16),
 
                       // Color selector
-                      const Text('Màu sắc chủ đề', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppleTokens.systemGray)),
+                      Text(l10n.savingsGoalColor, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppleTokens.systemGray)),
                       const SizedBox(height: 8),
                       SizedBox(
                         height: 44,
@@ -352,7 +355,7 @@ class _SavingsGoalFormSheetState extends ConsumerState<SavingsGoalFormSheet> {
                       // Note
                       AppleTextField(
                         controller: _noteController,
-                        label: 'Ghi chú động lực',
+                        label: l10n.savingsMotivationNote,
                         prefixIcon: const Icon(CupertinoIcons.quote_bubble, size: 18),
                       ),
                       const SizedBox(height: 24),
@@ -360,7 +363,7 @@ class _SavingsGoalFormSheetState extends ConsumerState<SavingsGoalFormSheet> {
                       // Submit
                       AppleButton.primary(
                         color: Color(_selectedColor),
-                        label: _isEditing ? 'Cập nhật mục tiêu' : 'Tạo mục tiêu tích lũy',
+                        label: _isEditing ? l10n.save : l10n.savingsNewGoal,
                         onPressed: _submit,
                       ),
                       const SizedBox(height: 24),

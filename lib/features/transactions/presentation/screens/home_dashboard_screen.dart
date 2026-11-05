@@ -105,8 +105,23 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            const SoThuChiLogo(size: 34),
-            const SizedBox(width: 10),
+            if (user?.photoUrl != null && user!.photoUrl!.trim().isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: AppleUserAvatar(
+                  photoUrl: user.photoUrl,
+                  displayName: user.displayName,
+                  email: user.email,
+                  size: 34,
+                  borderRadius: 10,
+                  onTap: () => context.push(AppRoutes.settings),
+                ),
+              )
+            else
+              const Padding(
+                padding: EdgeInsets.only(right: 10),
+                child: SoThuChiLogo(size: 34),
+              ),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,7 +154,7 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
           const LedgerSelectorPill(),
           const SizedBox(width: 4),
           IconButton(
-            tooltip: 'Tìm kiếm giao dịch',
+            tooltip: l10n.searchTransactionsTooltip,
             onPressed: () => context.go(AppRoutes.transactions),
             icon: const Icon(CupertinoIcons.search),
           ),
@@ -607,40 +622,41 @@ class _HomeQuickActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const actions = [
+    final l10n = context.l10n;
+    final actions = [
       _ActionItemData(
         icon: CupertinoIcons.plus,
-        label: 'Giao dịch',
+        label: l10n.homeActionTransaction,
         color: AppleTokens.jadePrimary,
         route: AppRoutes.transactionNew,
       ),
       _ActionItemData(
         icon: CupertinoIcons.creditcard,
-        label: 'Ví tiền',
+        label: l10n.homeActionWallet,
         color: AppleTokens.systemBlue,
         route: AppRoutes.accounts,
       ),
       _ActionItemData(
         icon: CupertinoIcons.sparkles,
-        label: 'Tiết kiệm',
+        label: l10n.homeActionSavings,
         color: AppleTokens.systemPink,
         route: AppRoutes.savings,
       ),
       _ActionItemData(
         icon: CupertinoIcons.repeat,
-        label: 'Định kỳ',
+        label: l10n.homeActionRecurring,
         color: AppleTokens.systemPurple,
         route: AppRoutes.recurring,
       ),
       _ActionItemData(
         icon: CupertinoIcons.person_2,
-        label: 'Sổ Ghi Nợ',
+        label: l10n.homeActionDebts,
         color: AppleTokens.systemIndigo,
         route: AppRoutes.debts,
       ),
       _ActionItemData(
         icon: CupertinoIcons.square_grid_2x2,
-        label: 'Danh mục',
+        label: l10n.homeActionCategories,
         color: AppleTokens.systemOrange,
         route: AppRoutes.categories,
       ),
@@ -953,7 +969,7 @@ class _AddWalletCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                'Thêm ví',
+                context.l10n.addWallet,
                 style: theme.textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: theme.colorScheme.primary,
@@ -1008,6 +1024,7 @@ class _MiniSavingsGoalCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final locale = Localizations.localeOf(context).languageCode;
     final accentColor = Color(goal.color);
 
     return ApplePressable(
@@ -1051,12 +1068,12 @@ class _MiniSavingsGoalCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    goal.currentMoney.format(locale: 'vi', masked: hideBalance),
+                    goal.currentMoney.format(locale: locale, masked: hideBalance),
                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${goal.progressPercent}% của ${goal.targetMoney.format(locale: 'vi', masked: hideBalance)}',
+                    '${goal.progressPercent}% / ${goal.targetMoney.format(locale: locale, masked: hideBalance)}',
                     style: const TextStyle(fontSize: 10, color: AppleTokens.systemGray),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
