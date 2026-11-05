@@ -131,7 +131,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       leading: const Text('🇻🇳', style: TextStyle(fontSize: 22)),
                       title: Text(l10n.languageVietnamese, style: const TextStyle(fontWeight: FontWeight.w600)),
                       trailing: current == 'vi'
-                          ? const Icon(CupertinoIcons.checkmark_alt_circle_fill, color: AppleTokens.jadePrimary)
+                          ? Icon(CupertinoIcons.checkmark_alt_circle_fill, color: theme.colorScheme.primary)
                           : null,
                       onTap: () => Navigator.of(ctx).pop('vi'),
                     ),
@@ -140,7 +140,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       leading: const Text('🇺🇸', style: TextStyle(fontSize: 22)),
                       title: Text(l10n.languageEnglish, style: const TextStyle(fontWeight: FontWeight.w600)),
                       trailing: current == 'en'
-                          ? const Icon(CupertinoIcons.checkmark_alt_circle_fill, color: AppleTokens.jadePrimary)
+                          ? Icon(CupertinoIcons.checkmark_alt_circle_fill, color: theme.colorScheme.primary)
                           : null,
                       onTap: () => Navigator.of(ctx).pop('en'),
                     ),
@@ -220,7 +220,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
                         trailing: current == AppCurrencies.supported[i].code
-                            ? const Icon(CupertinoIcons.checkmark_alt_circle_fill, color: AppleTokens.jadePrimary)
+                            ? Icon(CupertinoIcons.checkmark_alt_circle_fill, color: theme.colorScheme.primary)
                             : null,
                         onTap: () => Navigator.of(ctx).pop(AppCurrencies.supported[i].code),
                       ),
@@ -677,9 +677,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                     const SizedBox(width: 14),
                     Expanded(
-                      child: Text(
-                        l10n.accentColor,
-                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            l10n.accentColor,
+                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            AppTheme.paletteNames[settings.accentColorIndex.clamp(0, AppTheme.paletteNames.length - 1)],
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     Row(
@@ -800,7 +815,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 title: Text(l10n.biometricLock, style: const TextStyle(fontWeight: FontWeight.w600)),
                 subtitle: Text(l10n.biometricLockSubtitle, style: const TextStyle(fontSize: 12)),
                 value: settings.biometricLockEnabled,
-                activeTrackColor: AppleTokens.jadePrimary,
+                activeTrackColor: theme.colorScheme.primary,
                 onChanged: _handleToggleBiometric,
               ),
             ],

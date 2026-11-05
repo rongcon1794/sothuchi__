@@ -170,6 +170,7 @@ abstract final class AppTheme {
     final isDark = brightness == Brightness.dark;
     final colorScheme = ColorScheme.fromSeed(
       seedColor: seed,
+      primary: seed,
       brightness: brightness,
       surface: isDark ? AppleTokens.bgDarkCard : AppleTokens.bgLightCard,
     );

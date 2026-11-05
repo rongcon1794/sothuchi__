@@ -44,7 +44,7 @@ class AppleAdaptiveExpandableFab extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final bg = backgroundColor ?? AppleTokens.jadePrimary;
+    final bg = backgroundColor ?? theme.colorScheme.primary;
 
     final content = ApplePressable(
       scaleDown: 0.94,

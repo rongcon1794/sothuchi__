@@ -785,15 +785,15 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                       padding: const EdgeInsets.symmetric(vertical: 9),
                                       alignment: Alignment.center,
                                       decoration: BoxDecoration(
-                                        color: AppleTokens.jadePrimary.withValues(alpha: 0.15),
+                                        color: theme.colorScheme.primary.withValues(alpha: 0.15),
                                         borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                                       ),
                                       child: Text(
                                         '+ ${l10n.txCategoryAdd}',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w600,
-                                          color: AppleTokens.jadePrimary,
+                                          color: theme.colorScheme.primary,
                                         ),
                                       ),
                                     ),
@@ -1044,7 +1044,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
             isLoading: isSaving,
             icon: CupertinoIcons.checkmark_alt,
             label: _isEditing ? l10n.editTransaction : l10n.save,
-            color: AppleTokens.jadePrimary,
+            color: theme.colorScheme.primary,
             onPressed: isSaving ? null : _submit,
           ),
         ),
@@ -1780,7 +1780,7 @@ class _CategorySelectionCard extends StatelessWidget {
                             color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
                             borderRadius: BorderRadius.circular(13),
                             border: Border.all(
-                              color: AppleTokens.jadePrimary.withValues(alpha: 0.4),
+                              color: theme.colorScheme.primary.withValues(alpha: 0.4),
                               width: 1,
                             ),
                           ),
@@ -1798,10 +1798,10 @@ class _CategorySelectionCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: AppleTokens.jadePrimary,
+                            color: theme.colorScheme.primary,
                           ),
                         ),
                       ],
@@ -1914,7 +1914,7 @@ class _WalletPickerSheet extends StatelessWidget {
                       ),
                     ),
                     trailing: isSelected
-                        ? const Icon(CupertinoIcons.checkmark_circle_fill, color: AppleTokens.jadePrimary)
+                        ? Icon(CupertinoIcons.checkmark_circle_fill, color: theme.colorScheme.primary)
                         : null,
                     onTap: () {
                       HapticFeedback.selectionClick();
@@ -2014,20 +2014,20 @@ class _CategoryPickerSheetState extends State<_CategoryPickerSheet> {
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         margin: const EdgeInsets.only(right: 6),
                         decoration: BoxDecoration(
-                          color: AppleTokens.jadePrimary.withValues(alpha: 0.15),
+                          color: theme.colorScheme.primary.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(CupertinoIcons.plus, size: 13, color: AppleTokens.jadePrimary),
+                            Icon(CupertinoIcons.plus, size: 13, color: theme.colorScheme.primary),
                             const SizedBox(width: 3),
                             Text(
                               l10n.txCategoryCreateNew,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: AppleTokens.jadePrimary,
+                                color: theme.colorScheme.primary,
                               ),
                             ),
                           ],

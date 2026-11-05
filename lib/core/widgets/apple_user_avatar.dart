@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 
 /// Apple-styled User Avatar widget.
 ///
@@ -60,8 +59,11 @@ class AppleUserAvatar extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF00B074), Color(0xFF0D7C66)],
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).colorScheme.primary,
+            Color.lerp(Theme.of(context).colorScheme.primary, Colors.black, 0.25)!,
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -126,7 +128,7 @@ class AppleUserAvatar extends StatelessWidget {
         boxShadow: showBorder
             ? [
                 BoxShadow(
-                  color: AppleTokens.jadePrimary.withValues(alpha: isDark ? 0.18 : 0.12),
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: isDark ? 0.22 : 0.15),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),

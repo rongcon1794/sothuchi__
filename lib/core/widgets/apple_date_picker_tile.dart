@@ -46,13 +46,13 @@ class AppleDatePickerTile extends StatelessWidget {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: isDark
-                ? const ColorScheme.dark(
-                    primary: AppleTokens.jadePrimary,
+                ? ColorScheme.dark(
+                    primary: Theme.of(context).colorScheme.primary,
                     surface: AppleTokens.bgDarkCard,
                     onSurface: Colors.white,
                   )
-                : const ColorScheme.light(
-                    primary: AppleTokens.jadeDark,
+                : ColorScheme.light(
+                    primary: Theme.of(context).colorScheme.primary,
                     surface: Colors.white,
                     onSurface: Colors.black87,
                   ),

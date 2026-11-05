@@ -1008,10 +1008,10 @@ class _SixMonthSummaryPanel extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(
+              Icon(
                 CupertinoIcons.chart_bar_square,
                 size: 15,
-                color: AppleTokens.jadePrimary,
+                color: theme.colorScheme.primary,
               ),
               const SizedBox(width: 6),
               Text(

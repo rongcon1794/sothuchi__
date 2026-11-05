@@ -499,27 +499,28 @@ class _HeroBalanceCard extends StatelessWidget {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final primary = theme.colorScheme.primary;
 
     final cardGradient = isDark
-        ? const LinearGradient(
+        ? LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF0F1816),
-              Color(0xFF0A2922),
-              Color(0xFF021612),
+              Color.lerp(primary, Colors.black, 0.82)!,
+              Color.lerp(primary, Colors.black, 0.65)!,
+              Color.lerp(primary, Colors.black, 0.88)!,
             ],
-            stops: [0.0, 0.55, 1.0],
+            stops: const [0.0, 0.55, 1.0],
           )
-        : const LinearGradient(
+        : LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF00A86B),
-              Color(0xFF047857),
-              Color(0xFF024434),
+              primary,
+              Color.lerp(primary, Colors.black, 0.22)!,
+              Color.lerp(primary, Colors.black, 0.45)!,
             ],
-            stops: [0.0, 0.6, 1.0],
+            stops: const [0.0, 0.6, 1.0],
           );
 
     const fgColor = Colors.white;
@@ -529,9 +530,7 @@ class _HeroBalanceCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
         boxShadow: [
           BoxShadow(
-            color: isDark
-                ? const Color(0xFF00E5B0).withValues(alpha: 0.16)
-                : const Color(0xFF00A86B).withValues(alpha: 0.28),
+            color: primary.withValues(alpha: isDark ? 0.22 : 0.32),
             blurRadius: 26,
             offset: const Offset(0, 10),
           ),
@@ -1101,12 +1100,17 @@ class _HomeQuickActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final primary = theme.colorScheme.primary;
     final actions = [
       _ActionItemData(
         icon: CupertinoIcons.plus,
         label: l10n.homeActionTransaction,
-        gradient: const [Color(0xFF00E5B0), Color(0xFF00A86B)],
-        accentColor: const Color(0xFF00BFA5),
+        gradient: [
+          Color.lerp(primary, Colors.white, 0.28)!,
+          primary,
+        ],
+        accentColor: primary,
         route: AppRoutes.transactionNew,
       ),
       _ActionItemData(

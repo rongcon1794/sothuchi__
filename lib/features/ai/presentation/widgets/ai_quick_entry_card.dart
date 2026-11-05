@@ -162,8 +162,8 @@ class _AiQuickEntryCardState extends ConsumerState<AiQuickEntryCard> {
       padding: const EdgeInsets.all(16),
       borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
       borderColor: isDark
-          ? AppleTokens.jadePrimary.withValues(alpha: 0.35)
-          : AppleTokens.jadePrimary.withValues(alpha: 0.25),
+          ? theme.colorScheme.primary.withValues(alpha: 0.35)
+          : theme.colorScheme.primary.withValues(alpha: 0.25),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -285,7 +285,7 @@ class _AiQuickEntryCardState extends ConsumerState<AiQuickEntryCard> {
                     : Colors.white,
                 borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
                 border: Border.all(
-                  color: AppleTokens.jadePrimary.withValues(alpha: 0.3),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.3),
                   width: AppleTokens.hairline,
                 ),
               ),
@@ -298,7 +298,7 @@ class _AiQuickEntryCardState extends ConsumerState<AiQuickEntryCard> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AppleTokens.jadePrimary.withValues(alpha: 0.15),
+                          color: theme.colorScheme.primary.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                         ),
                         child: Text(
@@ -306,8 +306,8 @@ class _AiQuickEntryCardState extends ConsumerState<AiQuickEntryCard> {
                             minorUnits: draft.amountMinorUnits!,
                             currencyCode: draft.currencyCode ?? 'VND',
                           ).format(locale: 'vi'),
-                          style: const TextStyle(
-                            color: AppleTokens.jadePrimary,
+                          style: TextStyle(
+                            color: theme.colorScheme.primary,
                             fontWeight: FontWeight.w700,
                             fontSize: 13,
                           ),
@@ -404,7 +404,7 @@ class _AiQuickEntryCardState extends ConsumerState<AiQuickEntryCard> {
                     child: Container(
                       height: 40,
                       decoration: BoxDecoration(
-                        color: AppleTokens.jadePrimary,
+                        color: theme.colorScheme.primary,
                         borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                       ),
                       alignment: Alignment.center,

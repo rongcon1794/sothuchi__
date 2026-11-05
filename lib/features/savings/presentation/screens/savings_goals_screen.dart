@@ -56,7 +56,7 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
         isExpanded: _isFabExpanded,
         icon: const Icon(CupertinoIcons.plus),
         label: Text(l10n.savingsNewGoal),
-        backgroundColor: AppleTokens.jadeDark,
+        // defaults to theme.colorScheme.primary
         onPressed: () {
           unawaited(HapticFeedback.lightImpact());
           SavingsGoalFormSheet.show(context);
@@ -116,7 +116,7 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
                         ? const [Color(0xFF0A2E20), Color(0xFF041710)]
                         : const [Color(0xFFE8F5E9), Color(0xFFF1F8E9)],
                   ),
-                  borderColor: AppleTokens.jadePrimary.withValues(alpha: 0.3),
+                  borderColor: theme.colorScheme.primary.withValues(alpha: 0.3),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -126,26 +126,26 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
                           Expanded(
                             child: Text(
                               l10n.savingsSummaryProgress,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.5,
-                                color: AppleTokens.jadePrimary,
+                                color: theme.colorScheme.primary,
                               ),
                             ),
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: AppleTokens.jadePrimary.withValues(alpha: 0.15),
+                              color: theme.colorScheme.primary.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
                               l10n.savingsActiveCount(summary.activeCount, summary.completedCount),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
-                                color: AppleTokens.jadePrimary,
+                                color: theme.colorScheme.primary,
                               ),
                             ),
                           ),
@@ -156,7 +156,7 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
                         children: [
                           SavingsArcProgressIndicator(
                             progress: summary.overallProgress,
-                            color: AppleTokens.jadePrimary,
+                            color: theme.colorScheme.primary,
                             size: 88,
                             strokeWidth: 8,
                             child: Text(
