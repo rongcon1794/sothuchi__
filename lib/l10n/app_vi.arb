@@ -761,5 +761,22 @@
         "type": "int"
       }
     }
-  }
+  },
+  "filterDateAll": "Toàn thời gian",
+  "filterDateThisMonth": "Tháng này",
+  "filterDateLastMonth": "Tháng trước",
+  "filterDateLast30Days": "30 ngày qua",
+  "filterDateThisYear": "Năm nay",
+  "filterActiveCount": "{count} bộ lọc đang áp dụng",
+  "@filterActiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filterAllCategories": "Tất cả danh mục",
+  "filterAllWallets": "Tất cả ví",
+  "filterTransactionType": "Loại giao dịch",
+  "filterApply": "Áp dụng bộ lọc"
 }

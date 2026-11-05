@@ -2881,6 +2881,66 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'{percent}% Chi'**
   String expenseRatio(int percent);
+
+  /// No description provided for @filterDateAll.
+  ///
+  /// In vi, this message translates to:
+  /// **'Toàn thời gian'**
+  String get filterDateAll;
+
+  /// No description provided for @filterDateThisMonth.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tháng này'**
+  String get filterDateThisMonth;
+
+  /// No description provided for @filterDateLastMonth.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tháng trước'**
+  String get filterDateLastMonth;
+
+  /// No description provided for @filterDateLast30Days.
+  ///
+  /// In vi, this message translates to:
+  /// **'30 ngày qua'**
+  String get filterDateLast30Days;
+
+  /// No description provided for @filterDateThisYear.
+  ///
+  /// In vi, this message translates to:
+  /// **'Năm nay'**
+  String get filterDateThisYear;
+
+  /// No description provided for @filterActiveCount.
+  ///
+  /// In vi, this message translates to:
+  /// **'{count} bộ lọc đang áp dụng'**
+  String filterActiveCount(int count);
+
+  /// No description provided for @filterAllCategories.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tất cả danh mục'**
+  String get filterAllCategories;
+
+  /// No description provided for @filterAllWallets.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tất cả ví'**
+  String get filterAllWallets;
+
+  /// No description provided for @filterTransactionType.
+  ///
+  /// In vi, this message translates to:
+  /// **'Loại giao dịch'**
+  String get filterTransactionType;
+
+  /// No description provided for @filterApply.
+  ///
+  /// In vi, this message translates to:
+  /// **'Áp dụng bộ lọc'**
+  String get filterApply;
 }
 
 class _AppLocalizationsDelegate

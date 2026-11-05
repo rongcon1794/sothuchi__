@@ -710,5 +710,22 @@
         "type": "int"
       }
     }
-  }
+  },
+  "filterDateAll": "All time",
+  "filterDateThisMonth": "This month",
+  "filterDateLastMonth": "Last month",
+  "filterDateLast30Days": "Last 30 days",
+  "filterDateThisYear": "This year",
+  "filterActiveCount": "{count} active filters",
+  "@filterActiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filterAllCategories": "All categories",
+  "filterAllWallets": "All wallets",
+  "filterTransactionType": "Transaction type",
+  "filterApply": "Apply filter"
 }

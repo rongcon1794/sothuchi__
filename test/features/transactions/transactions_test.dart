@@ -263,6 +263,88 @@ void main() {
         expect(find.text('Ăn phở 50k hôm qua'), findsOneWidget);
       },
     );
+
+    testWidgets(
+      'Redesigned TransactionFilterBottomSheet renders Apple HIG components and applies filters',
+      (tester) async {
+        SharedPreferences.setMockInitialValues({'onboarding_completed': true});
+        final prefs = await SharedPreferences.getInstance();
+        final accRepo = InMemoryAccountRepository();
+        final catRepo = InMemoryCategoryRepository();
+        final txRepo = InMemoryTransactionRepository(accountRepo: accRepo);
+
+        await catRepo.seedDefaultCategoriesIfNeeded();
+        final wallet = ((await accRepo.createAccount(
+          name: 'Ví tiền mặt',
+          type: AccountType.cash,
+          initialBalance: 5000000,
+          currency: 'VND',
+          icon: 'cash',
+          color: 0xFF0D7C66,
+        )) as Success<Account>).value;
+
+        await txRepo.addTransaction(
+          amount: 55000,
+          currency: 'VND',
+          type: TransactionType.expense,
+          accountId: wallet.id,
+          categoryId: 'default_food',
+          note: 'Phở bò tái lăn',
+          date: DateTime.now(),
+        );
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              sharedPreferencesProvider.overrideWithValue(prefs),
+              accountRepositoryProvider.overrideWithValue(accRepo),
+              categoryRepositoryProvider.overrideWithValue(catRepo),
+              transactionRepositoryProvider.overrideWithValue(txRepo),
+            ],
+            child: MaterialApp(
+              locale: const Locale('vi'),
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              theme: AppTheme.light(),
+              home: const TransactionsScreen(),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Tap filter button in AppBar
+        final filterButton = find.byTooltip('Bộ lọc giao dịch');
+        expect(filterButton, findsOneWidget);
+        await tester.tap(filterButton);
+        await tester.pumpAndSettle();
+
+        // Verify bottom sheet title & Apple sections exist
+        expect(find.text('Bộ lọc giao dịch'), findsWidgets);
+        expect(find.text('LOẠI GIAO DỊCH'), findsOneWidget);
+        expect(find.text('KHOẢNG THỜI GIAN'), findsOneWidget);
+        expect(find.text('VÍ & TÀI KHOẢN'), findsOneWidget);
+        expect(find.text('DANH MỤC THU CHI'), findsOneWidget);
+
+        // Verify type buttons
+        expect(find.text('Chi tiêu'), findsWidgets);
+        expect(find.text('Thu nhập'), findsWidgets);
+        expect(find.text('Chuyển khoản'), findsWidgets);
+
+        // Verify presets
+        expect(find.text('Tháng này'), findsOneWidget);
+        expect(find.text('30 ngày qua'), findsOneWidget);
+
+        // Verify wallet card & apply button
+        expect(find.text('Ví tiền mặt'), findsWidgets);
+        expect(find.text('Áp dụng bộ lọc'), findsOneWidget);
+
+        // Tap Apply button to dismiss bottom sheet
+        await tester.tap(find.text('Áp dụng bộ lọc'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('LOẠI GIAO DỊCH'), findsNothing);
+      },
+    );
   });
 }
 

@@ -1513,4 +1513,36 @@ class AppLocalizationsVi extends AppLocalizations {
   String expenseRatio(int percent) {
     return '$percent% Chi';
   }
+
+  @override
+  String get filterDateAll => 'Toàn thời gian';
+
+  @override
+  String get filterDateThisMonth => 'Tháng này';
+
+  @override
+  String get filterDateLastMonth => 'Tháng trước';
+
+  @override
+  String get filterDateLast30Days => '30 ngày qua';
+
+  @override
+  String get filterDateThisYear => 'Năm nay';
+
+  @override
+  String filterActiveCount(int count) {
+    return '$count bộ lọc đang áp dụng';
+  }
+
+  @override
+  String get filterAllCategories => 'Tất cả danh mục';
+
+  @override
+  String get filterAllWallets => 'Tất cả ví';
+
+  @override
+  String get filterTransactionType => 'Loại giao dịch';
+
+  @override
+  String get filterApply => 'Áp dụng bộ lọc';
 }

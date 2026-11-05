@@ -1512,4 +1512,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String expenseRatio(int percent) {
     return '$percent% Out';
   }
+
+  @override
+  String get filterDateAll => 'All time';
+
+  @override
+  String get filterDateThisMonth => 'This month';
+
+  @override
+  String get filterDateLastMonth => 'Last month';
+
+  @override
+  String get filterDateLast30Days => 'Last 30 days';
+
+  @override
+  String get filterDateThisYear => 'This year';
+
+  @override
+  String filterActiveCount(int count) {
+    return '$count active filters';
+  }
+
+  @override
+  String get filterAllCategories => 'All categories';
+
+  @override
+  String get filterAllWallets => 'All wallets';
+
+  @override
+  String get filterTransactionType => 'Transaction type';
+
+  @override
+  String get filterApply => 'Apply filter';
 }
