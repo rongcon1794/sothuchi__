@@ -125,8 +125,8 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                       ? '$greeting, $userFirstName!'
                       : l10n.appTitle;
                   final subtitleText = userFirstName != null
-                      ? l10n.appTitle
-                      : (user?.displayName ?? user?.email ?? '');
+                      ? l10n.appTagline
+                      : (user?.displayName ?? user?.email ?? l10n.appTagline);
 
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -355,10 +355,10 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
               if (activeGoals.isNotEmpty) ...[
                 Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Heo đất & Tiết kiệm',
-                        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                        l10n.savingsTitle,
+                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
                       ),
                     ),
                     TextButton(
@@ -1560,6 +1560,13 @@ class _MiniSavingsGoalCard extends StatelessWidget {
             color: accentColor.withValues(alpha: isDark ? 0.25 : 0.2),
             width: AppleTokens.hairline,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -1589,7 +1596,11 @@ class _MiniSavingsGoalCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     goal.currentMoney.format(locale: locale, masked: hideBalance),
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      fontFeatures: AppTheme.tabularFigures,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(

@@ -216,6 +216,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     required bool isDestination,
     required String locale,
   }) async {
+    final l10n = context.l10n;
     final selectedId = isDestination ? _toAccountId : _accountId;
     final result = await showModalBottomSheet<String>(
       context: context,
@@ -225,7 +226,9 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         wallets: wallets,
         selectedId: selectedId,
         locale: locale,
-        title: isDestination ? 'Chọn ví nhận tiền' : 'Chọn ví thanh toán',
+        title: isDestination
+            ? (locale.startsWith('vi') ? 'Chọn ví nhận tiền' : l10n.txDestWallet)
+            : (locale.startsWith('vi') ? 'Chọn ví thanh toán' : l10n.txSelectWallet),
       ),
     );
 
@@ -595,7 +598,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(CupertinoIcons.chevron_left, size: 24),
-          tooltip: 'Quay lại',
+          tooltip: l10n.back,
           onPressed: () => context.pop(),
         ),
         actions: [
@@ -725,9 +728,9 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
-                                      const Text(
-                                        'Chưa có danh mục nào',
-                                        style: TextStyle(
+                                      Text(
+                                        l10n.noCategories,
+                                        style: const TextStyle(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w700,
                                         ),
@@ -738,9 +741,9 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                               ],
                             ),
                             const SizedBox(height: 12),
-                            const Text(
-                              'Vui lòng khôi phục danh mục mẫu hoặc tạo danh mục mới để phân loại giao dịch.',
-                              style: TextStyle(
+                            Text(
+                              l10n.noCategoriesDescription,
+                              style: const TextStyle(
                                 fontSize: 13,
                                 color: AppleTokens.systemGray,
                               ),
@@ -762,9 +765,9 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                         color: AppleTokens.systemBlue.withValues(alpha: 0.15),
                                         borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                                       ),
-                                      child: const Text(
-                                        'Khôi phục mẫu',
-                                        style: TextStyle(
+                                      child: Text(
+                                        l10n.restoreDefaultCategories,
+                                        style: const TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w600,
                                           color: AppleTokens.systemBlue,
@@ -785,9 +788,9 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                         color: AppleTokens.jadePrimary.withValues(alpha: 0.15),
                                         borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                                       ),
-                                      child: const Text(
-                                        '+ Thêm mới',
-                                        style: TextStyle(
+                                      child: Text(
+                                        '+ ${l10n.txCategoryAdd}',
+                                        style: const TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w600,
                                           color: AppleTokens.jadePrimary,
@@ -828,7 +831,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                           subtitle: Text(
                             selectedAccount != null
                                 ? '${selectedAccount.name} (${selectedAccount.balanceMoney.format(locale: locale)})'
-                                : 'Chọn ví chuyển',
+                                : l10n.txSourceWallet,
                             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                           ),
                           trailing: const Icon(CupertinoIcons.chevron_right, size: 16, color: AppleTokens.systemGray),
@@ -860,14 +863,14 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                       width: AppleTokens.hairline,
                                     ),
                                   ),
-                                  child: const Row(
+                                  child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(CupertinoIcons.arrow_2_squarepath, size: 14, color: AppleTokens.systemBlue),
-                                      SizedBox(width: 6),
+                                      const Icon(CupertinoIcons.arrow_2_squarepath, size: 14, color: AppleTokens.systemBlue),
+                                      const SizedBox(width: 6),
                                       Text(
-                                        'Đổi chiều chuyển',
-                                        style: TextStyle(
+                                        l10n.txSwapWallets,
+                                        style: const TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w600,
                                           color: AppleTokens.systemBlue,
@@ -898,7 +901,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                           subtitle: Text(
                             selectedToAccount != null
                                 ? '${selectedToAccount.name} (${selectedToAccount.balanceMoney.format(locale: locale)})'
-                                : 'Chọn ví nhận',
+                                : l10n.txDestWallet,
                             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                           ),
                           trailing: const Icon(CupertinoIcons.chevron_right, size: 16, color: AppleTokens.systemGray),
@@ -931,7 +934,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                           subtitle: Text(
                             selectedAccount != null
                                 ? '${selectedAccount.name} (${selectedAccount.balanceMoney.format(locale: locale)})'
-                                : 'Chọn ví',
+                                : l10n.txSelectWallet,
                             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                           ),
                           trailing: const Icon(CupertinoIcons.chevron_right, size: 16, color: AppleTokens.systemGray),
@@ -948,7 +951,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
                   // 3. Transaction Details & Metadata Section
                   AppleListGroup(
-                    header: 'THỜI GIAN & CHI TIẾT',
+                    header: l10n.txTimeAndDetails,
                     margin: const EdgeInsets.only(bottom: 24),
                     children: [
                       // Date Selector Row
@@ -982,8 +985,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                 _selectedDate.day == DateTime.now().day &&
                                         _selectedDate.month == DateTime.now().month &&
                                         _selectedDate.year == DateTime.now().year
-                                    ? 'Hôm nay'
-                                    : 'Thay đổi',
+                                    ? l10n.today
+                                    : l10n.edit,
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
@@ -1040,7 +1043,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
             borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
             isLoading: isSaving,
             icon: CupertinoIcons.checkmark_alt,
-            label: _isEditing ? 'Cập nhật giao dịch' : l10n.save,
+            label: _isEditing ? l10n.editTransaction : l10n.save,
             color: AppleTokens.jadePrimary,
             onPressed: isSaving ? null : _submit,
           ),
@@ -1288,6 +1291,7 @@ class _HeroAmountCardState extends State<_HeroAmountCard> {
           ListenableBuilder(
             listenable: widget.amountController,
             builder: (context, _) {
+              final l10n = context.l10n;
               final rawMoney = Money.tryParse(widget.amountController.text, currencyCode: widget.currencyCode);
               final currentMinor = rawMoney?.minorUnits ?? 0;
               if (currentMinor <= 0) return const SizedBox.shrink();
@@ -1327,7 +1331,7 @@ class _HeroAmountCardState extends State<_HeroAmountCard> {
                         ),
                         const SizedBox(width: 5),
                         Text(
-                          'Gợi ý thêm số 0',
+                          l10n.zeroSuggestions,
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -1411,22 +1415,23 @@ class _TransactionTypeSegmentedPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final l10n = context.l10n;
     final segments = [
       (
         type: TransactionType.expense,
-        label: 'Chi tiêu',
+        label: l10n.expense,
         icon: CupertinoIcons.arrow_up_right,
         color: AppleTokens.rubyExpense,
       ),
       (
         type: TransactionType.income,
-        label: 'Thu nhập',
+        label: l10n.income,
         icon: CupertinoIcons.arrow_down_left,
         color: AppleTokens.jadePrimary,
       ),
       (
         type: TransactionType.transfer,
-        label: 'Chuyển khoản',
+        label: l10n.transfer,
         icon: CupertinoIcons.arrow_right_arrow_left,
         color: AppleTokens.cobaltTransfer,
       ),
@@ -1742,12 +1747,12 @@ class _CategorySelectionCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 6),
-                          const Text(
-                            'Khác',
+                          Text(
+                            l10n.txCategoryOther,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                               color: AppleTokens.systemBlue,
@@ -1788,12 +1793,12 @@ class _CategorySelectionCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 6),
-                        const Text(
-                          'Thêm',
+                        Text(
+                          l10n.txCategoryAdd,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             color: AppleTokens.jadePrimary,
@@ -1994,7 +1999,7 @@ class _CategoryPickerSheetState extends State<_CategoryPickerSheet> {
                 children: [
                   Expanded(
                     child: Text(
-                      'Chọn danh mục',
+                      l10n.selectCategory,
                       style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
                     ),
                   ),
@@ -2012,14 +2017,14 @@ class _CategoryPickerSheetState extends State<_CategoryPickerSheet> {
                           color: AppleTokens.jadePrimary.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(CupertinoIcons.plus, size: 13, color: AppleTokens.jadePrimary),
-                            SizedBox(width: 3),
+                            const Icon(CupertinoIcons.plus, size: 13, color: AppleTokens.jadePrimary),
+                            const SizedBox(width: 3),
                             Text(
-                              'Tạo mới',
-                              style: TextStyle(
+                              l10n.txCategoryCreateNew,
+                              style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: AppleTokens.jadePrimary,
@@ -2041,7 +2046,7 @@ class _CategoryPickerSheetState extends State<_CategoryPickerSheet> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
               child: CupertinoSearchTextField(
-                placeholder: 'Tìm kiếm danh mục...',
+                placeholder: l10n.txCategorySearchPlaceholder,
                 onChanged: (val) => setState(() => _searchQuery = val),
               ),
             ),
@@ -2061,9 +2066,9 @@ class _CategoryPickerSheetState extends State<_CategoryPickerSheet> {
                             color: AppleTokens.systemGray,
                           ),
                           const SizedBox(height: 10),
-                          const Text(
-                            'Không tìm thấy danh mục',
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                          Text(
+                            l10n.txCategoryNotFound,
+                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                           ),
                           if (widget.onCreateNew != null) ...[
                             const SizedBox(height: 12),
@@ -2079,9 +2084,9 @@ class _CategoryPickerSheetState extends State<_CategoryPickerSheet> {
                                   color: AppleTokens.jadePrimary,
                                   borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                                 ),
-                                child: const Text(
-                                  '+ Tạo danh mục mới',
-                                  style: TextStyle(
+                                child: Text(
+                                  '+ ${l10n.categoryCreateNew}',
+                                  style: const TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
                                     color: Colors.white,

@@ -120,14 +120,18 @@ class TransactionTile extends StatelessWidget {
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final stackAmountBelow = textScale >= 1.6;
 
-    final amountWidget = Text(
-      displayAmount,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: theme.textTheme.titleSmall?.copyWith(
-        color: amountColor,
-        fontWeight: FontWeight.w700,
-        fontFeatures: AppTheme.tabularFigures,
+    final amountWidget = FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: Alignment.centerRight,
+      child: Text(
+        displayAmount,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: theme.textTheme.titleSmall?.copyWith(
+          color: amountColor,
+          fontWeight: FontWeight.w700,
+          fontFeatures: AppTheme.tabularFigures,
+        ),
       ),
     );
 

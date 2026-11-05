@@ -45,17 +45,20 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
         ? ((report.netMinor / report.totalIncomeMinor) * 100).clamp(0, 100).toStringAsFixed(1)
         : '0.0';
 
+    final isVi = locale.startsWith('vi');
     final sb = StringBuffer()
-      ..writeln('📊 BÁO CÁO TÀI CHÍNH THÁNG $monthStr — SỔ THU CHI')
+      ..writeln(isVi
+          ? '📊 BÁO CÁO TÀI CHÍNH THÁNG $monthStr — SỔ THU CHI'
+          : '📊 MONTHLY FINANCIAL REPORT $monthStr — SỔ THU CHI')
       ..writeln('----------------------------------------')
-      ..writeln('💰 Thu nhập: ${report.incomeMoney.format(locale: locale)}')
-      ..writeln('💸 Chi tiêu: ${report.expenseMoney.format(locale: locale)}')
-      ..writeln('📈 Thặng dư ròng: ${report.netMoney.format(locale: locale, showPlusSign: true)}')
-      ..writeln('🛡️ Tỷ lệ tích lũy: $savingsRate%')
+      ..writeln('${isVi ? "💰 Thu nhập:" : "💰 Income:"} ${report.incomeMoney.format(locale: locale)}')
+      ..writeln('${isVi ? "💸 Chi tiêu:" : "💸 Expense:"} ${report.expenseMoney.format(locale: locale)}')
+      ..writeln('${isVi ? "📈 Thặng dư ròng:" : "📈 Net surplus:"} ${report.netMoney.format(locale: locale, showPlusSign: true)}')
+      ..writeln('${isVi ? "🛡️ Tỷ lệ tích lũy:" : "🛡️ Savings rate:"} $savingsRate%')
       ..writeln('----------------------------------------');
 
     if (report.categorySlices.isNotEmpty) {
-      sb.writeln('TOP DANH MỤC CHI TIÊU:');
+      sb.writeln(isVi ? 'TOP DANH MỤC CHI TIÊU:' : 'TOP EXPENSE CATEGORIES:');
       for (final s in report.categorySlices.take(5)) {
         sb.writeln(
           ' • ${s.fallbackName}: ${s.amountMoney.format(locale: locale)} (${s.percentage}%)',
@@ -63,12 +66,16 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
       }
       sb.writeln('----------------------------------------');
     }
-    sb.writeln('Quản lý chi tiêu thông minh cùng Sổ Thu Chi.');
+    sb.writeln(isVi
+        ? 'Quản lý chi tiêu thông minh cùng Sổ Thu Chi.'
+        : 'Smart personal finance tracker with So Thu Chi.');
 
     await SharePlus.instance.share(
       ShareParams(
         text: sb.toString(),
-        subject: 'Báo cáo tài chính tháng $monthStr',
+        subject: isVi
+            ? 'Báo cáo tài chính tháng $monthStr'
+            : 'Financial report for month $monthStr',
       ),
     );
   }
@@ -1008,7 +1015,7 @@ class _SixMonthSummaryPanel extends StatelessWidget {
               ),
               const SizedBox(width: 6),
               Text(
-                'Tổng quan 6 Tháng',
+                locale.startsWith('vi') ? 'Tổng quan 6 Tháng' : '6-Month Overview',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -1018,16 +1025,41 @@ class _SixMonthSummaryPanel extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          _buildRow(context, 'Tổng thu 6T:', Money(minorUnits: totalInc, currencyCode: currencyCode).format(locale: locale, masked: hideBalance), financeColors.income),
+          _buildRow(
+            context,
+            locale.startsWith('vi') ? 'Tổng thu 6T:' : 'Total Income 6M:',
+            Money(minorUnits: totalInc, currencyCode: currencyCode).format(locale: locale, masked: hideBalance),
+            financeColors.income,
+          ),
           const SizedBox(height: 6),
-          _buildRow(context, 'Tổng chi 6T:', Money(minorUnits: totalExp, currencyCode: currencyCode).format(locale: locale, masked: hideBalance), financeColors.expense),
+          _buildRow(
+            context,
+            locale.startsWith('vi') ? 'Tổng chi 6T:' : 'Total Expense 6M:',
+            Money(minorUnits: totalExp, currencyCode: currencyCode).format(locale: locale, masked: hideBalance),
+            financeColors.expense,
+          ),
           const SizedBox(height: 6),
-          _buildRow(context, 'Chi TB/tháng:', Money(minorUnits: avgMonthlyExp, currencyCode: currencyCode).format(locale: locale, masked: hideBalance), null),
+          _buildRow(
+            context,
+            locale.startsWith('vi') ? 'Chi TB/tháng:' : 'Avg Monthly Exp:',
+            Money(minorUnits: avgMonthlyExp, currencyCode: currencyCode).format(locale: locale, masked: hideBalance),
+            null,
+          ),
           const SizedBox(height: 6),
-          _buildRow(context, 'Thuần 6T:', Money(minorUnits: netTotal, currencyCode: currencyCode).format(locale: locale, showPlusSign: true, masked: hideBalance), netTotal >= 0 ? financeColors.income : financeColors.expense),
+          _buildRow(
+            context,
+            locale.startsWith('vi') ? 'Thuần 6T:' : 'Net Flow 6M:',
+            Money(minorUnits: netTotal, currencyCode: currencyCode).format(locale: locale, showPlusSign: true, masked: hideBalance),
+            netTotal >= 0 ? financeColors.income : financeColors.expense,
+          ),
           if (bestMonth.isNotEmpty) ...[
             const SizedBox(height: 6),
-            _buildRow(context, 'Tiết kiệm nhất:', bestMonth, AppleTokens.jadeDark),
+            _buildRow(
+              context,
+              locale.startsWith('vi') ? 'Tiết kiệm nhất:' : 'Top Saving Month:',
+              bestMonth,
+              AppleTokens.jadeDark,
+            ),
           ],
         ],
       ),
