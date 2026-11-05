@@ -663,7 +663,7 @@ describe('Sổ Thu Chi — Firestore Security Rules', () => {
       }),
     );
 
-    // Rejects invalid frequency and invalid recurring type
+    // Rejects invalid frequency and invalid recurring type (transfer IS allowed)
     await assertFails(
       setDoc(doc(aliceDb, `users/${ALICE_UID}/recurring/rec_bad_freq`), {
         ...validRecurring('rec_bad_freq'),
@@ -673,7 +673,34 @@ describe('Sổ Thu Chi — Firestore Security Rules', () => {
     await assertFails(
       setDoc(doc(aliceDb, `users/${ALICE_UID}/recurring/rec_bad_type`), {
         ...validRecurring('rec_bad_type'),
+        type: 'invalid_type',
+      }),
+    );
+
+    // Owner creates recurring transfer with full Flutter client schema (interval, startDate, toAccountId, autoExecute, isPaused)
+    const recTransferRef = doc(aliceDb, `users/${ALICE_UID}/recurring/rec_transfer`);
+    await assertSucceeds(
+      setDoc(recTransferRef, {
+        id: 'rec_transfer',
+        title: 'Chuyển tiền tiết kiệm định kỳ',
+        amount: 2000000,
+        currency: 'VND',
         type: 'transfer',
+        interval: 'monthly',
+        frequency: 'monthly',
+        intervalCount: 1,
+        startDate: t0,
+        nextDueDate: t1,
+        lastExecutedDate: null,
+        accountId: 'acc_bank',
+        toAccountId: 'acc_cash',
+        categoryId: 'default_other',
+        autoExecute: true,
+        isPaused: false,
+        isActive: true,
+        note: 'Tự động trích tiền lương',
+        createdAt: t0,
+        updatedAt: t0,
       }),
     );
 
@@ -728,6 +755,7 @@ describe('Sổ Thu Chi — Firestore Security Rules', () => {
     await assertSucceeds(updateDoc(recRef, { deletedAt: t2, updatedAt: t2 }));
     await assertSucceeds(deleteDoc(recRef));
     await assertSucceeds(deleteDoc(recWeeklyRef));
+    await assertSucceeds(deleteDoc(recTransferRef));
   });
 
   it('enforces /users/{uid}/savings_goals/{goalId} ownership, schema, non-negative amounts, and immutability', async () => {
@@ -820,6 +848,63 @@ describe('Sổ Thu Chi — Firestore Security Rules', () => {
       }),
     );
 
+    // Owner creates savings goal with Flutter client payload (title, linkedAccountId, isCompleted, without id)
+    const goalFlutterRef = doc(aliceDb, `users/${ALICE_UID}/savings_goals/goal_flutter`);
+    await assertSucceeds(
+      setDoc(goalFlutterRef, {
+        title: 'Quỹ du lịch Nhật Bản',
+        name: 'Quỹ du lịch Nhật Bản',
+        targetAmount: 50000000,
+        currentAmount: 15000000,
+        currency: 'VND',
+        deadline: t2,
+        icon: 'flight',
+        color: 0xff0d7c66,
+        isCompleted: false,
+        linkedAccountId: 'acc_bank',
+        accountId: 'acc_bank',
+        note: 'Tiết kiệm đi Tokyo',
+        createdAt: t0,
+        updatedAt: t0,
+      }),
+    );
+
+    // Goal with only title (omitting name and id) succeeds
+    const goalTitleOnlyRef = doc(aliceDb, `users/${ALICE_UID}/savings_goals/goal_title_only`);
+    await assertSucceeds(
+      setDoc(goalTitleOnlyRef, {
+        title: 'Mua laptop mới',
+        targetAmount: 30000000,
+        currentAmount: 5000000,
+        currency: 'VND',
+        icon: 'laptop',
+        color: 0xff0d7c66,
+        createdAt: t0,
+        updatedAt: t0,
+      }),
+    );
+
+    // Rejects goal with neither title nor name
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/savings_goals/goal_no_title`), {
+        targetAmount: 10000000,
+        currentAmount: 0,
+        currency: 'VND',
+        icon: 'star',
+        color: 0xff0d7c66,
+        createdAt: t0,
+        updatedAt: t0,
+      }),
+    );
+
+    // Rejects invalid isCompleted type (must be bool)
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/savings_goals/goal_bad_is_completed`), {
+        ...validSavingsGoal('goal_bad_is_completed'),
+        isCompleted: 'yes',
+      }),
+    );
+
     // Owner partial update (deposit progress)
     await assertSucceeds(
       updateDoc(goalRef, {
@@ -836,6 +921,8 @@ describe('Sổ Thu Chi — Firestore Security Rules', () => {
     await assertSucceeds(updateDoc(goalRef, { deletedAt: t2, updatedAt: t2 }));
     await assertSucceeds(deleteDoc(goalRef));
     await assertSucceeds(deleteDoc(goal2Ref));
+    await assertSucceeds(deleteDoc(goalFlutterRef));
+    await assertSucceeds(deleteDoc(goalTitleOnlyRef));
   });
 
   it('enforces /users/{uid}/ledgers/{ledgerId} ownership, schema, sharedMemberEmails bounds, and immutability', async () => {

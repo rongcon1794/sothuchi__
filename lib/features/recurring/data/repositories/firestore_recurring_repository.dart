@@ -86,6 +86,7 @@ class FirestoreRecurringRepository implements RecurringRepository {
     try {
       await _collection().doc(id).update({
         'isPaused': isPaused,
+        'isActive': !isPaused,
         'updatedAt': Timestamp.fromDate(DateTime.now()),
       });
       return const Success(null);

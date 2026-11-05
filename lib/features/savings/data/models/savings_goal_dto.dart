@@ -51,7 +51,7 @@ class SavingsGoalDto {
 
     return SavingsGoalDto(
       id: id ?? (json['id'] as String? ?? ''),
-      title: json['title'] as String? ?? '',
+      title: json['title'] as String? ?? json['name'] as String? ?? '',
       targetAmount: (json['targetAmount'] as num?)?.toInt() ?? 0,
       currentAmount: (json['currentAmount'] as num?)?.toInt() ?? 0,
       currency: json['currency'] as String? ?? AppCurrencies.defaultCode,
@@ -59,7 +59,7 @@ class SavingsGoalDto {
       icon: json['icon'] as String? ?? 'piggy_bank',
       color: (json['color'] as num?)?.toInt() ?? 0xFF00A86B,
       isCompleted: json['isCompleted'] as bool? ?? false,
-      linkedAccountId: json['linkedAccountId'] as String?,
+      linkedAccountId: json['linkedAccountId'] as String? ?? json['accountId'] as String?,
       note: json['note'] as String? ?? '',
       createdAt: parseDate(json['createdAt']),
       updatedAt: parseDate(json['updatedAt']),
@@ -104,7 +104,9 @@ class SavingsGoalDto {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'title': title,
+      'name': title,
       'targetAmount': targetAmount,
       'currentAmount': currentAmount,
       'currency': currency,
@@ -113,6 +115,7 @@ class SavingsGoalDto {
       'color': color,
       'isCompleted': isCompleted,
       'linkedAccountId': linkedAccountId,
+      'accountId': linkedAccountId,
       'note': note,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),

@@ -96,35 +96,44 @@ rules_version = '2';
 //
 // 7. Collection: users/{uid}/recurring/{recurringId} (RecurringTransactionDto)
 //    Fields:
-//      - id: string (required, 1..128 chars, immutable)
+//      - id: string | optional (1..128 chars, immutable when present)
 //      - title: string (required, 1..100 chars)
 //      - amount: int (required, > 0, integer minor units; never float)
 //      - currency: string in ['VND', 'USD', 'EUR', 'JPY', 'KRW'] (required)
-//      - type: string in ['income', 'expense'] (required)
-//      - frequency: string in ['daily', 'weekly', 'biweekly', 'monthly', 'yearly'] (required)
+//      - type: string in ['income', 'expense', 'transfer'] (required)
+//      - frequency: string in ['daily', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly'] (optional if interval provided)
+//      - interval: string in ['daily', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly'] (optional if frequency provided)
+//      - intervalCount: int | optional (>= 1)
 //      - dayOfMonth: int | null (optional, 1..31 when int)
-//      - categoryId: string (required, 1..128 chars)
-//      - accountId: string (required, 1..128 chars)
-//      - note: string (required, 0..1000 chars)
-//      - isActive: bool (required)
+//      - startDate: timestamp | null (optional)
 //      - nextDueDate: timestamp (required)
 //      - lastExecutedDate: timestamp | null (optional)
+//      - accountId: string (required, 1..128 chars)
+//      - toAccountId: string | null (optional, 0..128 chars when string)
+//      - categoryId: string (required, 1..128 chars)
+//      - autoExecute: bool | optional
+//      - isPaused: bool | optional (at least one of isPaused, isActive)
+//      - isActive: bool | optional (at least one of isPaused, isActive)
+//      - note: string | null (optional, 0..1000 chars)
 //      - createdAt: timestamp (required, immutable)
 //      - updatedAt: timestamp (required)
 //      - deletedAt: timestamp | null (optional)
 //
 // 8. Collection: users/{uid}/savings_goals/{goalId} (SavingsGoalDto)
 //    Fields:
-//      - id: string (required, 1..128 chars, immutable)
-//      - name: string (required, 1..100 chars)
+//      - id: string | optional (1..128 chars, immutable when present)
+//      - title: string | optional (1..100 chars, at least one of title or name required)
+//      - name: string | optional (1..100 chars, at least one of title or name required)
 //      - targetAmount: int (required, > 0, integer minor units; never float)
 //      - currentAmount: int (required, >= 0, integer minor units; never float)
 //      - currency: string in ['VND', 'USD', 'EUR', 'JPY', 'KRW'] (required)
 //      - deadline: timestamp | null (optional)
-//      - accountId: string | null (optional, 1..128 chars when string)
 //      - icon: string (required, 1..64 chars)
 //      - color: int (required, 32-bit signed/unsigned ARGB integer)
-//      - note: string (required, 0..1000 chars)
+//      - isCompleted: bool | optional
+//      - linkedAccountId: string | null (optional, 0..128 chars when string)
+//      - accountId: string | null (optional, 0..128 chars when string)
+//      - note: string | null (optional, 0..1000 chars)
 //      - createdAt: timestamp (required, immutable)
 //      - updatedAt: timestamp (required)
 //      - deletedAt: timestamp | null (optional)
@@ -592,16 +601,12 @@ service cloud.firestore {
 
     function isValidRecurring(data) {
       let requiredKeys = [
-        'id',
         'title',
         'amount',
         'currency',
         'type',
-        'frequency',
-        'categoryId',
         'accountId',
-        'note',
-        'isActive',
+        'categoryId',
         'nextDueDate',
         'createdAt',
         'updatedAt'
@@ -613,13 +618,19 @@ service cloud.firestore {
         'currency',
         'type',
         'frequency',
+        'interval',
+        'intervalCount',
         'dayOfMonth',
-        'categoryId',
-        'accountId',
-        'note',
-        'isActive',
+        'startDate',
         'nextDueDate',
         'lastExecutedDate',
+        'accountId',
+        'toAccountId',
+        'categoryId',
+        'autoExecute',
+        'isPaused',
+        'isActive',
+        'note',
         'createdAt',
         'updatedAt',
         'deletedAt'
@@ -627,21 +638,28 @@ service cloud.firestore {
 
       return hasRequiredKeys(data, requiredKeys) &&
              hasOnlyAllowedKeys(data, allowedKeys) &&
-             isBoundedString(data.id, 1, 128) &&
+             (!('id' in data) || isBoundedString(data.id, 1, 128)) &&
              isBoundedString(data.title, 1, 100) &&
              isValidPositiveMinorUnits(data.amount) &&
              isValidCurrency(data.currency) &&
              data.type is string &&
-             data.type in ['income', 'expense'] &&
-             data.frequency is string &&
-             data.frequency in ['daily', 'weekly', 'biweekly', 'monthly', 'yearly'] &&
+             data.type in ['income', 'expense', 'transfer'] &&
+             ('frequency' in data || 'interval' in data) &&
+             (!('frequency' in data) || (data.frequency is string && data.frequency in ['daily', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly'])) &&
+             (!('interval' in data) || (data.interval is string && data.interval in ['daily', 'weekly', 'biweekly', 'monthly', 'quarterly', 'yearly'])) &&
+             (!('intervalCount' in data) || (data.intervalCount is int && data.intervalCount >= 1 && data.intervalCount <= 1000)) &&
              isOptionalNullableInt(data, 'dayOfMonth', 1, 31) &&
-             isBoundedString(data.categoryId, 1, 128) &&
-             isBoundedString(data.accountId, 1, 128) &&
-             isBoundedString(data.note, 0, 1000) &&
-             data.isActive is bool &&
+             isOptionalNullableTimestamp(data, 'startDate') &&
              data.nextDueDate is timestamp &&
              isOptionalNullableTimestamp(data, 'lastExecutedDate') &&
+             isBoundedString(data.accountId, 1, 128) &&
+             isOptionalNullableString(data, 'toAccountId', 0, 128) &&
+             isBoundedString(data.categoryId, 1, 128) &&
+             (!('autoExecute' in data) || data.autoExecute is bool) &&
+             ('isActive' in data || 'isPaused' in data) &&
+             (!('isActive' in data) || data.isActive is bool) &&
+             (!('isPaused' in data) || data.isPaused is bool) &&
+             isOptionalNullableString(data, 'note', 0, 1000) &&
              data.createdAt is timestamp &&
              data.updatedAt is timestamp &&
              isOptionalNullableTimestamp(data, 'deletedAt');
@@ -649,27 +667,27 @@ service cloud.firestore {
 
     function isValidSavingsGoal(data) {
       let requiredKeys = [
-        'id',
-        'name',
         'targetAmount',
         'currentAmount',
         'currency',
         'icon',
         'color',
-        'note',
         'createdAt',
         'updatedAt'
       ];
       let allowedKeys = [
         'id',
+        'title',
         'name',
         'targetAmount',
         'currentAmount',
         'currency',
         'deadline',
-        'accountId',
         'icon',
         'color',
+        'isCompleted',
+        'linkedAccountId',
+        'accountId',
         'note',
         'createdAt',
         'updatedAt',
@@ -678,16 +696,20 @@ service cloud.firestore {
 
       return hasRequiredKeys(data, requiredKeys) &&
              hasOnlyAllowedKeys(data, allowedKeys) &&
-             isBoundedString(data.id, 1, 128) &&
-             isBoundedString(data.name, 1, 100) &&
+             ('title' in data || 'name' in data) &&
+             (!('title' in data) || isBoundedString(data.title, 1, 100)) &&
+             (!('name' in data) || isBoundedString(data.name, 1, 100)) &&
+             (!('id' in data) || isBoundedString(data.id, 1, 128)) &&
              isValidPositiveMinorUnits(data.targetAmount) &&
              isValidNonNegativeMinorUnits(data.currentAmount) &&
              isValidCurrency(data.currency) &&
              isOptionalNullableTimestamp(data, 'deadline') &&
-             isOptionalNullableString(data, 'accountId', 1, 128) &&
+             isOptionalNullableString(data, 'linkedAccountId', 0, 128) &&
+             isOptionalNullableString(data, 'accountId', 0, 128) &&
              isBoundedString(data.icon, 1, 64) &&
              isValidColorInt(data.color) &&
-             isBoundedString(data.note, 0, 1000) &&
+             (!('isCompleted' in data) || data.isCompleted is bool) &&
+             isOptionalNullableString(data, 'note', 0, 1000) &&
              data.createdAt is timestamp &&
              data.updatedAt is timestamp &&
              isOptionalNullableTimestamp(data, 'deletedAt');
