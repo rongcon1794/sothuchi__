@@ -168,6 +168,75 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(BarChart), findsOneWidget);
     });
+
+    testWidgets('adapts charts to 2-column side-by-side layout on wide landscape screens', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1200, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      SharedPreferences.setMockInitialValues({'onboarding_completed': true});
+      final prefs = await SharedPreferences.getInstance();
+      final accRepo = InMemoryAccountRepository();
+      final catRepo = InMemoryCategoryRepository();
+      final txRepo = InMemoryTransactionRepository(accountRepo: accRepo);
+
+      await catRepo.seedDefaultCategoriesIfNeeded();
+      final wallet = ((await accRepo.createAccount(
+        name: 'Ví chính',
+        type: AccountType.cash,
+        initialBalance: 10000000,
+        currency: 'VND',
+        icon: 'cash',
+        color: 0xFF0D7C66,
+      )) as Success<Account>).value;
+
+      final now = DateTime.now();
+      await txRepo.addTransaction(
+        amount: 5000000,
+        currency: 'VND',
+        type: TransactionType.expense,
+        accountId: wallet.id,
+        categoryId: 'default_food',
+        date: now,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            accountRepositoryProvider.overrideWithValue(accRepo),
+            categoryRepositoryProvider.overrideWithValue(catRepo),
+            transactionRepositoryProvider.overrideWithValue(txRepo),
+          ],
+          child: MaterialApp(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: AppTheme.light(),
+            home: const ReportsScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Scroll down to Donut Chart
+      await tester.drag(find.byType(ListView).first, const Offset(0, -350));
+      await tester.pumpAndSettle();
+      expect(find.byType(PieChart), findsOneWidget);
+
+      // Scroll down to Bar Chart
+      await tester.drag(find.byType(ListView).first, const Offset(0, -450));
+      await tester.pumpAndSettle();
+
+      // Both BarChart and 6-Month Summary Panel are visible on wide screen
+      expect(find.byType(BarChart), findsOneWidget);
+      expect(find.text('Tổng quan 6 Tháng'), findsOneWidget);
+    });
   });
 }
 

@@ -12,6 +12,7 @@ import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/date_formatter.dart';
+import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/core/widgets/empty_state_view.dart';
 import 'package:so_thu_chi/core/widgets/skeleton_box.dart';
@@ -21,6 +22,7 @@ import 'package:so_thu_chi/features/reports/presentation/widgets/apple_spending_
 import 'package:so_thu_chi/features/reports/presentation/widgets/financial_health_card.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
+import 'package:so_thu_chi/l10n/app_localizations.dart';
 
 class ReportsScreen extends ConsumerStatefulWidget {
   const ReportsScreen({super.key});
@@ -224,101 +226,73 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                                   ),
                                 ),
                               )
-                            else ...[
-                              SizedBox(
-                                height: 210,
-                                child: Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    ExcludeSemantics(
-                                      child: PieChart(
-                                        PieChartData(
-                                          sectionsSpace: 2.5,
-                                          centerSpaceRadius: 58,
-                                          pieTouchData: PieTouchData(
-                                            touchCallback:
-                                                (FlTouchEvent event, response) {
-                                                  setState(() {
-                                                    if (!event
-                                                            .isInterestedForInteractions ||
-                                                        response == null ||
-                                                        response
-                                                                .touchedSection ==
-                                                            null) {
-                                                      _touchedPieIndex = -1;
-                                                      return;
-                                                    }
-                                                    _touchedPieIndex = response
-                                                        .touchedSection!
-                                                        .touchedSectionIndex;
-                                                  });
-                                                },
+                            else
+                              LayoutBuilder(
+                                builder: (context, constraints) {
+                                  final isWide = constraints.maxWidth >= 600;
+
+                                  if (isWide) {
+                                    // Wide Landscape / Tablet: Side-by-side 2-column layout
+                                    return Row(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        _buildPieChartWidget(
+                                          report: report,
+                                          theme: theme,
+                                          locale: locale,
+                                          hideBalance: hideBalance,
+                                          l10n: l10n,
+                                          height: 230,
+                                          diameter: 230,
+                                        ),
+                                        const SizedBox(width: 24),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              for (final slice in report.categorySlices) ...[
+                                                _CategoryLegendRow(
+                                                  slice: slice,
+                                                  locale: locale,
+                                                  hideBalance: hideBalance,
+                                                ),
+                                                const SizedBox(height: 10),
+                                              ],
+                                            ],
                                           ),
-                                          sections: [
-                                            for (
-                                              var i = 0;
-                                              i < report.categorySlices.length;
-                                              i++
-                                            )
-                                              _buildPieSection(
-                                                slice: report.categorySlices[i],
-                                                isTouched:
-                                                    i == _touchedPieIndex,
-                                                theme: theme,
-                                              ),
-                                          ],
+                                        ),
+                                      ],
+                                    );
+                                  }
+
+                                  // Narrow Portrait: Centered stacked layout
+                                  return Column(
+                                    children: [
+                                      Center(
+                                        child: _buildPieChartWidget(
+                                          report: report,
+                                          theme: theme,
+                                          locale: locale,
+                                          hideBalance: hideBalance,
+                                          l10n: l10n,
+                                          height: 210,
+                                          diameter: 210,
                                         ),
                                       ),
-                                    ),
-                                    SizedBox(
-                                      width: 100,
-                                      child: FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              l10n.expense,
-                                              style: theme.textTheme.labelSmall
-                                                  ?.copyWith(
-                                                    color: theme
-                                                        .colorScheme
-                                                        .onSurfaceVariant,
-                                                  ),
-                                            ),
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              report.expenseMoney.format(
-                                                locale: locale,
-                                                masked: hideBalance,
-                                              ),
-                                              semanticsLabel: hideBalance
-                                                  ? l10n.balanceHidden
-                                                  : null,
-                                              style: theme.textTheme.labelLarge
-                                                  ?.copyWith(
-                                                    fontWeight: FontWeight.w700,
-                                                    fontFeatures:
-                                                        AppTheme.tabularFigures,
-                                                  ),
-                                            ),
-                                          ],
+                                      const SizedBox(height: 16),
+                                      for (final slice in report.categorySlices) ...[
+                                        _CategoryLegendRow(
+                                          slice: slice,
+                                          locale: locale,
+                                          hideBalance: hideBalance,
                                         ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                        const SizedBox(height: 10),
+                                      ],
+                                    ],
+                                  );
+                                },
                               ),
-                              const SizedBox(height: 16),
-                              for (final slice in report.categorySlices) ...[
-                                _CategoryLegendRow(
-                                  slice: slice,
-                                  locale: locale,
-                                  hideBalance: hideBalance,
-                                ),
-                                const SizedBox(height: 10),
-                              ],
-                            ],
                           ],
                         ),
                       ),
@@ -351,13 +325,51 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                               ],
                             ),
                             const SizedBox(height: 20),
-                            SizedBox(
-                              height: 230,
-                              child: _SixMonthTrendBarChart(
-                                bars: report.sixMonthTrend,
-                                locale: locale,
-                                hideBalance: hideBalance,
-                              ),
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                final isWide = constraints.maxWidth >= 600;
+
+                                if (isWide) {
+                                  // Wide Landscape / Tablet: 2-column layout (Chart on left, 6M Summary on right)
+                                  return Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        flex: 3,
+                                        child: SizedBox(
+                                          height: 240,
+                                          child: _SixMonthTrendBarChart(
+                                            bars: report.sixMonthTrend,
+                                            locale: locale,
+                                            hideBalance: hideBalance,
+                                            isWide: true,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 20),
+                                      Expanded(
+                                        flex: 2,
+                                        child: _SixMonthSummaryPanel(
+                                          bars: report.sixMonthTrend,
+                                          currencyCode: report.currencyCode,
+                                          locale: locale,
+                                          hideBalance: hideBalance,
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                }
+
+                                // Narrow Portrait: Stacked
+                                return SizedBox(
+                                  height: 230,
+                                  child: _SixMonthTrendBarChart(
+                                    bars: report.sixMonthTrend,
+                                    locale: locale,
+                                    hideBalance: hideBalance,
+                                  ),
+                                );
+                              },
                             ),
                           ],
                         ),
@@ -365,6 +377,85 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                   ],
                 );
               },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPieChartWidget({
+    required MonthlyReportData report,
+    required ThemeData theme,
+    required String locale,
+    required bool hideBalance,
+    required AppLocalizations l10n,
+    double height = 210,
+    double diameter = 210,
+  }) {
+    return SizedBox(
+      width: diameter,
+      height: height,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          ExcludeSemantics(
+            child: PieChart(
+              PieChartData(
+                sectionsSpace: 2.5,
+                centerSpaceRadius: 58,
+                pieTouchData: PieTouchData(
+                  touchCallback: (FlTouchEvent event, response) {
+                    setState(() {
+                      if (!event.isInterestedForInteractions ||
+                          response == null ||
+                          response.touchedSection == null) {
+                        _touchedPieIndex = -1;
+                        return;
+                      }
+                      _touchedPieIndex =
+                          response.touchedSection!.touchedSectionIndex;
+                    });
+                  },
+                ),
+                sections: [
+                  for (var i = 0; i < report.categorySlices.length; i++)
+                    _buildPieSection(
+                      slice: report.categorySlices[i],
+                      isTouched: i == _touchedPieIndex,
+                      theme: theme,
+                    ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 100,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    l10n.expense,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    report.expenseMoney.format(
+                      locale: locale,
+                      masked: hideBalance,
+                    ),
+                    semanticsLabel: hideBalance ? l10n.balanceHidden : null,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: AppTheme.tabularFigures,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -677,11 +768,13 @@ class _SixMonthTrendBarChart extends StatelessWidget {
     required this.bars,
     required this.locale,
     required this.hideBalance,
+    this.isWide = false,
   });
 
   final List<MonthlyTrendBar> bars;
   final String locale;
   final bool hideBalance;
+  final bool isWide;
 
   @override
   Widget build(BuildContext context) {
@@ -778,12 +871,12 @@ class _SixMonthTrendBarChart extends StatelessWidget {
             for (var i = 0; i < bars.length; i++)
               BarChartGroupData(
                 x: i,
-                barsSpace: 4,
+                barsSpace: isWide ? 6 : 4,
                 barRods: [
                   BarChartRodData(
                     toY: bars[i].incomeMinorUnits.toDouble(),
                     color: financeColors.income,
-                    width: 11,
+                    width: isWide ? 14 : 11,
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(4),
                     ),
@@ -791,7 +884,7 @@ class _SixMonthTrendBarChart extends StatelessWidget {
                   BarChartRodData(
                     toY: bars[i].expenseMinorUnits.toDouble(),
                     color: financeColors.expense,
-                    width: 11,
+                    width: isWide ? 14 : 11,
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(4),
                     ),
@@ -801,6 +894,124 @@ class _SixMonthTrendBarChart extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _SixMonthSummaryPanel extends StatelessWidget {
+  const _SixMonthSummaryPanel({
+    required this.bars,
+    required this.currencyCode,
+    required this.locale,
+    required this.hideBalance,
+  });
+
+  final List<MonthlyTrendBar> bars;
+  final String currencyCode;
+  final String locale;
+  final bool hideBalance;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final financeColors = context.financeColors;
+
+    var totalInc = 0;
+    var totalExp = 0;
+    var bestNet = -9999999999;
+    var bestMonth = '';
+
+    for (final bar in bars) {
+      totalInc += bar.incomeMinorUnits;
+      totalExp += bar.expenseMinorUnits;
+      final net = bar.incomeMinorUnits - bar.expenseMinorUnits;
+      if (net > bestNet) {
+        bestNet = net;
+        bestMonth = AppDateUtils.formatShortMonth(bar.monthAnchor, locale: locale);
+      }
+    }
+
+    final avgMonthlyExp = bars.isNotEmpty ? totalExp ~/ bars.length : 0;
+    final netTotal = totalInc - totalExp;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark
+            ? AppleTokens.bgDarkPrimary.withValues(alpha: 0.6)
+            : AppleTokens.bgLightSecondary.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.black.withValues(alpha: 0.06),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                CupertinoIcons.chart_bar_square,
+                size: 15,
+                color: AppleTokens.jadePrimary,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'Tổng quan 6 Tháng',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          _buildRow(context, 'Tổng thu 6T:', Money(minorUnits: totalInc, currencyCode: currencyCode).format(locale: locale, masked: hideBalance), financeColors.income),
+          const SizedBox(height: 6),
+          _buildRow(context, 'Tổng chi 6T:', Money(minorUnits: totalExp, currencyCode: currencyCode).format(locale: locale, masked: hideBalance), financeColors.expense),
+          const SizedBox(height: 6),
+          _buildRow(context, 'Chi TB/tháng:', Money(minorUnits: avgMonthlyExp, currencyCode: currencyCode).format(locale: locale, masked: hideBalance), null),
+          const SizedBox(height: 6),
+          _buildRow(context, 'Thuần 6T:', Money(minorUnits: netTotal, currencyCode: currencyCode).format(locale: locale, showPlusSign: true, masked: hideBalance), netTotal >= 0 ? financeColors.income : financeColors.expense),
+          if (bestMonth.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            _buildRow(context, 'Tiết kiệm nhất:', bestMonth, AppleTokens.jadeDark),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRow(BuildContext context, String label, String value, Color? color) {
+    return Row(
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
