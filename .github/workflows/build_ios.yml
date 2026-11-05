@@ -45,7 +45,7 @@ jobs:
 
   build-ios:
     name: Build iOS IPA (Unsigned / Ad-hoc)
-    runs-on: macos-14 # Sử dụng macos-14 ổn định, pool runner lớn hơn nhiều so với macos-15 (tránh lỗi runner capacity)
+    runs-on: macos-15 # Bắt buộc dùng macOS 15 Sequoia (chứa Xcode 16+ & Swift 6 cần thiết cho Firebase iOS SDK 11+)
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -56,6 +56,11 @@ jobs:
           flutter-version: '3.47.9'
           channel: 'stable'
           cache: true
+
+      - name: Verify Xcode & Swift Version
+        run: |
+          xcodebuild -version
+          swift --version
 
       - name: Configure CocoaPods & Disable SwiftPM
         run: |
