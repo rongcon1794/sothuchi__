@@ -680,13 +680,18 @@ class AppleFloatingActionButtonLocation extends FloatingActionButtonLocation {
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    final double rightEdgeInset = scaffoldGeometry.textDirection == TextDirection.rtl
+        ? scaffoldGeometry.minViewPadding.left
+        : scaffoldGeometry.minViewPadding.right;
+
     final double fabX;
     if (scaffoldGeometry.textDirection == TextDirection.rtl) {
-      fabX = 16.0;
+      fabX = 16.0 + rightEdgeInset;
     } else {
       fabX = scaffoldGeometry.scaffoldSize.width -
           scaffoldGeometry.floatingActionButtonSize.width -
-          16.0;
+          16.0 -
+          rightEdgeInset;
     }
 
     final double keyboardInset = scaffoldGeometry.minInsets.bottom;

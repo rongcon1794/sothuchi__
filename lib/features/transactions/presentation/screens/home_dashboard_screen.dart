@@ -197,8 +197,9 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final isWide = constraints.maxWidth >= 720;
-            final scrollBottomPadding = isWide
-                ? AppleTokens.scrollBottomPaddingLandscape + 50
+            final isLandscape = context.isLandscape;
+            final scrollBottomPadding = (isWide || isLandscape)
+                ? AppleTokens.scrollBottomPaddingLandscape + 54
                 : AppleTokens.scrollBottomPaddingWithFab;
 
             final balanceCoreWidgets = <Widget>[

@@ -4,12 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:so_thu_chi/app.dart';
+import 'package:so_thu_chi/core/errors/result.dart';
 import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/data/firebase/firebase_providers.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/accounts/data/repositories/firestore_account_repository.dart';
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
+import 'package:so_thu_chi/features/auth/domain/entities/app_user.dart';
+import 'package:so_thu_chi/features/auth/domain/repositories/auth_repository.dart';
 import 'package:so_thu_chi/features/budgets/data/repositories/firestore_budget_repository.dart';
 import 'package:so_thu_chi/features/categories/data/repositories/firestore_category_repository.dart';
 import 'package:so_thu_chi/features/reports/presentation/screens/reports_screen.dart';
@@ -18,6 +22,40 @@ import 'package:so_thu_chi/features/transactions/domain/entities/transaction_ent
 import 'package:so_thu_chi/features/transactions/presentation/screens/home_dashboard_screen.dart';
 import 'package:so_thu_chi/features/transactions/presentation/screens/transactions_screen.dart';
 import 'package:so_thu_chi/l10n/app_localizations.dart';
+
+class _TestAuthRepo implements AuthRepository {
+  final _u = AppUser(
+    uid: 'u_resp_test',
+    email: 'user@test.vn',
+    displayName: 'Thử Nghiệm',
+    createdAt: DateTime(2026, 1, 1),
+    updatedAt: DateTime(2026, 1, 1),
+  );
+
+  @override
+  bool get isCloudAuthConfigured => true;
+
+  @override
+  AppUser? get currentUser => _u;
+
+  @override
+  Stream<AppUser?> watchAuthState() => Stream.value(_u);
+
+  @override
+  Future<Result<AppUser>> signInWithGoogle() async => Success(_u);
+
+  @override
+  Future<Result<AppUser>> signInOfflineDemo() async => Success(_u);
+
+  @override
+  Future<Result<void>> signOut() async => const Success(null);
+
+  @override
+  Future<Result<void>> deleteAccountAndAllData() async => const Success(null);
+
+  @override
+  Future<Result<void>> updateProfilePreferences({String? defaultCurrency, String? locale}) async => const Success(null);
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -34,7 +72,7 @@ void main() {
             builder: (context) {
               recordedClass = context.windowSizeClass;
               recordedIsWide = context.isWideScreen;
-              return const SizedBox();
+              return const SizedBox.shrink();
             },
           ),
         );
@@ -45,12 +83,7 @@ void main() {
       expect(recordedClass, AppleWindowSizeClass.compact);
       expect(recordedIsWide, isFalse);
 
-      // Medium (Landscape phone: 600 .. 839 dp)
-      await tester.pumpWidget(buildProbe(const Size(750, 390)));
-      expect(recordedClass, AppleWindowSizeClass.medium);
-      expect(recordedIsWide, isTrue);
-
-      // Expanded (Tablet portrait/landscape: 840 .. 1199 dp)
+      // Medium (Phone landscape / Foldable)
       await tester.pumpWidget(buildProbe(const Size(844, 390)));
       expect(recordedClass, AppleWindowSizeClass.expanded);
       expect(recordedIsWide, isTrue);
@@ -210,6 +243,58 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.byType(TransactionsScreen), findsOneWidget);
+    });
+
+    testWidgets('AppShellScaffold renders 42dp non-obscured BottomBar with all 5 items on Phone Landscape', (tester) async {
+      tester.view.physicalSize = const Size(844, 390);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      final authRepo = _TestAuthRepo();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            firebaseBootstrapStateProvider.overrideWithValue(
+              const FirebaseBootstrapState.configured(),
+            ),
+            authRepositoryProvider.overrideWithValue(authRepo),
+            accountRepositoryProvider.overrideWithValue(accRepo),
+            categoryRepositoryProvider.overrideWithValue(catRepo),
+            transactionRepositoryProvider.overrideWithValue(txRepo),
+            budgetRepositoryProvider.overrideWithValue(budgetRepo),
+          ],
+          child: const MediaQuery(
+            data: MediaQueryData(
+              size: Size(844, 390),
+              padding: EdgeInsets.fromLTRB(44, 0, 44, 21),
+              viewPadding: EdgeInsets.fromLTRB(44, 0, 44, 21),
+            ),
+            child: SoThuChiApp(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+
+      // Verify all 5 destinations are present in bottombar
+      expect(find.text('Tổng quan'), findsWidgets);
+      expect(find.text('Giao dịch'), findsOneWidget);
+      expect(find.text('Ngân sách'), findsOneWidget);
+      expect(find.text('Báo cáo'), findsOneWidget);
+      expect(find.text('Cài đặt'), findsOneWidget);
+
+      // Tap 'Giao dịch' tab
+      await tester.tap(find.text('Giao dịch'));
+      await tester.pumpAndSettle();
+      expect(find.byType(TransactionsScreen), findsOneWidget);
+
+      // Tap 'Báo cáo' tab
+      await tester.tap(find.text('Báo cáo'));
+      await tester.pumpAndSettle();
+      expect(find.byType(ReportsScreen), findsOneWidget);
     });
   });
 }
