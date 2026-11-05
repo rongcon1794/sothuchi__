@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,6 +19,7 @@ import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_c
 import 'package:so_thu_chi/features/budgets/presentation/controllers/budgets_controller.dart';
 import 'package:so_thu_chi/features/categories/domain/entities/category.dart';
 import 'package:so_thu_chi/features/categories/presentation/controllers/categories_controller.dart';
+import 'package:so_thu_chi/features/categories/presentation/widgets/category_form_sheet.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
@@ -86,6 +89,12 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
     if (_isEditing) {
       _loadExistingTransaction();
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          unawaited(ref.read(categoriesActionControllerProvider.notifier).seedDefaultsIfNeeded());
+        }
+      });
     }
   }
 
@@ -210,6 +219,21 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     }
   }
 
+  Future<void> _openCreateCategorySheet(BuildContext context) async {
+    final catType = _type == TransactionType.income
+        ? CategoryType.income
+        : CategoryType.expense;
+    final created = await CategoryFormSheet.show(
+      context,
+      initialType: catType,
+    );
+    if (created != null && mounted) {
+      setState(() {
+        _categoryId = created.id;
+      });
+    }
+  }
+
   Future<void> _openCategoryPicker(
     BuildContext context, {
     required List<Category> categories,
@@ -221,6 +245,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       builder: (ctx) => _CategoryPickerSheet(
         categories: categories,
         selectedId: _categoryId,
+        onCreateNew: () => _openCreateCategorySheet(context),
       ),
     );
 
@@ -459,13 +484,14 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     final allWallets = ref.watch(accountsStreamProvider).value ?? const [];
     final walletsForDropdown = _isEditing ? allWallets : activeWallets;
 
+    final categoriesAsync = ref.watch(categoriesStreamProvider);
     final expenseCategories = ref.watch(expenseCategoriesProvider);
     final incomeCategories = ref.watch(incomeCategoriesProvider);
     final availableCategories = _type == TransactionType.income
         ? incomeCategories
         : expenseCategories;
 
-    // Auto-select sensible default wallet & category on first render
+    // Auto-select sensible default wallet on first render
     if (!_initializedDefaults && !_isEditing) {
       if (_accountId == null && walletsForDropdown.isNotEmpty) {
         _accountId = walletsForDropdown.first.id;
@@ -479,11 +505,15 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
             ? matchingDest.first.id
             : walletsForDropdown[1].id;
       }
-      if (_categoryId == null && availableCategories.isNotEmpty) {
-        _categoryId = availableCategories.first.id;
-      }
-      if (_accountId != null || _categoryId != null) {
+      if (_accountId != null) {
         _initializedDefaults = true;
+      }
+    }
+
+    // Dynamic self-healing: ensure category is always selected whenever available
+    if (!_isEditing && _type != TransactionType.transfer && availableCategories.isNotEmpty) {
+      if (_categoryId == null || !availableCategories.any((c) => c.id == _categoryId)) {
+        _categoryId = availableCategories.first.id;
       }
     }
 
@@ -587,19 +617,161 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                   ),
                   const SizedBox(height: 18),
 
-                  // 2. Category Selection Card (Only for Expense & Income)
-                  if (_type != TransactionType.transfer && availableCategories.isNotEmpty) ...[
-                    _CategorySelectionCard(
-                      categories: availableCategories,
-                      selectedId: _categoryId,
-                      selectedCategory: selectedCategory,
-                      onSelected: (id) {
-                        HapticFeedback.selectionClick();
-                        setState(() => _categoryId = id);
-                      },
-                      onOpenMore: () => _openCategoryPicker(context, categories: availableCategories),
-                    ),
-                    const SizedBox(height: 18),
+                  // 2. Category Selection Section (Only for Expense & Income)
+                  if (_type != TransactionType.transfer) ...[
+                    if (availableCategories.isNotEmpty) ...[
+                      _CategorySelectionCard(
+                        categories: availableCategories,
+                        selectedId: _categoryId,
+                        selectedCategory: selectedCategory,
+                        onSelected: (id) {
+                          HapticFeedback.selectionClick();
+                          setState(() => _categoryId = id);
+                        },
+                        onOpenMore: () => _openCategoryPicker(context, categories: availableCategories),
+                        onCreateNew: () => _openCreateCategorySheet(context),
+                      ),
+                      const SizedBox(height: 18),
+                    ] else if (categoriesAsync.isLoading) ...[
+                      AppleGlassCard(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                        borderColor: isDark
+                            ? Colors.white.withValues(alpha: 0.12)
+                            : AppleTokens.borderLight,
+                        child: const Row(
+                          children: [
+                            CupertinoActivityIndicator(),
+                            SizedBox(width: 12),
+                            Text(
+                              'Đang tải danh mục...',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: AppleTokens.systemGray,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                    ] else ...[
+                      // Empty state: Auto-seed and provide manual recovery options
+                      AppleGlassCard(
+                        padding: const EdgeInsets.all(16),
+                        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                        borderColor: isDark
+                            ? Colors.white.withValues(alpha: 0.12)
+                            : AppleTokens.borderLight,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: BoxDecoration(
+                                    color: AppleTokens.systemOrange.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Icon(
+                                    CupertinoIcons.square_grid_2x2,
+                                    size: 20,
+                                    color: AppleTokens.systemOrange,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        l10n.selectCategory,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: AppleTokens.systemGray,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      const Text(
+                                        'Chưa có danh mục nào',
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            const Text(
+                              'Vui lòng khôi phục danh mục mẫu hoặc tạo danh mục mới để phân loại giao dịch.',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: AppleTokens.systemGray,
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ApplePressable(
+                                    scaleDown: 0.95,
+                                    onTap: () async {
+                                      await HapticFeedback.mediumImpact();
+                                      await ref.read(categoriesActionControllerProvider.notifier).seedDefaultsIfNeeded();
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(vertical: 9),
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: AppleTokens.systemBlue.withValues(alpha: 0.15),
+                                        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                                      ),
+                                      child: const Text(
+                                        'Khôi phục mẫu',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppleTokens.systemBlue,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: ApplePressable(
+                                    scaleDown: 0.95,
+                                    onTap: () => _openCreateCategorySheet(context),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(vertical: 9),
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: AppleTokens.jadePrimary.withValues(alpha: 0.15),
+                                        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                                      ),
+                                      child: const Text(
+                                        '+ Thêm mới',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppleTokens.jadePrimary,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                    ],
                   ],
 
                   // 3. Wallet Selection Section
@@ -1227,6 +1399,7 @@ class _CategorySelectionCard extends StatelessWidget {
     required this.selectedCategory,
     required this.onSelected,
     required this.onOpenMore,
+    required this.onCreateNew,
   });
 
   final List<Category> categories;
@@ -1234,6 +1407,7 @@ class _CategorySelectionCard extends StatelessWidget {
   final Category? selectedCategory;
   final ValueChanged<String> onSelected;
   final VoidCallback onOpenMore;
+  final VoidCallback onCreateNew;
 
   @override
   Widget build(BuildContext context) {
@@ -1343,7 +1517,7 @@ class _CategorySelectionCard extends StatelessWidget {
             height: 74,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              itemCount: previewCategories.length + 1,
+              itemCount: previewCategories.length + 2,
               separatorBuilder: (_, _) => const SizedBox(width: 10),
               itemBuilder: (context, index) {
                 if (index < previewCategories.length) {
@@ -1429,10 +1603,53 @@ class _CategorySelectionCard extends StatelessWidget {
                   );
                 }
 
-                // Last item: "Khác" button
+                if (index == previewCategories.length) {
+                  // "Khác" button -> opens full picker sheet
+                  return ApplePressable(
+                    scaleDown: 0.92,
+                    onTap: onOpenMore,
+                    child: SizedBox(
+                      width: 58,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
+                              borderRadius: BorderRadius.circular(13),
+                            ),
+                            child: const Center(
+                              child: Icon(
+                                CupertinoIcons.ellipsis,
+                                size: 20,
+                                color: AppleTokens.systemBlue,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          const Text(
+                            'Khác',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppleTokens.systemBlue,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                // Last item: "+ Thêm" button -> opens CategoryFormSheet directly
                 return ApplePressable(
                   scaleDown: 0.92,
-                  onTap: onOpenMore,
+                  onTap: onCreateNew,
                   child: SizedBox(
                     width: 58,
                     child: Column(
@@ -1444,25 +1661,29 @@ class _CategorySelectionCard extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
                             borderRadius: BorderRadius.circular(13),
+                            border: Border.all(
+                              color: AppleTokens.jadePrimary.withValues(alpha: 0.4),
+                              width: 1,
+                            ),
                           ),
                           child: const Center(
                             child: Icon(
-                              CupertinoIcons.ellipsis,
+                              CupertinoIcons.plus,
                               size: 20,
-                              color: AppleTokens.systemBlue,
+                              color: AppleTokens.jadePrimary,
                             ),
                           ),
                         ),
                         const SizedBox(height: 6),
                         const Text(
-                          'Khác',
+                          'Thêm',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: AppleTokens.systemBlue,
+                            color: AppleTokens.jadePrimary,
                           ),
                         ),
                       ],
@@ -1598,10 +1819,12 @@ class _CategoryPickerSheet extends StatefulWidget {
   const _CategoryPickerSheet({
     required this.categories,
     required this.selectedId,
+    this.onCreateNew,
   });
 
   final List<Category> categories;
   final String? selectedId;
+  final VoidCallback? onCreateNew;
 
   @override
   State<_CategoryPickerSheet> createState() => _CategoryPickerSheetState();
@@ -1662,6 +1885,37 @@ class _CategoryPickerSheetState extends State<_CategoryPickerSheet> {
                       style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
                     ),
                   ),
+                  if (widget.onCreateNew != null)
+                    ApplePressable(
+                      scaleDown: 0.94,
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        widget.onCreateNew!();
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        margin: const EdgeInsets.only(right: 6),
+                        decoration: BoxDecoration(
+                          color: AppleTokens.jadePrimary.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(CupertinoIcons.plus, size: 13, color: AppleTokens.jadePrimary),
+                            SizedBox(width: 3),
+                            Text(
+                              'Tạo mới',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppleTokens.jadePrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   IconButton(
                     icon: const Icon(CupertinoIcons.xmark_circle_fill, color: AppleTokens.systemGray),
                     onPressed: () => Navigator.of(context).pop(),
@@ -1681,9 +1935,52 @@ class _CategoryPickerSheetState extends State<_CategoryPickerSheet> {
 
             const Divider(height: AppleTokens.hairline),
 
-            // 4-Column Squircle Category Grid
+            // 4-Column Squircle Category Grid or Empty Search State
             Expanded(
-              child: GridView.builder(
+              child: filtered.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            CupertinoIcons.search,
+                            size: 40,
+                            color: AppleTokens.systemGray,
+                          ),
+                          const SizedBox(height: 10),
+                          const Text(
+                            'Không tìm thấy danh mục',
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                          ),
+                          if (widget.onCreateNew != null) ...[
+                            const SizedBox(height: 12),
+                            ApplePressable(
+                              scaleDown: 0.94,
+                              onTap: () {
+                                Navigator.of(context).pop();
+                                widget.onCreateNew!();
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: AppleTokens.jadePrimary,
+                                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                                ),
+                                child: const Text(
+                                  '+ Tạo danh mục mới',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    )
+                  : GridView.builder(
                 padding: const EdgeInsets.all(16),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 4,

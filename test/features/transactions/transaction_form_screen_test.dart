@@ -162,12 +162,42 @@ void main() {
       // Category card should be present in expense mode
       expect(find.text('Chọn danh mục'), findsOneWidget);
       expect(find.text('Tất cả'), findsOneWidget);
+      expect(find.text('Khác'), findsOneWidget);
+      expect(find.text('Thêm'), findsOneWidget);
 
       // Verify TextField for amount has showCursor: false and no border
       final textField = tester.widget<TextField>(
         find.byType(TextField).first,
       );
       expect(textField.showCursor, isFalse);
+    });
+
+    testWidgets('when categories are empty, it automatically seeds defaults and displays categories', (tester) async {
+      final emptyCatRepo = InMemoryCategoryRepository();
+      final widget = ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          accountRepositoryProvider.overrideWithValue(accRepo),
+          categoryRepositoryProvider.overrideWithValue(emptyCatRepo),
+          transactionRepositoryProvider.overrideWithValue(txRepo),
+        ],
+        child: MaterialApp(
+          locale: const Locale('vi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          theme: AppTheme.light(),
+          home: const TransactionFormScreen(),
+        ),
+      );
+
+      await tester.pumpWidget(widget);
+      await tester.pumpAndSettle();
+
+      // Automatically seeds defaults and shows category card!
+      expect(find.text('Chọn danh mục'), findsOneWidget);
+      expect(find.text('Tất cả'), findsOneWidget);
+      expect(find.text('Khác'), findsOneWidget);
+      expect(find.text('Thêm'), findsOneWidget);
     });
   });
 }

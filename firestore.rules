@@ -142,11 +142,13 @@ rules_version = '2';
 //    Fields:
 //      - id: string (required, 1..128 chars, immutable)
 //      - name: string (required, 1..100 chars)
-//      - description: string (required, 0..500 chars)
+//      - type: string in ['personal', 'family', 'business', 'custom'] (required)
 //      - icon: string (required, 1..64 chars)
 //      - color: int (required, 32-bit signed/unsigned ARGB integer)
+//      - currency: string in ['VND', 'USD', 'EUR', 'JPY', 'KRW'] (required)
 //      - isDefault: bool (required)
-//      - sharedMemberEmails: list<string> (required, <= 20 items, each 1..320 chars)
+//      - description: string | null (optional, 0..500 chars when string)
+//      - sharedMemberEmails: list<string> | null (optional, <= 20 items, each 1..320 chars when list)
 //      - createdAt: timestamp (required, immutable)
 //      - updatedAt: timestamp (required)
 //      - deletedAt: timestamp | null (optional)
@@ -719,21 +721,23 @@ service cloud.firestore {
       let requiredKeys = [
         'id',
         'name',
-        'description',
+        'type',
         'icon',
         'color',
+        'currency',
         'isDefault',
-        'sharedMemberEmails',
         'createdAt',
         'updatedAt'
       ];
       let allowedKeys = [
         'id',
         'name',
-        'description',
+        'type',
         'icon',
         'color',
+        'currency',
         'isDefault',
+        'description',
         'sharedMemberEmails',
         'createdAt',
         'updatedAt',
@@ -744,11 +748,16 @@ service cloud.firestore {
              hasOnlyAllowedKeys(data, allowedKeys) &&
              isBoundedString(data.id, 1, 128) &&
              isBoundedString(data.name, 1, 100) &&
-             isBoundedString(data.description, 0, 500) &&
+             data.type is string &&
+             data.type in ['personal', 'family', 'business', 'custom'] &&
              isBoundedString(data.icon, 1, 64) &&
              isValidColorInt(data.color) &&
+             isValidCurrency(data.currency) &&
              data.isDefault is bool &&
-             isValidSharedMemberEmailsList(data.sharedMemberEmails) &&
+             isOptionalNullableString(data, 'description', 0, 500) &&
+             (!('sharedMemberEmails' in data) ||
+              data.sharedMemberEmails == null ||
+              isValidSharedMemberEmailsList(data.sharedMemberEmails)) &&
              data.createdAt is timestamp &&
              data.updatedAt is timestamp &&
              isOptionalNullableTimestamp(data, 'deletedAt');

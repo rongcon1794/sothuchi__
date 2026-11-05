@@ -71,6 +71,18 @@ class CategoriesActionController extends Notifier<AsyncValue<void>> {
     );
     return res;
   }
+
+  Future<Result<void>> seedDefaultsIfNeeded() async {
+    state = const AsyncLoading();
+    final res = await ref
+        .read(categoryRepositoryProvider)
+        .seedDefaultCategoriesIfNeeded();
+    state = res.fold(
+      onSuccess: (_) => const AsyncData(null),
+      onFailure: (e) => AsyncError(e, StackTrace.current),
+    );
+    return res;
+  }
 }
 
 final categoriesActionControllerProvider =

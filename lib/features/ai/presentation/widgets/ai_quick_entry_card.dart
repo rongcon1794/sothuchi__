@@ -68,12 +68,15 @@ class _AiQuickEntryCardState extends ConsumerState<AiQuickEntryCard> {
     }
 
     final targetAccountId = draft.accountId ?? activeWallets.first.id;
-    final targetCategoryId = draft.categoryId ?? 'default_other_expense';
     final targetType = switch (draft.kind) {
       TransactionDraftKind.income => TransactionType.income,
       TransactionDraftKind.expense => TransactionType.expense,
       TransactionDraftKind.transfer => TransactionType.transfer,
     };
+    final targetCategoryId = draft.categoryId ??
+        (targetType == TransactionType.income
+            ? 'default_other_income'
+            : 'default_other_expense');
 
     setState(() => _isAdding = true);
     await HapticFeedback.mediumImpact();

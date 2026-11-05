@@ -184,10 +184,12 @@ function validLedger(id = 'ledger_1') {
   return {
     id,
     name: 'Sổ chi tiêu gia đình',
-    description: 'Quản lý thu chi sinh hoạt gia đình',
+    type: 'family',
+    currency: 'VND',
     icon: 'family',
     color: 0xff0d7c66,
     isDefault: false,
+    description: 'Quản lý thu chi sinh hoạt gia đình',
     sharedMemberEmails: ['alice@sothuchi.vn', 'bob@sothuchi.vn'],
     createdAt: t0,
     updatedAt: t0,
@@ -931,20 +933,49 @@ describe('Sổ Thu Chi — Firestore Security Rules', () => {
 
     const ledgerRef = doc(aliceDb, `users/${ALICE_UID}/ledgers/ledger_1`);
     const ledgerEmptyRef = doc(aliceDb, `users/${ALICE_UID}/ledgers/ledger_2`);
+    const ledgerDtoRef = doc(aliceDb, `users/${ALICE_UID}/ledgers/ledger_dto`);
+    const ledgerNullsRef = doc(aliceDb, `users/${ALICE_UID}/ledgers/ledger_nulls`);
 
-    // Owner create valid ledger with shared member emails
+    // 1. Owner create valid ledger with all fields (including description & sharedMemberEmails)
     await assertSucceeds(setDoc(ledgerRef, validLedger('ledger_1')));
 
-    // Owner create valid ledger with empty sharedMemberEmails list
+    // 2. Owner create valid ledger strictly matching LedgerBookDto.toJson()
+    // (omits description, sharedMemberEmails, and deletedAt)
+    const dtoData = {
+      id: 'ledger_dto',
+      name: 'Sổ Cá Nhân',
+      type: 'personal',
+      icon: 'person',
+      color: 0x00a86b,
+      currency: 'VND',
+      isDefault: true,
+      createdAt: t0,
+      updatedAt: t0,
+    };
+    await assertSucceeds(setDoc(ledgerDtoRef, dtoData));
+
+    // 3. Owner create valid ledger with description & sharedMemberEmails explicitly set to null
+    await assertSucceeds(
+      setDoc(ledgerNullsRef, {
+        ...validLedger('ledger_nulls'),
+        type: 'business',
+        currency: 'USD',
+        description: null,
+        sharedMemberEmails: null,
+      }),
+    );
+
+    // 4. Owner create valid ledger with empty sharedMemberEmails list
     await assertSucceeds(
       setDoc(ledgerEmptyRef, {
         ...validLedger('ledger_2'),
+        type: 'custom',
         sharedMemberEmails: [],
         description: '',
       }),
     );
 
-    // Cross-user read/update/delete denied
+    // 5. Cross-user read/update/delete denied
     await assertFails(
       getDoc(doc(bobDb, `users/${ALICE_UID}/ledgers/ledger_1`)),
     );
@@ -958,7 +989,33 @@ describe('Sổ Thu Chi — Firestore Security Rules', () => {
       deleteDoc(doc(bobDb, `users/${ALICE_UID}/ledgers/ledger_1`)),
     );
 
-    // Rejects oversized description (> 500 chars)
+    // 6. Rejects invalid ledger type
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/ledgers/l_bad_type`), {
+        ...validLedger('l_bad_type'),
+        type: 'crypto_vault',
+      }),
+    );
+
+    // 7. Rejects invalid currency
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/ledgers/l_bad_cur`), {
+        ...validLedger('l_bad_cur'),
+        currency: 'GBP',
+      }),
+    );
+
+    // 8. Rejects missing required fields (e.g. type, currency, isDefault)
+    const { type: _t, ...missingType } = validLedger('l_miss_type');
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/ledgers/l_miss_type`), missingType),
+    );
+    const { currency: _c, ...missingCurrency } = validLedger('l_miss_cur');
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/ledgers/l_miss_cur`), missingCurrency),
+    );
+
+    // 9. Rejects oversized description (> 500 chars)
     await assertFails(
       setDoc(doc(aliceDb, `users/${ALICE_UID}/ledgers/l_big_desc`), {
         ...validLedger('l_big_desc'),
@@ -966,7 +1023,7 @@ describe('Sổ Thu Chi — Firestore Security Rules', () => {
       }),
     );
 
-    // Rejects > 20 shared member emails
+    // 10. Rejects > 20 shared member emails
     await assertFails(
       setDoc(doc(aliceDb, `users/${ALICE_UID}/ledgers/l_too_many_emails`), {
         ...validLedger('l_too_many_emails'),
@@ -977,7 +1034,7 @@ describe('Sổ Thu Chi — Firestore Security Rules', () => {
       }),
     );
 
-    // Rejects oversized email (> 320 chars) and non-string elements
+    // 11. Rejects oversized email (> 320 chars) and non-string elements
     await assertFails(
       setDoc(doc(aliceDb, `users/${ALICE_UID}/ledgers/l_big_email`), {
         ...validLedger('l_big_email'),
@@ -991,7 +1048,7 @@ describe('Sổ Thu Chi — Firestore Security Rules', () => {
       }),
     );
 
-    // Rejects invalid color int and non-boolean isDefault
+    // 12. Rejects invalid color int and non-boolean isDefault
     await assertFails(
       setDoc(doc(aliceDb, `users/${ALICE_UID}/ledgers/l_bad_color`), {
         ...validLedger('l_bad_color'),
@@ -1005,21 +1062,30 @@ describe('Sổ Thu Chi — Firestore Security Rules', () => {
       }),
     );
 
-    // Owner partial update (toggle default status)
+    // 13. Owner partial update (toggle default status & modify name)
     await assertSucceeds(
       updateDoc(ledgerRef, {
         isDefault: true,
         updatedAt: t1,
       }),
     );
+    await assertSucceeds(
+      updateDoc(ledgerDtoRef, {
+        name: 'Sổ Chi Tiêu Chính',
+        description: 'Đã cập nhật mô tả',
+        updatedAt: t1,
+      }),
+    );
 
-    // Protects immutable `id` and `createdAt` on update
+    // 14. Protects immutable `id` and `createdAt` on update
     await assertFails(updateDoc(ledgerRef, { id: 'tampered', updatedAt: t2 }));
     await assertFails(updateDoc(ledgerRef, { createdAt: t2, updatedAt: t2 }));
 
-    // Soft-delete and hard-delete allowed for owner
+    // 15. Soft-delete and hard-delete allowed for owner
     await assertSucceeds(updateDoc(ledgerRef, { deletedAt: t2, updatedAt: t2 }));
     await assertSucceeds(deleteDoc(ledgerRef));
     await assertSucceeds(deleteDoc(ledgerEmptyRef));
+    await assertSucceeds(deleteDoc(ledgerDtoRef));
+    await assertSucceeds(deleteDoc(ledgerNullsRef));
   });
 });

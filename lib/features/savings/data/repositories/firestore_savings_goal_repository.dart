@@ -110,7 +110,7 @@ class FirestoreSavingsGoalRepository implements SavingsGoalRepository {
         currency: goal.currency,
         type: TransactionType.expense,
         accountId: fromAccountId,
-        categoryId: 'default_other',
+        categoryId: 'default_other_expense',
         note: note.isNotEmpty
             ? '[Tích lũy] ${goal.title}: $note'
             : '[Tích lũy] Nạp vào: ${goal.title}',
@@ -168,7 +168,7 @@ class FirestoreSavingsGoalRepository implements SavingsGoalRepository {
         currency: goal.currency,
         type: TransactionType.income,
         accountId: toAccountId,
-        categoryId: 'default_salary',
+        categoryId: 'default_other_income',
         note: note.isNotEmpty
             ? '[Rút tích lũy] ${goal.title}: $note'
             : '[Rút tích lũy] Từ: ${goal.title}',
@@ -285,7 +285,7 @@ class InMemorySavingsGoalRepository implements SavingsGoalRepository {
         currency: goal.currency,
         type: TransactionType.expense,
         accountId: fromAccountId,
-        categoryId: 'default_other',
+        categoryId: 'default_other_expense',
         note: note.isNotEmpty
             ? '[Tích lũy] ${goal.title}: $note'
             : '[Tích lũy] Nạp vào: ${goal.title}',
@@ -328,7 +328,7 @@ class InMemorySavingsGoalRepository implements SavingsGoalRepository {
         currency: goal.currency,
         type: TransactionType.income,
         accountId: toAccountId,
-        categoryId: 'default_salary',
+        categoryId: 'default_other_income',
         note: note.isNotEmpty
             ? '[Rút tích lũy] ${goal.title}: $note'
             : '[Rút tích lũy] Từ: ${goal.title}',

@@ -90,6 +90,7 @@ class LedgerBookDto {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'name': name,
       'type': type,
       'icon': icon,

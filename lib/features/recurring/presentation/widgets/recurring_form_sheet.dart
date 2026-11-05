@@ -64,6 +64,11 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
       _categoryId = item.categoryId;
       _autoExecute = item.autoExecute;
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(categoriesActionControllerProvider.notifier).seedDefaultsIfNeeded();
+      }
+    });
   }
 
   @override
@@ -120,7 +125,10 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
       startDate: _startDate,
       nextDueDate: widget.existing?.nextDueDate ?? _startDate,
       accountId: _accountId!,
-      categoryId: _categoryId ?? 'default_other',
+      categoryId: _categoryId ??
+          (_type == TransactionType.income
+              ? 'default_other_income'
+              : 'default_other_expense'),
       autoExecute: _autoExecute,
       note: _noteController.text.trim(),
       createdAt: widget.existing?.createdAt ?? DateTime.now(),
@@ -159,7 +167,8 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
     if (_accountId == null && wallets.isNotEmpty) {
       _accountId = wallets.first.id;
     }
-    if (_categoryId == null && availableCats.isNotEmpty) {
+    if (availableCats.isNotEmpty &&
+        (_categoryId == null || !availableCats.any((c) => c.id == _categoryId))) {
       _categoryId = availableCats.first.id;
     }
 
