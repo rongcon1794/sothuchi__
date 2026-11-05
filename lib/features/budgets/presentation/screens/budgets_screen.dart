@@ -183,6 +183,13 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
                       AppleTokens.scrollBottomPaddingWithFab,
                     ),
                     children: [
+                      _BudgetOverviewCard(
+                        progressList: progressList,
+                        selectedMonth: selectedMonth,
+                        locale: locale,
+                        hideBalance: hideBalance,
+                      ),
+                      const SizedBox(height: 16),
                       if (triggered.isNotEmpty) ...[
                         BudgetAlertBanner(
                           progressOverride: triggered,
@@ -225,6 +232,163 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
         label: Text(l10n.addBudget),
         onPressed: () => _openBudgetForm(context, selectedMonth: selectedMonth),
         tooltip: l10n.addBudget,
+      ),
+    );
+  }
+}
+
+class _BudgetOverviewCard extends StatelessWidget {
+  const _BudgetOverviewCard({
+    required this.progressList,
+    required this.selectedMonth,
+    required this.locale,
+    required this.hideBalance,
+  });
+
+  final List<BudgetProgress> progressList;
+  final DateTime selectedMonth;
+  final String locale;
+  final bool hideBalance;
+
+  @override
+  Widget build(BuildContext context) {
+    if (progressList.isEmpty) return const SizedBox.shrink();
+
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final currency = progressList.first.budget.currency;
+
+    final totalLimit = progressList.fold<int>(0, (acc, p) => acc + p.budget.amount);
+    final totalSpent = progressList.fold<int>(0, (acc, p) => acc + p.spentMinorUnits);
+    final totalRemaining = totalLimit > totalSpent ? totalLimit - totalSpent : 0;
+    final usedPercent = totalLimit > 0 ? ((totalSpent * 100) ~/ totalLimit).clamp(0, 999) : 0;
+    final clampedRatio = (usedPercent / 100.0).clamp(0.0, 1.0);
+
+    final now = DateTime.now();
+    final isCurrentMonth = selectedMonth.year == now.year && selectedMonth.month == now.month;
+    final daysInMonth = DateTime(selectedMonth.year, selectedMonth.month + 1, 0).day;
+    final daysLeft = isCurrentMonth ? (daysInMonth - now.day + 1).clamp(1, daysInMonth) : daysInMonth;
+
+    final safeDailyMinor = daysLeft > 0 ? totalRemaining ~/ daysLeft : 0;
+    final safeDailyMoney = Money(minorUnits: safeDailyMinor, currencyCode: currency);
+    final totalLimitMoney = Money(minorUnits: totalLimit, currencyCode: currency);
+    final totalSpentMoney = Money(minorUnits: totalSpent, currencyCode: currency);
+
+    final isExceeded = totalSpent > totalLimit;
+    final barColor = isExceeded
+        ? AppleTokens.systemRed
+        : (usedPercent >= 80 ? AppleTokens.systemOrange : AppleTokens.jadeDark);
+
+    return AppleGlassCard(
+      padding: const EdgeInsets.all(16),
+      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                l10n.overallMonthlyBudget,
+                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: barColor.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                ),
+                child: Text(
+                  locale.startsWith('vi') ? '$usedPercent% tổng' : '$usedPercent% total',
+                  style: TextStyle(
+                    color: barColor,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                    fontFeatures: AppTheme.tabularFigures,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            l10n.budgetSpentOf(
+              totalSpentMoney.format(locale: locale, masked: hideBalance),
+              totalLimitMoney.format(locale: locale, masked: hideBalance),
+            ),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+              fontFeatures: AppTheme.tabularFigures,
+            ),
+          ),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+            child: LinearProgressIndicator(
+              value: clampedRatio,
+              minHeight: 8,
+              backgroundColor: scheme.surfaceContainerHighest,
+              valueColor: AlwaysStoppedAnimation<Color>(barColor),
+            ),
+          ),
+          if (isCurrentMonth) ...[
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(CupertinoIcons.calendar, size: 14, color: AppleTokens.systemBlue),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            l10n.budgetRemainingDays(daysLeft),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(CupertinoIcons.flame_fill, size: 14, color: AppleTokens.systemOrange),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            l10n.budgetDailyRecommended(safeDailyMoney.format(locale: locale, masked: hideBalance)),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -420,6 +584,52 @@ class _BudgetProgressCard extends StatelessWidget {
                 ),
               ],
             ),
+            if (!progress.isExceeded && progress.remainingMinorUnits > 0) ...[
+              const SizedBox(height: 6),
+              Builder(
+                builder: (context) {
+                  final now = DateTime.now();
+                  final isCurrent = progress.budget.startDate.year == now.year &&
+                      progress.budget.startDate.month == now.month;
+                  final daysInMonth = DateTime(
+                    progress.budget.startDate.year,
+                    progress.budget.startDate.month + 1,
+                    0,
+                  ).day;
+                  final daysLeft = isCurrent
+                      ? (daysInMonth - now.day + 1).clamp(1, daysInMonth)
+                      : daysInMonth;
+                  final dailyMinor = daysLeft > 0
+                      ? progress.remainingMinorUnits ~/ daysLeft
+                      : 0;
+                  final dailyText = Money(
+                    minorUnits: dailyMinor,
+                    currencyCode: progress.budget.currency,
+                  ).format(locale: locale, masked: hideBalance);
+
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        CupertinoIcons.flame_fill,
+                        size: 11,
+                        color: AppleTokens.systemOrange,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        l10n.budgetDailyRecommended(dailyText),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: scheme.onSurfaceVariant,
+                          fontFeatures: AppTheme.tabularFigures,
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
           ],
         ),
     );

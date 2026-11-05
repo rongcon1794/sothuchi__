@@ -636,5 +636,74 @@
   "savingsWithdrawSheetTitle": "Withdraw from Savings",
   "debtSubmitNew": "Record Debt",
   "loading": "Loading...",
-  "loadingCategories": "Loading categories..."
+  "loadingCategories": "Loading categories...",
+  "greetingMorning": "Good morning",
+  "greetingAfternoon": "Good afternoon",
+  "greetingEvening": "Good evening",
+  "smartPaceTitle": "Smart Spending Pace",
+  "smartPaceSafeToSpend": "Safe daily budget today",
+  "smartPaceDaysLeft": "{days} days left this month",
+  "@smartPaceDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "smartPaceOnTrack": "Spending is well balanced",
+  "smartPaceOverPace": "Over safe spending pace",
+  "homeActionTransfer": "Transfer",
+  "homeActionAiAssistant": "AI Assistant",
+  "homeActionExploreMore": "More",
+  "toolsAndFeatures": "Tools & Utilities",
+  "reportsVsLastMonth": "vs Last Month",
+  "reportsSpendingIncreased": "Up {percent}%",
+  "@reportsSpendingIncreased": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsSpendingDecreased": "Down {percent}%",
+  "@reportsSpendingDecreased": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetRemainingDays": "{days} days left",
+  "@budgetRemainingDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetDailyRecommended": "Safe max: {amount}/day",
+  "@budgetDailyRecommended": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cashflowRatio": "Cashflow Ratio",
+  "incomeRatio": "{percent}% In",
+  "@incomeRatio": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseRatio": "{percent}% Out",
+  "@expenseRatio": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  }
 }

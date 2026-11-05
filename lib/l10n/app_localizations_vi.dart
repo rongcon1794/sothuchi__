@@ -1424,4 +1424,78 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get loadingCategories => 'Đang tải danh mục...';
+
+  @override
+  String get greetingMorning => 'Chào buổi sáng';
+
+  @override
+  String get greetingAfternoon => 'Chào buổi chiều';
+
+  @override
+  String get greetingEvening => 'Chào buổi tối';
+
+  @override
+  String get smartPaceTitle => 'Nhịp độ chi tiêu thông minh';
+
+  @override
+  String get smartPaceSafeToSpend => 'Mức chi an toàn hôm nay';
+
+  @override
+  String smartPaceDaysLeft(int days) {
+    return 'Còn $days ngày trong tháng';
+  }
+
+  @override
+  String get smartPaceOnTrack => 'Chi tiêu rất cân đối';
+
+  @override
+  String get smartPaceOverPace => 'Vượt nhịp độ an toàn';
+
+  @override
+  String get homeActionTransfer => 'Chuyển ví';
+
+  @override
+  String get homeActionAiAssistant => 'Trợ lý AI';
+
+  @override
+  String get homeActionExploreMore => 'Thêm';
+
+  @override
+  String get toolsAndFeatures => 'Công cụ & Tiện ích';
+
+  @override
+  String get reportsVsLastMonth => 'So với tháng trước';
+
+  @override
+  String reportsSpendingIncreased(String percent) {
+    return 'Tăng $percent%';
+  }
+
+  @override
+  String reportsSpendingDecreased(String percent) {
+    return 'Giảm $percent%';
+  }
+
+  @override
+  String budgetRemainingDays(int days) {
+    return 'Còn $days ngày';
+  }
+
+  @override
+  String budgetDailyRecommended(String amount) {
+    return 'Chi tối đa $amount/ngày';
+  }
+
+  @override
+  String get cashflowRatio => 'Tỷ lệ dòng tiền';
+
+  @override
+  String incomeRatio(int percent) {
+    return '$percent% Thu';
+  }
+
+  @override
+  String expenseRatio(int percent) {
+    return '$percent% Chi';
+  }
 }

@@ -123,29 +123,49 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                 child: SoThuChiLogo(size: 34),
               ),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    l10n.appTitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                  if (user?.displayName != null && user!.displayName!.isNotEmpty)
-                    Text(
-                      user.displayName!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: scheme.onSurfaceVariant,
+              child: Builder(
+                builder: (context) {
+                  final hour = DateTime.now().hour;
+                  final greeting = (hour >= 4 && hour < 12)
+                      ? l10n.greetingMorning
+                      : (hour >= 12 && hour < 18)
+                          ? l10n.greetingAfternoon
+                          : l10n.greetingEvening;
+                  final userFirstName = (user?.displayName != null && user!.displayName!.trim().isNotEmpty)
+                      ? user.displayName!.trim().split(' ').last
+                      : null;
+                  final titleText = userFirstName != null
+                      ? '$greeting, $userFirstName!'
+                      : l10n.appTitle;
+                  final subtitleText = userFirstName != null
+                      ? l10n.appTitle
+                      : (user?.displayName ?? user?.email ?? '');
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        titleText,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.3,
+                        ),
                       ),
-                    ),
-                ],
+                      if (subtitleText.isNotEmpty)
+                        Text(
+                          subtitleText,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                    ],
+                  );
+                },
               ),
             ),
           ],
@@ -212,7 +232,16 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
               ),
               const SizedBox(height: 12),
 
-              // Smart 4-Capsule Quick Actions
+              // Smart Daily Spending Pace Card
+              _SmartSpendingPaceCard(
+                monthSummary: monthSummary,
+                totalBalance: totalBalance,
+                locale: locale,
+                hideBalance: hideBalance,
+              ),
+              const SizedBox(height: 14),
+
+              // Smart Quick Actions
               const _HomeQuickActionBar(),
               const SizedBox(height: 14),
 
@@ -611,7 +640,316 @@ class _HeroBalanceCard extends StatelessWidget {
               ],
             ),
           ),
+          // Intelligent Cashflow Segmented Bar
+          Builder(
+            builder: (context) {
+              final totalFlow = monthSummary.income.minorUnits + monthSummary.expense.minorUnits;
+              if (totalFlow <= 0) return const SizedBox.shrink();
+              final incomeRatio = ((monthSummary.income.minorUnits / totalFlow) * 100).round().clamp(1, 99);
+              final expenseRatio = 100 - incomeRatio;
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 16),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                    child: SizedBox(
+                      height: 6,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: incomeRatio,
+                            child: Container(color: AppleTokens.systemGreen),
+                          ),
+                          const SizedBox(width: 2),
+                          Expanded(
+                            flex: expenseRatio,
+                            child: Container(color: AppleTokens.systemRed.withValues(alpha: 0.9)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          l10n.incomeRatio(incomeRatio),
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: fgColor.withValues(alpha: 0.85),
+                            fontFeatures: AppTheme.tabularFigures,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          l10n.expenseRatio(expenseRatio),
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: fgColor.withValues(alpha: 0.85),
+                            fontFeatures: AppTheme.tabularFigures,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _SmartSpendingPaceCard extends StatelessWidget {
+  const _SmartSpendingPaceCard({
+    required this.monthSummary,
+    required this.totalBalance,
+    required this.locale,
+    required this.hideBalance,
+  });
+
+  final MonthlyCashflowSummary monthSummary;
+  final Money totalBalance;
+  final String locale;
+  final bool hideBalance;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final now = DateTime.now();
+    final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+    final daysRemaining = math.max(1, daysInMonth - now.day + 1);
+
+    final remainingMinor = monthSummary.income.minorUnits > monthSummary.expense.minorUnits
+        ? (monthSummary.income.minorUnits - monthSummary.expense.minorUnits)
+        : math.max(0, totalBalance.minorUnits);
+    final safeDailyMinor = (remainingMinor / daysRemaining).round();
+    final safeDailyMoney = Money(minorUnits: safeDailyMinor, currencyCode: totalBalance.currencyCode);
+
+    final isOverPace = monthSummary.expense.minorUnits > monthSummary.income.minorUnits &&
+        monthSummary.income.minorUnits > 0;
+    final statusColor = isOverPace ? AppleTokens.systemOrange : AppleTokens.systemGreen;
+    final statusIcon = isOverPace
+        ? CupertinoIcons.exclamationmark_circle_fill
+        : CupertinoIcons.checkmark_circle_fill;
+    final statusText = isOverPace ? l10n.smartPaceOverPace : l10n.smartPaceOnTrack;
+
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    final isLargeText = textScale >= 1.35;
+
+    return ApplePressable(
+      onTap: () => context.go(AppRoutes.budgets),
+      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+      child: AppleGlassCard(
+        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+        borderColor: statusColor.withValues(alpha: isDark ? 0.28 : 0.2),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (isLargeText) ...[
+              Row(
+                children: [
+                  AppleSquircleBadge(
+                    icon: CupertinoIcons.gauge,
+                    color: statusColor,
+                    size: 28,
+                    iconSize: 15,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      l10n.smartPaceTitle,
+                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: isDark ? 0.22 : 0.12),
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(statusIcon, size: 12, color: statusColor),
+                    const SizedBox(width: 4),
+                    Text(
+                      statusText,
+                      style: TextStyle(
+                        color: statusColor,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ] else ...[
+              Row(
+                children: [
+                  AppleSquircleBadge(
+                    icon: CupertinoIcons.gauge,
+                    color: statusColor,
+                    size: 28,
+                    iconSize: 15,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      l10n.smartPaceTitle,
+                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: isDark ? 0.22 : 0.12),
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(statusIcon, size: 12, color: statusColor),
+                        const SizedBox(width: 4),
+                        Text(
+                          statusText,
+                          style: TextStyle(
+                            color: statusColor,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: 12),
+            if (isLargeText) ...[
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.smartPaceSafeToSpend,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    safeDailyMoney.format(locale: locale, masked: hideBalance),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: isDark ? Colors.white : theme.colorScheme.onSurface,
+                      fontFeatures: AppTheme.tabularFigures,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.08)
+                          : AppleTokens.bgLightSecondary,
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                      border: Border.all(
+                        color: isDark ? Colors.white.withValues(alpha: 0.12) : AppleTokens.borderLight,
+                        width: AppleTokens.hairline,
+                      ),
+                    ),
+                    child: Text(
+                      l10n.smartPaceDaysLeft(daysRemaining),
+                      style: const TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                        color: AppleTokens.systemGray,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ] else ...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.smartPaceSafeToSpend,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            safeDailyMoney.format(locale: locale, masked: hideBalance),
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              color: isDark ? Colors.white : theme.colorScheme.onSurface,
+                              fontFeatures: AppTheme.tabularFigures,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.08)
+                          : AppleTokens.bgLightSecondary,
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                      border: Border.all(
+                        color: isDark ? Colors.white.withValues(alpha: 0.12) : AppleTokens.borderLight,
+                        width: AppleTokens.hairline,
+                      ),
+                    ),
+                    child: Text(
+                      l10n.smartPaceDaysLeft(daysRemaining),
+                      style: const TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                        color: AppleTokens.systemGray,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

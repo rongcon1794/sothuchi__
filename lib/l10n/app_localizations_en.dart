@@ -1423,4 +1423,78 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loadingCategories => 'Loading categories...';
+
+  @override
+  String get greetingMorning => 'Good morning';
+
+  @override
+  String get greetingAfternoon => 'Good afternoon';
+
+  @override
+  String get greetingEvening => 'Good evening';
+
+  @override
+  String get smartPaceTitle => 'Smart Spending Pace';
+
+  @override
+  String get smartPaceSafeToSpend => 'Safe daily budget today';
+
+  @override
+  String smartPaceDaysLeft(int days) {
+    return '$days days left this month';
+  }
+
+  @override
+  String get smartPaceOnTrack => 'Spending is well balanced';
+
+  @override
+  String get smartPaceOverPace => 'Over safe spending pace';
+
+  @override
+  String get homeActionTransfer => 'Transfer';
+
+  @override
+  String get homeActionAiAssistant => 'AI Assistant';
+
+  @override
+  String get homeActionExploreMore => 'More';
+
+  @override
+  String get toolsAndFeatures => 'Tools & Utilities';
+
+  @override
+  String get reportsVsLastMonth => 'vs Last Month';
+
+  @override
+  String reportsSpendingIncreased(String percent) {
+    return 'Up $percent%';
+  }
+
+  @override
+  String reportsSpendingDecreased(String percent) {
+    return 'Down $percent%';
+  }
+
+  @override
+  String budgetRemainingDays(int days) {
+    return '$days days left';
+  }
+
+  @override
+  String budgetDailyRecommended(String amount) {
+    return 'Safe max: $amount/day';
+  }
+
+  @override
+  String get cashflowRatio => 'Cashflow Ratio';
+
+  @override
+  String incomeRatio(int percent) {
+    return '$percent% In';
+  }
+
+  @override
+  String expenseRatio(int percent) {
+    return '$percent% Out';
+  }
 }

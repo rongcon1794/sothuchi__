@@ -2731,6 +2731,126 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Đang tải danh mục...'**
   String get loadingCategories;
+
+  /// No description provided for @greetingMorning.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chào buổi sáng'**
+  String get greetingMorning;
+
+  /// No description provided for @greetingAfternoon.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chào buổi chiều'**
+  String get greetingAfternoon;
+
+  /// No description provided for @greetingEvening.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chào buổi tối'**
+  String get greetingEvening;
+
+  /// No description provided for @smartPaceTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhịp độ chi tiêu thông minh'**
+  String get smartPaceTitle;
+
+  /// No description provided for @smartPaceSafeToSpend.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mức chi an toàn hôm nay'**
+  String get smartPaceSafeToSpend;
+
+  /// No description provided for @smartPaceDaysLeft.
+  ///
+  /// In vi, this message translates to:
+  /// **'Còn {days} ngày trong tháng'**
+  String smartPaceDaysLeft(int days);
+
+  /// No description provided for @smartPaceOnTrack.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chi tiêu rất cân đối'**
+  String get smartPaceOnTrack;
+
+  /// No description provided for @smartPaceOverPace.
+  ///
+  /// In vi, this message translates to:
+  /// **'Vượt nhịp độ an toàn'**
+  String get smartPaceOverPace;
+
+  /// No description provided for @homeActionTransfer.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chuyển ví'**
+  String get homeActionTransfer;
+
+  /// No description provided for @homeActionAiAssistant.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trợ lý AI'**
+  String get homeActionAiAssistant;
+
+  /// No description provided for @homeActionExploreMore.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thêm'**
+  String get homeActionExploreMore;
+
+  /// No description provided for @toolsAndFeatures.
+  ///
+  /// In vi, this message translates to:
+  /// **'Công cụ & Tiện ích'**
+  String get toolsAndFeatures;
+
+  /// No description provided for @reportsVsLastMonth.
+  ///
+  /// In vi, this message translates to:
+  /// **'So với tháng trước'**
+  String get reportsVsLastMonth;
+
+  /// No description provided for @reportsSpendingIncreased.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tăng {percent}%'**
+  String reportsSpendingIncreased(String percent);
+
+  /// No description provided for @reportsSpendingDecreased.
+  ///
+  /// In vi, this message translates to:
+  /// **'Giảm {percent}%'**
+  String reportsSpendingDecreased(String percent);
+
+  /// No description provided for @budgetRemainingDays.
+  ///
+  /// In vi, this message translates to:
+  /// **'Còn {days} ngày'**
+  String budgetRemainingDays(int days);
+
+  /// No description provided for @budgetDailyRecommended.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chi tối đa {amount}/ngày'**
+  String budgetDailyRecommended(String amount);
+
+  /// No description provided for @cashflowRatio.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tỷ lệ dòng tiền'**
+  String get cashflowRatio;
+
+  /// No description provided for @incomeRatio.
+  ///
+  /// In vi, this message translates to:
+  /// **'{percent}% Thu'**
+  String incomeRatio(int percent);
+
+  /// No description provided for @expenseRatio.
+  ///
+  /// In vi, this message translates to:
+  /// **'{percent}% Chi'**
+  String expenseRatio(int percent);
 }
 
 class _AppLocalizationsDelegate

@@ -546,6 +546,44 @@ class _MonthlySummaryHeader extends StatelessWidget {
       valueColor: theme.colorScheme.onSurface,
     );
 
+    final momPercent = report.expenseChangeVsPreviousMonthPercent;
+    Widget? momBadge;
+    if (momPercent != null && !hideBalance) {
+      final isUp = momPercent > 0;
+      final badgeColor = isUp ? AppleTokens.systemRed : AppleTokens.jadeDark;
+      final badgeBg = isUp
+          ? AppleTokens.systemRed.withValues(alpha: 0.12)
+          : AppleTokens.jadeDark.withValues(alpha: 0.12);
+      final arrowIcon = isUp ? CupertinoIcons.arrow_up_right : CupertinoIcons.arrow_down_right;
+      final trendText = isUp
+          ? '${l10n.reportsSpendingIncreased} ${momPercent.abs()}%'
+          : '${l10n.reportsSpendingDecreased} ${momPercent.abs()}%';
+
+      momBadge = Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: badgeBg,
+          borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(arrowIcon, size: 12, color: badgeColor),
+            const SizedBox(width: 5),
+            Text(
+              '${l10n.reportsVsLastMonth}: $trendText',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: badgeColor,
+                fontFeatures: AppTheme.tabularFigures,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     if (stackSingleCol) {
       return AppleGlassCard(
         padding: const EdgeInsets.all(16),
@@ -553,6 +591,10 @@ class _MonthlySummaryHeader extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (momBadge != null) ...[
+              Align(alignment: Alignment.centerLeft, child: momBadge),
+              const SizedBox(height: 12),
+            ],
             incStat,
             const SizedBox(height: 10),
             expStat,
@@ -573,6 +615,10 @@ class _MonthlySummaryHeader extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
       child: Column(
         children: [
+          if (momBadge != null) ...[
+            Align(alignment: Alignment.centerLeft, child: momBadge),
+            const SizedBox(height: 12),
+          ],
           Row(
             children: [
               Expanded(child: incStat),

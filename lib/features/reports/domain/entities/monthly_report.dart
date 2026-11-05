@@ -125,5 +125,24 @@ class MonthlyReportData {
   bool get hasSixMonthActivity => sixMonthTrend.any(
     (b) => b.incomeMinorUnits > 0 || b.expenseMinorUnits > 0,
   );
+
+  /// Previous month in trend window, or null if trend has < 2 months.
+  MonthlyTrendBar? get previousMonthTrend =>
+      sixMonthTrend.length >= 2 ? sixMonthTrend[sixMonthTrend.length - 2] : null;
+
+  /// Percentage change in expenses vs previous month (+/- int), or null if no previous data.
+  int? get expenseChangeVsPreviousMonthPercent {
+    final prev = previousMonthTrend;
+    if (prev == null || prev.expenseMinorUnits <= 0) return null;
+    final diff = totalExpenseMinor - prev.expenseMinorUnits;
+    return ((diff * 100) ~/ prev.expenseMinorUnits);
+  }
+
+  /// Absolute minor-units change in expenses vs previous month, or null if no previous data.
+  int? get expenseChangeVsPreviousMonthMinor {
+    final prev = previousMonthTrend;
+    if (prev == null || prev.expenseMinorUnits <= 0) return null;
+    return totalExpenseMinor - prev.expenseMinorUnits;
+  }
 }
 

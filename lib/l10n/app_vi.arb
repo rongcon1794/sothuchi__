@@ -687,5 +687,74 @@
   "savingsWithdrawSheetTitle": "Rút tiền tiết kiệm",
   "debtSubmitNew": "Ghi nhận nợ",
   "loading": "Đang tải...",
-  "loadingCategories": "Đang tải danh mục..."
+  "loadingCategories": "Đang tải danh mục...",
+  "greetingMorning": "Chào buổi sáng",
+  "greetingAfternoon": "Chào buổi chiều",
+  "greetingEvening": "Chào buổi tối",
+  "smartPaceTitle": "Nhịp độ chi tiêu thông minh",
+  "smartPaceSafeToSpend": "Mức chi an toàn hôm nay",
+  "smartPaceDaysLeft": "Còn {days} ngày trong tháng",
+  "@smartPaceDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "smartPaceOnTrack": "Chi tiêu rất cân đối",
+  "smartPaceOverPace": "Vượt nhịp độ an toàn",
+  "homeActionTransfer": "Chuyển ví",
+  "homeActionAiAssistant": "Trợ lý AI",
+  "homeActionExploreMore": "Thêm",
+  "toolsAndFeatures": "Công cụ & Tiện ích",
+  "reportsVsLastMonth": "So với tháng trước",
+  "reportsSpendingIncreased": "Tăng {percent}%",
+  "@reportsSpendingIncreased": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsSpendingDecreased": "Giảm {percent}%",
+  "@reportsSpendingDecreased": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "budgetRemainingDays": "Còn {days} ngày",
+  "@budgetRemainingDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "budgetDailyRecommended": "Chi tối đa {amount}/ngày",
+  "@budgetDailyRecommended": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cashflowRatio": "Tỷ lệ dòng tiền",
+  "incomeRatio": "{percent}% Thu",
+  "@incomeRatio": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "expenseRatio": "{percent}% Chi",
+  "@expenseRatio": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  }
 }
