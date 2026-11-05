@@ -45,6 +45,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
   final _tagsController = TextEditingController();
+  final _tagInputController = TextEditingController();
+  final List<String> _selectedTags = [];
 
   TransactionType _type = TransactionType.expense;
   String? _accountId;
@@ -75,6 +77,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       if (draft.date != null) _selectedDate = draft.date!;
       if (draft.note != null) _noteController.text = draft.note!;
       if (draft.tags.isNotEmpty) {
+        _selectedTags.addAll(draft.tags);
         _tagsController.text = draft.tags.join(', ');
       }
       if (draft.amountMinorUnits != null && draft.amountMinorUnits! > 0) {
@@ -114,6 +117,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         _selectedDate = tx.date;
         _amountController.text = tx.money.toInputString(locale: locale);
         _noteController.text = tx.note;
+        _selectedTags.clear();
+        _selectedTags.addAll(tx.tags);
         _tagsController.text = tx.tags.join(', ');
         _loadingExisting = false;
       });
@@ -127,6 +132,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     _amountController.dispose();
     _noteController.dispose();
     _tagsController.dispose();
+    _tagInputController.dispose();
     super.dispose();
   }
 
@@ -175,6 +181,55 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     setState(() {
       _amountController.clear();
     });
+  }
+
+  void _setAmount(int minorUnits, String currencyCode, String locale) {
+    HapticFeedback.lightImpact();
+    final newText = Money(
+      minorUnits: minorUnits,
+      currencyCode: currencyCode,
+    ).toInputString(locale: locale);
+    setState(() {
+      _amountController.text = newText;
+    });
+  }
+
+  void _appendZeros(int multiplier, String currencyCode, String locale) {
+    HapticFeedback.lightImpact();
+    final current =
+        Money.tryParse(_amountController.text, currencyCode: currencyCode)
+            ?.minorUnits ??
+        0;
+    if (current <= 0) return;
+    final updated = current * multiplier;
+    if (updated > 9000000000000000) return;
+    final newText = Money(
+      minorUnits: updated,
+      currencyCode: currencyCode,
+    ).toInputString(locale: locale);
+    setState(() {
+      _amountController.text = newText;
+    });
+  }
+
+  void _addTag(String raw) {
+    final clean = raw.trim().replaceAll('#', '');
+    if (clean.isNotEmpty && !_selectedTags.contains(clean)) {
+      setState(() {
+        _selectedTags.add(clean);
+        _tagsController.text = _selectedTags.join(', ');
+      });
+      _tagInputController.clear();
+      HapticFeedback.lightImpact();
+    }
+  }
+
+  void _removeTag(String tag) {
+    setState(() {
+      _selectedTags.remove(tag);
+      _tagsController.text = _selectedTags.join(', ');
+    });
+    HapticFeedback.lightImpact();
   }
 
   void _swapTransferWallets() {
@@ -310,7 +365,16 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       return;
     }
 
-    final tags = _tagsController.text
+    if (_tagInputController.text.trim().isNotEmpty) {
+      final clean = _tagInputController.text.trim().replaceAll('#', '');
+      if (clean.isNotEmpty && !_selectedTags.contains(clean)) {
+        _selectedTags.add(clean);
+      }
+    }
+
+    final tags = _selectedTags.isNotEmpty
+        ? List<String>.from(_selectedTags)
+        : _tagsController.text
         .split(',')
         .map((t) => t.trim())
         .where((t) => t.isNotEmpty)
@@ -611,6 +675,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                       });
                     },
                     onAddShortcut: (amount) => _addAmountShortcut(amount, currencyCode, locale),
+                    onSetAmount: (amount) => _setAmount(amount, currencyCode, locale),
+                    onAppendZeros: (multiplier) => _appendZeros(multiplier, currencyCode, locale),
                     onClear: _clearAmount,
                   ),
                   const SizedBox(height: 18),
@@ -965,75 +1031,21 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                         onTap: _pickDate,
                       ),
 
-                      // Note Input Row
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            const AppleSquircleBadge(
-                              icon: CupertinoIcons.pencil_ellipsis_rectangle,
-                              backgroundColor: AppleTokens.systemYellow,
-                              size: 38,
-                              iconSize: 20,
-                              radius: 10,
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: TextFormField(
-                                controller: _noteController,
-                                maxLines: null,
-                                maxLength: 1000,
-                                style: const TextStyle(fontSize: 15),
-                                decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  isDense: true,
-                                  contentPadding: const EdgeInsets.symmetric(vertical: 8),
-                                  hintText: l10n.noteHint,
-                                  hintStyle: TextStyle(
-                                    fontSize: 14,
-                                    color: isDark ? const Color(0xFF6C6C70) : const Color(0xFF8E8E93),
-                                  ),
-                                  counterText: '',
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                      // Note Input Section
+                      _SmartNoteSection(
+                        noteController: _noteController,
+                        type: _type,
+                        selectedCategory: selectedCategory,
+                        isDark: isDark,
                       ),
 
-                      // Tags Input Row
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            const AppleSquircleBadge(
-                              icon: CupertinoIcons.tag,
-                              backgroundColor: AppleTokens.systemPink,
-                              size: 38,
-                              iconSize: 18,
-                              radius: 10,
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: TextFormField(
-                                controller: _tagsController,
-                                style: const TextStyle(fontSize: 15),
-                                decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  isDense: true,
-                                  contentPadding: const EdgeInsets.symmetric(vertical: 8),
-                                  hintText: l10n.tagsHint,
-                                  hintStyle: TextStyle(
-                                    fontSize: 14,
-                                    color: isDark ? const Color(0xFF6C6C70) : const Color(0xFF8E8E93),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                      // Tags Input Section
+                      _SmartTagsSection(
+                        selectedTags: _selectedTags,
+                        tagInputController: _tagInputController,
+                        onAddTag: _addTag,
+                        onRemoveTag: _removeTag,
+                        isDark: isDark,
                       ),
                     ],
                   ),
@@ -1082,6 +1094,8 @@ class _HeroAmountCard extends StatelessWidget {
     required this.isEditing,
     required this.onTypeChanged,
     required this.onAddShortcut,
+    required this.onSetAmount,
+    required this.onAppendZeros,
     required this.onClear,
   });
 
@@ -1093,6 +1107,8 @@ class _HeroAmountCard extends StatelessWidget {
   final bool isEditing;
   final ValueChanged<TransactionType> onTypeChanged;
   final ValueChanged<int> onAddShortcut;
+  final ValueChanged<int> onSetAmount;
+  final ValueChanged<int> onAppendZeros;
   final VoidCallback onClear;
 
   @override
@@ -1209,7 +1225,188 @@ class _HeroAmountCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // 3. Quick Amount Shortcut Pills
+          // 3. Smart Zero Suggestions Bar (Reactive to amountController)
+          ListenableBuilder(
+            listenable: amountController,
+            builder: (context, _) {
+              final rawMoney = Money.tryParse(amountController.text, currencyCode: currencyCode);
+              final currentMinor = rawMoney?.minorUnits ?? 0;
+              if (currentMinor <= 0) return const SizedBox.shrink();
+
+              // Calculate suggestions for appending zeros
+              final List<({String label, int value, String tag})> zeroSuggestions = [];
+
+              final List<int> multipliers;
+              if (currentMinor < 10) {
+                // e.g. 5 -> 50, 500, 5.000, 50.000, 500.000, 5.000.000
+                multipliers = [10, 100, 1000, 10000, 100000, 1000000];
+              } else if (currentMinor < 100) {
+                multipliers = [10, 100, 1000, 10000, 100000];
+              } else if (currentMinor < 1000) {
+                multipliers = [10, 100, 1000, 10000];
+              } else if (currentMinor < 10000) {
+                multipliers = [10, 100, 1000];
+              } else if (currentMinor < 100000) {
+                multipliers = [10, 100];
+              } else if (currentMinor < 1000000) {
+                multipliers = [10];
+              } else {
+                multipliers = [];
+              }
+
+              for (final m in multipliers) {
+                final target = currentMinor * m;
+                if (target <= 100000000000) {
+                  final formatted = Money(minorUnits: target, currencyCode: currencyCode).toInputString(locale: locale);
+                  final tag = switch (m) {
+                    10 => '+0',
+                    100 => '+00',
+                    1000 => '+000',
+                    10000 => '+4 số 0',
+                    100000 => '+5 số 0',
+                    1000000 => '+6 số 0',
+                    _ => 'x$m',
+                  };
+                  zeroSuggestions.add((label: formatted, value: target, tag: tag));
+                }
+              }
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          CupertinoIcons.sparkles,
+                          size: 13,
+                          color: typeColor,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          context.l10n.zeroSuggestions,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.2,
+                            color: isDark ? const Color(0xFF98989F) : const Color(0xFF6E6E73),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          // Quick multiplier +00
+                          Padding(
+                            padding: const EdgeInsets.only(right: 6),
+                            child: ApplePressable(
+                              scaleDown: 0.92,
+                              onTap: () => onAppendZeros(100),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: typeColor.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                                  border: Border.all(
+                                    color: typeColor.withValues(alpha: 0.35),
+                                    width: AppleTokens.hairline,
+                                  ),
+                                ),
+                                child: Text(
+                                  '+00',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: typeColor,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          // Quick multiplier +000
+                          Padding(
+                            padding: const EdgeInsets.only(right: 6),
+                            child: ApplePressable(
+                              scaleDown: 0.92,
+                              onTap: () => onAppendZeros(1000),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: typeColor.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                                  border: Border.all(
+                                    color: typeColor.withValues(alpha: 0.35),
+                                    width: AppleTokens.hairline,
+                                  ),
+                                ),
+                                child: Text(
+                                  '+000',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: typeColor,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          for (final s in zeroSuggestions)
+                            Padding(
+                              padding: const EdgeInsets.only(right: 6),
+                              child: ApplePressable(
+                                scaleDown: 0.92,
+                                onTap: () => onSetAmount(s.value),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
+                                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                                    border: Border.all(
+                                      color: isDark
+                                          ? Colors.white.withValues(alpha: 0.12)
+                                          : Colors.black.withValues(alpha: 0.08),
+                                      width: AppleTokens.hairline,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        s.label,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          color: typeColor,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        s.tag,
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w500,
+                                          color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6C6C70),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+
+          // 4. Quick Amount Shortcut Pills
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -2075,6 +2272,486 @@ class _CategoryPickerSheetState extends State<_CategoryPickerSheet> {
           ],
         ),
       ),
+      ),
+    );
+  }
+}
+
+
+/// Smart Note Section with TextCapitalization.sentences, quick clear, and category-aware suggested notes.
+class _SmartNoteSection extends StatelessWidget {
+  const _SmartNoteSection({
+    required this.noteController,
+    required this.type,
+    required this.selectedCategory,
+    required this.isDark,
+  });
+
+  final TextEditingController noteController;
+  final TransactionType type;
+  final Category? selectedCategory;
+  final bool isDark;
+
+  List<String> _getCategorySuggestedNotes() {
+    if (type == TransactionType.income) {
+      return const [
+        'Lương tháng',
+        'Thưởng dự án',
+        'Thu nhập phụ',
+        'Được tặng',
+        'Lãi tiết kiệm',
+        'Bán đồ cũ',
+      ];
+    }
+    if (type == TransactionType.transfer) {
+      return const [
+        'Chuyển tiền',
+        'Trả nợ',
+        'Gửi gia đình',
+        'Nạp ví điện tử',
+        'Rút tiền ATM',
+      ];
+    }
+
+    final catName = selectedCategory?.name.toLowerCase() ?? '';
+    if (catName.contains('ăn') || catName.contains('food') || catName.contains('uống') || catName.contains('cafe')) {
+      return const [
+        'Ăn sáng',
+        'Ăn trưa',
+        'Ăn tối',
+        'Cà phê',
+        'Trà sữa',
+        'Đi chợ',
+        'Siêu thị',
+      ];
+    }
+    if (catName.contains('xe') || catName.contains('xăng') || catName.contains('di chuyển') || catName.contains('transport')) {
+      return const [
+        'Đổ xăng',
+        'Grab / Taxi',
+        'Gửi xe',
+        'Bảo dưỡng xe',
+        'Rửa xe',
+      ];
+    }
+    if (catName.contains('mua') || catName.contains('shop') || catName.contains('sắm')) {
+      return const [
+        'Quần áo',
+        'Mỹ phẩm',
+        'Đồ gia dụng',
+        'Shopee',
+        'Siêu thị',
+      ];
+    }
+    if (catName.contains('nhà') || catName.contains('điện') || catName.contains('nước') || catName.contains('hóa đơn') || catName.contains('bill')) {
+      return const [
+        'Tiền điện',
+        'Tiền nước',
+        'Internet',
+        'Tiền phòng / nhà',
+        'Dịch vụ số',
+      ];
+    }
+    if (catName.contains('giải trí') || catName.contains('chơi') || catName.contains('entertain')) {
+      return const [
+        'Xem phim',
+        'Du lịch',
+        'Game / Net',
+        'Sách / Khóa học',
+        'Gặp bạn bè',
+      ];
+    }
+    if (catName.contains('sức khỏe') || catName.contains('thuốc') || catName.contains('y tế') || catName.contains('health')) {
+      return const [
+        'Mua thuốc',
+        'Khám bệnh',
+        'Gym / Thể thao',
+        'Thực phẩm bổ sung',
+      ];
+    }
+
+    return const [
+      'Ăn uống',
+      'Cà phê',
+      'Đổ xăng',
+      'Mua sắm',
+      'Gia đình',
+      'Chi tiêu khác',
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final suggestions = _getCategorySuggestedNotes();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const AppleSquircleBadge(
+                icon: CupertinoIcons.pencil_ellipsis_rectangle,
+                backgroundColor: AppleTokens.systemYellow,
+                size: 38,
+                iconSize: 20,
+                radius: 10,
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: ListenableBuilder(
+                  listenable: noteController,
+                  builder: (context, _) {
+                    return TextFormField(
+                      controller: noteController,
+                      textCapitalization: TextCapitalization.sentences,
+                      maxLines: null,
+                      maxLength: 1000,
+                      style: const TextStyle(fontSize: 15),
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                        hintText: l10n.noteHint,
+                        hintStyle: TextStyle(
+                          fontSize: 14,
+                          color: isDark ? const Color(0xFF6C6C70) : const Color(0xFF8E8E93),
+                        ),
+                        counterText: '',
+                        suffixIcon: noteController.text.isNotEmpty
+                            ? GestureDetector(
+                                onTap: () {
+                                  noteController.clear();
+                                  HapticFeedback.lightImpact();
+                                },
+                                child: const Icon(
+                                  CupertinoIcons.clear_circled_solid,
+                                  size: 18,
+                                  color: AppleTokens.systemGray,
+                                ),
+                              )
+                            : null,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: Row(
+                    children: [
+                      const Icon(CupertinoIcons.lightbulb, size: 12, color: AppleTokens.systemYellow),
+                      const SizedBox(width: 4),
+                      Text(
+                        l10n.suggestedNotes,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? const Color(0xFF98989F) : const Color(0xFF6E6E73),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                    ],
+                  ),
+                ),
+                for (final note in suggestions)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: ApplePressable(
+                      scaleDown: 0.92,
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        noteController.text = note;
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
+                          borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                          border: Border.all(
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.10)
+                                : Colors.black.withValues(alpha: 0.06),
+                            width: AppleTokens.hairline,
+                          ),
+                        ),
+                        child: Text(
+                          note,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? const Color(0xFFE5E5EA) : const Color(0xFF3A3A3C),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Smart Tag Section with chip pills, interactive inline input, and dynamic frequently used tags.
+class _SmartTagsSection extends ConsumerWidget {
+  const _SmartTagsSection({
+    required this.selectedTags,
+    required this.tagInputController,
+    required this.onAddTag,
+    required this.onRemoveTag,
+    required this.isDark,
+  });
+
+  final List<String> selectedTags;
+  final TextEditingController tagInputController;
+  final ValueChanged<String> onAddTag;
+  final ValueChanged<String> onRemoveTag;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final allTxs = ref.watch(transactionsStreamProvider).value ?? const [];
+
+    // Calculate frequent tags
+    final Map<String, int> tagCounts = {};
+    for (final tx in allTxs) {
+      for (final tag in tx.tags) {
+        final clean = tag.trim().replaceAll('#', '');
+        if (clean.isNotEmpty) {
+          tagCounts[clean] = (tagCounts[clean] ?? 0) + 1;
+        }
+      }
+    }
+
+    // Default suggestions fallback
+    const defaultTags = ['thiết yếu', 'cố định', 'gia đình', 'công việc', 'bạn bè', 'phát sinh'];
+    for (final dt in defaultTags) {
+      tagCounts.putIfAbsent(dt, () => 0);
+    }
+
+    final sortedFrequentTags = tagCounts.keys.toList()
+      ..sort((a, b) => (tagCounts[b] ?? 0).compareTo(tagCounts[a] ?? 0));
+
+    final availableFrequent = sortedFrequentTags.where((t) => !selectedTags.contains(t)).take(8).toList();
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const AppleSquircleBadge(
+                icon: CupertinoIcons.tag,
+                backgroundColor: AppleTokens.systemPink,
+                size: 38,
+                iconSize: 18,
+                radius: 10,
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Active tags chips wrap
+                    if (selectedTags.isNotEmpty) ...[
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: [
+                          for (final tag in selectedTags)
+                            Container(
+                              padding: const EdgeInsets.fromLTRB(10, 4, 6, 4),
+                              decoration: BoxDecoration(
+                                color: AppleTokens.systemPink.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                                border: Border.all(
+                                  color: AppleTokens.systemPink.withValues(alpha: 0.35),
+                                  width: AppleTokens.hairline,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    '#$tag',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppleTokens.systemPink,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  GestureDetector(
+                                    onTap: () => onRemoveTag(tag),
+                                    child: const Icon(
+                                      CupertinoIcons.xmark_circle_fill,
+                                      size: 15,
+                                      color: AppleTokens.systemPink,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+
+                    // Tag Input Field with + Add button
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: tagInputController,
+                            textInputAction: TextInputAction.done,
+                            onFieldSubmitted: (val) {
+                              if (val.trim().isNotEmpty) {
+                                onAddTag(val.trim());
+                              }
+                            },
+                            onChanged: (val) {
+                              if (val.endsWith(',') || val.endsWith(' ')) {
+                                final clean = val.replaceAll(',', '').trim();
+                                if (clean.isNotEmpty) {
+                                  onAddTag(clean);
+                                }
+                              }
+                            },
+                            style: const TextStyle(fontSize: 14),
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(vertical: 6),
+                              hintText: selectedTags.isEmpty ? l10n.tagsHint : l10n.addTagHint,
+                              hintStyle: TextStyle(
+                                fontSize: 13,
+                                color: isDark ? const Color(0xFF6C6C70) : const Color(0xFF8E8E93),
+                              ),
+                            ),
+                          ),
+                        ),
+                        ListenableBuilder(
+                          listenable: tagInputController,
+                          builder: (context, _) {
+                            if (tagInputController.text.trim().isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+                            return ApplePressable(
+                              scaleDown: 0.92,
+                              onTap: () {
+                                final text = tagInputController.text.trim();
+                                if (text.isNotEmpty) {
+                                  onAddTag(text);
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: AppleTokens.systemPink,
+                                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                                ),
+                                child: Text(
+                                  l10n.addTag,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          // Frequent Tags Suggestion Bar
+          if (availableFrequent.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: Row(
+                      children: [
+                        const Icon(CupertinoIcons.tag_circle, size: 13, color: AppleTokens.systemPink),
+                        const SizedBox(width: 4),
+                        Text(
+                          l10n.frequentTags,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? const Color(0xFF98989F) : const Color(0xFF6E6E73),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                      ],
+                    ),
+                  ),
+                  for (final tag in availableFrequent)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: ApplePressable(
+                        scaleDown: 0.92,
+                        onTap: () => onAddTag(tag),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
+                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                            border: Border.all(
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.10)
+                                  : Colors.black.withValues(alpha: 0.06),
+                              width: AppleTokens.hairline,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '#$tag',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppleTokens.systemPink.withValues(alpha: 0.9),
+                                ),
+                              ),
+                              const SizedBox(width: 2),
+                              const Icon(CupertinoIcons.plus, size: 10, color: AppleTokens.systemPink),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

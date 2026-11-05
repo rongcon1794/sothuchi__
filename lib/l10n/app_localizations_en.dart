@@ -304,10 +304,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noteHint => 'Add a short note (e.g., Lunch with team)...';
 
   @override
-  String get tags => 'Tags (comma-separated)';
+  String get suggestedNotes => 'Suggested notes';
+
+  @override
+  String get tags => 'Tags';
 
   @override
   String get tagsHint => 'e.g., work, family';
+
+  @override
+  String get frequentTags => 'Frequent tags';
+
+  @override
+  String get addTag => 'Add tag';
+
+  @override
+  String get addTagHint => 'Type a tag name and tap Add or Enter...';
+
+  @override
+  String get zeroSuggestions => 'Zero suggestions';
 
   @override
   String get searchTransactionsHint => 'Search notes or tags...';

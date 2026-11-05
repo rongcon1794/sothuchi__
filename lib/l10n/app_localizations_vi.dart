@@ -304,10 +304,25 @@ class AppLocalizationsVi extends AppLocalizations {
   String get noteHint => 'Thêm mô tả ngắn (VD: Ăn trưa cùng đồng nghiệp)...';
 
   @override
-  String get tags => 'Thẻ (phân cách bằng dấu phẩy)';
+  String get suggestedNotes => 'Gợi ý mô tả';
+
+  @override
+  String get tags => 'Thẻ phân loại';
 
   @override
   String get tagsHint => 'VD: công tác, gia đình';
+
+  @override
+  String get frequentTags => 'Thẻ hay dùng';
+
+  @override
+  String get addTag => 'Thêm thẻ';
+
+  @override
+  String get addTagHint => 'Nhập tên thẻ rồi bấm Thêm hoặc Enter...';
+
+  @override
+  String get zeroSuggestions => 'Gợi ý thêm số 0';
 
   @override
   String get searchTransactionsHint => 'Tìm theo ghi chú hoặc thẻ...';

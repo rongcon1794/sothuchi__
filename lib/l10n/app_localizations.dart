@@ -668,10 +668,16 @@ abstract class AppLocalizations {
   /// **'Thêm mô tả ngắn (VD: Ăn trưa cùng đồng nghiệp)...'**
   String get noteHint;
 
+  /// No description provided for @suggestedNotes.
+  ///
+  /// In vi, this message translates to:
+  /// **'Gợi ý mô tả'**
+  String get suggestedNotes;
+
   /// No description provided for @tags.
   ///
   /// In vi, this message translates to:
-  /// **'Thẻ (phân cách bằng dấu phẩy)'**
+  /// **'Thẻ phân loại'**
   String get tags;
 
   /// No description provided for @tagsHint.
@@ -679,6 +685,30 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'VD: công tác, gia đình'**
   String get tagsHint;
+
+  /// No description provided for @frequentTags.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thẻ hay dùng'**
+  String get frequentTags;
+
+  /// No description provided for @addTag.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thêm thẻ'**
+  String get addTag;
+
+  /// No description provided for @addTagHint.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhập tên thẻ rồi bấm Thêm hoặc Enter...'**
+  String get addTagHint;
+
+  /// No description provided for @zeroSuggestions.
+  ///
+  /// In vi, this message translates to:
+  /// **'Gợi ý thêm số 0'**
+  String get zeroSuggestions;
 
   /// No description provided for @searchTransactionsHint.
   ///

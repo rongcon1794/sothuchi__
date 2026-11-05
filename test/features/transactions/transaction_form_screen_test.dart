@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -198,6 +199,77 @@ void main() {
       expect(find.text('Tất cả'), findsOneWidget);
       expect(find.text('Khác'), findsOneWidget);
       expect(find.text('Thêm'), findsOneWidget);
+    });
+
+    testWidgets('shows smart zero suggestions when entering amount and sets value on tap', (tester) async {
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pumpAndSettle();
+
+      // Enter '5' in amount field
+      final amountField = find.byType(TextField).first;
+      await tester.enterText(amountField, '5');
+      await tester.pumpAndSettle();
+
+      // Suggestions should appear: 500, 5.000, 50.000, +00, +000
+      expect(find.text('+00'), findsWidgets);
+      expect(find.text('+000'), findsWidgets);
+      expect(find.text('500'), findsOneWidget);
+      expect(find.text('5.000'), findsOneWidget);
+      expect(find.text('50.000'), findsOneWidget);
+
+      // Tap '50.000'
+      await tester.tap(find.text('50.000'));
+      await tester.pumpAndSettle();
+
+      // Amount field text should now be '50.000'
+      expect(find.text('50.000'), findsWidgets);
+    });
+
+    testWidgets('tapping suggested note sets note text and clear button clears it', (tester) async {
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pumpAndSettle();
+
+      // Scroll down to Note section
+      await tester.ensureVisible(find.text('Ăn sáng'));
+      await tester.pumpAndSettle();
+
+      // Tap suggested note 'Ăn sáng'
+      expect(find.text('Ăn sáng'), findsOneWidget);
+      await tester.tap(find.text('Ăn sáng'));
+      await tester.pumpAndSettle();
+
+      // Note should now contain 'Ăn sáng'
+      expect(find.text('Ăn sáng'), findsWidgets);
+
+      // Clear button should be visible and clear it
+      final clearIcon = find.byIcon(CupertinoIcons.clear_circled_solid);
+      expect(clearIcon, findsOneWidget);
+      await tester.tap(clearIcon);
+      await tester.pumpAndSettle();
+      expect(find.byIcon(CupertinoIcons.clear_circled_solid), findsNothing);
+    });
+
+    testWidgets('tapping frequent tag adds tag chip and delete button removes it', (tester) async {
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pumpAndSettle();
+
+      // Scroll down to Tags section
+      await tester.ensureVisible(find.text('#thiết yếu'));
+      await tester.pumpAndSettle();
+
+      // Frequent tags row contains '#thiết yếu'
+      expect(find.text('#thiết yếu'), findsOneWidget);
+      await tester.tap(find.text('#thiết yếu'));
+      await tester.pumpAndSettle();
+
+      // Tag chip with delete icon should now be active
+      final deleteChip = find.byIcon(CupertinoIcons.xmark_circle_fill);
+      expect(deleteChip, findsOneWidget);
+
+      // Tap delete icon to remove tag
+      await tester.tap(deleteChip);
+      await tester.pumpAndSettle();
+      expect(find.byIcon(CupertinoIcons.xmark_circle_fill), findsNothing);
     });
   });
 }
