@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
+import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/date_formatter.dart';
@@ -83,8 +84,16 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
         .where((p) => p.isWarningTriggered)
         .toList(growable: false);
 
+    final isLandscape = context.isLandscape;
+    final isWide = context.isWideScreen;
+
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.budgetsTitle)),
+      appBar: AppBar(
+        toolbarHeight: isLandscape
+            ? AppleTokens.appBarHeightLandscape
+            : AppleTokens.appBarHeightPortrait,
+        title: Text(l10n.budgetsTitle),
+      ),
       body: Column(
         children: [
           // Month Switcher Bar
@@ -175,47 +184,54 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
                     );
                   }
 
-                  return ListView(
-                    padding: const EdgeInsets.fromLTRB(
-                      16,
-                      4,
-                      16,
-                      AppleTokens.scrollBottomPaddingWithFab,
-                    ),
-                    children: [
-                      _BudgetOverviewCard(
-                        progressList: progressList,
-                        selectedMonth: selectedMonth,
-                        locale: locale,
-                        hideBalance: hideBalance,
-                      ),
-                      const SizedBox(height: 16),
-                      if (triggered.isNotEmpty) ...[
-                        BudgetAlertBanner(
-                          progressOverride: triggered,
-                          navigateOnTap: false,
+                  return Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 860),
+                      child: ListView(
+                        padding: EdgeInsets.fromLTRB(
+                          16,
+                          4,
+                          16,
+                          isWide
+                              ? AppleTokens.scrollBottomPaddingLandscape + 50
+                              : AppleTokens.scrollBottomPaddingWithFab,
                         ),
-                        const SizedBox(height: 16),
-                      ],
-                      for (final item in progressList) ...[
-                        _BudgetProgressCard(
-                          progress: item,
-                          category: item.budget.categoryId != null
-                              ? categoriesMap[item.budget.categoryId!]
-                              : null,
-                          locale: locale,
-                          hideBalance: hideBalance,
-                          onEdit: () => _openBudgetForm(
-                            context,
+                        children: [
+                          _BudgetOverviewCard(
+                            progressList: progressList,
                             selectedMonth: selectedMonth,
-                            existing: item.budget,
+                            locale: locale,
+                            hideBalance: hideBalance,
                           ),
-                          onDelete: () =>
-                              _deleteBudget(context, item.budget.id),
-                        ),
-                        const SizedBox(height: 12),
-                      ],
-                    ],
+                          const SizedBox(height: 16),
+                          if (triggered.isNotEmpty) ...[
+                            BudgetAlertBanner(
+                              progressOverride: triggered,
+                              navigateOnTap: false,
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+                          for (final item in progressList) ...[
+                            _BudgetProgressCard(
+                              progress: item,
+                              category: item.budget.categoryId != null
+                                  ? categoriesMap[item.budget.categoryId!]
+                                  : null,
+                              locale: locale,
+                              hideBalance: hideBalance,
+                              onEdit: () => _openBudgetForm(
+                                context,
+                                selectedMonth: selectedMonth,
+                                existing: item.budget,
+                              ),
+                              onDelete: () =>
+                                  _deleteBudget(context, item.budget.id),
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+                        ],
+                      ),
+                    ),
                   );
                 },
               ),

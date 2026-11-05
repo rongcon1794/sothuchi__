@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
+import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
@@ -104,8 +105,14 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     final categoriesMap = ref.watch(categoriesMapProvider);
     final accountsMap = ref.watch(accountsMapProvider);
 
+    final isLandscape = context.isLandscape;
+    final isWide = context.isWideScreen;
+
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: isLandscape
+            ? AppleTokens.appBarHeightLandscape
+            : AppleTokens.appBarHeightPortrait,
         title: Text(l10n.transactionsTitle),
         actions: [
           Badge(
@@ -303,14 +310,19 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                   );
                 }
 
-                return ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(
-                    16,
-                    4,
-                    16,
-                    AppleTokens.scrollBottomPaddingWithFab,
-                  ),
-                  itemCount: grouped.length,
+                return Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 860),
+                    child: ListView.builder(
+                      padding: EdgeInsets.fromLTRB(
+                        16,
+                        4,
+                        16,
+                        isWide
+                            ? AppleTokens.scrollBottomPaddingLandscape + 50
+                            : AppleTokens.scrollBottomPaddingWithFab,
+                      ),
+                      itemCount: grouped.length,
                   itemBuilder: (context, groupIndex) {
                     final group = grouped[groupIndex];
                     final dayNet = Money(
@@ -420,7 +432,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                       ),
                     );
                   },
-                );
+                ),
+              ),
+            );
               },
             ),
           ),

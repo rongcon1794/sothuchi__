@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
+import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/date_formatter.dart';
@@ -94,6 +95,9 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: context.isLandscape
+            ? AppleTokens.appBarHeightLandscape
+            : AppleTokens.appBarHeightPortrait,
         title: Text(l10n.reportsTitle),
         actions: [
           IconButton(
@@ -175,213 +179,218 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                   );
                 }
 
-                return ListView(
-                  padding: const EdgeInsets.fromLTRB(
-                    16,
-                    4,
-                    16,
-                    AppleTokens.scrollBottomPaddingNoFab,
-                  ),
-                  children: [
-                    // Monthly Summary Grid
-                    _MonthlySummaryHeader(
-                      report: report,
-                      locale: locale,
-                      hideBalance: hideBalance,
-                    ),
-                    const SizedBox(height: 16),
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isLandscape = context.isLandscape;
+                    final isWide = constraints.maxWidth >= 640 || isLandscape;
+                    final scrollBottomPadding = isWide
+                        ? AppleTokens.scrollBottomPaddingLandscape + 20
+                        : AppleTokens.scrollBottomPaddingNoFab;
 
-                    // Financial Health Insights
-                    FinancialHealthCard(
-                      report: report,
-                      locale: locale,
-                      hideBalance: hideBalance,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Daily Spending Heatmap Grid
-                    AppleSpendingHeatmap(
-                      report: report,
-                      locale: locale,
-                      hideBalance: hideBalance,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Donut Chart: Expense by Category
-                    AppleGlassCard(
+                    final donutChartCard = AppleGlassCard(
                       padding: const EdgeInsets.all(16),
                       borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
                       child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.expenseByCategory,
-                              style: theme.textTheme.titleMedium,
-                            ),
-                            const SizedBox(height: 16),
-                            if (report.categorySlices.isEmpty)
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 20,
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    l10n.noReportDataTitle,
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: theme.colorScheme.onSurfaceVariant,
-                                    ),
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.expenseByCategory,
+                            style: theme.textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 16),
+                          if (report.categorySlices.isEmpty)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 20,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  l10n.noReportDataTitle,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
                                   ),
                                 ),
-                              )
-                            else
-                              LayoutBuilder(
-                                builder: (context, constraints) {
-                                  final isWide = constraints.maxWidth >= 600;
-
-                                  if (isWide) {
-                                    // Wide Landscape / Tablet: Side-by-side 2-column layout
-                                    return Row(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        _buildPieChartWidget(
-                                          report: report,
-                                          theme: theme,
-                                          locale: locale,
-                                          hideBalance: hideBalance,
-                                          l10n: l10n,
-                                          height: 230,
-                                          diameter: 230,
-                                        ),
-                                        const SizedBox(width: 24),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              for (final slice in report.categorySlices) ...[
-                                                _CategoryLegendRow(
-                                                  slice: slice,
-                                                  locale: locale,
-                                                  hideBalance: hideBalance,
-                                                ),
-                                                const SizedBox(height: 10),
-                                              ],
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    );
-                                  }
-
-                                  // Narrow Portrait: Centered stacked layout
-                                  return Column(
-                                    children: [
-                                      Center(
-                                        child: _buildPieChartWidget(
-                                          report: report,
-                                          theme: theme,
-                                          locale: locale,
-                                          hideBalance: hideBalance,
-                                          l10n: l10n,
-                                          height: 210,
-                                          diameter: 210,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      for (final slice in report.categorySlices) ...[
-                                        _CategoryLegendRow(
-                                          slice: slice,
-                                          locale: locale,
-                                          hideBalance: hideBalance,
-                                        ),
-                                        const SizedBox(height: 10),
-                                      ],
-                                    ],
-                                  );
-                                },
                               ),
-                          ],
-                        ),
-                      ),
-                    const SizedBox(height: 16),
-
-                    // Bar Chart: 6-Month Income vs Expense Trend
-                    AppleGlassCard(
-                      padding: const EdgeInsets.all(16),
-                      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.incomeVsExpenseTrend,
-                              style: theme.textTheme.titleMedium,
-                            ),
-                            const SizedBox(height: 10),
-                            Wrap(
-                              spacing: 16,
-                              runSpacing: 6,
-                              children: [
-                                _LegendDot(
-                                  color: context.financeColors.income,
-                                  label: l10n.income,
-                                ),
-                                _LegendDot(
-                                  color: context.financeColors.expense,
-                                  label: l10n.expense,
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 20),
+                            )
+                          else
                             LayoutBuilder(
                               builder: (context, constraints) {
-                                final isWide = constraints.maxWidth >= 600;
+                                final isLocalWide = constraints.maxWidth >= 600;
 
-                                if (isWide) {
-                                  // Wide Landscape / Tablet: 2-column layout (Chart on left, 6M Summary on right)
+                                if (isLocalWide) {
+                                  // Wide Landscape / Tablet: Side-by-side 2-column layout
                                   return Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
-                                      Expanded(
-                                        flex: 3,
-                                        child: SizedBox(
-                                          height: 240,
-                                          child: _SixMonthTrendBarChart(
-                                            bars: report.sixMonthTrend,
-                                            locale: locale,
-                                            hideBalance: hideBalance,
-                                            isWide: true,
-                                          ),
-                                        ),
+                                      _buildPieChartWidget(
+                                        report: report,
+                                        theme: theme,
+                                        locale: locale,
+                                        hideBalance: hideBalance,
+                                        l10n: l10n,
+                                        height: 230,
+                                        diameter: 230,
                                       ),
-                                      const SizedBox(width: 20),
+                                      const SizedBox(width: 24),
                                       Expanded(
-                                        flex: 2,
-                                        child: _SixMonthSummaryPanel(
-                                          bars: report.sixMonthTrend,
-                                          currencyCode: report.currencyCode,
-                                          locale: locale,
-                                          hideBalance: hideBalance,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            for (final slice in report.categorySlices) ...[
+                                              _CategoryLegendRow(
+                                                slice: slice,
+                                                locale: locale,
+                                                hideBalance: hideBalance,
+                                              ),
+                                              const SizedBox(height: 10),
+                                            ],
+                                          ],
                                         ),
                                       ),
                                     ],
                                   );
                                 }
 
-                                // Narrow Portrait: Stacked
-                                return SizedBox(
-                                  height: 230,
-                                  child: _SixMonthTrendBarChart(
-                                    bars: report.sixMonthTrend,
-                                    locale: locale,
-                                    hideBalance: hideBalance,
-                                  ),
+                                // Narrow Portrait: Centered stacked layout
+                                return Column(
+                                  children: [
+                                    Center(
+                                      child: _buildPieChartWidget(
+                                        report: report,
+                                        theme: theme,
+                                        locale: locale,
+                                        hideBalance: hideBalance,
+                                        l10n: l10n,
+                                        height: 210,
+                                        diameter: 210,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    for (final slice in report.categorySlices) ...[
+                                      _CategoryLegendRow(
+                                        slice: slice,
+                                        locale: locale,
+                                        hideBalance: hideBalance,
+                                      ),
+                                      const SizedBox(height: 10),
+                                    ],
+                                  ],
                                 );
                               },
                             ),
+                        ],
+                      ),
+                    );
+
+                    final barChartCard = AppleGlassCard(
+                      padding: const EdgeInsets.all(16),
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.incomeVsExpenseTrend,
+                            style: theme.textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 16,
+                            runSpacing: 6,
+                            children: [
+                              _LegendDot(
+                                color: context.financeColors.income,
+                                label: l10n.income,
+                              ),
+                              _LegendDot(
+                                color: context.financeColors.expense,
+                                label: l10n.expense,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final isLocalWide = constraints.maxWidth >= 600;
+
+                              if (isLocalWide) {
+                                // Wide Landscape / Tablet: 2-column layout (Chart on left, 6M Summary on right)
+                                return Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      flex: 3,
+                                      child: SizedBox(
+                                        height: 240,
+                                        child: _SixMonthTrendBarChart(
+                                          bars: report.sixMonthTrend,
+                                          locale: locale,
+                                          hideBalance: hideBalance,
+                                          isWide: true,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 20),
+                                    Expanded(
+                                      flex: 2,
+                                      child: _SixMonthSummaryPanel(
+                                        bars: report.sixMonthTrend,
+                                        currencyCode: report.currencyCode,
+                                        locale: locale,
+                                        hideBalance: hideBalance,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }
+
+                              // Narrow Portrait: Stacked
+                              return SizedBox(
+                                height: 230,
+                                child: _SixMonthTrendBarChart(
+                                  bars: report.sixMonthTrend,
+                                  locale: locale,
+                                  hideBalance: hideBalance,
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+
+                    return Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 900),
+                        child: ListView(
+                          padding: EdgeInsets.fromLTRB(16, 4, 16, scrollBottomPadding),
+                          children: [
+                            _MonthlySummaryHeader(
+                              report: report,
+                              locale: locale,
+                              hideBalance: hideBalance,
+                            ),
+                            const SizedBox(height: 16),
+                            FinancialHealthCard(
+                              report: report,
+                              locale: locale,
+                              hideBalance: hideBalance,
+                            ),
+                            const SizedBox(height: 16),
+                            AppleSpendingHeatmap(
+                              report: report,
+                              locale: locale,
+                              hideBalance: hideBalance,
+                            ),
+                            const SizedBox(height: 16),
+                            donutChartCard,
+                            const SizedBox(height: 16),
+                            barChartCard,
                           ],
                         ),
                       ),
-                  ],
+                    );
+                  },
                 );
               },
             ),

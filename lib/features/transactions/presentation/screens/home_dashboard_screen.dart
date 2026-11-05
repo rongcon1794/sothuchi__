@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
+import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
@@ -101,13 +102,19 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
 
     final walletStripHeight = math.max(96.0, 74.0 * textScale);
 
+    final isLandscape = context.isLandscape;
+    final appBarHeight = isLandscape
+        ? AppleTokens.appBarHeightLandscape
+        : AppleTokens.appBarHeightPortrait;
+
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: appBarHeight,
         title: Row(
           children: [
-            const Padding(
-              padding: EdgeInsets.only(right: 10),
-              child: SoThuChiLogo(size: 36),
+            Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: SoThuChiLogo(size: isLandscape ? 28 : 36),
             ),
             Expanded(
               child: Builder(
@@ -187,21 +194,14 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
           }
           return false;
         },
-        child: RefreshIndicator(
-          onRefresh: () async {
-            ref
-              ..invalidate(accountsStreamProvider)
-              ..invalidate(transactionsStreamProvider)
-              ..invalidate(categoriesStreamProvider);
-          },
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(
-              16,
-              8,
-              16,
-              AppleTokens.scrollBottomPaddingWithFab,
-            ),
-            children: [
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isWide = constraints.maxWidth >= 720;
+            final scrollBottomPadding = isWide
+                ? AppleTokens.scrollBottomPaddingLandscape + 50
+                : AppleTokens.scrollBottomPaddingWithFab;
+
+            final balanceCoreWidgets = <Widget>[
               // Hero Total Balance Card
               _HeroBalanceCard(
                 totalBalance: totalBalance,
@@ -262,14 +262,16 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
               // Budget alert slot (injected by Budgets feature in Milestone e)
               ?budgetAlertBanner,
               if (budgetAlertBanner != null) const SizedBox(height: 16),
+            ];
 
+            final activityAndWalletsWidgets = <Widget>[
               // This Month's Income vs Expense Cards
               Text(
                 '${l10n.thisMonthSummary} • ${AppDateUtils.formatMonthYear(DateTime.now(), locale: locale)}',
                 style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 10),
-              if (isLargeText)
+              if (isLargeText && !isWide)
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -441,8 +443,47 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                   );
                 },
               ),
-            ],
-          ),
+            ];
+
+            return RefreshIndicator(
+              onRefresh: () async {
+                ref
+                  ..invalidate(accountsStreamProvider)
+                  ..invalidate(transactionsStreamProvider)
+                  ..invalidate(categoriesStreamProvider);
+              },
+              child: ListView(
+                padding: EdgeInsets.fromLTRB(16, 8, 16, scrollBottomPadding),
+                children: [
+                  if (isWide)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 44,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: balanceCoreWidgets,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          flex: 56,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: activityAndWalletsWidgets,
+                          ),
+                        ),
+                      ],
+                    )
+                  else ...[
+                    ...balanceCoreWidgets,
+                    ...activityAndWalletsWidgets,
+                  ],
+                ],
+              ),
+            );
+          },
         ),
       ),
       floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
@@ -1069,56 +1110,121 @@ class _SmartSpendingPaceCard extends StatelessWidget {
                   children: [
                     Icon(statusIcon, size: 12, color: statusColor),
                     const SizedBox(width: 4),
-                    Text(
-                      statusText,
-                      style: TextStyle(
-                        color: statusColor,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 11,
+                    Flexible(
+                      child: Text(
+                        statusText,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: statusColor,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 11,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
             ] else ...[
-              Row(
-                children: [
-                  AppleSquircleBadge(
-                    icon: CupertinoIcons.gauge,
-                    color: statusColor,
-                    size: 28,
-                    iconSize: 15,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      l10n.smartPaceTitle,
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: statusColor.withValues(alpha: isDark ? 0.22 : 0.12),
-                      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+              LayoutBuilder(
+                builder: (context, c) {
+                  if (c.maxWidth < 340) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(statusIcon, size: 12, color: statusColor),
-                        const SizedBox(width: 4),
-                        Text(
-                          statusText,
-                          style: TextStyle(
-                            color: statusColor,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 11,
+                        Row(
+                          children: [
+                            AppleSquircleBadge(
+                              icon: CupertinoIcons.gauge,
+                              color: statusColor,
+                              size: 26,
+                              iconSize: 14,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                l10n.smartPaceTitle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: statusColor.withValues(alpha: isDark ? 0.22 : 0.12),
+                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(statusIcon, size: 11, color: statusColor),
+                              const SizedBox(width: 4),
+                              Text(
+                                statusText,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: statusColor,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 10.5,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
-                    ),
-                  ),
-                ],
+                    );
+                  }
+
+                  return Row(
+                    children: [
+                      AppleSquircleBadge(
+                        icon: CupertinoIcons.gauge,
+                        color: statusColor,
+                        size: 28,
+                        iconSize: 15,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          l10n.smartPaceTitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: statusColor.withValues(alpha: isDark ? 0.22 : 0.12),
+                          borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(statusIcon, size: 11, color: statusColor),
+                            const SizedBox(width: 4),
+                            Text(
+                              statusText,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: statusColor,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 10.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ],
             const SizedBox(height: 12),
@@ -1168,12 +1274,11 @@ class _SmartSpendingPaceCard extends StatelessWidget {
                 ],
               ),
             ] else ...[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: Column(
+              LayoutBuilder(
+                builder: (context, c) {
+                  final isCompactCard = c.maxWidth < 340;
+                  if (isCompactCard) {
+                    return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
@@ -1197,32 +1302,96 @@ class _SmartSpendingPaceCard extends StatelessWidget {
                             ),
                           ),
                         ),
+                        const SizedBox(height: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.08)
+                                : AppleTokens.bgLightSecondary,
+                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                            border: Border.all(
+                              color: isDark ? Colors.white.withValues(alpha: 0.12) : AppleTokens.borderLight,
+                              width: AppleTokens.hairline,
+                            ),
+                          ),
+                          child: Text(
+                            l10n.smartPaceDaysLeft(daysRemaining),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppleTokens.systemGray,
+                            ),
+                          ),
+                        ),
                       ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.08)
-                          : AppleTokens.bgLightSecondary,
-                      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                      border: Border.all(
-                        color: isDark ? Colors.white.withValues(alpha: 0.12) : AppleTokens.borderLight,
-                        width: AppleTokens.hairline,
+                    );
+                  }
+
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.smartPaceSafeToSpend,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                safeDailyMoney.format(locale: locale, masked: hideBalance),
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w800,
+                                  color: isDark ? Colors.white : theme.colorScheme.onSurface,
+                                  fontFeatures: AppTheme.tabularFigures,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      l10n.smartPaceDaysLeft(daysRemaining),
-                      style: const TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w600,
-                        color: AppleTokens.systemGray,
+                      const SizedBox(width: 8),
+                      Flexible(
+                        flex: 0,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.08)
+                                : AppleTokens.bgLightSecondary,
+                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                            border: Border.all(
+                              color: isDark ? Colors.white.withValues(alpha: 0.12) : AppleTokens.borderLight,
+                              width: AppleTokens.hairline,
+                            ),
+                          ),
+                          child: Text(
+                            l10n.smartPaceDaysLeft(daysRemaining),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                              color: AppleTokens.systemGray,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ],
+                    ],
+                  );
+                },
               ),
             ],
           ],
