@@ -778,7 +778,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('TransactionsScreen merges search and type filter into AppBar on Landscape and hides body search bar', (tester) async {
+    testWidgets('TransactionsScreen renders quick search and type filter chips in body (not fixed in header) on Landscape', (tester) async {
       // 1. Portrait mode (390x844): AppBar title is simple Text, search TextField is in body
       tester.view.physicalSize = const Size(390, 844);
       tester.view.devicePixelRatio = 1.0;
@@ -795,7 +795,7 @@ void main() {
       // In portrait: 1 TextField (in body)
       expect(find.byType(TextField), findsOneWidget);
 
-      // 2. Landscape mode (844x390): AppBar title contains search field and type filter popup
+      // 2. Landscape mode (844x390): AppBar header is uncluttered, quick filter is in body
       tester.view.physicalSize = const Size(844, 390);
       await tester.pumpWidget(
         buildAppWithScreen(
@@ -805,21 +805,21 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // In landscape: exactly 1 TextField (now in AppBar header, body search bar is hidden)
+      // In landscape: exactly 1 TextField (in body, not in AppBar header)
       expect(find.byType(TextField), findsOneWidget);
 
-      // Verify PopupMenuButton for type filter is present in header
-      expect(find.byType(PopupMenuButton<TransactionType?>), findsOneWidget);
+      // Verify AppBar title is clean and simple
+      final appBarFinder = find.byType(AppBar);
+      expect(find.descendant(of: appBarFinder, matching: find.text('Sổ giao dịch')), findsOneWidget);
+      expect(find.descendant(of: appBarFinder, matching: find.byType(TextField)), findsNothing);
 
-      // Type filter popup opens and shows choices
-      await tester.tap(find.byType(PopupMenuButton<TransactionType?>));
-      await tester.pumpAndSettle();
-
+      // Verify type filter chips are available in body
+      expect(find.byType(FilterChip), findsWidgets);
       expect(find.text('Chi tiêu'), findsOneWidget);
       expect(find.text('Thu nhập'), findsOneWidget);
       expect(find.text('Chuyển khoản'), findsOneWidget);
 
-      // Tap 'Chi tiêu'
+      // Tap 'Chi tiêu' chip
       await tester.tap(find.text('Chi tiêu'));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
