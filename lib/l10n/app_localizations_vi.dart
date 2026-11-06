@@ -105,6 +105,13 @@ class AppLocalizationsVi extends AppLocalizations {
   String get deleteAccountAction => 'Xóa vĩnh viễn';
 
   @override
+  String get dangerZoneSection => 'VÙNG NGUY HIỂM';
+
+  @override
+  String get deleteDataAndAccountSubtitle =>
+      'Xóa vĩnh viễn toàn bộ dữ liệu, giao dịch và tài khoản';
+
+  @override
   String get cancel => 'Hủy';
 
   @override

@@ -436,32 +436,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  // Space-Optimized Quick Action Icons for Account
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AppleIconButton(
-                        icon: Icons.logout_rounded,
-                        tooltip: l10n.signOut,
-                        size: 36,
-                        iconSize: 18,
-                        foregroundColor: AppleTokens.systemOrange,
-                        backgroundColor: AppleTokens.systemOrange.withValues(alpha: 0.12),
-                        borderColor: AppleTokens.systemOrange.withValues(alpha: 0.22),
-                        onTap: authBusy ? null : _confirmSignOut,
-                      ),
-                      const SizedBox(width: 6),
-                      AppleIconButton(
-                        icon: Icons.delete_forever_rounded,
-                        tooltip: l10n.deleteAccount,
-                        size: 36,
-                        iconSize: 18,
-                        foregroundColor: AppleTokens.systemRed,
-                        backgroundColor: AppleTokens.systemRed.withValues(alpha: 0.12),
-                        borderColor: AppleTokens.systemRed.withValues(alpha: 0.22),
-                        onTap: authBusy ? null : _confirmDeleteAccount,
-                      ),
-                    ],
+                  // Quick Action: Sign Out only (safely separated from destructive actions)
+                  AppleIconButton(
+                    icon: Icons.logout_rounded,
+                    tooltip: l10n.signOut,
+                    size: 38,
+                    iconSize: 19,
+                    foregroundColor: AppleTokens.systemOrange,
+                    backgroundColor: AppleTokens.systemOrange.withValues(alpha: 0.12),
+                    borderColor: AppleTokens.systemOrange.withValues(alpha: 0.22),
+                    onTap: authBusy ? null : _confirmSignOut,
                   ),
                 ],
               ),
@@ -881,6 +865,48 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ],
           ),
+
+          // Section 5: Danger Zone (Xóa dữ liệu & tài khoản tách riêng biệt để tránh bấm nhầm)
+          if (user != null) ...[
+            AppleListGroup(
+              header: l10n.dangerZoneSection,
+              margin: const EdgeInsets.only(bottom: 32),
+              children: [
+                ListTile(
+                  leading: const AppleSquircleBadge(
+                    icon: Icons.delete_forever_rounded,
+                    backgroundColor: AppleTokens.systemRed,
+                  ),
+                  title: Text(
+                    l10n.deleteAccount,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: AppleTokens.systemRed,
+                    ),
+                  ),
+                  subtitle: Text(
+                    l10n.deleteDataAndAccountSubtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  trailing: authBusy
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(
+                          Icons.chevron_right_rounded,
+                          size: 20,
+                          color: AppleTokens.systemRed,
+                        ),
+                  onTap: authBusy ? null : _confirmDeleteAccount,
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     ),

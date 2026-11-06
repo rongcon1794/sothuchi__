@@ -29,6 +29,8 @@
   "deleteAccountConfirmTitle": "Permanently delete account?",
   "deleteAccountConfirmBody": "All your wallets, categories, transactions, budgets, and profile data will be permanently erased and cannot be undone.",
   "deleteAccountAction": "Delete permanently",
+  "dangerZoneSection": "DANGER ZONE",
+  "deleteDataAndAccountSubtitle": "Permanently erase all data, transactions, and account",
   "cancel": "Cancel",
   "save": "Save",
   "edit": "Edit",

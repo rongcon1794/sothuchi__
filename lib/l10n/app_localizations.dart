@@ -272,6 +272,18 @@ abstract class AppLocalizations {
   /// **'Xóa vĩnh viễn'**
   String get deleteAccountAction;
 
+  /// No description provided for @dangerZoneSection.
+  ///
+  /// In vi, this message translates to:
+  /// **'VÙNG NGUY HIỂM'**
+  String get dangerZoneSection;
+
+  /// No description provided for @deleteDataAndAccountSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Xóa vĩnh viễn toàn bộ dữ liệu, giao dịch và tài khoản'**
+  String get deleteDataAndAccountSubtitle;
+
   /// No description provided for @cancel.
   ///
   /// In vi, this message translates to:

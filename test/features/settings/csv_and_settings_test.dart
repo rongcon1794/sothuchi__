@@ -13,6 +13,7 @@ import 'package:so_thu_chi/data/services/biometric_service.dart';
 import 'package:so_thu_chi/data/services/csv_export_service.dart';
 import 'package:so_thu_chi/features/accounts/data/repositories/firestore_account_repository.dart';
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
+import 'package:so_thu_chi/features/auth/domain/entities/app_user.dart';
 import 'package:so_thu_chi/features/categories/data/datasources/default_categories_catalog.dart';
 import 'package:so_thu_chi/features/categories/data/repositories/firestore_category_repository.dart';
 import 'package:so_thu_chi/features/categories/domain/entities/category.dart';
@@ -162,6 +163,16 @@ void main() {
             accountRepositoryProvider.overrideWithValue(accRepo),
             categoryRepositoryProvider.overrideWithValue(catRepo),
             transactionRepositoryProvider.overrideWithValue(txRepo),
+            currentUserProvider.overrideWithValue(
+              AppUser(
+                uid: 'u1',
+                email: 'test@example.com',
+                displayName: 'Huy Nguyen',
+                isDemoUser: false,
+                createdAt: DateTime(2026, 1, 1),
+                updatedAt: DateTime(2026, 1, 1),
+              ),
+            ),
           ],
           child: MaterialApp(
             locale: const Locale('vi'),
@@ -213,6 +224,16 @@ void main() {
             accountRepositoryProvider.overrideWithValue(accRepo),
             categoryRepositoryProvider.overrideWithValue(catRepo),
             transactionRepositoryProvider.overrideWithValue(txRepo),
+            currentUserProvider.overrideWithValue(
+              AppUser(
+                uid: 'u1',
+                email: 'test@example.com',
+                displayName: 'Huy Nguyen',
+                isDemoUser: false,
+                createdAt: DateTime(2026, 1, 1),
+                updatedAt: DateTime(2026, 1, 1),
+              ),
+            ),
           ],
           child: MaterialApp(
             locale: const Locale('vi'),
@@ -226,6 +247,65 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Gam màu chủ đạo'), findsOneWidget);
+    });
+
+    testWidgets('places delete account & data in dedicated Danger Zone section away from quick actions', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      FlutterSecureStorage.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+      final fakeBio = FakeBiometricService();
+      final fakeCsv = FakeWidgetCsvExportService();
+      final accRepo = InMemoryAccountRepository();
+      final catRepo = InMemoryCategoryRepository();
+      final txRepo = InMemoryTransactionRepository(accountRepo: accRepo);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            biometricServiceProvider.overrideWithValue(fakeBio),
+            csvExportServiceProvider.overrideWithValue(fakeCsv),
+            accountRepositoryProvider.overrideWithValue(accRepo),
+            categoryRepositoryProvider.overrideWithValue(catRepo),
+            transactionRepositoryProvider.overrideWithValue(txRepo),
+            currentUserProvider.overrideWithValue(
+              AppUser(
+                uid: 'u1',
+                email: 'test@example.com',
+                displayName: 'Huy Nguyen',
+                isDemoUser: false,
+                createdAt: DateTime(2026, 1, 1),
+                updatedAt: DateTime(2026, 1, 1),
+              ),
+            ),
+          ],
+          child: MaterialApp(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: AppTheme.light(),
+            home: const SettingsScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Top profile card only has sign-out quick button, no delete button
+      expect(find.byTooltip('Đăng xuất'), findsOneWidget);
+
+      // Scroll to bottom to find Danger Zone
+      await tester.drag(find.byType(ListView).first, const Offset(0, -1200));
+      await tester.pumpAndSettle();
+
+      expect(find.text('VÙNG NGUY HIỂM'), findsOneWidget);
+      expect(find.text('Xóa tài khoản & toàn bộ dữ liệu'), findsOneWidget);
+      expect(find.text('Xóa vĩnh viễn toàn bộ dữ liệu, giao dịch và tài khoản'), findsOneWidget);
     });
   });
 }

@@ -104,6 +104,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteAccountAction => 'Delete permanently';
 
   @override
+  String get dangerZoneSection => 'DANGER ZONE';
+
+  @override
+  String get deleteDataAndAccountSubtitle =>
+      'Permanently erase all data, transactions, and account';
+
+  @override
   String get cancel => 'Cancel';
 
   @override
