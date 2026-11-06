@@ -15,6 +15,7 @@ _AccountDto _$AccountDtoFromJson(Map<String, dynamic> json) => _AccountDto(
   icon: json['icon'] as String? ?? 'wallet',
   color: (json['color'] as num?)?.toInt() ?? 0xFF0D7C66,
   archived: json['archived'] as bool? ?? false,
+  ledgerId: json['ledgerId'] as String? ?? LedgerBook.defaultPersonalId,
   createdAt: const FirestoreDateTimeConverter().fromJson(json['createdAt']),
   updatedAt: const FirestoreDateTimeConverter().fromJson(json['updatedAt']),
   deletedAt: const NullableFirestoreDateTimeConverter().fromJson(
@@ -33,6 +34,7 @@ Map<String, dynamic> _$AccountDtoToJson(
   'icon': instance.icon,
   'color': instance.color,
   'archived': instance.archived,
+  'ledgerId': instance.ledgerId,
   'createdAt': const FirestoreDateTimeConverter().toJson(instance.createdAt),
   'updatedAt': const FirestoreDateTimeConverter().toJson(instance.updatedAt),
   'deletedAt': const NullableFirestoreDateTimeConverter().toJson(

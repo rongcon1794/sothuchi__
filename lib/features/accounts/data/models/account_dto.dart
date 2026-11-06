@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/data/firebase/firestore_timestamp_converter.dart';
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
+import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
 
 part 'account_dto.freezed.dart';
 part 'account_dto.g.dart';
@@ -19,6 +20,7 @@ abstract class AccountDto with _$AccountDto {
     @Default('wallet') String icon,
     @Default(0xFF0D7C66) int color,
     @Default(false) bool archived,
+    @Default(LedgerBook.defaultPersonalId) String ledgerId,
     @FirestoreDateTimeConverter() required DateTime createdAt,
     @FirestoreDateTimeConverter() required DateTime updatedAt,
     @NullableFirestoreDateTimeConverter() DateTime? deletedAt,
@@ -36,6 +38,7 @@ abstract class AccountDto with _$AccountDto {
     icon: entity.icon,
     color: entity.color,
     archived: entity.archived,
+    ledgerId: entity.ledgerId,
     createdAt: entity.createdAt,
     updatedAt: entity.updatedAt,
     deletedAt: entity.deletedAt,
@@ -55,6 +58,7 @@ abstract class AccountDto with _$AccountDto {
       icon: icon,
       color: color,
       archived: archived,
+      ledgerId: ledgerId,
       createdAt: createdAt,
       updatedAt: updatedAt,
       deletedAt: deletedAt,

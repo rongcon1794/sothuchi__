@@ -6,6 +6,7 @@ import 'package:so_thu_chi/core/errors/result.dart';
 import 'package:so_thu_chi/features/accounts/data/models/account_dto.dart';
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
 import 'package:so_thu_chi/features/accounts/domain/repositories/account_repository.dart';
+import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
 import 'package:uuid/uuid.dart';
 
 class FirestoreAccountRepository implements AccountRepository {
@@ -68,6 +69,7 @@ class FirestoreAccountRepository implements AccountRepository {
     required String currency,
     required String icon,
     required int color,
+    String? ledgerId,
   }) async {
     final trimmed = name.trim();
     if (trimmed.isEmpty || trimmed.length > maxNameLength) {
@@ -87,6 +89,9 @@ class FirestoreAccountRepository implements AccountRepository {
         currency: currency,
         icon: icon,
         color: color,
+        ledgerId: (ledgerId ?? '').trim().isEmpty
+            ? LedgerBook.defaultPersonalId
+            : ledgerId!.trim(),
         createdAt: now,
         updatedAt: now,
       );
@@ -255,15 +260,23 @@ class FirestoreAccountRepository implements AccountRepository {
   }
 
   @override
-  Future<Result<void>> ensureDefaultWallet({required String currency}) async {
+  Future<Result<void>> ensureDefaultWallet({
+    required String currency,
+    String? ledgerId,
+  }) async {
+    final effectiveLedgerId = (ledgerId ?? '').trim().isEmpty
+        ? LedgerBook.defaultPersonalId
+        : ledgerId!.trim();
     try {
-      const id = 'default_cash_wallet';
+      final id = effectiveLedgerId == LedgerBook.defaultPersonalId
+          ? 'default_cash_wallet'
+          : 'default_cash_wallet_$effectiveLedgerId';
       final defaultDoc = await _col.doc(id).get();
       if (defaultDoc.exists) {
         return const Success(null);
       }
       final existing = await getAccounts();
-      if (existing.isNotEmpty) {
+      if (existing.any((a) => a.ledgerId == effectiveLedgerId && a.deletedAt == null)) {
         return const Success(null);
       }
       final now = DateTime.now();
@@ -275,6 +288,7 @@ class FirestoreAccountRepository implements AccountRepository {
         currency: currency,
         icon: 'cash',
         color: 0xFF0D7C66,
+        ledgerId: effectiveLedgerId,
         createdAt: now,
         updatedAt: now,
       );
@@ -335,6 +349,7 @@ class InMemoryAccountRepository implements AccountRepository {
     required String currency,
     required String icon,
     required int color,
+    String? ledgerId,
   }) async {
     final trimmed = name.trim();
     if (trimmed.isEmpty ||
@@ -352,6 +367,9 @@ class InMemoryAccountRepository implements AccountRepository {
       currency: currency,
       icon: icon,
       color: color,
+      ledgerId: (ledgerId ?? '').trim().isEmpty
+          ? LedgerBook.defaultPersonalId
+          : ledgerId!.trim(),
       createdAt: now,
       updatedAt: now,
     );
@@ -474,20 +492,30 @@ class InMemoryAccountRepository implements AccountRepository {
   }
 
   @override
-  Future<Result<void>> ensureDefaultWallet({required String currency}) async {
-    if (_items.containsKey('default_cash_wallet') ||
-        _snapshot(includeArchived: true).isNotEmpty) {
+  Future<Result<void>> ensureDefaultWallet({
+    required String currency,
+    String? ledgerId,
+  }) async {
+    final effectiveLedgerId = (ledgerId ?? '').trim().isEmpty
+        ? LedgerBook.defaultPersonalId
+        : ledgerId!.trim();
+    final id = effectiveLedgerId == LedgerBook.defaultPersonalId
+        ? 'default_cash_wallet'
+        : 'default_cash_wallet_$effectiveLedgerId';
+    if (_items.containsKey(id) ||
+        _snapshot(includeArchived: true).any((a) => a.ledgerId == effectiveLedgerId)) {
       return const Success(null);
     }
     final now = DateTime.now();
-    _items['default_cash_wallet'] = Account(
-      id: 'default_cash_wallet',
+    _items[id] = Account(
+      id: id,
       name: 'Tiền mặt',
       type: AccountType.cash,
       balance: 0,
       currency: currency,
       icon: 'cash',
       color: 0xFF0D7C66,
+      ledgerId: effectiveLedgerId,
       createdAt: now,
       updatedAt: now,
     );

@@ -14,6 +14,7 @@ _BudgetDto _$BudgetDtoFromJson(Map<String, dynamic> json) => _BudgetDto(
   period: json['period'] as String? ?? 'month',
   startDate: const FirestoreDateTimeConverter().fromJson(json['startDate']),
   alertThreshold: (json['alertThreshold'] as num?)?.toInt() ?? 80,
+  ledgerId: json['ledgerId'] as String? ?? LedgerBook.defaultPersonalId,
   createdAt: const FirestoreDateTimeConverter().fromJson(json['createdAt']),
   updatedAt: const FirestoreDateTimeConverter().fromJson(json['updatedAt']),
   deletedAt: const NullableFirestoreDateTimeConverter().fromJson(
@@ -31,6 +32,7 @@ Map<String, dynamic> _$BudgetDtoToJson(
   'period': instance.period,
   'startDate': const FirestoreDateTimeConverter().toJson(instance.startDate),
   'alertThreshold': instance.alertThreshold,
+  'ledgerId': instance.ledgerId,
   'createdAt': const FirestoreDateTimeConverter().toJson(instance.createdAt),
   'updatedAt': const FirestoreDateTimeConverter().toJson(instance.updatedAt),
   'deletedAt': const NullableFirestoreDateTimeConverter().toJson(

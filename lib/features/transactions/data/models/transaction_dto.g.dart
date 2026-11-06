@@ -20,6 +20,7 @@ _TransactionDto _$TransactionDtoFromJson(Map<String, dynamic> json) =>
       tags:
           (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
           const <String>[],
+      ledgerId: json['ledgerId'] as String? ?? LedgerBook.defaultPersonalId,
       createdAt: const FirestoreDateTimeConverter().fromJson(json['createdAt']),
       updatedAt: const FirestoreDateTimeConverter().fromJson(json['updatedAt']),
       deletedAt: const NullableFirestoreDateTimeConverter().fromJson(
@@ -40,6 +41,7 @@ Map<String, dynamic> _$TransactionDtoToJson(
   'note': instance.note,
   'date': const FirestoreDateTimeConverter().toJson(instance.date),
   'tags': instance.tags,
+  'ledgerId': instance.ledgerId,
   'createdAt': const FirestoreDateTimeConverter().toJson(instance.createdAt),
   'updatedAt': const FirestoreDateTimeConverter().toJson(instance.updatedAt),
   'deletedAt': const NullableFirestoreDateTimeConverter().toJson(

@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$BudgetDto {
 
- String get id; String? get categoryId; int get amount; String get currency; String get period;@FirestoreDateTimeConverter() DateTime get startDate; int get alertThreshold;@FirestoreDateTimeConverter() DateTime get createdAt;@FirestoreDateTimeConverter() DateTime get updatedAt;@NullableFirestoreDateTimeConverter() DateTime? get deletedAt;
+ String get id; String? get categoryId; int get amount; String get currency; String get period;@FirestoreDateTimeConverter() DateTime get startDate; int get alertThreshold; String get ledgerId;@FirestoreDateTimeConverter() DateTime get createdAt;@FirestoreDateTimeConverter() DateTime get updatedAt;@NullableFirestoreDateTimeConverter() DateTime? get deletedAt;
 /// Create a copy of BudgetDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $BudgetDtoCopyWith<BudgetDto> get copyWith => _$BudgetDtoCopyWithImpl<BudgetDto>
 @override
 bool operator ==(Object other) {
   final _this = this as BudgetDto;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is BudgetDto&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.categoryId, _this.categoryId) || other.categoryId == _this.categoryId)&&(identical(other.amount, _this.amount) || other.amount == _this.amount)&&(identical(other.currency, _this.currency) || other.currency == _this.currency)&&(identical(other.period, _this.period) || other.period == _this.period)&&(identical(other.startDate, _this.startDate) || other.startDate == _this.startDate)&&(identical(other.alertThreshold, _this.alertThreshold) || other.alertThreshold == _this.alertThreshold)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.updatedAt, _this.updatedAt) || other.updatedAt == _this.updatedAt)&&(identical(other.deletedAt, _this.deletedAt) || other.deletedAt == _this.deletedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BudgetDto&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.categoryId, _this.categoryId) || other.categoryId == _this.categoryId)&&(identical(other.amount, _this.amount) || other.amount == _this.amount)&&(identical(other.currency, _this.currency) || other.currency == _this.currency)&&(identical(other.period, _this.period) || other.period == _this.period)&&(identical(other.startDate, _this.startDate) || other.startDate == _this.startDate)&&(identical(other.alertThreshold, _this.alertThreshold) || other.alertThreshold == _this.alertThreshold)&&(identical(other.ledgerId, _this.ledgerId) || other.ledgerId == _this.ledgerId)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.updatedAt, _this.updatedAt) || other.updatedAt == _this.updatedAt)&&(identical(other.deletedAt, _this.deletedAt) || other.deletedAt == _this.deletedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as BudgetDto;
-  return Object.hash(runtimeType,_this.id,_this.categoryId,_this.amount,_this.currency,_this.period,_this.startDate,_this.alertThreshold,_this.createdAt,_this.updatedAt,_this.deletedAt);
+  return Object.hash(runtimeType,_this.id,_this.categoryId,_this.amount,_this.currency,_this.period,_this.startDate,_this.alertThreshold,_this.ledgerId,_this.createdAt,_this.updatedAt,_this.deletedAt);
 }
 
 @override
 String toString() {
   final _this = this as BudgetDto;
-  return 'BudgetDto(id: ${_this.id}, categoryId: ${_this.categoryId}, amount: ${_this.amount}, currency: ${_this.currency}, period: ${_this.period}, startDate: ${_this.startDate}, alertThreshold: ${_this.alertThreshold}, createdAt: ${_this.createdAt}, updatedAt: ${_this.updatedAt}, deletedAt: ${_this.deletedAt})';
+  return 'BudgetDto(id: ${_this.id}, categoryId: ${_this.categoryId}, amount: ${_this.amount}, currency: ${_this.currency}, period: ${_this.period}, startDate: ${_this.startDate}, alertThreshold: ${_this.alertThreshold}, ledgerId: ${_this.ledgerId}, createdAt: ${_this.createdAt}, updatedAt: ${_this.updatedAt}, deletedAt: ${_this.deletedAt})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $BudgetDtoCopyWith<$Res>  {
   factory $BudgetDtoCopyWith(BudgetDto value, $Res Function(BudgetDto) _then) = _$BudgetDtoCopyWithImpl;
 @useResult
 $Res call({
- String id, String? categoryId, int amount, String currency, String period,@FirestoreDateTimeConverter() DateTime startDate, int alertThreshold,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt,@NullableFirestoreDateTimeConverter() DateTime? deletedAt
+ String id, String? categoryId, int amount, String currency, String period,@FirestoreDateTimeConverter() DateTime startDate, int alertThreshold, String ledgerId,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt,@NullableFirestoreDateTimeConverter() DateTime? deletedAt
 });
 
 
@@ -71,7 +71,7 @@ class _$BudgetDtoCopyWithImpl<$Res>
 
 /// Create a copy of BudgetDto
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? categoryId = freezed,Object? amount = null,Object? currency = null,Object? period = null,Object? startDate = null,Object? alertThreshold = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? categoryId = freezed,Object? amount = null,Object? currency = null,Object? period = null,Object? startDate = null,Object? alertThreshold = null,Object? ledgerId = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,}) {
   return _then(BudgetDto(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,categoryId: freezed == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
@@ -80,7 +80,8 @@ as int,currency: null == currency ? _self.currency : currency // ignore: cast_nu
 as String,period: null == period ? _self.period : period // ignore: cast_nullable_to_non_nullable
 as String,startDate: null == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
 as DateTime,alertThreshold: null == alertThreshold ? _self.alertThreshold : alertThreshold // ignore: cast_nullable_to_non_nullable
-as int,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as int,ledgerId: null == ledgerId ? _self.ledgerId : ledgerId // ignore: cast_nullable_to_non_nullable
+as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,deletedAt: freezed == deletedAt ? _self.deletedAt : deletedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
@@ -168,10 +169,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? categoryId,  int amount,  String currency,  String period, @FirestoreDateTimeConverter()  DateTime startDate,  int alertThreshold, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt, @NullableFirestoreDateTimeConverter()  DateTime? deletedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? categoryId,  int amount,  String currency,  String period, @FirestoreDateTimeConverter()  DateTime startDate,  int alertThreshold,  String ledgerId, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt, @NullableFirestoreDateTimeConverter()  DateTime? deletedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _BudgetDto() when $default != null:
-return $default(_that.id,_that.categoryId,_that.amount,_that.currency,_that.period,_that.startDate,_that.alertThreshold,_that.createdAt,_that.updatedAt,_that.deletedAt);case _:
+return $default(_that.id,_that.categoryId,_that.amount,_that.currency,_that.period,_that.startDate,_that.alertThreshold,_that.ledgerId,_that.createdAt,_that.updatedAt,_that.deletedAt);case _:
   return orElse();
 
 }
@@ -189,10 +190,10 @@ return $default(_that.id,_that.categoryId,_that.amount,_that.currency,_that.peri
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? categoryId,  int amount,  String currency,  String period, @FirestoreDateTimeConverter()  DateTime startDate,  int alertThreshold, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt, @NullableFirestoreDateTimeConverter()  DateTime? deletedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? categoryId,  int amount,  String currency,  String period, @FirestoreDateTimeConverter()  DateTime startDate,  int alertThreshold,  String ledgerId, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt, @NullableFirestoreDateTimeConverter()  DateTime? deletedAt)  $default,) {final _that = this;
 switch (_that) {
 case _BudgetDto():
-return $default(_that.id,_that.categoryId,_that.amount,_that.currency,_that.period,_that.startDate,_that.alertThreshold,_that.createdAt,_that.updatedAt,_that.deletedAt);case _:
+return $default(_that.id,_that.categoryId,_that.amount,_that.currency,_that.period,_that.startDate,_that.alertThreshold,_that.ledgerId,_that.createdAt,_that.updatedAt,_that.deletedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -209,10 +210,10 @@ return $default(_that.id,_that.categoryId,_that.amount,_that.currency,_that.peri
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? categoryId,  int amount,  String currency,  String period, @FirestoreDateTimeConverter()  DateTime startDate,  int alertThreshold, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt, @NullableFirestoreDateTimeConverter()  DateTime? deletedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? categoryId,  int amount,  String currency,  String period, @FirestoreDateTimeConverter()  DateTime startDate,  int alertThreshold,  String ledgerId, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt, @NullableFirestoreDateTimeConverter()  DateTime? deletedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _BudgetDto() when $default != null:
-return $default(_that.id,_that.categoryId,_that.amount,_that.currency,_that.period,_that.startDate,_that.alertThreshold,_that.createdAt,_that.updatedAt,_that.deletedAt);case _:
+return $default(_that.id,_that.categoryId,_that.amount,_that.currency,_that.period,_that.startDate,_that.alertThreshold,_that.ledgerId,_that.createdAt,_that.updatedAt,_that.deletedAt);case _:
   return null;
 
 }
@@ -224,7 +225,7 @@ return $default(_that.id,_that.categoryId,_that.amount,_that.currency,_that.peri
 @JsonSerializable()
 
 class _BudgetDto extends BudgetDto {
-  const _BudgetDto({required this.id, this.categoryId, required this.amount, this.currency = AppCurrencies.defaultCode, this.period = 'month', @FirestoreDateTimeConverter() required this.startDate, this.alertThreshold = 80, @FirestoreDateTimeConverter() required this.createdAt, @FirestoreDateTimeConverter() required this.updatedAt, @NullableFirestoreDateTimeConverter() this.deletedAt}): super._();
+  const _BudgetDto({required this.id, this.categoryId, required this.amount, this.currency = AppCurrencies.defaultCode, this.period = 'month', @FirestoreDateTimeConverter() required this.startDate, this.alertThreshold = 80, this.ledgerId = LedgerBook.defaultPersonalId, @FirestoreDateTimeConverter() required this.createdAt, @FirestoreDateTimeConverter() required this.updatedAt, @NullableFirestoreDateTimeConverter() this.deletedAt}): super._();
   factory _BudgetDto.fromJson(Map<String, dynamic> json) => _$BudgetDtoFromJson(json);
 
 @override final  String id;
@@ -234,6 +235,7 @@ class _BudgetDto extends BudgetDto {
 @override@JsonKey() final  String period;
 @override@FirestoreDateTimeConverter() final  DateTime startDate;
 @override@JsonKey() final  int alertThreshold;
+@override@JsonKey() final  String ledgerId;
 @override@FirestoreDateTimeConverter() final  DateTime createdAt;
 @override@FirestoreDateTimeConverter() final  DateTime updatedAt;
 @override@NullableFirestoreDateTimeConverter() final  DateTime? deletedAt;
@@ -251,18 +253,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _BudgetDto&&(identical(other.id, id) || other.id == id)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.period, period) || other.period == period)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.alertThreshold, alertThreshold) || other.alertThreshold == alertThreshold)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _BudgetDto&&(identical(other.id, id) || other.id == id)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.period, period) || other.period == period)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.alertThreshold, alertThreshold) || other.alertThreshold == alertThreshold)&&(identical(other.ledgerId, ledgerId) || other.ledgerId == ledgerId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,categoryId,amount,currency,period,startDate,alertThreshold,createdAt,updatedAt,deletedAt);
+    return Object.hash(runtimeType,id,categoryId,amount,currency,period,startDate,alertThreshold,ledgerId,createdAt,updatedAt,deletedAt);
 }
 
 @override
 String toString() {
-    return 'BudgetDto(id: $id, categoryId: $categoryId, amount: $amount, currency: $currency, period: $period, startDate: $startDate, alertThreshold: $alertThreshold, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt)';
+    return 'BudgetDto(id: $id, categoryId: $categoryId, amount: $amount, currency: $currency, period: $period, startDate: $startDate, alertThreshold: $alertThreshold, ledgerId: $ledgerId, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt)';
 }
 
 
@@ -273,7 +275,7 @@ abstract mixin class _$BudgetDtoCopyWith<$Res> implements $BudgetDtoCopyWith<$Re
   factory _$BudgetDtoCopyWith(_BudgetDto value, $Res Function(_BudgetDto) _then) = __$BudgetDtoCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String? categoryId, int amount, String currency, String period,@FirestoreDateTimeConverter() DateTime startDate, int alertThreshold,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt,@NullableFirestoreDateTimeConverter() DateTime? deletedAt
+ String id, String? categoryId, int amount, String currency, String period,@FirestoreDateTimeConverter() DateTime startDate, int alertThreshold, String ledgerId,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt,@NullableFirestoreDateTimeConverter() DateTime? deletedAt
 });
 
 
@@ -290,7 +292,7 @@ class __$BudgetDtoCopyWithImpl<$Res>
 
 /// Create a copy of BudgetDto
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? categoryId = freezed,Object? amount = null,Object? currency = null,Object? period = null,Object? startDate = null,Object? alertThreshold = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? categoryId = freezed,Object? amount = null,Object? currency = null,Object? period = null,Object? startDate = null,Object? alertThreshold = null,Object? ledgerId = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,}) {
   return _then(_BudgetDto(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,categoryId: freezed == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
@@ -299,7 +301,8 @@ as int,currency: null == currency ? _self.currency : currency // ignore: cast_nu
 as String,period: null == period ? _self.period : period // ignore: cast_nullable_to_non_nullable
 as String,startDate: null == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
 as DateTime,alertThreshold: null == alertThreshold ? _self.alertThreshold : alertThreshold // ignore: cast_nullable_to_non_nullable
-as int,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as int,ledgerId: null == ledgerId ? _self.ledgerId : ledgerId // ignore: cast_nullable_to_non_nullable
+as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,deletedAt: freezed == deletedAt ? _self.deletedAt : deletedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,

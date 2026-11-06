@@ -6,12 +6,24 @@ import 'package:so_thu_chi/core/utils/date_formatter.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/budgets/domain/entities/budget.dart';
 import 'package:so_thu_chi/features/categories/presentation/controllers/categories_controller.dart';
+import 'package:so_thu_chi/features/ledger/presentation/controllers/ledgers_controller.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
 
-/// Streams all active (non-deleted) budgets.
-final budgetsStreamProvider = StreamProvider<List<Budget>>((ref) {
+/// Streams all active (non-deleted) budgets across all ledgers from the repository.
+final rawBudgetsStreamProvider = StreamProvider<List<Budget>>((ref) {
   return ref.watch(budgetRepositoryProvider).watchBudgets();
+});
+
+/// Streams all active (non-deleted) budgets for the currently active ledger.
+final budgetsStreamProvider = Provider<AsyncValue<List<Budget>>>((ref) {
+  final activeLedgerId = ref.watch(activeLedgerIdProvider);
+  final rawAsync = ref.watch(rawBudgetsStreamProvider);
+  return rawAsync.whenData(
+    (all) => all
+        .where((b) => b.ledgerId == activeLedgerId)
+        .toList(growable: false),
+  );
 });
 
 /// Selected month anchor for viewing and configuring monthly budgets.
@@ -179,8 +191,10 @@ class BudgetsActionController extends Notifier<AsyncValue<void>> {
     required String currency,
     required DateTime monthStart,
     required int alertThreshold,
+    String? ledgerId,
   }) async {
     state = const AsyncLoading();
+    final effectiveLedgerId = ledgerId ?? ref.read(activeLedgerIdProvider);
     final res = await ref
         .read(budgetRepositoryProvider)
         .upsertMonthlyBudget(
@@ -190,6 +204,7 @@ class BudgetsActionController extends Notifier<AsyncValue<void>> {
           currency: currency,
           monthStart: monthStart,
           alertThreshold: alertThreshold,
+          ledgerId: effectiveLedgerId,
         );
     state = res.fold(
       onSuccess: (_) => const AsyncData(null),

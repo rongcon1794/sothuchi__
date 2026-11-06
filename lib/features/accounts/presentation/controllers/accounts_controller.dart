@@ -4,11 +4,21 @@ import 'package:so_thu_chi/core/errors/result.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
+import 'package:so_thu_chi/features/ledger/presentation/controllers/ledgers_controller.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 
-/// Streams all non-deleted accounts (both active and archived).
-final accountsStreamProvider = StreamProvider<List<Account>>((ref) {
+/// Streams all non-deleted accounts from the repository across all ledgers.
+final rawAccountsStreamProvider = StreamProvider<List<Account>>((ref) {
   return ref.watch(accountRepositoryProvider).watchAccounts();
+});
+
+/// Streams all non-deleted accounts (both active and archived) for the currently active ledger.
+final accountsStreamProvider = Provider<AsyncValue<List<Account>>>((ref) {
+  final activeLedgerId = ref.watch(activeLedgerIdProvider);
+  final rawAsync = ref.watch(rawAccountsStreamProvider);
+  return rawAsync.whenData(
+    (all) => all.where((a) => a.ledgerId == activeLedgerId).toList(growable: false),
+  );
 });
 
 /// Active (non-archived) accounts list.
@@ -49,8 +59,10 @@ class AccountsActionController extends Notifier<AsyncValue<void>> {
     required String currency,
     required String icon,
     required int color,
+    String? ledgerId,
   }) async {
     state = const AsyncLoading();
+    final effectiveLedgerId = ledgerId ?? ref.read(activeLedgerIdProvider);
     final res = await ref
         .read(accountRepositoryProvider)
         .createAccount(
@@ -60,6 +72,7 @@ class AccountsActionController extends Notifier<AsyncValue<void>> {
           currency: currency,
           icon: icon,
           color: color,
+          ledgerId: effectiveLedgerId,
         );
     state = res.fold(
       onSuccess: (_) => const AsyncData(null),

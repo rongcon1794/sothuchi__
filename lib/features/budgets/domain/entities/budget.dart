@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
+import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
 
 part 'budget.freezed.dart';
 
@@ -20,6 +21,7 @@ abstract class Budget with _$Budget {
 
     /// Percentage (1..100) at which an alert is triggered (default 80%).
     @Default(80) int alertThreshold,
+    @Default(LedgerBook.defaultPersonalId) String ledgerId,
     required DateTime createdAt,
     required DateTime updatedAt,
     DateTime? deletedAt,

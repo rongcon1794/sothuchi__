@@ -16,6 +16,7 @@ abstract interface class BudgetRepository {
     required String currency,
     required DateTime monthStart,
     required int alertThreshold,
+    String? ledgerId,
   });
 
   /// Soft-deletes a budget (`deletedAt = now`).

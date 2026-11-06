@@ -1,9 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/core/errors/result.dart';
 import 'package:so_thu_chi/data/firebase/firebase_providers.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
 import 'package:so_thu_chi/features/ledger/domain/repositories/ledger_repository.dart';
+import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 
 final ledgersStreamProvider = StreamProvider<List<LedgerBook>>((ref) {
   final repo = ref.watch(ledgerRepositoryProvider);
@@ -15,14 +17,33 @@ class ActiveLedgerIdController extends Notifier<String> {
 
   @override
   String build() {
-    final prefs = ref.watch(sharedPreferencesProvider);
-    return prefs.getString(_prefKey) ?? LedgerBook.defaultPersonalId;
+    try {
+      final prefs = ref.watch(sharedPreferencesProvider);
+      return prefs.getString(_prefKey) ?? LedgerBook.defaultPersonalId;
+    } catch (_) {
+      return LedgerBook.defaultPersonalId;
+    }
   }
 
   void selectLedger(String id) {
     state = id;
-    final prefs = ref.read(sharedPreferencesProvider);
-    prefs.setString(_prefKey, id);
+    try {
+      final prefs = ref.read(sharedPreferencesProvider);
+      prefs.setString(_prefKey, id);
+    } catch (_) {}
+    _ensureCashWallet(id);
+  }
+
+  void _ensureCashWallet(String ledgerId) {
+    try {
+      final currency =
+          ref.read(settingsControllerProvider).value?.currencyCode ??
+          AppCurrencies.defaultCode;
+      ref.read(accountRepositoryProvider).ensureDefaultWallet(
+            currency: currency,
+            ledgerId: ledgerId,
+          );
+    } catch (_) {}
   }
 }
 

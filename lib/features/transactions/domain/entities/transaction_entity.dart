@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
+import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
 
 part 'transaction_entity.freezed.dart';
 
@@ -21,6 +22,7 @@ abstract class TransactionEntity with _$TransactionEntity {
     @Default('') String note,
     required DateTime date,
     @Default(<String>[]) List<String> tags,
+    @Default(LedgerBook.defaultPersonalId) String ledgerId,
     required DateTime createdAt,
     required DateTime updatedAt,
     DateTime? deletedAt,

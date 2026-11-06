@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
+import 'package:so_thu_chi/data/firebase/firebase_providers.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/debts/data/repositories/firestore_debt_repository.dart';
 import 'package:so_thu_chi/features/debts/domain/entities/debt.dart';
@@ -162,11 +164,14 @@ void main() {
     });
 
     testWidgets('creates a new debt via DebtFormSheet', (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
       final inMem = InMemoryDebtRepository();
 
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
             debtRepositoryProvider.overrideWithValue(inMem),
           ],
           child: const MaterialApp(

@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/data/firebase/firestore_timestamp_converter.dart';
+import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 
 part 'transaction_dto.freezed.dart';
@@ -21,6 +22,7 @@ abstract class TransactionDto with _$TransactionDto {
     @Default('') String note,
     @FirestoreDateTimeConverter() required DateTime date,
     @Default(<String>[]) List<String> tags,
+    @Default(LedgerBook.defaultPersonalId) String ledgerId,
     @FirestoreDateTimeConverter() required DateTime createdAt,
     @FirestoreDateTimeConverter() required DateTime updatedAt,
     @NullableFirestoreDateTimeConverter() DateTime? deletedAt,
@@ -40,6 +42,7 @@ abstract class TransactionDto with _$TransactionDto {
     note: entity.note,
     date: entity.date,
     tags: entity.tags,
+    ledgerId: entity.ledgerId,
     createdAt: entity.createdAt,
     updatedAt: entity.updatedAt,
     deletedAt: entity.deletedAt,
@@ -61,6 +64,7 @@ abstract class TransactionDto with _$TransactionDto {
       note: note,
       date: date,
       tags: tags,
+      ledgerId: ledgerId,
       createdAt: createdAt,
       updatedAt: updatedAt,
       deletedAt: deletedAt,

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:so_thu_chi/core/errors/app_exception.dart';
 import 'package:so_thu_chi/core/errors/result.dart';
 import 'package:so_thu_chi/features/accounts/data/repositories/firestore_account_repository.dart';
+import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
 import 'package:so_thu_chi/features/transactions/data/models/transaction_dto.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:so_thu_chi/features/transactions/domain/repositories/transaction_repository.dart';
@@ -177,6 +178,7 @@ class FirestoreTransactionRepository implements TransactionRepository {
     String note = '',
     required DateTime date,
     List<String> tags = const <String>[],
+    String? ledgerId,
   }) async {
     final effectiveCategory = type == TransactionType.transfer
         ? 'system_transfer'
@@ -210,6 +212,9 @@ class FirestoreTransactionRepository implements TransactionRepository {
         note: note.trim(),
         date: date,
         tags: normalizedTags,
+        ledgerId: (ledgerId ?? '').trim().isEmpty
+            ? LedgerBook.defaultPersonalId
+            : ledgerId!.trim(),
         createdAt: now,
         updatedAt: now,
       );
@@ -510,6 +515,7 @@ class InMemoryTransactionRepository implements TransactionRepository {
     String note = '',
     required DateTime date,
     List<String> tags = const <String>[],
+    String? ledgerId,
   }) async {
     final effectiveCategory = type == TransactionType.transfer
         ? 'system_transfer'
@@ -554,6 +560,9 @@ class InMemoryTransactionRepository implements TransactionRepository {
       note: note.trim(),
       date: date,
       tags: normalizedTags,
+      ledgerId: (ledgerId ?? '').trim().isEmpty
+          ? LedgerBook.defaultPersonalId
+          : ledgerId!.trim(),
       createdAt: now,
       updatedAt: now,
     );

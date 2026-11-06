@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/data/firebase/firestore_timestamp_converter.dart';
 import 'package:so_thu_chi/features/budgets/domain/entities/budget.dart';
+import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
 
 part 'budget_dto.freezed.dart';
 part 'budget_dto.g.dart';
@@ -18,6 +19,7 @@ abstract class BudgetDto with _$BudgetDto {
     @Default('month') String period,
     @FirestoreDateTimeConverter() required DateTime startDate,
     @Default(80) int alertThreshold,
+    @Default(LedgerBook.defaultPersonalId) String ledgerId,
     @FirestoreDateTimeConverter() required DateTime createdAt,
     @FirestoreDateTimeConverter() required DateTime updatedAt,
     @NullableFirestoreDateTimeConverter() DateTime? deletedAt,
@@ -34,6 +36,7 @@ abstract class BudgetDto with _$BudgetDto {
     period: entity.period,
     startDate: entity.startDate,
     alertThreshold: entity.alertThreshold,
+    ledgerId: entity.ledgerId,
     createdAt: entity.createdAt,
     updatedAt: entity.updatedAt,
     deletedAt: entity.deletedAt,
@@ -47,6 +50,7 @@ abstract class BudgetDto with _$BudgetDto {
     period: period,
     startDate: startDate,
     alertThreshold: alertThreshold,
+    ledgerId: ledgerId,
     createdAt: createdAt,
     updatedAt: updatedAt,
     deletedAt: deletedAt,

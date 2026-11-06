@@ -8,19 +8,31 @@ import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
 import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_controller.dart';
 import 'package:so_thu_chi/features/categories/presentation/controllers/categories_controller.dart';
+import 'package:so_thu_chi/features/ledger/presentation/controllers/ledgers_controller.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 
-/// Streams all active (non-deleted) transactions ordered newest first.
-final transactionsStreamProvider = StreamProvider<List<TransactionEntity>>((
-  ref,
-) {
+/// Streams all active (non-deleted) transactions across all ledgers from the repository.
+final rawTransactionsStreamProvider =
+    StreamProvider<List<TransactionEntity>>((ref) {
   return ref.watch(transactionRepositoryProvider).watchTransactions();
 });
 
-/// Map of `accountId -> Account` (including archived wallets for historical display).
+/// Streams all active (non-deleted) transactions for the currently active ledger, ordered newest first.
+final transactionsStreamProvider =
+    Provider<AsyncValue<List<TransactionEntity>>>((ref) {
+  final activeLedgerId = ref.watch(activeLedgerIdProvider);
+  final rawAsync = ref.watch(rawTransactionsStreamProvider);
+  return rawAsync.whenData(
+    (all) => all
+        .where((tx) => tx.ledgerId == activeLedgerId)
+        .toList(growable: false),
+  );
+});
+
+/// Map of `accountId -> Account` (including archived wallets for historical display across ledgers).
 final accountsMapProvider = Provider<Map<String, Account>>((ref) {
-  final all = ref.watch(accountsStreamProvider).value ?? const <Account>[];
+  final all = ref.watch(rawAccountsStreamProvider).value ?? const <Account>[];
   return {for (final a in all) a.id: a};
 });
 
@@ -270,8 +282,10 @@ class TransactionsActionController extends Notifier<AsyncValue<void>> {
     String note = '',
     required DateTime date,
     List<String> tags = const <String>[],
+    String? ledgerId,
   }) async {
     state = const AsyncLoading();
+    final effectiveLedgerId = ledgerId ?? ref.read(activeLedgerIdProvider);
     final res = await ref
         .read(transactionRepositoryProvider)
         .addTransaction(
@@ -284,6 +298,7 @@ class TransactionsActionController extends Notifier<AsyncValue<void>> {
           note: note,
           date: date,
           tags: tags,
+          ledgerId: effectiveLedgerId,
         );
     state = res.fold(
       onSuccess: (_) => const AsyncData(null),

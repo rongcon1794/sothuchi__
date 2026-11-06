@@ -11,6 +11,7 @@ abstract interface class AccountRepository {
     required String currency,
     required String icon,
     required int color,
+    String? ledgerId,
   });
   Future<Result<Account>> updateAccount(Account account);
   Future<Result<void>> setArchived({
@@ -26,5 +27,8 @@ abstract interface class AccountRepository {
     String note = '',
     DateTime? date,
   });
-  Future<Result<void>> ensureDefaultWallet({required String currency});
+  Future<Result<void>> ensureDefaultWallet({
+    required String currency,
+    String? ledgerId,
+  });
 }

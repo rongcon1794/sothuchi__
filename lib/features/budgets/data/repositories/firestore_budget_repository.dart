@@ -7,6 +7,7 @@ import 'package:so_thu_chi/core/utils/date_formatter.dart';
 import 'package:so_thu_chi/features/budgets/data/models/budget_dto.dart';
 import 'package:so_thu_chi/features/budgets/domain/entities/budget.dart';
 import 'package:so_thu_chi/features/budgets/domain/repositories/budget_repository.dart';
+import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
 import 'package:uuid/uuid.dart';
 
 class FirestoreBudgetRepository implements BudgetRepository {
@@ -59,6 +60,7 @@ class FirestoreBudgetRepository implements BudgetRepository {
     required String currency,
     required DateTime monthStart,
     required int alertThreshold,
+    String? ledgerId,
   }) async {
     if (amount <= 0) {
       return const Failure(ValidationException('Budget limit must be > 0'));
@@ -67,6 +69,9 @@ class FirestoreBudgetRepository implements BudgetRepository {
     final normalizedMonth = AppDateUtils.startOfMonth(monthStart);
     final normalizedCategory =
         categoryId != null && categoryId.trim().isNotEmpty ? categoryId : null;
+    final resolvedLedgerId = (ledgerId ?? '').trim().isEmpty
+        ? LedgerBook.defaultPersonalId
+        : ledgerId!.trim();
 
     try {
       final now = DateTime.now();
@@ -74,6 +79,7 @@ class FirestoreBudgetRepository implements BudgetRepository {
       final duplicate = active.cast<Budget?>().firstWhere(
         (b) =>
             b != null &&
+            b.ledgerId == resolvedLedgerId &&
             AppDateUtils.isSameMonth(b.startDate, normalizedMonth) &&
             b.categoryId == normalizedCategory,
         orElse: () => null,
@@ -104,6 +110,7 @@ class FirestoreBudgetRepository implements BudgetRepository {
       final targetId = existingId ?? duplicate?.id ?? _uuid.v4();
       final entity = Budget(
         id: targetId,
+        ledgerId: resolvedLedgerId,
         categoryId: normalizedCategory,
         amount: amount,
         currency: currency,
@@ -177,6 +184,7 @@ class InMemoryBudgetRepository implements BudgetRepository {
     required String currency,
     required DateTime monthStart,
     required int alertThreshold,
+    String? ledgerId,
   }) async {
     if (amount <= 0) {
       return const Failure(ValidationException('Budget limit must be > 0'));
@@ -185,11 +193,15 @@ class InMemoryBudgetRepository implements BudgetRepository {
     final normalizedMonth = AppDateUtils.startOfMonth(monthStart);
     final normalizedCategory =
         categoryId != null && categoryId.trim().isNotEmpty ? categoryId : null;
+    final resolvedLedgerId = (ledgerId ?? '').trim().isEmpty
+        ? LedgerBook.defaultPersonalId
+        : ledgerId!.trim();
 
     final now = DateTime.now();
     final duplicate = _snapshot().cast<Budget?>().firstWhere(
       (b) =>
           b != null &&
+          b.ledgerId == resolvedLedgerId &&
           AppDateUtils.isSameMonth(b.startDate, normalizedMonth) &&
           b.categoryId == normalizedCategory,
       orElse: () => null,
@@ -209,6 +221,7 @@ class InMemoryBudgetRepository implements BudgetRepository {
         : (duplicate?.createdAt ?? now);
     final entity = Budget(
       id: targetId,
+      ledgerId: resolvedLedgerId,
       categoryId: normalizedCategory,
       amount: amount,
       currency: currency,

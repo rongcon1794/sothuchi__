@@ -22,6 +22,7 @@ abstract interface class TransactionRepository {
     String note = '',
     required DateTime date,
     List<String> tags = const <String>[],
+    String? ledgerId,
   });
 
   /// Updates an existing transaction and atomically reconciles wallet balance deltas

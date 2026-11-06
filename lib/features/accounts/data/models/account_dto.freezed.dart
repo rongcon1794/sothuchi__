@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AccountDto {
 
- String get id; String get name; String get type; int get balance; String get currency; String get icon; int get color; bool get archived;@FirestoreDateTimeConverter() DateTime get createdAt;@FirestoreDateTimeConverter() DateTime get updatedAt;@NullableFirestoreDateTimeConverter() DateTime? get deletedAt;
+ String get id; String get name; String get type; int get balance; String get currency; String get icon; int get color; bool get archived; String get ledgerId;@FirestoreDateTimeConverter() DateTime get createdAt;@FirestoreDateTimeConverter() DateTime get updatedAt;@NullableFirestoreDateTimeConverter() DateTime? get deletedAt;
 /// Create a copy of AccountDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $AccountDtoCopyWith<AccountDto> get copyWith => _$AccountDtoCopyWithImpl<Account
 @override
 bool operator ==(Object other) {
   final _this = this as AccountDto;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AccountDto&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.balance, _this.balance) || other.balance == _this.balance)&&(identical(other.currency, _this.currency) || other.currency == _this.currency)&&(identical(other.icon, _this.icon) || other.icon == _this.icon)&&(identical(other.color, _this.color) || other.color == _this.color)&&(identical(other.archived, _this.archived) || other.archived == _this.archived)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.updatedAt, _this.updatedAt) || other.updatedAt == _this.updatedAt)&&(identical(other.deletedAt, _this.deletedAt) || other.deletedAt == _this.deletedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AccountDto&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.balance, _this.balance) || other.balance == _this.balance)&&(identical(other.currency, _this.currency) || other.currency == _this.currency)&&(identical(other.icon, _this.icon) || other.icon == _this.icon)&&(identical(other.color, _this.color) || other.color == _this.color)&&(identical(other.archived, _this.archived) || other.archived == _this.archived)&&(identical(other.ledgerId, _this.ledgerId) || other.ledgerId == _this.ledgerId)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.updatedAt, _this.updatedAt) || other.updatedAt == _this.updatedAt)&&(identical(other.deletedAt, _this.deletedAt) || other.deletedAt == _this.deletedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as AccountDto;
-  return Object.hash(runtimeType,_this.id,_this.name,_this.type,_this.balance,_this.currency,_this.icon,_this.color,_this.archived,_this.createdAt,_this.updatedAt,_this.deletedAt);
+  return Object.hash(runtimeType,_this.id,_this.name,_this.type,_this.balance,_this.currency,_this.icon,_this.color,_this.archived,_this.ledgerId,_this.createdAt,_this.updatedAt,_this.deletedAt);
 }
 
 @override
 String toString() {
   final _this = this as AccountDto;
-  return 'AccountDto(id: ${_this.id}, name: ${_this.name}, type: ${_this.type}, balance: ${_this.balance}, currency: ${_this.currency}, icon: ${_this.icon}, color: ${_this.color}, archived: ${_this.archived}, createdAt: ${_this.createdAt}, updatedAt: ${_this.updatedAt}, deletedAt: ${_this.deletedAt})';
+  return 'AccountDto(id: ${_this.id}, name: ${_this.name}, type: ${_this.type}, balance: ${_this.balance}, currency: ${_this.currency}, icon: ${_this.icon}, color: ${_this.color}, archived: ${_this.archived}, ledgerId: ${_this.ledgerId}, createdAt: ${_this.createdAt}, updatedAt: ${_this.updatedAt}, deletedAt: ${_this.deletedAt})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $AccountDtoCopyWith<$Res>  {
   factory $AccountDtoCopyWith(AccountDto value, $Res Function(AccountDto) _then) = _$AccountDtoCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String type, int balance, String currency, String icon, int color, bool archived,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt,@NullableFirestoreDateTimeConverter() DateTime? deletedAt
+ String id, String name, String type, int balance, String currency, String icon, int color, bool archived, String ledgerId,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt,@NullableFirestoreDateTimeConverter() DateTime? deletedAt
 });
 
 
@@ -71,7 +71,7 @@ class _$AccountDtoCopyWithImpl<$Res>
 
 /// Create a copy of AccountDto
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? type = null,Object? balance = null,Object? currency = null,Object? icon = null,Object? color = null,Object? archived = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? type = null,Object? balance = null,Object? currency = null,Object? icon = null,Object? color = null,Object? archived = null,Object? ledgerId = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,}) {
   return _then(AccountDto(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -81,7 +81,8 @@ as int,currency: null == currency ? _self.currency : currency // ignore: cast_nu
 as String,icon: null == icon ? _self.icon : icon // ignore: cast_nullable_to_non_nullable
 as String,color: null == color ? _self.color : color // ignore: cast_nullable_to_non_nullable
 as int,archived: null == archived ? _self.archived : archived // ignore: cast_nullable_to_non_nullable
-as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as bool,ledgerId: null == ledgerId ? _self.ledgerId : ledgerId // ignore: cast_nullable_to_non_nullable
+as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,deletedAt: freezed == deletedAt ? _self.deletedAt : deletedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
@@ -169,10 +170,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String type,  int balance,  String currency,  String icon,  int color,  bool archived, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt, @NullableFirestoreDateTimeConverter()  DateTime? deletedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String type,  int balance,  String currency,  String icon,  int color,  bool archived,  String ledgerId, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt, @NullableFirestoreDateTimeConverter()  DateTime? deletedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AccountDto() when $default != null:
-return $default(_that.id,_that.name,_that.type,_that.balance,_that.currency,_that.icon,_that.color,_that.archived,_that.createdAt,_that.updatedAt,_that.deletedAt);case _:
+return $default(_that.id,_that.name,_that.type,_that.balance,_that.currency,_that.icon,_that.color,_that.archived,_that.ledgerId,_that.createdAt,_that.updatedAt,_that.deletedAt);case _:
   return orElse();
 
 }
@@ -190,10 +191,10 @@ return $default(_that.id,_that.name,_that.type,_that.balance,_that.currency,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String type,  int balance,  String currency,  String icon,  int color,  bool archived, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt, @NullableFirestoreDateTimeConverter()  DateTime? deletedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String type,  int balance,  String currency,  String icon,  int color,  bool archived,  String ledgerId, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt, @NullableFirestoreDateTimeConverter()  DateTime? deletedAt)  $default,) {final _that = this;
 switch (_that) {
 case _AccountDto():
-return $default(_that.id,_that.name,_that.type,_that.balance,_that.currency,_that.icon,_that.color,_that.archived,_that.createdAt,_that.updatedAt,_that.deletedAt);case _:
+return $default(_that.id,_that.name,_that.type,_that.balance,_that.currency,_that.icon,_that.color,_that.archived,_that.ledgerId,_that.createdAt,_that.updatedAt,_that.deletedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -210,10 +211,10 @@ return $default(_that.id,_that.name,_that.type,_that.balance,_that.currency,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String type,  int balance,  String currency,  String icon,  int color,  bool archived, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt, @NullableFirestoreDateTimeConverter()  DateTime? deletedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String type,  int balance,  String currency,  String icon,  int color,  bool archived,  String ledgerId, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt, @NullableFirestoreDateTimeConverter()  DateTime? deletedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _AccountDto() when $default != null:
-return $default(_that.id,_that.name,_that.type,_that.balance,_that.currency,_that.icon,_that.color,_that.archived,_that.createdAt,_that.updatedAt,_that.deletedAt);case _:
+return $default(_that.id,_that.name,_that.type,_that.balance,_that.currency,_that.icon,_that.color,_that.archived,_that.ledgerId,_that.createdAt,_that.updatedAt,_that.deletedAt);case _:
   return null;
 
 }
@@ -225,7 +226,7 @@ return $default(_that.id,_that.name,_that.type,_that.balance,_that.currency,_tha
 @JsonSerializable()
 
 class _AccountDto extends AccountDto {
-  const _AccountDto({required this.id, required this.name, required this.type, required this.balance, this.currency = AppCurrencies.defaultCode, this.icon = 'wallet', this.color = 0xFF0D7C66, this.archived = false, @FirestoreDateTimeConverter() required this.createdAt, @FirestoreDateTimeConverter() required this.updatedAt, @NullableFirestoreDateTimeConverter() this.deletedAt}): super._();
+  const _AccountDto({required this.id, required this.name, required this.type, required this.balance, this.currency = AppCurrencies.defaultCode, this.icon = 'wallet', this.color = 0xFF0D7C66, this.archived = false, this.ledgerId = LedgerBook.defaultPersonalId, @FirestoreDateTimeConverter() required this.createdAt, @FirestoreDateTimeConverter() required this.updatedAt, @NullableFirestoreDateTimeConverter() this.deletedAt}): super._();
   factory _AccountDto.fromJson(Map<String, dynamic> json) => _$AccountDtoFromJson(json);
 
 @override final  String id;
@@ -236,6 +237,7 @@ class _AccountDto extends AccountDto {
 @override@JsonKey() final  String icon;
 @override@JsonKey() final  int color;
 @override@JsonKey() final  bool archived;
+@override@JsonKey() final  String ledgerId;
 @override@FirestoreDateTimeConverter() final  DateTime createdAt;
 @override@FirestoreDateTimeConverter() final  DateTime updatedAt;
 @override@NullableFirestoreDateTimeConverter() final  DateTime? deletedAt;
@@ -253,18 +255,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AccountDto&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.type, type) || other.type == type)&&(identical(other.balance, balance) || other.balance == balance)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.icon, icon) || other.icon == icon)&&(identical(other.color, color) || other.color == color)&&(identical(other.archived, archived) || other.archived == archived)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AccountDto&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.type, type) || other.type == type)&&(identical(other.balance, balance) || other.balance == balance)&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.icon, icon) || other.icon == icon)&&(identical(other.color, color) || other.color == color)&&(identical(other.archived, archived) || other.archived == archived)&&(identical(other.ledgerId, ledgerId) || other.ledgerId == ledgerId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,name,type,balance,currency,icon,color,archived,createdAt,updatedAt,deletedAt);
+    return Object.hash(runtimeType,id,name,type,balance,currency,icon,color,archived,ledgerId,createdAt,updatedAt,deletedAt);
 }
 
 @override
 String toString() {
-    return 'AccountDto(id: $id, name: $name, type: $type, balance: $balance, currency: $currency, icon: $icon, color: $color, archived: $archived, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt)';
+    return 'AccountDto(id: $id, name: $name, type: $type, balance: $balance, currency: $currency, icon: $icon, color: $color, archived: $archived, ledgerId: $ledgerId, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt)';
 }
 
 
@@ -275,7 +277,7 @@ abstract mixin class _$AccountDtoCopyWith<$Res> implements $AccountDtoCopyWith<$
   factory _$AccountDtoCopyWith(_AccountDto value, $Res Function(_AccountDto) _then) = __$AccountDtoCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String type, int balance, String currency, String icon, int color, bool archived,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt,@NullableFirestoreDateTimeConverter() DateTime? deletedAt
+ String id, String name, String type, int balance, String currency, String icon, int color, bool archived, String ledgerId,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt,@NullableFirestoreDateTimeConverter() DateTime? deletedAt
 });
 
 
@@ -292,7 +294,7 @@ class __$AccountDtoCopyWithImpl<$Res>
 
 /// Create a copy of AccountDto
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? type = null,Object? balance = null,Object? currency = null,Object? icon = null,Object? color = null,Object? archived = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? type = null,Object? balance = null,Object? currency = null,Object? icon = null,Object? color = null,Object? archived = null,Object? ledgerId = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,}) {
   return _then(_AccountDto(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -302,7 +304,8 @@ as int,currency: null == currency ? _self.currency : currency // ignore: cast_nu
 as String,icon: null == icon ? _self.icon : icon // ignore: cast_nullable_to_non_nullable
 as String,color: null == color ? _self.color : color // ignore: cast_nullable_to_non_nullable
 as int,archived: null == archived ? _self.archived : archived // ignore: cast_nullable_to_non_nullable
-as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as bool,ledgerId: null == ledgerId ? _self.ledgerId : ledgerId // ignore: cast_nullable_to_non_nullable
+as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,deletedAt: freezed == deletedAt ? _self.deletedAt : deletedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
