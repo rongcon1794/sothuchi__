@@ -29,6 +29,7 @@ import 'package:so_thu_chi/features/settings/presentation/screens/about_screen.d
 import 'package:so_thu_chi/features/settings/presentation/screens/privacy_policy_screen.dart';
 import 'package:so_thu_chi/features/settings/presentation/screens/settings_screen.dart';
 import 'package:so_thu_chi/features/transactions/presentation/screens/home_dashboard_screen.dart';
+import 'package:so_thu_chi/features/transactions/presentation/screens/transaction_detail_screen.dart';
 import 'package:so_thu_chi/features/transactions/presentation/screens/transaction_form_screen.dart';
 import 'package:so_thu_chi/features/transactions/presentation/screens/transactions_screen.dart';
 
@@ -52,6 +53,7 @@ class AppScreenRegistry {
     required this.loginBuilder,
     required this.homeBuilder,
     required this.transactionsBuilder,
+    required this.transactionDetailBuilder,
     required this.transactionFormBuilder,
     required this.budgetsBuilder,
     required this.reportsBuilder,
@@ -77,6 +79,8 @@ class AppScreenRegistry {
   final WidgetBuilder loginBuilder;
   final WidgetBuilder homeBuilder;
   final WidgetBuilder transactionsBuilder;
+  final Widget Function(BuildContext context, GoRouterState state)
+  transactionDetailBuilder;
   final Widget Function(BuildContext context, GoRouterState state)
   transactionFormBuilder;
   final WidgetBuilder budgetsBuilder;
@@ -110,6 +114,8 @@ class AppScreenRegistry {
       loginBuilder: (_) => const LoginScreen(),
       homeBuilder: (_) => const HomeDashboardScreen(),
       transactionsBuilder: (_) => const TransactionsScreen(),
+      transactionDetailBuilder: (_, state) =>
+          TransactionDetailScreen(transactionId: state.pathParameters['id'] ?? ''),
       transactionFormBuilder: (_, state) {
         final draft = state.extra is TransactionDraft
             ? state.extra! as TransactionDraft
@@ -282,6 +288,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.transactionNew,
         builder: screens.transactionFormBuilder,
+      ),
+      GoRoute(
+        path: '/transactions/:id',
+        builder: screens.transactionDetailBuilder,
       ),
       GoRoute(
         path: '/transactions/:id/edit',

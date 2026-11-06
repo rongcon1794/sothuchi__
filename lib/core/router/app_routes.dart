@@ -20,6 +20,7 @@ abstract final class AppRoutes {
   static const String privacy = '/settings/privacy';
   static const String about = '/settings/about';
 
+  static String transactionDetail(String id) => '/transactions/$id';
   static String transactionEdit(String id) => '/transactions/$id/edit';
   static String accountDetail(String id) => '/accounts/$id';
   static String categoryDetail(String id) => '/categories/$id';

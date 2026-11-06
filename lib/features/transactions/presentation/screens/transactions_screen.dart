@@ -419,7 +419,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                                     locale: locale,
                                     hideAmount: hideBalance,
                                     onTap: () => context.push(
-                                      AppRoutes.transactionEdit(
+                                      AppRoutes.transactionDetail(
                                         group.transactions[i].id,
                                       ),
                                     ),

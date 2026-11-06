@@ -554,7 +554,7 @@ class AccountDetailScreen extends ConsumerWidget {
                               locale: locale,
                               hideAmount: hideBalance,
                               onTap: () => context.push(
-                                AppRoutes.transactionEdit(walletTxs[i].id),
+                                AppRoutes.transactionDetail(walletTxs[i].id),
                               ),
                             ),
                           ],

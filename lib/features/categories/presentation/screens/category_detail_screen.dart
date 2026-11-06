@@ -479,7 +479,7 @@ class CategoryDetailScreen extends ConsumerWidget {
                               locale: locale,
                               hideAmount: hideBalance,
                               onTap: () => context.push(
-                                AppRoutes.transactionEdit(categoryTxs[i].id),
+                                AppRoutes.transactionDetail(categoryTxs[i].id),
                               ),
                             ),
                           ],
