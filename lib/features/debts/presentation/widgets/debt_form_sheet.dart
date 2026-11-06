@@ -225,64 +225,23 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
               const SizedBox(height: 16),
 
               // Segmented Type: Cho vay vs Đi vay
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightSecondary,
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: ApplePressable(
-                        onTap: () {
-                          HapticFeedback.selectionClick();
-                          setState(() => _selectedType = DebtType.lent);
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: isLent ? AppleTokens.systemGreen : Colors.transparent,
-                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                          ),
-                          child: Text(
-                            l10n.debtTypeLent,
-                            style: TextStyle(
-                              color: isLent ? Colors.white : theme.colorScheme.onSurface,
-                              fontWeight: isLent ? FontWeight.w700 : FontWeight.w500,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: ApplePressable(
-                        onTap: () {
-                          HapticFeedback.selectionClick();
-                          setState(() => _selectedType = DebtType.borrowed);
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: !isLent ? AppleTokens.systemOrange : Colors.transparent,
-                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                          ),
-                          child: Text(
-                            l10n.debtTypeBorrowed,
-                            style: TextStyle(
-                              color: !isLent ? Colors.white : theme.colorScheme.onSurface,
-                              fontWeight: !isLent ? FontWeight.w700 : FontWeight.w500,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+              LucianSlidingPillTabs<DebtType>(
+                items: [
+                  LucianTabItem(
+                    value: DebtType.lent,
+                    label: l10n.debtTypeLent,
+                    icon: CupertinoIcons.arrow_up_right,
+                    activeColor: AppleTokens.systemGreen,
+                  ),
+                  LucianTabItem(
+                    value: DebtType.borrowed,
+                    label: l10n.debtTypeBorrowed,
+                    icon: CupertinoIcons.arrow_down_left,
+                    activeColor: AppleTokens.systemOrange,
+                  ),
+                ],
+                selected: _selectedType,
+                onChanged: (type) => setState(() => _selectedType = type),
               ),
               const SizedBox(height: 16),
 

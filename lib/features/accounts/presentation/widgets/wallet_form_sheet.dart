@@ -154,35 +154,35 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
                 },
               ),
               const SizedBox(height: 14),
-              DropdownButtonFormField<AccountType>(
-                isExpanded: true,
-                initialValue: _type,
-                decoration: InputDecoration(labelText: l10n.walletType),
+              LucianSlidingPillTabs<AccountType>(
                 items: [
-                  DropdownMenuItem(
+                  LucianTabItem(
                     value: AccountType.cash,
-                    child: Text(l10n.walletTypeCash),
+                    label: l10n.walletTypeCash,
+                    icon: Icons.money_rounded,
                   ),
-                  DropdownMenuItem(
+                  LucianTabItem(
                     value: AccountType.bank,
-                    child: Text(l10n.walletTypeBank),
+                    label: l10n.walletTypeBank,
+                    icon: Icons.account_balance_rounded,
                   ),
-                  DropdownMenuItem(
+                  LucianTabItem(
                     value: AccountType.ewallet,
-                    child: Text(l10n.walletTypeEwallet),
+                    label: l10n.walletTypeEwallet,
+                    icon: Icons.phone_android_rounded,
                   ),
-                  DropdownMenuItem(
+                  LucianTabItem(
                     value: AccountType.card,
-                    child: Text(l10n.walletTypeCard),
+                    label: l10n.walletTypeCard,
+                    icon: Icons.credit_card_rounded,
                   ),
                 ],
+                selected: _type,
                 onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      _type = value;
-                      _icon = value.defaultIconKey;
-                    });
-                  }
+                  setState(() {
+                    _type = value;
+                    _icon = value.defaultIconKey;
+                  });
                 },
               ),
               const SizedBox(height: 14),

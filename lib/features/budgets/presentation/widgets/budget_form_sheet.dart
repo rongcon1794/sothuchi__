@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
+import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/budgets/domain/entities/budget.dart';
@@ -118,6 +120,8 @@ class _BudgetFormBottomSheetState
     final currencyInfo = AppCurrencies.byCode(currencyCode);
     final expenseCategories = ref.watch(expenseCategoriesProvider);
 
+    final isDark = theme.brightness == Brightness.dark;
+
     return Padding(
       padding: EdgeInsets.only(
         left: 20,
@@ -204,19 +208,114 @@ class _BudgetFormBottomSheetState
               ),
               const SizedBox(height: 20),
 
-              // Alert Threshold Slider (50% .. 100%)
-              Text(
-                l10n.alertThresholdLabel(_threshold),
-                style: theme.textTheme.titleSmall,
+              // Alert Threshold Slider (50% .. 100%) with Lucian preset chips
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    l10n.alertThresholdLabel(_threshold),
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: _threshold >= 90
+                          ? LucianTokens.danger.withValues(alpha: 0.15)
+                          : (_threshold >= 80
+                              ? AppleTokens.systemOrange.withValues(alpha: 0.15)
+                              : LucianTokens.mint.withValues(alpha: 0.15)),
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                    ),
+                    child: Text(
+                      '$_threshold%',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: _threshold >= 90
+                            ? LucianTokens.danger
+                            : (_threshold >= 80
+                                ? AppleTokens.systemOrange
+                                : LucianTokens.resolveMint(isDark)),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              Slider(
-                value: _threshold.toDouble(),
-                min: 50,
-                max: 100,
-                divisions: 10,
-                label: '$_threshold%',
-                semanticFormatterCallback: (val) => '${val.round()}%',
-                onChanged: (val) => setState(() => _threshold = val.round()),
+              const SizedBox(height: 10),
+
+              // Threshold Quick Preset Chips
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [50, 70, 80, 90, 100].map((preset) {
+                  final isSelected = _threshold == preset;
+                  return ApplePressable(
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      setState(() => _threshold = preset);
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      curve: LucianTokens.ease,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? (_threshold >= 90
+                                ? LucianTokens.danger
+                                : (_threshold >= 80
+                                    ? AppleTokens.systemOrange
+                                    : LucianTokens.resolveMint(isDark)))
+                            : (isDark
+                                ? Colors.white.withValues(alpha: 0.06)
+                                : Colors.black.withValues(alpha: 0.04)),
+                        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                        border: Border.all(
+                          color: isSelected
+                              ? Colors.transparent
+                              : (isDark
+                                  ? Colors.white.withValues(alpha: 0.1)
+                                  : Colors.black.withValues(alpha: 0.08)),
+                        ),
+                      ),
+                      child: Text(
+                        '$preset%',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                          color: isSelected
+                              ? Colors.white
+                              : theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 8),
+
+              SliderTheme(
+                data: SliderTheme.of(context).copyWith(
+                  activeTrackColor: _threshold >= 90
+                      ? LucianTokens.danger
+                      : (_threshold >= 80
+                          ? AppleTokens.systemOrange
+                          : LucianTokens.resolveMint(isDark)),
+                  thumbColor: _threshold >= 90
+                      ? LucianTokens.danger
+                      : (_threshold >= 80
+                          ? AppleTokens.systemOrange
+                          : LucianTokens.resolveMint(isDark)),
+                ),
+                child: Slider(
+                  value: _threshold.toDouble(),
+                  min: 50,
+                  max: 100,
+                  divisions: 10,
+                  label: '$_threshold%',
+                  semanticFormatterCallback: (val) => '${val.round()}%',
+                  onChanged: (val) => setState(() => _threshold = val.round()),
+                ),
               ),
               const SizedBox(height: 16),
 

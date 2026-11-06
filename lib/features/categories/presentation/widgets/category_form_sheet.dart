@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
+import 'package:so_thu_chi/core/theme/lucian_theme_tokens.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/core/widgets/icon_and_color_picker.dart';
 import 'package:so_thu_chi/features/categories/domain/entities/category.dart';
@@ -124,21 +125,25 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                 style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 16),
-              SegmentedButton<CategoryType>(
-                segments: [
-                  ButtonSegment(
+              LucianSlidingPillTabs<CategoryType>(
+                items: [
+                  LucianTabItem(
                     value: CategoryType.expense,
-                    label: Text(l10n.expense),
+                    label: l10n.expense,
+                    icon: Icons.trending_down_rounded,
+                    activeColor: LucianTokens.resolveDanger(isDark),
                   ),
-                  ButtonSegment(
+                  LucianTabItem(
                     value: CategoryType.income,
-                    label: Text(l10n.income),
+                    label: l10n.income,
+                    icon: Icons.trending_up_rounded,
+                    activeColor: LucianTokens.resolveMint(isDark),
                   ),
                 ],
-                selected: {_type},
-                onSelectionChanged: widget.existing != null
-                    ? null
-                    : (s) => setState(() => _type = s.first),
+                selected: _type,
+                onChanged: widget.existing != null
+                    ? (_) {}
+                    : (val) => setState(() => _type = val),
               ),
               const SizedBox(height: 16),
               AppleTextField(
