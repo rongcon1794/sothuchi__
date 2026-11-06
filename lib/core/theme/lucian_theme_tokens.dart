@@ -20,6 +20,9 @@ abstract final class LucianTokens {
   static const Color warnDark = Color(0xFFFFB26B);
   static const Color dangerLight = Color(0xFFD93A55); // --ux-danger
   static const Color dangerDark = Color(0xFFFF7D8C);
+  static const Color danger = dangerLight;
+  static const Color mint = mintLight;
+  static const Color warn = warnLight;
 
   // Surfaces & Glass
   static const Color surfaceLight = Color(0xFFFFFFFF);

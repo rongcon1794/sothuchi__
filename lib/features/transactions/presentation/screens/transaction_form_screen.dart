@@ -1041,9 +1041,12 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                       ),
                     ],
                   ),
-                ),
+                ],
               ),
             ),
+          ),
+        ),
+      ),
       bottomNavigationBar: SafeArea(
         top: false,
         child: Container(
