@@ -773,6 +773,53 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets('TransactionsScreen merges search and type filter into AppBar on Landscape and hides body search bar', (tester) async {
+      // 1. Portrait mode (390x844): AppBar title is simple Text, search TextField is in body
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: const TransactionsScreen(),
+          size: const Size(390, 844),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // In portrait: 1 TextField (in body)
+      expect(find.byType(TextField), findsOneWidget);
+
+      // 2. Landscape mode (844x390): AppBar title contains search field and type filter popup
+      tester.view.physicalSize = const Size(844, 390);
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: const TransactionsScreen(),
+          size: const Size(844, 390),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // In landscape: exactly 1 TextField (now in AppBar header, body search bar is hidden)
+      expect(find.byType(TextField), findsOneWidget);
+
+      // Verify PopupMenuButton for type filter is present in header
+      expect(find.byType(PopupMenuButton<TransactionType?>), findsOneWidget);
+
+      // Type filter popup opens and shows choices
+      await tester.tap(find.byType(PopupMenuButton<TransactionType?>));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Chi tiêu'), findsOneWidget);
+      expect(find.text('Thu nhập'), findsOneWidget);
+      expect(find.text('Chuyển khoản'), findsOneWidget);
+
+      // Tap 'Chi tiêu'
+      await tester.tap(find.text('Chi tiêu'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
   });
 
   group('16:9 Landscape Aspect Ratio Verification (640x360 Phone & 1280x720 Widescreen)', () {
