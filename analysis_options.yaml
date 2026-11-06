@@ -12,6 +12,7 @@ analyzer:
     - "**/*.freezed.dart"
     - "**/*.example.dart"
     - lib/l10n/app_localizations*.dart
+    - web/**
 
 linter:
   rules:

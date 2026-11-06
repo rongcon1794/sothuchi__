@@ -376,14 +376,11 @@ class _BudgetOverviewCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-            child: LinearProgressIndicator(
-              value: clampedRatio,
-              minHeight: 8,
-              backgroundColor: scheme.surfaceContainerHighest,
-              valueColor: AlwaysStoppedAnimation<Color>(barColor),
-            ),
+          LucianProgressBar(
+            value: clampedRatio,
+            height: 9,
+            activeColor: barColor,
+            showGlow: isExceeded,
           ),
           if (isCurrentMonth) ...[
             const SizedBox(height: 14),
@@ -599,16 +596,11 @@ class _BudgetProgressCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 14),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: LinearProgressIndicator(
-                value: clampedRatio,
-                minHeight: 10,
-                semanticsLabel: title,
-                semanticsValue: '${progress.usedPercent}%',
-                backgroundColor: scheme.surfaceContainerHighest,
-                valueColor: AlwaysStoppedAnimation<Color>(barColor),
-              ),
+            LucianProgressBar(
+              value: clampedRatio,
+              height: 9,
+              activeColor: barColor,
+              showGlow: progress.isExceeded,
             ),
             const SizedBox(height: 10),
             Wrap(

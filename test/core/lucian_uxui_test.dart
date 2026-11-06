@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
+import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/core/widgets/lucian_hold_to_delete_button.dart';
 import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
 import 'package:so_thu_chi/features/transactions/presentation/widgets/lucian_live_kpi_card.dart';
@@ -143,6 +144,26 @@ void main() {
       await tester.pump();
 
       expect(find.text('Chi tiêu'), findsWidgets);
+    });
+  });
+
+  group('LucianProgressBar Widget Tests', () {
+    testWidgets('renders progress bar with fraction and glow state without throwing', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: LucianProgressBar(
+                value: 0.75,
+                height: 10,
+                showGlow: true,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(LucianProgressBar), findsOneWidget);
     });
   });
 }

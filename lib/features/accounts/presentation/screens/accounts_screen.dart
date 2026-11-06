@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
@@ -73,7 +75,6 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final accountsAsync = ref.watch(accountsStreamProvider);
     final activeAccounts = ref.watch(activeAccountsProvider);
     final archivedAccounts = ref.watch(archivedAccountsProvider);
@@ -145,22 +146,39 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
               );
             }
 
-            final balanceCard = Container(
+            final isDark = theme.brightness == Brightness.dark;
+            final balanceCard = AppleGlassCard(
               padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: scheme.primaryContainer,
-                borderRadius: BorderRadius.circular(16),
-              ),
+              borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+              borderColor: isDark
+                  ? LucianTokens.accentDark.withValues(alpha: 0.25)
+                  : LucianTokens.accentLight.withValues(alpha: 0.20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: LucianTokens.resolveMint(isDark),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: LucianTokens.resolveMint(isDark).withValues(alpha: 0.5),
+                              blurRadius: 6,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           l10n.totalBalance,
                           style: theme.textTheme.labelLarge?.copyWith(
-                            color: scheme.onPrimaryContainer,
+                            color: theme.colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
@@ -168,32 +186,71 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                         tooltip: hideBalance
                             ? l10n.showBalance
                             : l10n.hideBalance,
-                        onPressed: () => ref
-                            .read(settingsControllerProvider.notifier)
-                            .toggleHideBalance(),
+                        onPressed: () {
+                          HapticFeedback.selectionClick();
+                          ref
+                              .read(settingsControllerProvider.notifier)
+                              .toggleHideBalance();
+                        },
                         icon: Icon(
                           hideBalance
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          color: scheme.onPrimaryContainer,
+                              ? CupertinoIcons.eye_slash
+                              : CupertinoIcons.eye,
+                          size: 20,
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
                   ),
-                  Text(
-                    totalBalance.format(locale: locale, masked: hideBalance),
-                    semanticsLabel: hideBalance ? l10n.balanceHidden : null,
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      color: scheme.onPrimaryContainer,
-                      fontFeatures: AppTheme.tabularFigures,
+                  const SizedBox(height: 4),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      totalBalance.format(locale: locale, masked: hideBalance),
+                      semanticsLabel: hideBalance ? l10n.balanceHidden : null,
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
+                        fontFeatures: AppTheme.tabularFigures,
+                      ),
                     ),
                   ),
                   if (activeAccounts.length >= 2) ...[
-                    const SizedBox(height: 14),
-                    FilledButton.tonalIcon(
-                      onPressed: () => _openTransferSheet(context),
-                      icon: const Icon(Icons.swap_horiz_rounded),
-                      label: Text(l10n.transferBetweenWallets),
+                    const SizedBox(height: 16),
+                    ApplePressable(
+                      scaleDown: 0.96,
+                      onTap: () => _openTransferSheet(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.20 : 0.12),
+                          borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                          border: Border.all(
+                            color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.35 : 0.25),
+                            width: AppleTokens.hairline,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              CupertinoIcons.arrow_right_arrow_left,
+                              size: 16,
+                              color: theme.colorScheme.primary,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              l10n.transferBetweenWallets,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ],
@@ -367,8 +424,26 @@ class _WalletTile extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: walletColor.withValues(alpha: 0.16),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      walletColor.withValues(alpha: theme.brightness == Brightness.dark ? 0.28 : 0.20),
+                      walletColor.withValues(alpha: theme.brightness == Brightness.dark ? 0.12 : 0.08),
+                    ],
+                  ),
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: walletColor.withValues(alpha: theme.brightness == Brightness.dark ? 0.35 : 0.25),
+                    width: AppleTokens.hairline,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: walletColor.withValues(alpha: theme.brightness == Brightness.dark ? 0.16 : 0.08),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Icon(
                   AppIconCatalog.resolve(account.icon),
