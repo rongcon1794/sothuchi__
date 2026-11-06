@@ -12,7 +12,6 @@ import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
-import 'package:so_thu_chi/core/utils/date_formatter.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/core/widgets/empty_state_view.dart';
@@ -49,7 +48,6 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-    final financeColors = context.financeColors;
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final isLargeText = textScale >= 1.35;
 
@@ -72,33 +70,6 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
     final budgetAlertBanner =
         customBudgetBanner ??
         (triggeredBudgets.isNotEmpty ? const BudgetAlertBanner() : null);
-
-    final incomeMetric = _CashflowMetricCard(
-      label: l10n.income,
-      amountText: monthSummary.income.format(
-        locale: locale,
-        showPlusSign: true,
-        masked: hideBalance,
-      ),
-      semanticsAmount: hideBalance ? l10n.balanceHidden : null,
-      icon: Icons.south_west_rounded,
-      accentColor: financeColors.income,
-      containerColor: financeColors.incomeContainer,
-      onContainerColor: financeColors.onIncomeContainer,
-    );
-
-    final expenseMetric = _CashflowMetricCard(
-      label: l10n.expense,
-      amountText: monthSummary.expense.format(
-        locale: locale,
-        masked: hideBalance,
-      ),
-      semanticsAmount: hideBalance ? l10n.balanceHidden : null,
-      icon: Icons.north_east_rounded,
-      accentColor: financeColors.expense,
-      containerColor: financeColors.expenseContainer,
-      onContainerColor: financeColors.onExpenseContainer,
-    );
 
     final walletStripHeight = math.max(96.0, 74.0 * textScale);
 
@@ -266,31 +237,6 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
             ];
 
             final activityAndWalletsWidgets = <Widget>[
-              // This Month's Income vs Expense Cards
-              Text(
-                '${l10n.thisMonthSummary} • ${AppDateUtils.formatMonthYear(DateTime.now(), locale: locale)}',
-                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 10),
-              if (isLargeText && !isWide)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    incomeMetric,
-                    const SizedBox(height: 10),
-                    expenseMetric,
-                  ],
-                )
-              else
-                Row(
-                  children: [
-                    Expanded(child: incomeMetric),
-                    const SizedBox(width: 12),
-                    Expanded(child: expenseMetric),
-                  ],
-                ),
-              const SizedBox(height: 20),
-
               // Active Wallets & Debts Strip
               Row(
                 children: [
@@ -574,150 +520,158 @@ class _HeroBalanceCard extends StatelessWidget {
     final isNetPositive = monthSummary.net.minorUnits >= 0;
     final isLargeText = MediaQuery.textScalerOf(context).scale(1) >= 1.35;
 
-    Widget buildIncomeBox() => Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 10,
-          ),
-          decoration: BoxDecoration(
-            color: isDark
-                ? const Color(0xFF10B981).withValues(alpha: 0.10)
-                : const Color(0xFFECFDF5),
-            borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-            border: Border.all(
-              color: const Color(0xFF10B981).withValues(
-                alpha: isDark ? 0.22 : 0.20,
-              ),
-              width: AppleTokens.hairline,
+    Widget buildIncomeBox() => ApplePressable(
+          onTap: () => context.go(AppRoutes.transactions),
+          borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 10,
             ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 18,
-                    height: 18,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF10B981).withValues(alpha: 0.20),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: const Icon(
-                      CupertinoIcons.arrow_down_left,
-                      size: 10.5,
-                      color: Color(0xFF10B981),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      l10n.income,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        color: isDark
-                            ? Colors.white70
-                            : const Color(0xFF047857),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? const Color(0xFF10B981).withValues(alpha: 0.10)
+                  : const Color(0xFFECFDF5),
+              borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+              border: Border.all(
+                color: const Color(0xFF10B981).withValues(
+                  alpha: isDark ? 0.22 : 0.20,
+                ),
+                width: AppleTokens.hairline,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 18,
+                      height: 18,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF10B981).withValues(alpha: 0.20),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: const Icon(
+                        CupertinoIcons.arrow_down_left,
+                        size: 10.5,
+                        color: Color(0xFF10B981),
                       ),
                     ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        l10n.income,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: isDark
+                              ? Colors.white70
+                              : const Color(0xFF047857),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  monthSummary.income.format(
+                    locale: locale,
+                    showPlusSign: true,
+                    masked: hideBalance,
                   ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                monthSummary.income.format(
-                  locale: locale,
-                  showPlusSign: true,
-                  masked: hideBalance,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    color: isDark
+                        ? const Color(0xFF34D399)
+                        : const Color(0xFF059669),
+                    fontFeatures: AppTheme.tabularFigures,
+                  ),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w700,
-                  color: isDark
-                      ? const Color(0xFF34D399)
-                      : const Color(0xFF059669),
-                  fontFeatures: AppTheme.tabularFigures,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
 
-    Widget buildExpenseBox() => Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 10,
-          ),
-          decoration: BoxDecoration(
-            color: isDark
-                ? const Color(0xFFF43F5E).withValues(alpha: 0.10)
-                : const Color(0xFFFFF1F2),
-            borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-            border: Border.all(
-              color: const Color(0xFFF43F5E).withValues(
-                alpha: isDark ? 0.22 : 0.20,
-              ),
-              width: AppleTokens.hairline,
+    Widget buildExpenseBox() => ApplePressable(
+          onTap: () => context.go(AppRoutes.transactions),
+          borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 10,
             ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 18,
-                    height: 18,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF43F5E).withValues(alpha: 0.20),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: const Icon(
-                      CupertinoIcons.arrow_up_right,
-                      size: 10.5,
-                      color: Color(0xFFF43F5E),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      l10n.expense,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        color: isDark
-                            ? Colors.white70
-                            : const Color(0xFFBE123C),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? const Color(0xFFF43F5E).withValues(alpha: 0.10)
+                  : const Color(0xFFFFF1F2),
+              borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+              border: Border.all(
+                color: const Color(0xFFF43F5E).withValues(
+                  alpha: isDark ? 0.22 : 0.20,
+                ),
+                width: AppleTokens.hairline,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 18,
+                      height: 18,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF43F5E).withValues(alpha: 0.20),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: const Icon(
+                        CupertinoIcons.arrow_up_right,
+                        size: 10.5,
+                        color: Color(0xFFF43F5E),
                       ),
                     ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        l10n.expense,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: isDark
+                              ? Colors.white70
+                              : const Color(0xFFBE123C),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  monthSummary.expense.format(
+                    locale: locale,
+                    masked: hideBalance,
                   ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                monthSummary.expense.format(
-                  locale: locale,
-                  masked: hideBalance,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    color: isDark
+                        ? const Color(0xFFFB7185)
+                        : const Color(0xFFE11D48),
+                    fontFeatures: AppTheme.tabularFigures,
+                  ),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w700,
-                  color: isDark
-                      ? const Color(0xFFFB7185)
-                      : const Color(0xFFE11D48),
-                  fontFeatures: AppTheme.tabularFigures,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
 
@@ -1573,80 +1527,6 @@ class _QuickActionItem extends StatelessWidget {
                     letterSpacing: -0.2,
                   ),
                 ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CashflowMetricCard extends StatelessWidget {
-  const _CashflowMetricCard({
-    required this.label,
-    required this.amountText,
-    this.semanticsAmount,
-    required this.icon,
-    required this.accentColor,
-    required this.containerColor,
-    required this.onContainerColor,
-  });
-
-  final String label;
-  final String amountText;
-  final String? semanticsAmount;
-  final IconData icon;
-  final Color accentColor;
-  final Color containerColor;
-  final Color onContainerColor;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return ApplePressable(
-      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-      child: AppleGlassCard(
-        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color: containerColor,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(icon, size: 18, color: onContainerColor),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              amountText,
-              semanticsLabel: semanticsAmount,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: accentColor,
-                fontWeight: FontWeight.w700,
-                fontFeatures: AppTheme.tabularFigures,
               ),
             ),
           ],
