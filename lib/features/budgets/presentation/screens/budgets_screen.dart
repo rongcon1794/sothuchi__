@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
@@ -95,43 +96,84 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
         children: [
           // Month Switcher Bar
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-            child: AppleGlassCard(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-              borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                    IconButton(
-                      tooltip: l10n.previousMonth,
-                      onPressed: () => ref
-                          .read(selectedBudgetMonthProvider.notifier)
-                          .previousMonth(),
-                      icon: const Icon(Icons.chevron_left_rounded),
-                    ),
-                    Expanded(
-                      child: Text(
-                        AppDateUtils.formatMonthYear(
-                          selectedMonth,
-                          locale: locale,
+            padding: EdgeInsets.fromLTRB(16, isLandscape ? 2 : 4, 16, isLandscape ? 4 : 8),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: isLandscape ? 320 : 540),
+                child: AppleGlassCard(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isLandscape ? 4 : 6,
+                    vertical: isLandscape ? 2 : 4,
+                  ),
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+                  child: SizedBox(
+                    height: isLandscape ? 32 : 42,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          tooltip: l10n.previousMonth,
+                          padding: EdgeInsets.zero,
+                          visualDensity: VisualDensity.compact,
+                          constraints: BoxConstraints(
+                            minWidth: isLandscape ? 30 : 40,
+                            minHeight: isLandscape ? 28 : 36,
+                          ),
+                          onPressed: () {
+                            HapticFeedback.selectionClick();
+                            ref
+                                .read(selectedBudgetMonthProvider.notifier)
+                                .previousMonth();
+                          },
+                          icon: Icon(
+                            Icons.chevron_left_rounded,
+                            size: isLandscape ? 18 : 22,
+                          ),
                         ),
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleMedium,
-                      ),
+                        Expanded(
+                          child: Text(
+                            AppDateUtils.formatMonthYear(
+                              selectedMonth,
+                              locale: locale,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: (isLandscape
+                                    ? theme.textTheme.titleSmall
+                                    : theme.textTheme.titleMedium)
+                                ?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: -0.2,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: l10n.nextMonth,
+                          padding: EdgeInsets.zero,
+                          visualDensity: VisualDensity.compact,
+                          constraints: BoxConstraints(
+                            minWidth: isLandscape ? 30 : 40,
+                            minHeight: isLandscape ? 28 : 36,
+                          ),
+                          onPressed: () {
+                            HapticFeedback.selectionClick();
+                            ref
+                                .read(selectedBudgetMonthProvider.notifier)
+                                .nextMonth();
+                          },
+                          icon: Icon(
+                            Icons.chevron_right_rounded,
+                            size: isLandscape ? 18 : 22,
+                          ),
+                        ),
+                      ],
                     ),
-                    IconButton(
-                      tooltip: l10n.nextMonth,
-                      onPressed: () => ref
-                          .read(selectedBudgetMonthProvider.notifier)
-                          .nextMonth(),
-                      icon: const Icon(Icons.chevron_right_rounded),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
+          ),
 
           Expanded(
             child: NotificationListener<UserScrollNotification>(
