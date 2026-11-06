@@ -22,6 +22,7 @@ import 'package:so_thu_chi/features/categories/data/repositories/firestore_categ
 import 'package:so_thu_chi/features/categories/presentation/screens/categories_screen.dart';
 import 'package:so_thu_chi/features/debts/data/repositories/firestore_debt_repository.dart';
 import 'package:so_thu_chi/features/debts/presentation/screens/debts_screen.dart';
+import 'package:so_thu_chi/features/ledger/presentation/widgets/ledger_selector_pill.dart';
 import 'package:so_thu_chi/features/reports/presentation/screens/reports_screen.dart';
 import 'package:so_thu_chi/features/savings/data/repositories/firestore_savings_goal_repository.dart';
 import 'package:so_thu_chi/features/savings/presentation/screens/savings_goals_screen.dart';
@@ -588,7 +589,10 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.byType(HomeDashboardScreen), findsOneWidget);
+      expect(find.byType(LedgerSelectorPill), findsOneWidget);
       expect(find.textContaining('Tiệc tối gia đình'), findsOneWidget);
+      expect(find.text('Ví & Tài khoản'), findsOneWidget);
+      expect(find.text('Giao dịch gần đây'), findsOneWidget);
     });
 
     testWidgets('TransactionsScreen renders 2-column layout and ticker on 16:9 Phone Landscape (640x360)', (tester) async {

@@ -85,7 +85,7 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.only(right: 10),
-              child: SoThuChiLogo(size: isLandscape ? 28 : 36),
+              child: SoThuChiLogo(size: isLandscape ? 26 : 36),
             ),
             Expanded(
               child: Builder(
@@ -102,6 +102,20 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                   final titleText = userFirstName != null
                       ? '$greeting, $userFirstName!'
                       : l10n.appTitle;
+
+                  if (isLandscape) {
+                    return Text(
+                      titleText,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                        letterSpacing: -0.3,
+                      ),
+                    );
+                  }
+
                   final subtitleText = userFirstName != null
                       ? l10n.appTagline
                       : (user?.displayName ?? user?.email ?? l10n.appTagline);
@@ -135,9 +149,11 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
             ),
           ],
         ),
-        actions: const [
-          LedgerSelectorPill(compact: true),
-          SizedBox(width: 12),
+        actions: [
+          Center(
+            child: LedgerSelectorPill(compact: !isLandscape),
+          ),
+          const SizedBox(width: 12),
         ],
       ),
       body: NotificationListener<UserScrollNotification>(
@@ -173,224 +189,216 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                 ? AppleTokens.scrollBottomPaddingLandscape + 54
                 : AppleTokens.scrollBottomPaddingWithFab;
 
-            final balanceCoreWidgets = <Widget>[
-              // Hero Total Balance Card
-              _HeroBalanceCard(
-                totalBalance: totalBalance,
-                monthSummary: monthSummary,
-                locale: locale,
-                hideBalance: hideBalance,
-                onToggleVisibility: () =>
-                    ref.read(settingsControllerProvider.notifier).toggleHideBalance(),
-              ),
-              const SizedBox(height: 12),
+            final heroBalanceCard = _HeroBalanceCard(
+              totalBalance: totalBalance,
+              monthSummary: monthSummary,
+              locale: locale,
+              hideBalance: hideBalance,
+              onToggleVisibility: () =>
+                  ref.read(settingsControllerProvider.notifier).toggleHideBalance(),
+            );
 
-              // Smart Daily Spending Pace Card
-              _SmartSpendingPaceCard(
-                monthSummary: monthSummary,
-                totalBalance: totalBalance,
-                locale: locale,
-                hideBalance: hideBalance,
-              ),
-              const SizedBox(height: 14),
+            final spendingPaceCard = _SmartSpendingPaceCard(
+              monthSummary: monthSummary,
+              totalBalance: totalBalance,
+              locale: locale,
+              hideBalance: hideBalance,
+            );
 
-              // Smart Quick Actions
-              const _HomeQuickActionBar(),
-              const SizedBox(height: 14),
+            const quickActionBar = _HomeQuickActionBar();
 
-              // Due Recurring Bills Notification Banner
-              if (dueBills.isNotEmpty) ...[
-                ApplePressable(
-                  onTap: () => context.push(AppRoutes.recurring),
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: AppleTokens.systemOrange.withValues(alpha: isDark ? 0.2 : 0.12),
-                      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                      border: Border.all(
-                        color: AppleTokens.systemOrange.withValues(alpha: 0.35),
-                        width: AppleTokens.hairline,
+            final dueBillsWidget = dueBills.isNotEmpty
+                ? ApplePressable(
+                    onTap: () => context.push(AppRoutes.recurring),
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: AppleTokens.systemOrange.withValues(alpha: isDark ? 0.2 : 0.12),
+                        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                        border: Border.all(
+                          color: AppleTokens.systemOrange.withValues(alpha: 0.35),
+                          width: AppleTokens.hairline,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(CupertinoIcons.bell_fill, color: AppleTokens.systemOrange, size: 20),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'Bạn có ${dueBills.length} hóa đơn định kỳ cần thanh toán',
+                              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                            ),
+                          ),
+                          const Icon(CupertinoIcons.chevron_right, size: 14, color: AppleTokens.systemOrange),
+                        ],
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        const Icon(CupertinoIcons.bell_fill, color: AppleTokens.systemOrange, size: 20),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            'Bạn có ${dueBills.length} hóa đơn định kỳ cần thanh toán',
-                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-                          ),
-                        ),
-                        const Icon(CupertinoIcons.chevron_right, size: 14, color: AppleTokens.systemOrange),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 14),
-              ],
+                  )
+                : null;
 
-              // Budget alert slot (injected by Budgets feature in Milestone e)
-              ?budgetAlertBanner,
-              if (budgetAlertBanner != null) const SizedBox(height: 16),
-            ];
-
-            final activityAndWalletsWidgets = <Widget>[
-              // Active Wallets & Debts Strip
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n.walletsTitle,
-                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                  Flexible(
-                    flex: 0,
-                    child: TextButton(
-                      onPressed: () => context.push(AppRoutes.accounts),
-                      child: Text(l10n.manageWallets),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              SizedBox(
-                height: walletStripHeight,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: activeWallets.length + 1,
-                  separatorBuilder: (_, _) => const SizedBox(width: 10),
-                  itemBuilder: (context, index) {
-                    if (index < activeWallets.length) {
-                      final wallet = activeWallets[index];
-                      return _MiniWalletCard(
-                        account: wallet,
-                        locale: locale,
-                        hideBalance: hideBalance,
-                        onTap: () => context.push(AppRoutes.accounts),
-                      );
-                    }
-                    return _AddWalletCard(
-                      onTap: () => context.push(AppRoutes.accounts),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Active Savings Goals Strip
-              if (activeGoals.isNotEmpty) ...[
+            final walletsSection = Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
                 Row(
                   children: [
                     Expanded(
                       child: Text(
-                        l10n.savingsTitle,
-                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                        l10n.walletsTitle,
+                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
                       ),
                     ),
-                    TextButton(
-                      onPressed: () => context.push(AppRoutes.savings),
-                      child: Text(l10n.viewAll),
+                    Flexible(
+                      flex: 0,
+                      child: TextButton(
+                        onPressed: () => context.push(AppRoutes.accounts),
+                        child: Text(l10n.manageWallets),
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 6),
                 SizedBox(
-                  height: 94,
+                  height: walletStripHeight,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
-                    itemCount: activeGoals.length,
+                    itemCount: activeWallets.length + 1,
                     separatorBuilder: (_, _) => const SizedBox(width: 10),
                     itemBuilder: (context, index) {
-                      final goal = activeGoals[index];
-                      return _MiniSavingsGoalCard(
-                        goal: goal,
-                        hideBalance: hideBalance,
-                        onTap: () => context.push(AppRoutes.savings),
+                      if (index < activeWallets.length) {
+                        final wallet = activeWallets[index];
+                        return _MiniWalletCard(
+                          account: wallet,
+                          locale: locale,
+                          hideBalance: hideBalance,
+                          onTap: () => context.push(AppRoutes.accounts),
+                        );
+                      }
+                      return _AddWalletCard(
+                        onTap: () => context.push(AppRoutes.accounts),
                       );
                     },
                   ),
                 ),
-                const SizedBox(height: 20),
               ],
+            );
 
-              // Recent Transactions Header
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n.recentTransactions,
-                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                  Flexible(
-                    flex: 0,
-                    child: TextButton(
-                      onPressed: () => context.go(AppRoutes.transactions),
-                      child: Text(l10n.viewAll),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-
-              // Recent Transactions List / Loading / Empty
-              txStream.when(
-                loading: () => const SkeletonListView(itemCount: 3),
-                error: (err, _) => AppleGlassCard(
-                  padding: const EdgeInsets.all(16),
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                  child: Text(context.localizeError(err)),
-                ),
-                data: (_) {
-                  if (recentTxs.isEmpty) {
-                    return AppleGlassCard(
-                      padding: const EdgeInsets.all(16),
-                      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                      child: EmptyStateView(
-                        icon: Icons.receipt_long_outlined,
-                        title: l10n.emptyTransactionsTitle,
-                        subtitle: l10n.emptyTransactionsSubtitle,
-                        actionLabel: l10n.quickAddTransaction,
-                        onAction: () => context.push(AppRoutes.transactionNew),
-                      ),
-                    );
-                  }
-
-                  return AppleGlassCard(
-                    padding: EdgeInsets.zero,
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                    child: Column(
-                      children: [
-                        for (var i = 0; i < recentTxs.length; i++) ...[
-                          if (i > 0)
-                            Divider(
-                              height: AppleTokens.hairline,
-                              indent: 68,
-                              color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
-                            ),
-                          TransactionTile(
-                            transaction: recentTxs[i],
-                            category: categoriesMap[recentTxs[i].categoryId],
-                            sourceAccount: accountsMap[recentTxs[i].accountId],
-                            destinationAccount: recentTxs[i].toAccountId != null
-                                ? accountsMap[recentTxs[i].toAccountId!]
-                                : null,
-                            locale: locale,
-                            hideAmount: hideBalance,
-                            onTap: () => context.push(
-                              AppRoutes.transactionDetail(recentTxs[i].id),
+            final savingsSection = activeGoals.isNotEmpty
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              l10n.savingsTitle,
+                              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
                             ),
                           ),
+                          TextButton(
+                            onPressed: () => context.push(AppRoutes.savings),
+                            child: Text(l10n.viewAll),
+                          ),
                         ],
-                      ],
+                      ),
+                      const SizedBox(height: 6),
+                      SizedBox(
+                        height: 94,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: activeGoals.length,
+                          separatorBuilder: (_, _) => const SizedBox(width: 10),
+                          itemBuilder: (context, index) {
+                            final goal = activeGoals[index];
+                            return _MiniSavingsGoalCard(
+                              goal: goal,
+                              hideBalance: hideBalance,
+                              onTap: () => context.push(AppRoutes.savings),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  )
+                : null;
+
+            final recentTransactionsSection = Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.recentTransactions,
+                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                      ),
                     ),
-                  );
-                },
-              ),
-            ];
+                    Flexible(
+                      flex: 0,
+                      child: TextButton(
+                        onPressed: () => context.go(AppRoutes.transactions),
+                        child: Text(l10n.viewAll),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                txStream.when(
+                  loading: () => const SkeletonListView(itemCount: 3),
+                  error: (err, _) => AppleGlassCard(
+                    padding: const EdgeInsets.all(16),
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                    child: Text(context.localizeError(err)),
+                  ),
+                  data: (_) {
+                    if (recentTxs.isEmpty) {
+                      return AppleGlassCard(
+                        padding: const EdgeInsets.all(16),
+                        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                        child: EmptyStateView(
+                          icon: Icons.receipt_long_outlined,
+                          title: l10n.emptyTransactionsTitle,
+                          subtitle: l10n.emptyTransactionsSubtitle,
+                          actionLabel: l10n.quickAddTransaction,
+                          onAction: () => context.push(AppRoutes.transactionNew),
+                        ),
+                      );
+                    }
+
+                    return AppleGlassCard(
+                      padding: EdgeInsets.zero,
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                      child: Column(
+                        children: [
+                          for (var i = 0; i < recentTxs.length; i++) ...[
+                            if (i > 0)
+                              Divider(
+                                height: AppleTokens.hairline,
+                                indent: 68,
+                                color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
+                              ),
+                            TransactionTile(
+                              transaction: recentTxs[i],
+                              category: categoriesMap[recentTxs[i].categoryId],
+                              sourceAccount: accountsMap[recentTxs[i].accountId],
+                              destinationAccount: recentTxs[i].toAccountId != null
+                                  ? accountsMap[recentTxs[i].toAccountId!]
+                                  : null,
+                              locale: locale,
+                              hideAmount: hideBalance,
+                              onTap: () => context.push(
+                                AppRoutes.transactionDetail(recentTxs[i].id),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ],
+            );
 
             return RefreshIndicator(
               onRefresh: () async {
@@ -407,25 +415,66 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          flex: 44,
+                          flex: 48,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: balanceCoreWidgets,
+                            children: [
+                              heroBalanceCard,
+                              const SizedBox(height: 14),
+                              walletsSection,
+                              const SizedBox(height: 14),
+                              spendingPaceCard,
+                              if (dueBillsWidget != null) ...[
+                                const SizedBox(height: 14),
+                                dueBillsWidget,
+                              ],
+                              if (budgetAlertBanner != null) ...[
+                                const SizedBox(height: 14),
+                                budgetAlertBanner,
+                              ],
+                              if (savingsSection != null) ...[
+                                const SizedBox(height: 14),
+                                savingsSection,
+                              ],
+                            ],
                           ),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
-                          flex: 56,
+                          flex: 52,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: activityAndWalletsWidgets,
+                            children: [
+                              quickActionBar,
+                              const SizedBox(height: 12),
+                              recentTransactionsSection,
+                            ],
                           ),
                         ),
                       ],
                     )
                   else ...[
-                    ...balanceCoreWidgets,
-                    ...activityAndWalletsWidgets,
+                    heroBalanceCard,
+                    const SizedBox(height: 12),
+                    spendingPaceCard,
+                    const SizedBox(height: 14),
+                    quickActionBar,
+                    if (dueBillsWidget != null) ...[
+                      const SizedBox(height: 14),
+                      dueBillsWidget,
+                    ],
+                    if (budgetAlertBanner != null) ...[
+                      const SizedBox(height: 16),
+                      budgetAlertBanner,
+                    ],
+                    const SizedBox(height: 14),
+                    walletsSection,
+                    if (savingsSection != null) ...[
+                      const SizedBox(height: 20),
+                      savingsSection,
+                    ],
+                    const SizedBox(height: 20),
+                    recentTransactionsSection,
                   ],
                 ],
               ),
@@ -882,7 +931,7 @@ class _HeroBalanceCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                if (isLargeText || isLandscape) ...[
+                if (isLargeText) ...[
                   Row(
                     children: [
                       Icon(
@@ -1417,6 +1466,47 @@ class _HomeQuickActionBar extends StatelessWidget {
       ),
     ];
 
+    final isLandscape = context.isLandscape;
+    final isDark = theme.brightness == Brightness.dark;
+
+    if (isLandscape) {
+      final landscapeActions = actions.take(4).toList();
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+        decoration: BoxDecoration(
+          color: isDark ? AppleTokens.bgDarkCard : AppleTokens.bgLightCard,
+          borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+          border: Border.all(
+            color: isDark ? AppleTokens.separatorDark : AppleTokens.borderLight,
+            width: AppleTokens.hairline,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.20 : 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            for (var i = 0; i < landscapeActions.length; i++) ...[
+              if (i > 0) const SizedBox(width: 4),
+              Expanded(
+                child: _LandscapeQuickActionItem(
+                  icon: landscapeActions[i].icon,
+                  label: landscapeActions[i].label,
+                  gradient: landscapeActions[i].gradient,
+                  accentColor: landscapeActions[i].accentColor,
+                  onTap: () => context.push(landscapeActions[i].route),
+                ),
+              ),
+            ],
+          ],
+        ),
+      );
+    }
+
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final barHeight = math.max(88.0, 60.0 + (28.0 * textScale));
 
@@ -1437,6 +1527,85 @@ class _HomeQuickActionBar extends StatelessWidget {
             onTap: () => context.push(action.route),
           );
         },
+      ),
+    );
+  }
+}
+
+class _LandscapeQuickActionItem extends StatelessWidget {
+  const _LandscapeQuickActionItem({
+    required this.icon,
+    required this.label,
+    required this.gradient,
+    required this.accentColor,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final List<Color> gradient;
+  final Color accentColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return ApplePressable(
+      scaleDown: 0.94,
+      onTap: () {
+        HapticFeedback.selectionClick();
+        onTap();
+      },
+      borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
+        decoration: BoxDecoration(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.04)
+              : Colors.black.withValues(alpha: 0.02),
+          borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: gradient,
+                ),
+                borderRadius: BorderRadius.circular(9),
+                boxShadow: [
+                  BoxShadow(
+                    color: accentColor.withValues(alpha: isDark ? 0.35 : 0.25),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Icon(icon, size: 16, color: Colors.white),
+            ),
+            const SizedBox(height: 4),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                maxLines: 1,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 10.5,
+                  letterSpacing: -0.2,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
