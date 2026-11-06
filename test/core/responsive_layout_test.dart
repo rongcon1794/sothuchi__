@@ -1,5 +1,6 @@
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -262,7 +263,7 @@ void main() {
       expect(find.byType(TransactionsScreen), findsOneWidget);
     });
 
-    testWidgets('AppShellScaffold renders 42dp non-obscured BottomBar with all 5 items on Phone Landscape', (tester) async {
+    testWidgets('AppShellScaffold renders 50dp non-obscured BottomBar with all 5 items on Phone Landscape', (tester) async {
       tester.view.physicalSize = const Size(844, 390);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(() => tester.view.resetPhysicalSize());
@@ -320,6 +321,51 @@ void main() {
       expect(find.byType(ReportsScreen), findsOneWidget);
     });
 
+    testWidgets('AppShellScaffold on compact Phone Landscape (640x360) with 1.25x text scaling never truncates tab labels', (tester) async {
+      tester.view.physicalSize = const Size(640, 360);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      final authRepo = _TestAuthRepo();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            firebaseBootstrapStateProvider.overrideWithValue(
+              const FirebaseBootstrapState.configured(),
+            ),
+            authRepositoryProvider.overrideWithValue(authRepo),
+            accountRepositoryProvider.overrideWithValue(accRepo),
+            categoryRepositoryProvider.overrideWithValue(catRepo),
+            transactionRepositoryProvider.overrideWithValue(txRepo),
+            budgetRepositoryProvider.overrideWithValue(budgetRepo),
+          ],
+          child: const MediaQuery(
+            data: MediaQueryData(
+              size: Size(640, 360),
+              padding: EdgeInsets.fromLTRB(40, 0, 48, 0),
+              viewPadding: EdgeInsets.fromLTRB(40, 0, 48, 0),
+              textScaler: TextScaler.linear(1.25),
+            ),
+            child: SoThuChiApp(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+
+      final bottomBarFinder = find.byType(ClipRect).last;
+      for (final label in ['Tổng quan', 'Giao dịch', 'Ngân sách', 'Báo cáo', 'Cài đặt']) {
+        final textFinder = find.descendant(of: bottomBarFinder, matching: find.text(label));
+        expect(textFinder, findsOneWidget);
+        final richTextElement = find.descendant(of: textFinder, matching: find.byType(RichText)).evaluate().first;
+        final renderParagraph = richTextElement.renderObject as RenderParagraph;
+        expect(renderParagraph.didExceedMaxLines, isFalse, reason: 'Tab label "$label" must not be truncated');
+      }
+    });
+
     testWidgets('AppShellScaffold on wide landscape (1024x502) does not collapse body to white screen', (tester) async {
       tester.view.physicalSize = const Size(1024, 502);
       tester.view.devicePixelRatio = 1.0;
@@ -357,8 +403,8 @@ void main() {
 
       // Verify body is visible and takes vast majority of screen
       expect(homeRect.height, greaterThan(400));
-      // Verify bottom bar is docked at bottom, height is exactly navBarHeight (42dp)
-      expect(navBarRect.height, closeTo(42.0, 1.0));
+      // Verify bottom bar is docked at bottom, height is exactly navBarHeight (50dp)
+      expect(navBarRect.height, closeTo(50.0, 1.0));
       expect(navBarRect.bottom, equals(502.0));
       expect(homeRect.bottom, equals(navBarRect.top));
     });

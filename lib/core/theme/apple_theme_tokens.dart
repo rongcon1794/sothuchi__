@@ -92,12 +92,12 @@ abstract final class AppleTokens {
   // --- Navigation Bar, Left Rail & Responsive Layout Clearance Tokens ---
   static const double navBarHeight = 52.0;
   static const double navBarHeightPortrait = 52.0;
-  static const double navBarHeightLandscape = 42.0;
+  static const double navBarHeightLandscape = 50.0;
   static const double navRailWidthCompact = 64.0;
   static const double navRailWidthExpanded = 72.0;
   static const double appBarHeightPortrait = 56.0;
   static const double appBarHeightLandscape = 44.0;
   static const double scrollBottomPaddingWithFab = 120.0;
   static const double scrollBottomPaddingNoFab = 40.0;
-  static const double scrollBottomPaddingLandscape = 34.0;
+  static const double scrollBottomPaddingLandscape = 36.0;
 }

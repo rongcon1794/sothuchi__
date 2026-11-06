@@ -11,8 +11,8 @@ import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 /// Adapts seamlessly between:
 /// - iOS Bottom Navigation Bar on portrait phones (52dp, stacked Icon + Label).
 /// - Ultra-compact, non-obscured Landscape BottomBar on landscape phones/tablets
-///   (42dp, inline horizontal pill items, fully protected by left/right/bottom SafeArea
-///   against camera notches, 3-button navigation bars, and gesture pills).
+///   (50dp, stacked Icon + Label with full width per tab, fully protected by left/right/bottom SafeArea
+///   against camera notches, 3-button navigation bars, and gesture pills with zero text truncation).
 class AppShellScaffold extends StatelessWidget {
   const AppShellScaffold({
     required this.navigationShell,
@@ -101,22 +101,25 @@ class AppShellScaffold extends StatelessWidget {
               left: true,
               right: true,
               bottom: true,
-              child: SizedBox(
-                height: navBarHeight,
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 860),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        for (int i = 0; i < destinations.length; i++)
-                          _AppleNavBarItem(
-                            data: destinations[i],
-                            isSelected: i == currentIndex,
-                            isLandscape: isLandscape,
-                            onTap: () => _onDestinationSelected(i),
-                          ),
-                      ],
+              child: MediaQuery.withClampedTextScaling(
+                maxScaleFactor: isLandscape ? 1.05 : 1.15,
+                child: SizedBox(
+                  height: navBarHeight,
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 860),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          for (int i = 0; i < destinations.length; i++)
+                            _AppleNavBarItem(
+                              data: destinations[i],
+                              isSelected: i == currentIndex,
+                              isLandscape: isLandscape,
+                              onTap: () => _onDestinationSelected(i),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -161,76 +164,43 @@ class _AppleNavBarItem extends StatelessWidget {
     final primaryColor = theme.colorScheme.primary;
     const inactiveColor = Color(0xFF8E8E93);
 
-    final itemContent = isLandscape
-        ? AnimatedContainer(
-            duration: const Duration(milliseconds: 220),
-            curve: Curves.easeOutCubic,
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? primaryColor.withValues(alpha: isDark ? 0.22 : 0.12)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  isSelected ? data.activeIcon : data.icon,
-                  size: 18,
-                  color: isSelected ? primaryColor : inactiveColor,
-                ),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    data.label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 11.5,
-                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                      color: isSelected ? primaryColor : inactiveColor,
-                      letterSpacing: -0.2,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          )
-        : Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 220),
-                curve: Curves.easeOutCubic,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? primaryColor.withValues(alpha: isDark ? 0.22 : 0.12)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                ),
-                child: Icon(
-                  isSelected ? data.activeIcon : data.icon,
-                  size: 22,
-                  color: isSelected ? primaryColor : inactiveColor,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                data.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 10.5,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  color: isSelected ? primaryColor : inactiveColor,
-                ),
-              ),
-            ],
-          );
+    final itemContent = Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          padding: EdgeInsets.symmetric(
+            horizontal: isLandscape ? 12 : 14,
+            vertical: isLandscape ? 2 : 4,
+          ),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? primaryColor.withValues(alpha: isDark ? 0.22 : 0.12)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+          ),
+          child: Icon(
+            isSelected ? data.activeIcon : data.icon,
+            size: isLandscape ? 20 : 22,
+            color: isSelected ? primaryColor : inactiveColor,
+          ),
+        ),
+        SizedBox(height: isLandscape ? 1 : 2),
+        Text(
+          data.label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: isLandscape ? 10.0 : 10.5,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            color: isSelected ? primaryColor : inactiveColor,
+            letterSpacing: -0.2,
+          ),
+        ),
+      ],
+    );
 
     return Expanded(
       child: GestureDetector(
