@@ -167,8 +167,8 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
         },
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final isWide = constraints.maxWidth >= 720;
             final isLandscape = context.isLandscape;
+            final isWide = constraints.maxWidth >= 580 && isLandscape || constraints.maxWidth >= 720;
             final scrollBottomPadding = (isWide || isLandscape)
                 ? AppleTokens.scrollBottomPaddingLandscape + 54
                 : AppleTokens.scrollBottomPaddingWithFab;
@@ -518,6 +518,7 @@ class _HeroBalanceCard extends StatelessWidget {
         : 50;
     final expenseRatio = 100 - incomeRatio;
     final isNetPositive = monthSummary.net.minorUnits >= 0;
+    final isLandscape = context.isLandscape;
     final isLargeText = MediaQuery.textScalerOf(context).scale(1) >= 1.35;
 
     Widget buildIncomeBox() => ApplePressable(
@@ -694,7 +695,7 @@ class _HeroBalanceCard extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
         child: Container(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(isLandscape ? 14 : 20),
           decoration: BoxDecoration(
             gradient: cardGradient,
             borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
@@ -881,7 +882,7 @@ class _HeroBalanceCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                if (isLargeText) ...[
+                if (isLargeText || isLandscape) ...[
                   Row(
                     children: [
                       Icon(
@@ -1118,14 +1119,16 @@ class _SmartSpendingPaceCard extends StatelessWidget {
                             children: [
                               Icon(statusIcon, size: 11, color: statusColor),
                               const SizedBox(width: 4),
-                              Text(
-                                statusText,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: statusColor,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 10.5,
+                              Flexible(
+                                child: Text(
+                                  statusText,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: statusColor,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 10.5,
+                                  ),
                                 ),
                               ),
                             ],
@@ -1164,14 +1167,16 @@ class _SmartSpendingPaceCard extends StatelessWidget {
                           children: [
                             Icon(statusIcon, size: 11, color: statusColor),
                             const SizedBox(width: 4),
-                            Text(
-                              statusText,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: statusColor,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 10.5,
+                            Flexible(
+                              child: Text(
+                                statusText,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: statusColor,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 10.5,
+                                ),
                               ),
                             ),
                           ],

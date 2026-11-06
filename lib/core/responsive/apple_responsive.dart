@@ -37,6 +37,15 @@ extension AppleResponsiveContext on BuildContext {
   /// Height of the window.
   double get windowHeight => windowSize.height;
 
+  /// Aspect ratio of window (width / height).
+  double get aspectRatio => windowHeight > 0 ? windowWidth / windowHeight : 1.0;
+
+  /// True if the window is in landscape mode with an aspect ratio of 16:9 or wider (>= 1.70).
+  bool get is16by9OrWider => isLandscape && aspectRatio >= 1.70;
+
+  /// True if the window is a compact landscape handheld phone (height <= 450 dp).
+  bool get isCompactLandscape => isLandscape && windowHeight <= 450;
+
   /// Categorizes window width into [AppleWindowSizeClass].
   AppleWindowSizeClass get windowSizeClass {
     final width = windowWidth;

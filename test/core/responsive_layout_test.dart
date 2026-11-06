@@ -28,6 +28,8 @@ import 'package:so_thu_chi/features/savings/presentation/screens/savings_goals_s
 import 'package:so_thu_chi/features/transactions/data/repositories/firestore_transaction_repository.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:so_thu_chi/features/transactions/presentation/screens/home_dashboard_screen.dart';
+import 'package:so_thu_chi/features/transactions/presentation/screens/transaction_detail_screen.dart';
+import 'package:so_thu_chi/features/transactions/presentation/screens/transaction_form_screen.dart';
 import 'package:so_thu_chi/features/transactions/presentation/screens/transactions_screen.dart';
 import 'package:so_thu_chi/l10n/app_localizations.dart';
 
@@ -569,6 +571,128 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       expect(find.byType(SavingsGoalsScreen), findsOneWidget);
+    });
+
+    testWidgets('HomeDashboardScreen renders 2-column layout without overflow on 16:9 Phone Landscape (640x360)', (tester) async {
+      tester.view.physicalSize = const Size(640, 360);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: const HomeDashboardScreen(),
+          size: const Size(640, 360),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(HomeDashboardScreen), findsOneWidget);
+      expect(find.textContaining('Tiệc tối gia đình'), findsOneWidget);
+    });
+
+    testWidgets('TransactionsScreen renders 2-column layout and ticker on 16:9 Phone Landscape (640x360)', (tester) async {
+      tester.view.physicalSize = const Size(640, 360);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: const TransactionsScreen(),
+          size: const Size(640, 360),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(TransactionsScreen), findsOneWidget);
+      expect(find.textContaining('Tiệc tối gia đình'), findsOneWidget);
+      expect(find.textContaining('Ròng:'), findsOneWidget);
+    });
+
+    testWidgets('TransactionDetailScreen renders cleanly on 16:9 Phone Landscape (640x360)', (tester) async {
+      tester.view.physicalSize = const Size(640, 360);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      final txs = await txRepo.watchTransactions().first;
+      final sampleId = txs.first.id;
+
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: TransactionDetailScreen(transactionId: sampleId),
+          size: const Size(640, 360),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(TransactionDetailScreen), findsOneWidget);
+      expect(find.text('Chi tiết giao dịch'), findsOneWidget);
+    });
+
+    testWidgets('TransactionFormScreen renders cleanly on 16:9 Phone Landscape (640x360)', (tester) async {
+      tester.view.physicalSize = const Size(640, 360);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: const TransactionFormScreen(),
+          size: const Size(640, 360),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(TransactionFormScreen), findsOneWidget);
+      expect(find.text('Ghi giao dịch'), findsOneWidget);
+    });
+  });
+
+  group('16:9 Landscape Aspect Ratio Verification (640x360 Phone & 1280x720 Widescreen)', () {
+    testWidgets('AppleResponsiveContext computes 16:9 aspect ratio and flags accurately', (tester) async {
+      late double recordedAspectRatio;
+      late bool recordedIs16by9;
+      late bool recordedIsCompactLandscape;
+
+      Widget buildProbe(Size size) {
+        return MediaQuery(
+          data: MediaQueryData(size: size),
+          child: Builder(
+            builder: (context) {
+              recordedAspectRatio = context.aspectRatio;
+              recordedIs16by9 = context.is16by9OrWider;
+              recordedIsCompactLandscape = context.isCompactLandscape;
+              return const SizedBox.shrink();
+            },
+          ),
+        );
+      }
+
+      // 1. Phone Portrait 9:16 (360x640)
+      await tester.pumpWidget(buildProbe(const Size(360, 640)));
+      expect(recordedAspectRatio, closeTo(0.5625, 0.01));
+      expect(recordedIs16by9, isFalse);
+      expect(recordedIsCompactLandscape, isFalse);
+
+      // 2. Phone Landscape 16:9 (640x360)
+      await tester.pumpWidget(buildProbe(const Size(640, 360)));
+      expect(recordedAspectRatio, closeTo(1.7777, 0.01));
+      expect(recordedIs16by9, isTrue);
+      expect(recordedIsCompactLandscape, isTrue);
+
+      // 3. iPhone SE Landscape ~16:9 (667x375)
+      await tester.pumpWidget(buildProbe(const Size(667, 375)));
+      expect(recordedAspectRatio, closeTo(1.7786, 0.01));
+      expect(recordedIs16by9, isTrue);
+      expect(recordedIsCompactLandscape, isTrue);
+
+      // 4. Tablet / Desktop Widescreen 16:9 (1280x720)
+      await tester.pumpWidget(buildProbe(const Size(1280, 720)));
+      expect(recordedAspectRatio, closeTo(1.7777, 0.01));
+      expect(recordedIs16by9, isTrue);
+      expect(recordedIsCompactLandscape, isFalse); // Height > 450dp
     });
   });
 }

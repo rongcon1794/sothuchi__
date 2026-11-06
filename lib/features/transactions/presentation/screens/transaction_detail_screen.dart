@@ -250,15 +250,15 @@ class TransactionDetailScreen extends ConsumerWidget {
           ),
           body: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 720),
+              constraints: BoxConstraints(maxWidth: context.isWideScreen ? 1024 : 720),
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 40),
+                padding: EdgeInsets.fromLTRB(16, isLandscape ? 6 : 12, 16, 40),
                 children: [
                   // 1. Hero Amount & Type Card
                   AppleGlassCard(
-                    padding: const EdgeInsets.symmetric(
+                    padding: EdgeInsets.symmetric(
                       horizontal: 20,
-                      vertical: 24,
+                      vertical: isLandscape ? 14 : 24,
                     ),
                     borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
                     child: Column(

@@ -1057,9 +1057,14 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 860),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  isLandscape ? 4 : 10,
+                  16,
+                  isLandscape ? 6 : 12,
+                ),
                 child: AppleButton.primary(
-                  height: 50,
+                  height: isLandscape ? 40 : 50,
                   borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                   isLoading: isSaving,
                   icon: CupertinoIcons.checkmark_alt,
@@ -1150,8 +1155,10 @@ class _HeroAmountCardState extends State<_HeroAmountCard> {
       TransactionType.transfer => '⇄',
     };
 
+    final isLandscape = context.isLandscape;
+
     return AppleGlassCard(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+      padding: EdgeInsets.fromLTRB(16, isLandscape ? 10 : 16, 16, isLandscape ? 12 : 18),
       borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
       borderColor: isFocused
           ? typeColor.withValues(alpha: isDark ? 0.6 : 0.45)
