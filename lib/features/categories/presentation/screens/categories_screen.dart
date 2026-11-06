@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
+import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/core/widgets/skeleton_box.dart';
@@ -141,7 +143,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                   return ApplePressable(
                     borderRadius:
                         BorderRadius.circular(AppleTokens.radiusCard),
-                    onTap: () => _openCategorySheet(existing: cat),
+                    onTap: () => context.push(AppRoutes.categoryDetail(cat.id)),
                     child: AppleGlassCard(
                       padding: EdgeInsets.zero,
                       borderRadius: BorderRadius.circular(AppleTokens.radiusCard),

@@ -9,10 +9,14 @@ import 'package:so_thu_chi/data/firebase/firebase_providers.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/accounts/data/repositories/firestore_account_repository.dart';
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
+import 'package:so_thu_chi/features/accounts/presentation/screens/account_detail_screen.dart';
 import 'package:so_thu_chi/features/accounts/presentation/screens/accounts_screen.dart';
 import 'package:so_thu_chi/features/categories/data/repositories/firestore_category_repository.dart';
 import 'package:so_thu_chi/features/categories/domain/entities/category.dart';
+import 'package:so_thu_chi/features/categories/presentation/screens/category_detail_screen.dart';
 import 'package:so_thu_chi/features/categories/presentation/screens/categories_screen.dart';
+import 'package:so_thu_chi/features/transactions/data/repositories/firestore_transaction_repository.dart';
+import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:so_thu_chi/l10n/app_localizations.dart';
 
 void main() {
@@ -162,6 +166,84 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Ăn uống'), findsOneWidget);
+    });
+
+    testWidgets('AccountDetailScreen renders wallet information, stats, and actions', (tester) async {
+      SharedPreferences.setMockInitialValues({'onboarding_completed': true});
+      final prefs = await SharedPreferences.getInstance();
+      final firestore = FakeFirebaseFirestore();
+      final accRepo = FirestoreAccountRepository(firestore: firestore, uid: 'u1');
+      final catRepo = FirestoreCategoryRepository(firestore: firestore, uid: 'u1');
+      final txRepo = FirestoreTransactionRepository(firestore: firestore, uid: 'u1');
+
+      final wRes = await accRepo.createAccount(
+        name: 'Ví Tiền Mặt',
+        type: AccountType.cash,
+        initialBalance: 2500000,
+        currency: 'VND',
+        icon: 'cash',
+        color: 0xFF0D7C66,
+      );
+      final wallet = (wRes as Success<Account>).value;
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            accountRepositoryProvider.overrideWithValue(accRepo),
+            categoryRepositoryProvider.overrideWithValue(catRepo),
+            transactionRepositoryProvider.overrideWithValue(txRepo),
+          ],
+          child: MaterialApp(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: AppTheme.light(),
+            home: AccountDetailScreen(accountId: wallet.id),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Ví Tiền Mặt'), findsAtLeastNWidgets(1));
+      expect(find.text('Chưa có giao dịch trên ví này'), findsOneWidget);
+      expect(find.text('Thêm giao dịch'), findsAtLeastNWidgets(1));
+    });
+
+    testWidgets('CategoryDetailScreen renders category information and actions', (tester) async {
+      SharedPreferences.setMockInitialValues({'onboarding_completed': true});
+      final prefs = await SharedPreferences.getInstance();
+      final firestore = FakeFirebaseFirestore();
+      final accRepo = FirestoreAccountRepository(firestore: firestore, uid: 'u1');
+      final catRepo = FirestoreCategoryRepository(firestore: firestore, uid: 'u1');
+      final txRepo = FirestoreTransactionRepository(firestore: firestore, uid: 'u1');
+
+      await catRepo.seedDefaultCategoriesIfNeeded();
+      final cats = await catRepo.getCategories();
+      final cat = cats.firstWhere((c) => c.name == 'Ăn uống');
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            accountRepositoryProvider.overrideWithValue(accRepo),
+            categoryRepositoryProvider.overrideWithValue(catRepo),
+            transactionRepositoryProvider.overrideWithValue(txRepo),
+          ],
+          child: MaterialApp(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: AppTheme.light(),
+            home: CategoryDetailScreen(categoryId: cat.id),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Ăn uống'), findsAtLeastNWidgets(1));
+      expect(find.text('Chưa có giao dịch'), findsOneWidget);
+      expect(find.text('Thêm giao dịch'), findsAtLeastNWidgets(1));
     });
   });
 }

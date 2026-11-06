@@ -3,7 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
+import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
@@ -86,12 +88,15 @@ class SavingsGoalCard extends ConsumerWidget {
     final locale = Localizations.localeOf(context).languageCode;
     final accentColor = Color(goal.color);
 
-    return AppleGlassCard(
+    return ApplePressable(
       borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-      borderColor: goal.isCompleted
-          ? AppleTokens.systemGreen.withValues(alpha: 0.4)
-          : accentColor.withValues(alpha: 0.2),
-      child: Column(
+      onTap: () => context.push(AppRoutes.savingsDetail(goal.id)),
+      child: AppleGlassCard(
+        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+        borderColor: goal.isCompleted
+            ? AppleTokens.systemGreen.withValues(alpha: 0.4)
+            : accentColor.withValues(alpha: 0.2),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header Row
@@ -336,6 +341,7 @@ class SavingsGoalCard extends ConsumerWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }

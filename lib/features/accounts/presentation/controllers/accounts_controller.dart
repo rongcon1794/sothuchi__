@@ -95,6 +95,18 @@ class AccountsActionController extends Notifier<AsyncValue<void>> {
     return res;
   }
 
+  Future<Result<void>> deleteWallet(String accountId) async {
+    state = const AsyncLoading();
+    final res = await ref
+        .read(accountRepositoryProvider)
+        .softDeleteAccount(accountId);
+    state = res.fold(
+      onSuccess: (_) => const AsyncData(null),
+      onFailure: (e) => AsyncError(e, StackTrace.current),
+    );
+    return res;
+  }
+
   Future<Result<void>> transfer({
     required String fromAccountId,
     required String toAccountId,

@@ -1,10 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:so_thu_chi/core/constants/currency_constants.dart';
+import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
+import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/date_formatter.dart';
@@ -15,6 +16,7 @@ import 'package:so_thu_chi/core/widgets/skeleton_box.dart';
 import 'package:so_thu_chi/features/budgets/domain/entities/budget.dart';
 import 'package:so_thu_chi/features/budgets/presentation/controllers/budgets_controller.dart';
 import 'package:so_thu_chi/features/budgets/presentation/widgets/budget_alert_banner.dart';
+import 'package:so_thu_chi/features/budgets/presentation/widgets/budget_form_sheet.dart';
 import 'package:so_thu_chi/features/categories/domain/entities/category.dart';
 import 'package:so_thu_chi/features/categories/presentation/controllers/categories_controller.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
@@ -35,15 +37,10 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
     required DateTime selectedMonth,
     Budget? existing,
   }) async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      showDragHandle: true,
-      builder: (_) => _BudgetFormBottomSheet(
-        monthStart: selectedMonth,
-        existing: existing,
-      ),
+    await BudgetFormBottomSheet.show(
+      context,
+      monthStart: selectedMonth,
+      existing: existing,
     );
   }
 
@@ -487,13 +484,16 @@ class _BudgetProgressCard extends StatelessWidget {
       masked: hideBalance,
     );
 
-    return AppleGlassCard(
-      padding: const EdgeInsets.all(16),
+    return ApplePressable(
       borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-      borderColor: progress.isExceeded
-          ? AppleTokens.systemRed.withValues(alpha: 0.4)
-          : null,
-      child: Column(
+      onTap: () => context.push(AppRoutes.budgetDetail(progress.budget.id)),
+      child: AppleGlassCard(
+        padding: const EdgeInsets.all(16),
+        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+        borderColor: progress.isExceeded
+            ? AppleTokens.systemRed.withValues(alpha: 0.4)
+            : null,
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -647,208 +647,6 @@ class _BudgetProgressCard extends StatelessWidget {
               ),
             ],
           ],
-        ),
-    );
-  }
-}
-
-class _BudgetFormBottomSheet extends ConsumerStatefulWidget {
-  const _BudgetFormBottomSheet({
-    required this.monthStart,
-    this.existing,
-  });
-
-  final DateTime monthStart;
-  final Budget? existing;
-
-  @override
-  ConsumerState<_BudgetFormBottomSheet> createState() =>
-      _BudgetFormBottomSheetState();
-}
-
-class _BudgetFormBottomSheetState
-    extends ConsumerState<_BudgetFormBottomSheet> {
-  final _formKey = GlobalKey<FormState>();
-  final _amountController = TextEditingController();
-  String? _selectedCategoryId; // null => Overall Monthly Budget
-  int _threshold = 80;
-
-  @override
-  void initState() {
-    super.initState();
-    final existing = widget.existing;
-    if (existing != null) {
-      final locale =
-          ref.read(settingsControllerProvider).value?.localeCode ?? 'vi';
-      _selectedCategoryId = existing.categoryId;
-      _threshold = existing.alertThreshold;
-      _amountController.text = existing.limitMoney.toInputString(
-        locale: locale,
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    _amountController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
-    final settings = ref.read(settingsControllerProvider).value;
-    final currency =
-        widget.existing?.currency ??
-        settings?.currencyCode ??
-        AppCurrencies.defaultCode;
-    final parsed = Money.tryParse(
-      _amountController.text,
-      currencyCode: currency,
-    );
-    if (parsed == null || parsed.minorUnits <= 0) return;
-
-    final messenger = ScaffoldMessenger.of(context);
-    final res = await ref
-        .read(budgetsActionControllerProvider.notifier)
-        .upsertBudget(
-          existingId: widget.existing?.id,
-          categoryId: _selectedCategoryId,
-          amount: parsed.minorUnits,
-          currency: currency,
-          monthStart: widget.monthStart,
-          alertThreshold: _threshold,
-        );
-
-    if (!mounted) return;
-    res.fold(
-      onSuccess: (_) => Navigator.of(context).pop(),
-      onFailure: (err) {
-        messenger.showSnackBar(
-          SnackBar(content: Text(context.localizeError(err))),
-        );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final settings = ref.watch(settingsControllerProvider).value;
-    final locale = settings?.localeCode ?? 'vi';
-    final currencyCode =
-        widget.existing?.currency ??
-        settings?.currencyCode ??
-        AppCurrencies.defaultCode;
-    final currencyInfo = AppCurrencies.byCode(currencyCode);
-    final expenseCategories = ref.watch(expenseCategoriesProvider);
-
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
-        top: 4,
-        bottom: MediaQuery.viewInsetsOf(context).bottom + 24,
-      ),
-      child: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                widget.existing != null ? l10n.editBudget : l10n.addBudget,
-                style: theme.textTheme.titleLarge,
-              ),
-              const SizedBox(height: 16),
-
-              // Scope Selector (Overall or Specific Expense Category)
-              DropdownButtonFormField<String?>(
-                isExpanded: true,
-                initialValue: _selectedCategoryId,
-                decoration: InputDecoration(
-                  labelText: l10n.budgetScope,
-                  prefixIcon: const Icon(Icons.layers_outlined),
-                ),
-                items: [
-                  DropdownMenuItem<String?>(
-                    value: null,
-                    child: Text(
-                      l10n.overallMonthlyBudget,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  for (final cat in expenseCategories)
-                    DropdownMenuItem<String?>(
-                      value: cat.id,
-                      child: Text(
-                        DefaultCategoryLocalization.resolveName(
-                          l10n,
-                          categoryId: cat.id,
-                          fallbackName: cat.name,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                ],
-                onChanged: (val) => setState(() => _selectedCategoryId = val),
-              ),
-              const SizedBox(height: 16),
-
-              // Monthly Limit Amount
-              AppleTextField(
-                controller: _amountController,
-                keyboardType: TextInputType.numberWithOptions(
-                  decimal: currencyInfo.decimalDigits > 0,
-                ),
-                inputFormatters: [
-                  MoneyInputFormatter(
-                    currencyCode: currencyCode,
-                    locale: locale,
-                  ),
-                ],
-                label: l10n.budgetLimit,
-                placeholder: '0',
-                suffix: Text(
-                  currencyInfo.symbol,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                validator: (val) {
-                  final m = Money.tryParse(
-                    val ?? '',
-                    currencyCode: currencyCode,
-                  );
-                  if (m == null || m.minorUnits <= 0) {
-                    return l10n.amountRequiredError;
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-
-              // Alert Threshold Slider (50% .. 100%)
-              Text(
-                l10n.alertThresholdLabel(_threshold),
-                style: theme.textTheme.titleSmall,
-              ),
-              Slider(
-                value: _threshold.toDouble(),
-                min: 50,
-                max: 100,
-                divisions: 10,
-                label: '$_threshold%',
-                semanticFormatterCallback: (val) => '${val.round()}%',
-                onChanged: (val) => setState(() => _threshold = val.round()),
-              ),
-              const SizedBox(height: 16),
-
-              AppleButton.primary(
-                onPressed: _save,
-                label: l10n.save,
-              ),
-            ],
-          ),
         ),
       ),
     );

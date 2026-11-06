@@ -21,5 +21,11 @@ abstract final class AppRoutes {
   static const String about = '/settings/about';
 
   static String transactionEdit(String id) => '/transactions/$id/edit';
+  static String accountDetail(String id) => '/accounts/$id';
+  static String categoryDetail(String id) => '/categories/$id';
+  static String budgetDetail(String id) => '/budgets/$id';
+  static String savingsDetail(String id) => '/savings/$id';
+  static String debtDetail(String id) => '/debts/$id';
+  static String recurringDetail(String id) => '/recurring/$id';
 }
 

@@ -5,18 +5,24 @@ import 'package:so_thu_chi/core/contracts/transaction_draft_contract.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/widgets/app_shell_scaffold.dart';
 import 'package:so_thu_chi/core/widgets/offline_sync_banner.dart';
+import 'package:so_thu_chi/features/accounts/presentation/screens/account_detail_screen.dart';
 import 'package:so_thu_chi/features/accounts/presentation/screens/accounts_screen.dart';
 import 'package:so_thu_chi/features/auth/domain/entities/app_user.dart';
 import 'package:so_thu_chi/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:so_thu_chi/features/auth/presentation/screens/login_screen.dart';
 import 'package:so_thu_chi/features/auth/presentation/screens/onboarding_screen.dart';
 import 'package:so_thu_chi/features/auth/presentation/screens/splash_screen.dart';
+import 'package:so_thu_chi/features/budgets/presentation/screens/budget_detail_screen.dart';
 import 'package:so_thu_chi/features/budgets/presentation/screens/budgets_screen.dart';
+import 'package:so_thu_chi/features/categories/presentation/screens/category_detail_screen.dart';
 import 'package:so_thu_chi/features/categories/presentation/screens/categories_screen.dart';
+import 'package:so_thu_chi/features/debts/presentation/screens/debt_detail_screen.dart';
 import 'package:so_thu_chi/features/debts/presentation/screens/debts_screen.dart';
 import 'package:so_thu_chi/features/ledger/presentation/screens/ledgers_management_screen.dart';
+import 'package:so_thu_chi/features/recurring/presentation/screens/recurring_detail_screen.dart';
 import 'package:so_thu_chi/features/recurring/presentation/screens/recurring_transactions_screen.dart';
 import 'package:so_thu_chi/features/reports/presentation/screens/reports_screen.dart';
+import 'package:so_thu_chi/features/savings/presentation/screens/savings_goal_detail_screen.dart';
 import 'package:so_thu_chi/features/savings/presentation/screens/savings_goals_screen.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:so_thu_chi/features/settings/presentation/screens/about_screen.dart';
@@ -51,10 +57,16 @@ class AppScreenRegistry {
     required this.reportsBuilder,
     required this.settingsBuilder,
     required this.accountsBuilder,
+    required this.accountDetailBuilder,
     required this.categoriesBuilder,
+    required this.categoryDetailBuilder,
+    required this.budgetDetailBuilder,
     required this.debtsBuilder,
+    required this.debtDetailBuilder,
     required this.recurringBuilder,
+    required this.recurringDetailBuilder,
     required this.savingsBuilder,
+    required this.savingsDetailBuilder,
     required this.ledgersBuilder,
     required this.privacyBuilder,
     required this.aboutBuilder,
@@ -68,13 +80,25 @@ class AppScreenRegistry {
   final Widget Function(BuildContext context, GoRouterState state)
   transactionFormBuilder;
   final WidgetBuilder budgetsBuilder;
+  final Widget Function(BuildContext context, GoRouterState state)
+  budgetDetailBuilder;
   final WidgetBuilder reportsBuilder;
   final WidgetBuilder settingsBuilder;
   final WidgetBuilder accountsBuilder;
+  final Widget Function(BuildContext context, GoRouterState state)
+  accountDetailBuilder;
   final WidgetBuilder categoriesBuilder;
+  final Widget Function(BuildContext context, GoRouterState state)
+  categoryDetailBuilder;
   final WidgetBuilder debtsBuilder;
+  final Widget Function(BuildContext context, GoRouterState state)
+  debtDetailBuilder;
   final WidgetBuilder recurringBuilder;
+  final Widget Function(BuildContext context, GoRouterState state)
+  recurringDetailBuilder;
   final WidgetBuilder savingsBuilder;
+  final Widget Function(BuildContext context, GoRouterState state)
+  savingsDetailBuilder;
   final WidgetBuilder ledgersBuilder;
   final WidgetBuilder privacyBuilder;
   final WidgetBuilder aboutBuilder;
@@ -96,13 +120,25 @@ class AppScreenRegistry {
         );
       },
       budgetsBuilder: (_) => const BudgetsScreen(),
+      budgetDetailBuilder: (_, state) =>
+          BudgetDetailScreen(budgetId: state.pathParameters['id'] ?? ''),
       reportsBuilder: (_) => const ReportsScreen(),
       settingsBuilder: (_) => const SettingsScreen(),
       accountsBuilder: (_) => const AccountsScreen(),
+      accountDetailBuilder: (_, state) =>
+          AccountDetailScreen(accountId: state.pathParameters['id'] ?? ''),
       categoriesBuilder: (_) => const CategoriesScreen(),
+      categoryDetailBuilder: (_, state) =>
+          CategoryDetailScreen(categoryId: state.pathParameters['id'] ?? ''),
       debtsBuilder: (_) => const DebtsScreen(),
+      debtDetailBuilder: (_, state) =>
+          DebtDetailScreen(debtId: state.pathParameters['id'] ?? ''),
       recurringBuilder: (_) => const RecurringTransactionsScreen(),
+      recurringDetailBuilder: (_, state) =>
+          RecurringDetailScreen(recurringId: state.pathParameters['id'] ?? ''),
       savingsBuilder: (_) => const SavingsGoalsScreen(),
+      savingsDetailBuilder: (_, state) =>
+          SavingsGoalDetailScreen(goalId: state.pathParameters['id'] ?? ''),
       ledgersBuilder: (_) => const LedgersManagementScreen(),
       privacyBuilder: (_) => const PrivacyPolicyScreen(),
       aboutBuilder: (_) => const AboutScreen(),
@@ -256,20 +292,44 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, _) => screens.accountsBuilder(context),
       ),
       GoRoute(
+        path: '/accounts/:id',
+        builder: screens.accountDetailBuilder,
+      ),
+      GoRoute(
         path: AppRoutes.categories,
         builder: (context, _) => screens.categoriesBuilder(context),
+      ),
+      GoRoute(
+        path: '/categories/:id',
+        builder: screens.categoryDetailBuilder,
+      ),
+      GoRoute(
+        path: '/budgets/:id',
+        builder: screens.budgetDetailBuilder,
       ),
       GoRoute(
         path: AppRoutes.debts,
         builder: (context, _) => screens.debtsBuilder(context),
       ),
       GoRoute(
+        path: '/debts/:id',
+        builder: screens.debtDetailBuilder,
+      ),
+      GoRoute(
         path: AppRoutes.recurring,
         builder: (context, _) => screens.recurringBuilder(context),
       ),
       GoRoute(
+        path: '/recurring/:id',
+        builder: screens.recurringDetailBuilder,
+      ),
+      GoRoute(
         path: AppRoutes.savings,
         builder: (context, _) => screens.savingsBuilder(context),
+      ),
+      GoRoute(
+        path: '/savings/:id',
+        builder: screens.savingsDetailBuilder,
       ),
       GoRoute(
         path: AppRoutes.ledgers,

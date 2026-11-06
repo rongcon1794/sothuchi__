@@ -2,7 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
+import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/date_formatter.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
@@ -332,13 +334,16 @@ class _DebtCard extends ConsumerWidget {
         ? debt.personName.trim().split(' ').map((e) => e.isNotEmpty ? e[0] : '').take(2).join().toUpperCase()
         : '?';
 
-    return AppleGlassCard(
-      padding: const EdgeInsets.all(16),
+    return ApplePressable(
       borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-      borderColor: debt.isOverdue
-          ? AppleTokens.systemRed.withValues(alpha: 0.5)
-          : (isDark ? AppleTokens.bgDarkSecondary : AppleTokens.borderLight),
-      child: Column(
+      onTap: () => context.push(AppRoutes.debtDetail(debt.id)),
+      child: AppleGlassCard(
+        padding: const EdgeInsets.all(16),
+        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+        borderColor: debt.isOverdue
+            ? AppleTokens.systemRed.withValues(alpha: 0.5)
+            : (isDark ? AppleTokens.bgDarkSecondary : AppleTokens.borderLight),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -588,6 +593,7 @@ class _DebtCard extends ConsumerWidget {
           ],
         ],
       ),
+    ),
     );
   }
 
