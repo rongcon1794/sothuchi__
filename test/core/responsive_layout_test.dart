@@ -12,11 +12,18 @@ import 'package:so_thu_chi/data/firebase/firebase_providers.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/accounts/data/repositories/firestore_account_repository.dart';
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
+import 'package:so_thu_chi/features/accounts/presentation/screens/accounts_screen.dart';
 import 'package:so_thu_chi/features/auth/domain/entities/app_user.dart';
 import 'package:so_thu_chi/features/auth/domain/repositories/auth_repository.dart';
 import 'package:so_thu_chi/features/budgets/data/repositories/firestore_budget_repository.dart';
+import 'package:so_thu_chi/features/budgets/presentation/screens/budgets_screen.dart';
 import 'package:so_thu_chi/features/categories/data/repositories/firestore_category_repository.dart';
+import 'package:so_thu_chi/features/categories/presentation/screens/categories_screen.dart';
+import 'package:so_thu_chi/features/debts/data/repositories/firestore_debt_repository.dart';
+import 'package:so_thu_chi/features/debts/presentation/screens/debts_screen.dart';
 import 'package:so_thu_chi/features/reports/presentation/screens/reports_screen.dart';
+import 'package:so_thu_chi/features/savings/data/repositories/firestore_savings_goal_repository.dart';
+import 'package:so_thu_chi/features/savings/presentation/screens/savings_goals_screen.dart';
 import 'package:so_thu_chi/features/transactions/data/repositories/firestore_transaction_repository.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:so_thu_chi/features/transactions/presentation/screens/home_dashboard_screen.dart';
@@ -106,6 +113,8 @@ void main() {
     late FirestoreCategoryRepository catRepo;
     late FirestoreTransactionRepository txRepo;
     late FirestoreBudgetRepository budgetRepo;
+    late FirestoreDebtRepository debtRepo;
+    late FirestoreSavingsGoalRepository savingsGoalRepo;
 
     setUp(() async {
       SharedPreferences.setMockInitialValues({
@@ -120,6 +129,12 @@ void main() {
       catRepo = FirestoreCategoryRepository(firestore: firestore, uid: uid);
       txRepo = FirestoreTransactionRepository(firestore: firestore, uid: uid);
       budgetRepo = FirestoreBudgetRepository(firestore: firestore, uid: uid);
+      debtRepo = FirestoreDebtRepository(firestore: firestore, uid: uid);
+      savingsGoalRepo = FirestoreSavingsGoalRepository(
+        firestore: firestore,
+        currentUserIdGetter: () => uid,
+        transactionRepository: txRepo,
+      );
 
       await catRepo.seedDefaultCategoriesIfNeeded();
       final createdWallet = await accRepo.createAccount(
@@ -163,6 +178,8 @@ void main() {
           categoryRepositoryProvider.overrideWithValue(catRepo),
           transactionRepositoryProvider.overrideWithValue(txRepo),
           budgetRepositoryProvider.overrideWithValue(budgetRepo),
+          debtRepositoryProvider.overrideWithValue(debtRepo),
+          savingsGoalRepositoryProvider.overrideWithValue(savingsGoalRepo),
         ],
         child: MediaQuery(
           data: MediaQueryData(size: size),
@@ -344,6 +361,146 @@ void main() {
       expect(navBarRect.height, closeTo(42.0, 1.0));
       expect(navBarRect.bottom, equals(502.0));
       expect(homeRect.bottom, equals(navBarRect.top));
+    });
+
+    testWidgets('AccountsScreen renders 2-column layout without overflow on Landscape Phone and Tablet', (tester) async {
+      tester.view.physicalSize = const Size(844, 390);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: const AccountsScreen(),
+          size: const Size(844, 390),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(AccountsScreen), findsOneWidget);
+
+      // Verify on tablet
+      tester.view.physicalSize = const Size(1024, 768);
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: const AccountsScreen(),
+          size: const Size(1024, 768),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(AccountsScreen), findsOneWidget);
+    });
+
+    testWidgets('BudgetsScreen renders 2-column layout without overflow on Landscape Phone and Tablet', (tester) async {
+      tester.view.physicalSize = const Size(844, 390);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: const BudgetsScreen(),
+          size: const Size(844, 390),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(BudgetsScreen), findsOneWidget);
+
+      // Verify on tablet
+      tester.view.physicalSize = const Size(1024, 768);
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: const BudgetsScreen(),
+          size: const Size(1024, 768),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(BudgetsScreen), findsOneWidget);
+    });
+
+    testWidgets('CategoriesScreen renders adaptive Grid without overflow on Landscape Phone and Tablet', (tester) async {
+      tester.view.physicalSize = const Size(844, 390);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: const CategoriesScreen(),
+          size: const Size(844, 390),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(CategoriesScreen), findsOneWidget);
+
+      // Verify on tablet
+      tester.view.physicalSize = const Size(1024, 768);
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: const CategoriesScreen(),
+          size: const Size(1024, 768),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(CategoriesScreen), findsOneWidget);
+    });
+
+    testWidgets('DebtsScreen renders 2-column layout without overflow on Landscape Phone and Tablet', (tester) async {
+      tester.view.physicalSize = const Size(844, 390);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: const DebtsScreen(),
+          size: const Size(844, 390),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(DebtsScreen), findsOneWidget);
+
+      // Verify on tablet
+      tester.view.physicalSize = const Size(1024, 768);
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: const DebtsScreen(),
+          size: const Size(1024, 768),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(DebtsScreen), findsOneWidget);
+    });
+
+    testWidgets('SavingsGoalsScreen renders 2-column layout without overflow on Landscape Phone and Tablet', (tester) async {
+      tester.view.physicalSize = const Size(844, 390);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: const SavingsGoalsScreen(),
+          size: const Size(844, 390),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(SavingsGoalsScreen), findsOneWidget);
+
+      // Verify on tablet
+      tester.view.physicalSize = const Size(1024, 768);
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: const SavingsGoalsScreen(),
+          size: const Size(1024, 768),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(SavingsGoalsScreen), findsOneWidget);
     });
   });
 }

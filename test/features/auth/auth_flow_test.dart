@@ -9,9 +9,17 @@ import 'package:so_thu_chi/app.dart';
 import 'package:so_thu_chi/core/errors/result.dart';
 import 'package:so_thu_chi/data/firebase/firebase_providers.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
+import 'package:so_thu_chi/features/accounts/data/repositories/firestore_account_repository.dart';
 import 'package:so_thu_chi/features/auth/data/models/user_profile_dto.dart';
 import 'package:so_thu_chi/features/auth/domain/entities/app_user.dart';
 import 'package:so_thu_chi/features/auth/domain/repositories/auth_repository.dart';
+import 'package:so_thu_chi/features/budgets/data/repositories/firestore_budget_repository.dart';
+import 'package:so_thu_chi/features/categories/data/repositories/firestore_category_repository.dart';
+import 'package:so_thu_chi/features/debts/data/repositories/firestore_debt_repository.dart';
+import 'package:so_thu_chi/features/ledger/data/repositories/firestore_ledger_repository.dart';
+import 'package:so_thu_chi/features/recurring/data/repositories/firestore_recurring_repository.dart';
+import 'package:so_thu_chi/features/savings/data/repositories/firestore_savings_goal_repository.dart';
+import 'package:so_thu_chi/features/transactions/data/repositories/firestore_transaction_repository.dart';
 
 class FakeAuthRepository implements AuthRepository {
   FakeAuthRepository({this.cloudConfigured = true});
@@ -113,6 +121,17 @@ void main() {
         FlutterSecureStorage.setMockInitialValues({});
         final prefs = await SharedPreferences.getInstance();
         final fakeAuth = FakeAuthRepository();
+        final accRepo = InMemoryAccountRepository();
+        final catRepo = InMemoryCategoryRepository();
+        final txRepo = InMemoryTransactionRepository(accountRepo: accRepo);
+        final budgetRepo = InMemoryBudgetRepository();
+        final debtRepo = InMemoryDebtRepository(accountRepo: accRepo);
+        final recurringRepo = InMemoryRecurringRepository(transactionRepository: txRepo);
+        final savingsRepo = InMemorySavingsGoalRepository(transactionRepository: txRepo);
+        final ledgerRepo = InMemoryLedgerRepository();
+
+        await catRepo.seedDefaultCategoriesIfNeeded();
+        await accRepo.ensureDefaultWallet(currency: 'VND');
 
         await tester.pumpWidget(
           ProviderScope(
@@ -122,23 +141,30 @@ void main() {
                 const FirebaseBootstrapState.configured(),
               ),
               authRepositoryProvider.overrideWithValue(fakeAuth),
+              accountRepositoryProvider.overrideWithValue(accRepo),
+              categoryRepositoryProvider.overrideWithValue(catRepo),
+              transactionRepositoryProvider.overrideWithValue(txRepo),
+              budgetRepositoryProvider.overrideWithValue(budgetRepo),
+              debtRepositoryProvider.overrideWithValue(debtRepo),
+              recurringRepositoryProvider.overrideWithValue(recurringRepo),
+              savingsGoalRepositoryProvider.overrideWithValue(savingsRepo),
+              ledgerRepositoryProvider.overrideWithValue(ledgerRepo),
             ],
             child: const SoThuChiApp(),
           ),
         );
         await tester.pumpAndSettle();
+        expect(find.text('Bỏ qua'), findsOneWidget);
 
         // Onboarding -> Skip
-        expect(find.text('Bỏ qua'), findsOneWidget);
         await tester.tap(find.text('Bỏ qua'));
         await tester.pumpAndSettle();
+        expect(find.text('Đăng nhập với Google'), findsOneWidget);
 
         // Login screen ("Đăng nhập với Google")
         expect(find.text('Đăng nhập với Google'), findsOneWidget);
         await tester.tap(find.text('Đăng nhập với Google'));
         await tester.pumpAndSettle();
-
-        // Redirected into authenticated shell (/home)
         expect(find.text('Tổng quan'), findsWidgets);
 
         // Sign out returns to Login screen

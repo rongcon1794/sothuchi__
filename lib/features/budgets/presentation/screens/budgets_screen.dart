@@ -181,9 +181,46 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
                     );
                   }
 
+                  final overviewWidgets = <Widget>[
+                    _BudgetOverviewCard(
+                      progressList: progressList,
+                      selectedMonth: selectedMonth,
+                      locale: locale,
+                      hideBalance: hideBalance,
+                    ),
+                    if (triggered.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      BudgetAlertBanner(
+                        progressOverride: triggered,
+                        navigateOnTap: false,
+                      ),
+                    ],
+                  ];
+
+                  final budgetCardsList = <Widget>[
+                    for (final item in progressList) ...[
+                      _BudgetProgressCard(
+                        progress: item,
+                        category: item.budget.categoryId != null
+                            ? categoriesMap[item.budget.categoryId!]
+                            : null,
+                        locale: locale,
+                        hideBalance: hideBalance,
+                        onEdit: () => _openBudgetForm(
+                          context,
+                          selectedMonth: selectedMonth,
+                          existing: item.budget,
+                        ),
+                        onDelete: () =>
+                            _deleteBudget(context, item.budget.id),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  ];
+
                   return Center(
                     child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 860),
+                      constraints: const BoxConstraints(maxWidth: 1024),
                       child: ListView(
                         padding: EdgeInsets.fromLTRB(
                           16,
@@ -194,37 +231,31 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
                               : AppleTokens.scrollBottomPaddingWithFab,
                         ),
                         children: [
-                          _BudgetOverviewCard(
-                            progressList: progressList,
-                            selectedMonth: selectedMonth,
-                            locale: locale,
-                            hideBalance: hideBalance,
-                          ),
-                          const SizedBox(height: 16),
-                          if (triggered.isNotEmpty) ...[
-                            BudgetAlertBanner(
-                              progressOverride: triggered,
-                              navigateOnTap: false,
-                            ),
+                          if (isWide)
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  flex: 42,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: overviewWidgets,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  flex: 58,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: budgetCardsList,
+                                  ),
+                                ),
+                              ],
+                            )
+                          else ...[
+                            ...overviewWidgets,
                             const SizedBox(height: 16),
-                          ],
-                          for (final item in progressList) ...[
-                            _BudgetProgressCard(
-                              progress: item,
-                              category: item.budget.categoryId != null
-                                  ? categoriesMap[item.budget.categoryId!]
-                                  : null,
-                              locale: locale,
-                              hideBalance: hideBalance,
-                              onEdit: () => _openBudgetForm(
-                                context,
-                                selectedMonth: selectedMonth,
-                                existing: item.budget,
-                              ),
-                              onDelete: () =>
-                                  _deleteBudget(context, item.budget.id),
-                            ),
-                            const SizedBox(height: 12),
+                            ...budgetCardsList,
                           ],
                         ],
                       ),
@@ -302,10 +333,15 @@ class _BudgetOverviewCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                l10n.overallMonthlyBudget,
-                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              Expanded(
+                child: Text(
+                  l10n.overallMonthlyBudget,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(

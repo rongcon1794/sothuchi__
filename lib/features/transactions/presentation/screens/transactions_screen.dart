@@ -129,127 +129,136 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
       body: Column(
         children: [
           // Search Bar + Quick Type Filter Chips (Apple Cupertino style)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
-            child: TextField(
-              controller: _searchController,
-              onChanged: (value) => ref
-                  .read(transactionFilterProvider.notifier)
-                  .setSearchQuery(value),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: isDark
-                    ? AppleTokens.bgDarkSecondary
-                    : AppleTokens.bgLightSecondary,
-                hintText: l10n.searchTransactionsHint,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                  borderSide: const BorderSide(
-                    color: AppleTokens.jadePrimary,
-                    width: 1.5,
-                  ),
-                ),
-                prefixIcon: const Icon(CupertinoIcons.search, size: 20),
-                suffixIcon: filter.searchQuery.isNotEmpty
-                    ? IconButton(
-                        tooltip: l10n.clearFilters,
-                        onPressed: () {
-                          _searchController.clear();
-                          ref
-                              .read(transactionFilterProvider.notifier)
-                              .setSearchQuery('');
-                        },
-                        icon: const Icon(
-                          CupertinoIcons.clear_thick_circled,
-                          size: 18,
+          Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 860),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: (value) => ref
+                          .read(transactionFilterProvider.notifier)
+                          .setSearchQuery(value),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: isDark
+                            ? AppleTokens.bgDarkSecondary
+                            : AppleTokens.bgLightSecondary,
+                        hintText: l10n.searchTransactionsHint,
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                          borderSide: BorderSide.none,
                         ),
-                      )
-                    : null,
-              ),
-            ),
-          ),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                FilterChip(
-                  avatar: const Icon(CupertinoIcons.square_grid_2x2, size: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                    side: BorderSide.none,
-                  ),
-                  label: Text(l10n.all),
-                  selected: filter.type == null,
-                  onSelected: (_) =>
-                      ref.read(transactionFilterProvider.notifier).setType(null),
-                ),
-                const SizedBox(width: 8),
-                FilterChip(
-                  avatar: const Icon(CupertinoIcons.arrow_up_right, size: 14, color: AppleTokens.rubyExpense),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                    side: BorderSide.none,
-                  ),
-                  label: Text(l10n.expense),
-                  selected: filter.type == TransactionType.expense,
-                  onSelected: (sel) => ref
-                      .read(transactionFilterProvider.notifier)
-                      .setType(sel ? TransactionType.expense : null),
-                ),
-                const SizedBox(width: 8),
-                FilterChip(
-                  avatar: const Icon(CupertinoIcons.arrow_down_left, size: 14, color: AppleTokens.emeraldIncome),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                    side: BorderSide.none,
-                  ),
-                  label: Text(l10n.income),
-                  selected: filter.type == TransactionType.income,
-                  onSelected: (sel) => ref
-                      .read(transactionFilterProvider.notifier)
-                      .setType(sel ? TransactionType.income : null),
-                ),
-                const SizedBox(width: 8),
-                FilterChip(
-                  avatar: const Icon(CupertinoIcons.arrow_right_arrow_left, size: 14, color: AppleTokens.cobaltTransfer),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                    side: BorderSide.none,
-                  ),
-                  label: Text(l10n.transfer),
-                  selected: filter.type == TransactionType.transfer,
-                  onSelected: (sel) => ref
-                      .read(transactionFilterProvider.notifier)
-                      .setType(sel ? TransactionType.transfer : null),
-                ),
-                if (filter.hasActiveFilters) ...[
-                  const SizedBox(width: 8),
-                  ActionChip(
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppleTokens.radiusPill),
-                      side: BorderSide.none,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                          borderSide: const BorderSide(
+                            color: AppleTokens.jadePrimary,
+                            width: 1.5,
+                          ),
+                        ),
+                        prefixIcon: const Icon(CupertinoIcons.search, size: 20),
+                        suffixIcon: filter.searchQuery.isNotEmpty
+                            ? IconButton(
+                                tooltip: l10n.clearFilters,
+                                onPressed: () {
+                                  _searchController.clear();
+                                  ref
+                                      .read(transactionFilterProvider.notifier)
+                                      .setSearchQuery('');
+                                },
+                                icon: const Icon(
+                                  CupertinoIcons.clear_thick_circled,
+                                  size: 18,
+                                ),
+                              )
+                            : null,
+                      ),
                     ),
-                    avatar: const Icon(Icons.filter_alt_off_rounded, size: 16),
-                    label: Text(l10n.clearFilters),
-                    onPressed: () {
-                      _searchController.clear();
-                      ref.read(transactionFilterProvider.notifier).clearAll();
-                    },
+                  ),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        FilterChip(
+                          avatar: const Icon(CupertinoIcons.square_grid_2x2, size: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                            side: BorderSide.none,
+                          ),
+                          label: Text(l10n.all),
+                          selected: filter.type == null,
+                          onSelected: (_) =>
+                              ref.read(transactionFilterProvider.notifier).setType(null),
+                        ),
+                        const SizedBox(width: 8),
+                        FilterChip(
+                          avatar: const Icon(CupertinoIcons.arrow_up_right, size: 14, color: AppleTokens.rubyExpense),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                            side: BorderSide.none,
+                          ),
+                          label: Text(l10n.expense),
+                          selected: filter.type == TransactionType.expense,
+                          onSelected: (sel) => ref
+                              .read(transactionFilterProvider.notifier)
+                              .setType(sel ? TransactionType.expense : null),
+                        ),
+                        const SizedBox(width: 8),
+                        FilterChip(
+                          avatar: const Icon(CupertinoIcons.arrow_down_left, size: 14, color: AppleTokens.emeraldIncome),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                            side: BorderSide.none,
+                          ),
+                          label: Text(l10n.income),
+                          selected: filter.type == TransactionType.income,
+                          onSelected: (sel) => ref
+                              .read(transactionFilterProvider.notifier)
+                              .setType(sel ? TransactionType.income : null),
+                        ),
+                        const SizedBox(width: 8),
+                        FilterChip(
+                          avatar: const Icon(CupertinoIcons.arrow_right_arrow_left, size: 14, color: AppleTokens.cobaltTransfer),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                            side: BorderSide.none,
+                          ),
+                          label: Text(l10n.transfer),
+                          selected: filter.type == TransactionType.transfer,
+                          onSelected: (sel) => ref
+                              .read(transactionFilterProvider.notifier)
+                              .setType(sel ? TransactionType.transfer : null),
+                        ),
+                        if (filter.hasActiveFilters) ...[
+                          const SizedBox(width: 8),
+                          ActionChip(
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppleTokens.radiusPill),
+                              side: BorderSide.none,
+                            ),
+                            avatar: const Icon(Icons.filter_alt_off_rounded, size: 16),
+                            label: Text(l10n.clearFilters),
+                            onPressed: () {
+                              _searchController.clear();
+                              ref.read(transactionFilterProvider.notifier).clearAll();
+                            },
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
                 ],
-              ],
+              ),
             ),
           ),
           const SizedBox(height: 8),

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
+import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
@@ -327,9 +328,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         .where((d) => !d.isSettled)
         .length;
 
+    final isLandscape = context.isLandscape;
+    final isWide = context.isWideScreen;
+    final appBarHeight = isLandscape
+        ? AppleTokens.appBarHeightLandscape
+        : AppleTokens.appBarHeightPortrait;
+    final scrollBottomPadding = isWide
+        ? AppleTokens.scrollBottomPaddingLandscape + 20
+        : AppleTokens.scrollBottomPaddingNoFab;
+
     return Scaffold(
       backgroundColor: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightPrimary,
       appBar: AppBar(
+        toolbarHeight: appBarHeight,
         title: Text(
           l10n.settingsTitle,
           style: const TextStyle(fontWeight: FontWeight.w700),
@@ -337,13 +348,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(
-          16,
-          8,
-          16,
-          AppleTokens.scrollBottomPaddingNoFab,
-        ),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 720),
+          child: ListView(
+            padding: EdgeInsets.fromLTRB(
+              16,
+              8,
+              16,
+              scrollBottomPadding,
+            ),
         children: [
           // Apple ID Styled User Profile Card with Direct Icon Actions
           if (user != null) ...[
@@ -869,6 +883,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ],
       ),
-    );
+    ),
+  ),
+);
   }
 }

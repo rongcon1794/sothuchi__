@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
+import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
@@ -81,8 +82,18 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
     final locale = settings?.localeCode ?? 'vi';
     final hideBalance = settings?.hideBalance ?? false;
 
+    final isLandscape = context.isLandscape;
+    final isWide = context.isWideScreen;
+    final appBarHeight = isLandscape
+        ? AppleTokens.appBarHeightLandscape
+        : AppleTokens.appBarHeightPortrait;
+    final scrollBottomPadding = isWide
+        ? AppleTokens.scrollBottomPaddingLandscape + 54
+        : AppleTokens.scrollBottomPaddingWithFab;
+
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: appBarHeight,
         title: Text(l10n.walletsTitle),
         actions: [
           if (activeAccounts.length >= 2) ...[
@@ -134,69 +145,62 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
               );
             }
 
-            return ListView(
-              padding: const EdgeInsets.fromLTRB(
-                16,
-                8,
-                16,
-                AppleTokens.scrollBottomPaddingWithFab,
+            final balanceCard = Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: scheme.primaryContainer,
+                borderRadius: BorderRadius.circular(16),
               ),
-            children: [
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: scheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            l10n.totalBalance,
-                            style: theme.textTheme.labelLarge?.copyWith(
-                              color: scheme.onPrimaryContainer,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          tooltip: hideBalance
-                              ? l10n.showBalance
-                              : l10n.hideBalance,
-                          onPressed: () => ref
-                              .read(settingsControllerProvider.notifier)
-                              .toggleHideBalance(),
-                          icon: Icon(
-                            hideBalance
-                                ? Icons.visibility_off_outlined
-                                : Icons.visibility_outlined,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n.totalBalance,
+                          style: theme.textTheme.labelLarge?.copyWith(
                             color: scheme.onPrimaryContainer,
                           ),
                         ),
-                      ],
-                    ),
-                    Text(
-                      totalBalance.format(locale: locale, masked: hideBalance),
-                      semanticsLabel: hideBalance ? l10n.balanceHidden : null,
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        color: scheme.onPrimaryContainer,
-                        fontFeatures: AppTheme.tabularFigures,
                       ),
-                    ),
-                    if (activeAccounts.length >= 2) ...[
-                      const SizedBox(height: 14),
-                      FilledButton.tonalIcon(
-                        onPressed: () => _openTransferSheet(context),
-                        icon: const Icon(Icons.swap_horiz_rounded),
-                        label: Text(l10n.transferBetweenWallets),
+                      IconButton(
+                        tooltip: hideBalance
+                            ? l10n.showBalance
+                            : l10n.hideBalance,
+                        onPressed: () => ref
+                            .read(settingsControllerProvider.notifier)
+                            .toggleHideBalance(),
+                        icon: Icon(
+                          hideBalance
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: scheme.onPrimaryContainer,
+                        ),
                       ),
                     ],
+                  ),
+                  Text(
+                    totalBalance.format(locale: locale, masked: hideBalance),
+                    semanticsLabel: hideBalance ? l10n.balanceHidden : null,
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      color: scheme.onPrimaryContainer,
+                      fontFeatures: AppTheme.tabularFigures,
+                    ),
+                  ),
+                  if (activeAccounts.length >= 2) ...[
+                    const SizedBox(height: 14),
+                    FilledButton.tonalIcon(
+                      onPressed: () => _openTransferSheet(context),
+                      icon: const Icon(Icons.swap_horiz_rounded),
+                      label: Text(l10n.transferBetweenWallets),
+                    ),
                   ],
-                ),
+                ],
               ),
-              const SizedBox(height: 20),
+            );
+
+            final walletListItems = <Widget>[
               Text(l10n.activeWallets, style: theme.textTheme.titleMedium),
               const SizedBox(height: 10),
               ...activeAccounts.map(
@@ -248,21 +252,59 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                       .toList(),
                 ),
               ],
-            ],
-          );
-        },
+            ];
+
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1024),
+                child: ListView(
+                  padding: EdgeInsets.fromLTRB(
+                    16,
+                    8,
+                    16,
+                    scrollBottomPadding,
+                  ),
+                  children: [
+                    if (isWide)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 42,
+                            child: balanceCard,
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            flex: 58,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: walletListItems,
+                            ),
+                          ),
+                        ],
+                      )
+                    else ...[
+                      balanceCard,
+                      const SizedBox(height: 20),
+                      ...walletListItems,
+                    ],
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
       ),
-    ),
-    floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
-    floatingActionButton: AppleAdaptiveExpandableFab(
-      heroTag: 'accounts_add_fab',
-      isVisible: _isFabVisible,
-      isExpanded: _isFabExpanded,
-      icon: const Icon(Icons.add_rounded),
-      label: Text(l10n.addWallet),
-      onPressed: () => _openWalletForm(context),
-      tooltip: l10n.addWallet,
-    ),
+      floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
+      floatingActionButton: AppleAdaptiveExpandableFab(
+        heroTag: 'accounts_add_fab',
+        isVisible: _isFabVisible,
+        isExpanded: _isFabExpanded,
+        icon: const Icon(Icons.add_rounded),
+        label: Text(l10n.addWallet),
+        onPressed: () => _openWalletForm(context),
+        tooltip: l10n.addWallet,
+      ),
     );
   }
 }

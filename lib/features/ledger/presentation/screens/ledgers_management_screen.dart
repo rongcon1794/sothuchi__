@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
+import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
@@ -87,12 +88,22 @@ class _LedgersManagementScreenState
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final l10n = context.l10n;
+    final isLandscape = context.isLandscape;
+    final isWide = context.isWideScreen;
+    final appBarHeight = isLandscape
+        ? AppleTokens.appBarHeightLandscape
+        : AppleTokens.appBarHeightPortrait;
+    final scrollBottomPadding = isWide
+        ? AppleTokens.scrollBottomPaddingLandscape + 54
+        : AppleTokens.scrollBottomPaddingWithFab;
+
     final ledgersAsync = ref.watch(ledgersStreamProvider);
     final activeId = ref.watch(activeLedgerIdProvider);
 
     return Scaffold(
       backgroundColor: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightPrimary,
       appBar: AppBar(
+        toolbarHeight: appBarHeight,
         title: Text(l10n.ledgersTitle, style: const TextStyle(fontWeight: FontWeight.w700)),
         centerTitle: false,
         backgroundColor: Colors.transparent,
@@ -143,9 +154,12 @@ class _LedgersManagementScreenState
               }
               return false;
             },
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, AppleTokens.scrollBottomPaddingWithFab),
-              children: [
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 860),
+                child: ListView(
+                  padding: EdgeInsets.fromLTRB(16, 8, 16, scrollBottomPadding),
+                  children: [
                 // Info Card
                 AppleGlassCard(
                   borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
@@ -309,8 +323,10 @@ class _LedgersManagementScreenState
                 ],
               ],
             ),
-          );
-        },
+          ),
+        ),
+      );
+    },
       ),
     );
   }

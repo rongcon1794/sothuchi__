@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
+import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/date_formatter.dart';
@@ -36,10 +37,19 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
     final currentFilter = ref.watch(debtFilterModeProvider);
     final settings = ref.watch(settingsControllerProvider).value;
     final locale = settings?.localeCode ?? 'vi';
+    final isLandscape = context.isLandscape;
+    final isWide = context.isWideScreen;
+    final appBarHeight = isLandscape
+        ? AppleTokens.appBarHeightLandscape
+        : AppleTokens.appBarHeightPortrait;
+    final scrollBottomPadding = isWide
+        ? AppleTokens.scrollBottomPaddingLandscape + 54
+        : AppleTokens.scrollBottomPaddingWithFab;
 
     return Scaffold(
       backgroundColor: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightPrimary,
       appBar: AppBar(
+        toolbarHeight: appBarHeight,
         title: Text(l10n.debtBookTitle, style: const TextStyle(fontWeight: FontWeight.w700)),
         centerTitle: false,
         backgroundColor: Colors.transparent,
@@ -63,6 +73,203 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
         loading: () => const Center(child: CupertinoActivityIndicator()),
         error: (err, _) => Center(child: Text(context.localizeError(err))),
         data: (allDebts) {
+          final summaryCardWidgets = <Widget>[
+            // Top Dual Stats (Cho vay vs Đi vay)
+            Row(
+              children: [
+                Expanded(
+                  child: AppleGlassCard(
+                    padding: const EdgeInsets.all(14),
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                    borderColor: AppleTokens.systemGreen.withValues(alpha: 0.3),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const AppleSquircleBadge(
+                              icon: CupertinoIcons.arrow_up_right,
+                              color: AppleTokens.systemGreen,
+                              size: 26,
+                              iconSize: 15,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                l10n.debtSummaryLent,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            summary.totalLent.format(locale: locale),
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                              color: AppleTokens.systemGreen,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: AppleGlassCard(
+                    padding: const EdgeInsets.all(14),
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                    borderColor: AppleTokens.systemOrange.withValues(alpha: 0.3),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const AppleSquircleBadge(
+                              icon: CupertinoIcons.arrow_down_left,
+                              color: AppleTokens.systemOrange,
+                              size: 26,
+                              iconSize: 15,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                l10n.debtSummaryBorrowed,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            summary.totalBorrowed.format(locale: locale),
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                              color: AppleTokens.systemOrange,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            // Overdue Alert Banner
+            if (summary.overdueCount > 0) ...[
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: AppleTokens.systemRed.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+                  border: Border.all(
+                    color: AppleTokens.systemRed.withValues(alpha: 0.3),
+                    width: AppleTokens.hairline,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(CupertinoIcons.exclamationmark_triangle_fill, color: AppleTokens.systemRed, size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Có ${summary.overdueCount} khoản nợ đã đến hạn cần thanh toán!',
+                        style: const TextStyle(
+                          color: AppleTokens.systemRed,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
+            const SizedBox(height: 14),
+
+            // Filter Segmented Pill
+            AppleSegmentedPill<DebtFilterMode>(
+              selected: currentFilter,
+              segments: {
+                for (final mode in DebtFilterMode.values)
+                  mode: mode.label(l10n),
+              },
+              onChanged: (mode) {
+                ref
+                    .read(debtFilterModeProvider.notifier)
+                    .setMode(mode);
+              },
+            ),
+          ];
+
+          final debtListWidgets = <Widget>[
+            if (filteredDebts.isEmpty)
+              Padding(
+                padding: const EdgeInsets.all(32),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        CupertinoIcons.tray_fill,
+                        size: 54,
+                        color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        currentFilter == DebtFilterMode.settled
+                            ? l10n.debtFilterSettled
+                            : l10n.debtEmpty,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        l10n.debtEmptySubtitle,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              for (final debt in filteredDebts)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _DebtCard(debt: debt),
+                ),
+          ];
+
           return NotificationListener<UserScrollNotification>(
             onNotification: (notification) {
               if (notification.direction == ScrollDirection.reverse) {
@@ -74,9 +281,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
                 }
               } else if (notification.direction == ScrollDirection.forward) {
                 if (!_isFabVisible) {
-                  setState(() {
-                    _isFabVisible = true;
-                  });
+                  setState(() => _isFabVisible = true);
                 }
               } else if (notification.metrics.pixels <= 30) {
                 if (!_isFabVisible || !_isFabExpanded) {
@@ -88,229 +293,48 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
               }
               return false;
             },
-            child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-            slivers: [
-              // Summary Cards
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Column(
-                    children: [
-                      // Top Dual Stats (Cho vay vs Đi vay)
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1024),
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                  padding: EdgeInsets.fromLTRB(16, 8, 16, scrollBottomPadding),
+                  children: [
+                    if (isWide)
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
-                            child: AppleGlassCard(
-                              padding: const EdgeInsets.all(14),
-                              borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                              borderColor: AppleTokens.systemGreen.withValues(alpha: 0.3),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const AppleSquircleBadge(
-                                        icon: CupertinoIcons.arrow_up_right,
-                                        color: AppleTokens.systemGreen,
-                                        size: 26,
-                                        iconSize: 15,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        l10n.debtSummaryLent,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          color: theme.colorScheme.onSurfaceVariant,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 10),
-                                  FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      summary.totalLent.format(locale: locale),
-                                      style: const TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w800,
-                                        color: AppleTokens.systemGreen,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            flex: 42,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: summaryCardWidgets,
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 16),
                           Expanded(
-                            child: AppleGlassCard(
-                              padding: const EdgeInsets.all(14),
-                              borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                              borderColor: AppleTokens.systemOrange.withValues(alpha: 0.3),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const AppleSquircleBadge(
-                                        icon: CupertinoIcons.arrow_down_left,
-                                        color: AppleTokens.systemOrange,
-                                        size: 26,
-                                        iconSize: 15,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        l10n.debtSummaryBorrowed,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          color: theme.colorScheme.onSurfaceVariant,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 10),
-                                  FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      summary.totalBorrowed.format(locale: locale),
-                                      style: const TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w800,
-                                        color: AppleTokens.systemOrange,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            flex: 58,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: debtListWidgets,
                             ),
                           ),
                         ],
-                      ),
-
-                      // Overdue Alert Banner
-                      if (summary.overdueCount > 0) ...[
-                        const SizedBox(height: 10),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: AppleTokens.systemRed.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-                            border: Border.all(
-                              color: AppleTokens.systemRed.withValues(alpha: 0.3),
-                              width: AppleTokens.hairline,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(CupertinoIcons.exclamationmark_triangle_fill, color: AppleTokens.systemRed, size: 18),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'Có ${summary.overdueCount} khoản nợ đã đến hạn cần thanh toán!',
-                                  style: const TextStyle(
-                                    color: AppleTokens.systemRed,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 12.5,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-
-                      const SizedBox(height: 14),
-
-                      // Filter Segmented Pill
-                      AppleSegmentedPill<DebtFilterMode>(
-                        selected: currentFilter,
-                        segments: {
-                          for (final mode in DebtFilterMode.values)
-                            mode: mode.label(l10n),
-                        },
-                        onChanged: (mode) {
-                          ref
-                              .read(debtFilterModeProvider.notifier)
-                              .setMode(mode);
-                        },
-                      ),
+                      )
+                    else ...[
+                      ...summaryCardWidgets,
+                      const SizedBox(height: 12),
+                      ...debtListWidgets,
                     ],
-                  ),
+                  ],
                 ),
               ),
-
-              // Empty State
-              if (filteredDebts.isEmpty)
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(32),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            CupertinoIcons.tray_fill,
-                            size: 54,
-                            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            currentFilter == DebtFilterMode.settled
-                                ? l10n.debtFilterSettled
-                                : l10n.debtEmpty,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            l10n.debtEmptySubtitle,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                )
-              else
-                // Debts Inset Grouped List
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final debt = filteredDebts[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: _DebtCard(debt: debt),
-                        );
-                      },
-                      childCount: filteredDebts.length,
-                    ),
-                  ),
-                ),
-
-              const SliverToBoxAdapter(
-                child: SizedBox(height: AppleTokens.scrollBottomPaddingWithFab),
-              ),
-            ],
-          ),
-        );
-      },
-    ),
-  );
-}
+            ),
+          );
+        },
+      ),
+    );
+  }
 }
 
 class _DebtCard extends ConsumerWidget {

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
+import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/core/widgets/empty_state_view.dart';
@@ -31,6 +32,15 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final l10n = context.l10n;
+    final isLandscape = context.isLandscape;
+    final isWide = context.isWideScreen;
+    final appBarHeight = isLandscape
+        ? AppleTokens.appBarHeightLandscape
+        : AppleTokens.appBarHeightPortrait;
+    final scrollBottomPadding = isWide
+        ? AppleTokens.scrollBottomPaddingLandscape + 54
+        : AppleTokens.scrollBottomPaddingWithFab;
+
     final goalsAsync = ref.watch(savingsGoalsStreamProvider);
     final summary = ref.watch(savingsSummaryProvider);
     final settings = ref.watch(settingsControllerProvider).value;
@@ -40,6 +50,7 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
     return Scaffold(
       backgroundColor: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightPrimary,
       appBar: AppBar(
+        toolbarHeight: appBarHeight,
         title: Text(l10n.savingsTitle, style: const TextStyle(fontWeight: FontWeight.w700)),
         centerTitle: false,
         backgroundColor: Colors.transparent,
@@ -80,6 +91,156 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
           final activeGoals = allGoals.where((g) => !g.isCompleted).toList();
           final completedGoals = allGoals.where((g) => g.isCompleted).toList();
 
+          final summaryHeroCard = AppleGlassCard(
+            borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isDark
+                  ? const [Color(0xFF0A2E20), Color(0xFF041710)]
+                  : const [Color(0xFFE8F5E9), Color(0xFFF1F8E9)],
+            ),
+            borderColor: theme.colorScheme.primary.withValues(alpha: 0.3),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.savingsSummaryProgress,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        l10n.savingsActiveCount(summary.activeCount, summary.completedCount),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    SavingsArcProgressIndicator(
+                      progress: summary.overallProgress,
+                      color: theme.colorScheme.primary,
+                      size: 88,
+                      strokeWidth: 8,
+                      child: Text(
+                        '${(summary.overallProgress * 100).round()}%',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 18),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(l10n.savingsTotalSaved, style: const TextStyle(fontSize: 12, color: AppleTokens.systemGray)),
+                          const SizedBox(height: 2),
+                          AppleAnimatedMoneyText(
+                            money: summary.savedMoney,
+                            masked: hideBalance,
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: isDark ? Colors.white : const Color(0xFF0D5239),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            l10n.savingsGoalTarget(summary.targetMoney.format(locale: locale, masked: hideBalance)),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppleTokens.systemGray,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+
+          final goalsListWidgets = <Widget>[
+            // Active Goals Section
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+              child: Text(
+                l10n.homeSavingsStripTitle.toUpperCase(),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppleTokens.systemGray,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+            if (activeGoals.isEmpty)
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Center(
+                  child: Text(
+                    l10n.savingsEmpty,
+                    style: const TextStyle(color: AppleTokens.systemGray),
+                  ),
+                ),
+              ),
+            for (final goal in activeGoals)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: SavingsGoalCard(goal: goal, hideBalance: hideBalance),
+              ),
+
+            // Completed Goals Section
+            if (completedGoals.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Icon(CupertinoIcons.checkmark_seal_fill, color: AppleTokens.systemGreen, size: 16),
+                  const SizedBox(width: 6),
+                  Text(
+                    '${l10n.savingsGoalCompleted.toUpperCase()} (${completedGoals.length})',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppleTokens.systemGreen,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              for (final goal in completedGoals)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: SavingsGoalCard(goal: goal, hideBalance: hideBalance),
+                ),
+            ],
+          ];
+
           return NotificationListener<UserScrollNotification>(
             onNotification: (notification) {
               if (notification.direction == ScrollDirection.reverse) {
@@ -103,159 +264,38 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
               }
               return false;
             },
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, AppleTokens.scrollBottomPaddingWithFab),
-              children: [
-                // Overall Summary Hero Card
-                AppleGlassCard(
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: isDark
-                        ? const [Color(0xFF0A2E20), Color(0xFF041710)]
-                        : const [Color(0xFFE8F5E9), Color(0xFFF1F8E9)],
-                  ),
-                  borderColor: theme.colorScheme.primary.withValues(alpha: 0.3),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1024),
+                child: ListView(
+                  padding: EdgeInsets.fromLTRB(16, 8, 16, scrollBottomPadding),
+                  children: [
+                    if (isWide)
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
-                            child: Text(
-                              l10n.savingsSummaryProgress,
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.5,
-                                color: theme.colorScheme.primary,
-                              ),
-                            ),
+                            flex: 42,
+                            child: summaryHeroCard,
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.primary.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              l10n.savingsActiveCount(summary.activeCount, summary.completedCount),
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: theme.colorScheme.primary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 14),
-                      Row(
-                        children: [
-                          SavingsArcProgressIndicator(
-                            progress: summary.overallProgress,
-                            color: theme.colorScheme.primary,
-                            size: 88,
-                            strokeWidth: 8,
-                            child: Text(
-                              '${(summary.overallProgress * 100).round()}%',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 18,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 18),
+                          const SizedBox(width: 16),
                           Expanded(
+                            flex: 58,
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(l10n.savingsTotalSaved, style: const TextStyle(fontSize: 12, color: AppleTokens.systemGray)),
-                                const SizedBox(height: 2),
-                                AppleAnimatedMoneyText(
-                                  money: summary.savedMoney,
-                                  masked: hideBalance,
-                                  style: theme.textTheme.headlineSmall?.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                    color: isDark ? Colors.white : const Color(0xFF0D5239),
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  l10n.savingsGoalTarget(summary.targetMoney.format(locale: locale, masked: hideBalance)),
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppleTokens.systemGray,
-                                  ),
-                                ),
-                              ],
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: goalsListWidgets,
                             ),
                           ),
                         ],
-                      ),
+                      )
+                    else ...[
+                      summaryHeroCard,
+                      const SizedBox(height: 22),
+                      ...goalsListWidgets,
                     ],
-                  ),
+                  ],
                 ),
-                const SizedBox(height: 22),
-
-                // Active Goals Section
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-                  child: Text(
-                    l10n.homeSavingsStripTitle.toUpperCase(),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppleTokens.systemGray,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
-                if (activeGoals.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Center(
-                      child: Text(
-                        l10n.savingsEmpty,
-                        style: const TextStyle(color: AppleTokens.systemGray),
-                      ),
-                    ),
-                  ),
-                for (final goal in activeGoals)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: SavingsGoalCard(goal: goal, hideBalance: hideBalance),
-                  ),
-
-                // Completed Goals Section
-                if (completedGoals.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      const Icon(CupertinoIcons.checkmark_seal_fill, color: AppleTokens.systemGreen, size: 16),
-                      const SizedBox(width: 6),
-                      Text(
-                        '${l10n.savingsGoalCompleted.toUpperCase()} (${completedGoals.length})',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: AppleTokens.systemGreen,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  for (final goal in completedGoals)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: SavingsGoalCard(goal: goal, hideBalance: hideBalance),
-                    ),
-                ],
-              ],
+              ),
             ),
           );
         },

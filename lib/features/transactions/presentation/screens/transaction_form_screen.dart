@@ -7,6 +7,7 @@ import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/contracts/transaction_draft_contract.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
+import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/date_formatter.dart';
@@ -512,6 +513,14 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     final isDark = theme.brightness == Brightness.dark;
     final settings = ref.watch(settingsControllerProvider).value;
     final locale = settings?.localeCode ?? 'vi';
+    final isLandscape = context.isLandscape;
+    final isWide = context.isWideScreen;
+    final appBarHeight = isLandscape
+        ? AppleTokens.appBarHeightLandscape
+        : AppleTokens.appBarHeightPortrait;
+    final scrollBottomPadding = isWide
+        ? AppleTokens.scrollBottomPaddingLandscape + 40
+        : 120.0;
 
     final activeWallets = ref.watch(activeAccountsProvider);
     final allWallets = ref.watch(accountsStreamProvider).value ?? const [];
@@ -589,6 +598,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     return Scaffold(
       backgroundColor: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightPrimary,
       appBar: AppBar(
+        toolbarHeight: appBarHeight,
         title: Text(
           _isEditing ? l10n.editTransaction : l10n.addTransaction,
           style: const TextStyle(fontWeight: FontWeight.w700),
@@ -619,11 +629,14 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
           ? const Center(child: CupertinoActivityIndicator())
           : Form(
               key: _formKey,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 860),
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.fromLTRB(16, 8, 16, scrollBottomPadding),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
                   // 1. Hero Amount & Mode Card
                   _HeroAmountCard(
                     type: _type,
@@ -1023,10 +1036,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               ),
             ),
           ),
+        ),
+      ),
       bottomNavigationBar: SafeArea(
         top: false,
         child: Container(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
           decoration: BoxDecoration(
             color: isDark
                 ? AppleTokens.bgDarkCard.withValues(alpha: 0.92)
@@ -1038,14 +1052,23 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               ),
             ),
           ),
-          child: AppleButton.primary(
-            height: 50,
-            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-            isLoading: isSaving,
-            icon: CupertinoIcons.checkmark_alt,
-            label: _isEditing ? l10n.editTransaction : l10n.save,
-            color: theme.colorScheme.primary,
-            onPressed: isSaving ? null : _submit,
+          child: Center(
+            heightFactor: 1.0,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 860),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+                child: AppleButton.primary(
+                  height: 50,
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                  isLoading: isSaving,
+                  icon: CupertinoIcons.checkmark_alt,
+                  label: _isEditing ? l10n.editTransaction : l10n.save,
+                  color: theme.colorScheme.primary,
+                  onPressed: isSaving ? null : _submit,
+                ),
+              ),
+            ),
           ),
         ),
       ),

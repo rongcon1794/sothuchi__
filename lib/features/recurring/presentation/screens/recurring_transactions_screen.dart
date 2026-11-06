@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
+import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/date_formatter.dart';
@@ -108,6 +109,15 @@ class _RecurringTransactionsScreenState
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final l10n = context.l10n;
+    final isLandscape = context.isLandscape;
+    final isWide = context.isWideScreen;
+    final appBarHeight = isLandscape
+        ? AppleTokens.appBarHeightLandscape
+        : AppleTokens.appBarHeightPortrait;
+    final scrollBottomPadding = isWide
+        ? AppleTokens.scrollBottomPaddingLandscape + 54
+        : AppleTokens.scrollBottomPaddingWithFab;
+
     final locale = Localizations.localeOf(context).languageCode;
     final recurringAsync = ref.watch(recurringStreamProvider);
     final dueList = ref.watch(dueRecurringListProvider);
@@ -120,6 +130,7 @@ class _RecurringTransactionsScreenState
     return Scaffold(
       backgroundColor: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightPrimary,
       appBar: AppBar(
+        toolbarHeight: appBarHeight,
         title: Text(l10n.recurringTitle, style: const TextStyle(fontWeight: FontWeight.w700)),
         centerTitle: false,
         backgroundColor: Colors.transparent,
@@ -185,9 +196,12 @@ class _RecurringTransactionsScreenState
               }
               return false;
             },
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, AppleTokens.scrollBottomPaddingWithFab),
-              children: [
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 860),
+                child: ListView(
+                  padding: EdgeInsets.fromLTRB(16, 8, 16, scrollBottomPadding),
+                  children: [
               // Hero Monthly Estimate Card
               AppleGlassCard(
                 borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
@@ -511,8 +525,10 @@ class _RecurringTransactionsScreenState
               ],
             ],
             ),
-          );
-        },
+          ),
+        ),
+      );
+    },
       ),
     );
   }
