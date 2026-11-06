@@ -101,11 +101,11 @@ class AppShellScaffold extends StatelessWidget {
               left: true,
               right: true,
               bottom: true,
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 860),
-                  child: SizedBox(
-                    height: navBarHeight,
+              child: SizedBox(
+                height: navBarHeight,
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 860),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [

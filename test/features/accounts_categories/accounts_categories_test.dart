@@ -16,7 +16,6 @@ import 'package:so_thu_chi/features/categories/domain/entities/category.dart';
 import 'package:so_thu_chi/features/categories/presentation/screens/category_detail_screen.dart';
 import 'package:so_thu_chi/features/categories/presentation/screens/categories_screen.dart';
 import 'package:so_thu_chi/features/transactions/data/repositories/firestore_transaction_repository.dart';
-import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:so_thu_chi/l10n/app_localizations.dart';
 
 void main() {

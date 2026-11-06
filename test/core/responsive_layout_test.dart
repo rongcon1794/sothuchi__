@@ -279,22 +279,71 @@ void main() {
 
       expect(tester.takeException(), isNull);
 
+      final homeRect = tester.getRect(find.byType(HomeDashboardScreen));
+      final navBarRect = tester.getRect(find.byType(ClipRect).last);
+      expect(homeRect.height, greaterThan(200));
+      expect(navBarRect.top, greaterThanOrEqualTo(homeRect.bottom - 1.0));
+
       // Verify all 5 destinations are present in bottombar
-      expect(find.text('Tổng quan'), findsWidgets);
-      expect(find.text('Giao dịch'), findsOneWidget);
-      expect(find.text('Ngân sách'), findsOneWidget);
-      expect(find.text('Báo cáo'), findsOneWidget);
-      expect(find.text('Cài đặt'), findsOneWidget);
+      final bottomBarFinder = find.byType(ClipRect).last;
+      expect(find.descendant(of: bottomBarFinder, matching: find.text('Tổng quan')), findsOneWidget);
+      expect(find.descendant(of: bottomBarFinder, matching: find.text('Giao dịch')), findsOneWidget);
+      expect(find.descendant(of: bottomBarFinder, matching: find.text('Ngân sách')), findsOneWidget);
+      expect(find.descendant(of: bottomBarFinder, matching: find.text('Báo cáo')), findsOneWidget);
+      expect(find.descendant(of: bottomBarFinder, matching: find.text('Cài đặt')), findsOneWidget);
 
       // Tap 'Giao dịch' tab
-      await tester.tap(find.text('Giao dịch'));
+      await tester.tap(find.descendant(of: bottomBarFinder, matching: find.text('Giao dịch')));
       await tester.pumpAndSettle();
       expect(find.byType(TransactionsScreen), findsOneWidget);
 
       // Tap 'Báo cáo' tab
-      await tester.tap(find.text('Báo cáo'));
+      await tester.tap(find.descendant(of: bottomBarFinder, matching: find.text('Báo cáo')));
       await tester.pumpAndSettle();
       expect(find.byType(ReportsScreen), findsOneWidget);
+    });
+
+    testWidgets('AppShellScaffold on wide landscape (1024x502) does not collapse body to white screen', (tester) async {
+      tester.view.physicalSize = const Size(1024, 502);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      final authRepo = _TestAuthRepo();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            firebaseBootstrapStateProvider.overrideWithValue(
+              const FirebaseBootstrapState.configured(),
+            ),
+            authRepositoryProvider.overrideWithValue(authRepo),
+            accountRepositoryProvider.overrideWithValue(accRepo),
+            categoryRepositoryProvider.overrideWithValue(catRepo),
+            transactionRepositoryProvider.overrideWithValue(txRepo),
+            budgetRepositoryProvider.overrideWithValue(budgetRepo),
+          ],
+          child: const MediaQuery(
+            data: MediaQueryData(
+              size: Size(1024, 502),
+            ),
+            child: SoThuChiApp(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+
+      final homeRect = tester.getRect(find.byType(HomeDashboardScreen));
+      final navBarRect = tester.getRect(find.byType(ClipRect).last);
+
+      // Verify body is visible and takes vast majority of screen
+      expect(homeRect.height, greaterThan(400));
+      // Verify bottom bar is docked at bottom, height is exactly navBarHeight (42dp)
+      expect(navBarRect.height, closeTo(42.0, 1.0));
+      expect(navBarRect.bottom, equals(502.0));
+      expect(homeRect.bottom, equals(navBarRect.top));
     });
   });
 }
