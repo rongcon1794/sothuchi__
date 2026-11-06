@@ -1,6 +1,16 @@
-import 'dart:io';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
+
+bool get _isRunningInFlutterTest {
+  if (kIsWeb) return false;
+  try {
+    return Platform.environment.containsKey('FLUTTER_TEST');
+  } catch (_) {
+    return false;
+  }
+}
 
 /// Lucian Labs Element #018 / #074: Luminous Animated Progress Bar.
 ///
@@ -42,7 +52,7 @@ class _LucianProgressBarState extends State<LucianProgressBar>
       vsync: this,
       duration: const Duration(milliseconds: 1400),
     );
-    if (!Platform.environment.containsKey('FLUTTER_TEST') && widget.showGlow) {
+    if (!_isRunningInFlutterTest && widget.showGlow) {
       _pulseController.repeat(reverse: true);
     } else {
       _pulseController.value = 0.5;
@@ -53,7 +63,7 @@ class _LucianProgressBarState extends State<LucianProgressBar>
   void didUpdateWidget(covariant LucianProgressBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.showGlow != oldWidget.showGlow) {
-      if (!Platform.environment.containsKey('FLUTTER_TEST') && widget.showGlow) {
+      if (!_isRunningInFlutterTest && widget.showGlow) {
         _pulseController.repeat(reverse: true);
       } else {
         _pulseController.stop();

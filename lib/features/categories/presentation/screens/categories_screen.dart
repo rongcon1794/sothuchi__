@@ -63,9 +63,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         : AppleTokens.scrollBottomPaddingWithFab;
 
     final categoriesAsync = ref.watch(categoriesStreamProvider);
-    final items = _selectedType == CategoryType.expense
-        ? ref.watch(expenseCategoriesProvider)
-        : ref.watch(incomeCategoriesProvider);
+    final expenseList = ref.watch(expenseCategoriesProvider);
+    final incomeList = ref.watch(incomeCategoriesProvider);
+    final items = _selectedType == CategoryType.expense ? expenseList : incomeList;
 
     return Scaffold(
       appBar: AppBar(
@@ -75,30 +75,29 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 520),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: SegmentedButton<CategoryType>(
-                    segments: [
-                      ButtonSegment(
-                        value: CategoryType.expense,
-                        icon: const Icon(Icons.trending_down_rounded),
-                        label: Text(l10n.expense),
-                      ),
-                      ButtonSegment(
-                        value: CategoryType.income,
-                        icon: const Icon(Icons.trending_up_rounded),
-                        label: Text(l10n.income),
-                      ),
-                    ],
-                    selected: {_selectedType},
-                    onSelectionChanged: (set) {
-                      setState(() => _selectedType = set.first);
-                    },
-                  ),
+                child: LucianSlidingPillTabs<CategoryType>(
+                  items: [
+                    LucianTabItem(
+                      value: CategoryType.expense,
+                      label: l10n.expense,
+                      icon: Icons.trending_down_rounded,
+                      badgeCount: expenseList.length,
+                      activeColor: LucianTokens.resolveDanger(theme.brightness == Brightness.dark),
+                    ),
+                    LucianTabItem(
+                      value: CategoryType.income,
+                      label: l10n.income,
+                      icon: Icons.trending_up_rounded,
+                      badgeCount: incomeList.length,
+                      activeColor: LucianTokens.resolveMint(theme.brightness == Brightness.dark),
+                    ),
+                  ],
+                  selected: _selectedType,
+                  onChanged: (type) => setState(() => _selectedType = type),
                 ),
               ),
             ),
@@ -159,18 +158,11 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                             horizontal: 16,
                             vertical: 4,
                           ),
-                          leading: Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: color.withValues(alpha: 0.16),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              AppIconCatalog.resolve(cat.icon),
-                              color: color,
-                              size: 22,
-                            ),
+                          leading: AppleSquircleBadge(
+                            icon: AppIconCatalog.resolve(cat.icon),
+                            color: color,
+                            size: 42,
+                            iconSize: 22,
                           ),
                           title: Text(
                             displayName,

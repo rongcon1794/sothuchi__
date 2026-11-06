@@ -511,14 +511,11 @@ class _DebtCard extends ConsumerWidget {
           const SizedBox(height: 6),
 
           // Repayment Progress Bar
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-            child: LinearProgressIndicator(
-              value: debt.progress,
-              minHeight: 6,
-              backgroundColor: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.15),
-              valueColor: AlwaysStoppedAnimation<Color>(accentColor),
-            ),
+          LucianProgressBar(
+            value: debt.progress,
+            height: 7,
+            activeColor: accentColor,
+            showGlow: debt.isSettled,
           ),
 
           const SizedBox(height: 6),
