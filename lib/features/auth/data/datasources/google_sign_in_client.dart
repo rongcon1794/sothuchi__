@@ -32,6 +32,15 @@ abstract interface class GoogleSignInClient {
 class GoogleSignInV7Client implements GoogleSignInClient {
   GoogleSignInV7Client({this.serverClientId});
 
+  /// Default Web Client ID (OAuth client_type 3) configured in Firebase project `sochitieu-2dca6`.
+  /// Required by CredentialManager on Android and Firebase Auth to obtain an OpenID Connect `idToken`.
+  static const String defaultServerClientId =
+      '835896714104-gft5f5vbotbn063a16pkga9ail9g6s5m.apps.googleusercontent.com';
+
+  /// Default iOS Client ID from `GoogleService-Info.plist`.
+  static const String defaultIosClientId =
+      '835896714104-vegeqvb0vndjekrn0uepumanakce7oq6.apps.googleusercontent.com';
+
   final String? serverClientId;
   bool _initialized = false;
   Future<void>? _initFuture;
@@ -45,15 +54,15 @@ class GoogleSignInV7Client implements GoogleSignInClient {
   }
 
   Future<void> _doInitialize() async {
-    final trimmedServerId = (serverClientId?.trim().isEmpty ?? true)
-        ? null
-        : serverClientId!.trim();
+    final effectiveServerId = (serverClientId?.trim().isNotEmpty ?? false)
+        ? serverClientId!.trim()
+        : defaultServerClientId;
     final clientId = defaultTargetPlatform == TargetPlatform.iOS
-        ? '835896714104-vegeqvb0vndjekrn0uepumanakce7oq6.apps.googleusercontent.com'
+        ? defaultIosClientId
         : null;
     await GoogleSignIn.instance.initialize(
       clientId: clientId,
-      serverClientId: trimmedServerId,
+      serverClientId: effectiveServerId,
     );
     _initialized = true;
   }
@@ -102,6 +111,10 @@ class GoogleSignInV7Client implements GoogleSignInClient {
 
 final googleSignInClientProvider = Provider<GoogleSignInClient>((ref) {
   const serverClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
-  return GoogleSignInV7Client(serverClientId: serverClientId);
+  return GoogleSignInV7Client(
+    serverClientId: serverClientId.trim().isNotEmpty
+        ? serverClientId
+        : GoogleSignInV7Client.defaultServerClientId,
+  );
 });
 

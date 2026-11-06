@@ -12,7 +12,10 @@ extension AppLocalizationsX on BuildContext {
     return switch (error) {
       NetworkException() => l.errorNetwork,
       AuthCancelledException() => l.errorAuthCancelled,
-      AuthFailedException() => l.errorAuthFailed,
+      AuthFailedException(:final debugMessage) =>
+        debugMessage.isNotEmpty && debugMessage != 'Authentication failed'
+            ? '${l.errorAuthFailed}: $debugMessage'
+            : l.errorAuthFailed,
       PermissionDeniedException(:final debugMessage) =>
         debugMessage.isNotEmpty ? debugMessage : l.errorPermissionDenied,
       ValidationException(:final debugMessage) =>
