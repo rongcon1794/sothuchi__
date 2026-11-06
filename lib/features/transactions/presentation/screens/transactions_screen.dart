@@ -811,21 +811,47 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  dayNet.format(
-                    locale: locale,
-                    showPlusSign: true,
-                    masked: hideBalance,
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isLandscape ? 7 : 9,
+                    vertical: isLandscape ? 2 : 3,
                   ),
-                  style: (isLandscape
-                          ? theme.textTheme.labelMedium
-                          : theme.textTheme.labelLarge)
-                      ?.copyWith(
-                    color: group.netMinor >= 0
-                        ? context.financeColors.income
-                        : theme.colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w700,
-                    fontFeatures: AppTheme.tabularFigures,
+                  decoration: BoxDecoration(
+                    color: (group.netMinor > 0
+                            ? LucianTokens.mintLight
+                            : (group.netMinor < 0
+                                ? LucianTokens.dangerLight
+                                : Colors.grey))
+                        .withValues(alpha: isDark ? 0.15 : 0.10),
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                    border: Border.all(
+                      color: (group.netMinor > 0
+                              ? LucianTokens.resolveMint(isDark)
+                              : (group.netMinor < 0
+                                  ? LucianTokens.resolveDanger(isDark)
+                                  : Colors.grey))
+                          .withValues(alpha: isDark ? 0.25 : 0.18),
+                      width: AppleTokens.hairline,
+                    ),
+                  ),
+                  child: Text(
+                    dayNet.format(
+                      locale: locale,
+                      showPlusSign: true,
+                      masked: hideBalance,
+                    ),
+                    style: (isLandscape
+                            ? theme.textTheme.labelSmall
+                            : theme.textTheme.labelMedium)
+                        ?.copyWith(
+                      color: group.netMinor > 0
+                          ? LucianTokens.resolveMint(isDark)
+                          : (group.netMinor < 0
+                              ? LucianTokens.resolveDanger(isDark)
+                              : theme.colorScheme.onSurfaceVariant),
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: AppTheme.tabularFigures,
+                    ),
                   ),
                 ),
               ],

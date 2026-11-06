@@ -3,6 +3,7 @@ import 'package:flutter/semantics.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
+import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
 import 'package:so_thu_chi/features/categories/domain/entities/category.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
@@ -149,8 +150,26 @@ class TransactionTile extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: badgeColor.withValues(alpha: 0.14),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    badgeColor.withValues(alpha: theme.brightness == Brightness.dark ? 0.28 : 0.20),
+                    badgeColor.withValues(alpha: theme.brightness == Brightness.dark ? 0.12 : 0.08),
+                  ],
+                ),
                 borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: badgeColor.withValues(alpha: theme.brightness == Brightness.dark ? 0.35 : 0.25),
+                  width: AppleTokens.hairline,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: badgeColor.withValues(alpha: theme.brightness == Brightness.dark ? 0.16 : 0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Icon(iconData, color: badgeColor, size: 22),
             ),

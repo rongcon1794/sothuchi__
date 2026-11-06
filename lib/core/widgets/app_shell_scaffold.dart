@@ -170,7 +170,7 @@ class _AppleNavBarItem extends StatelessWidget {
       children: [
         AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOutCubic,
+          curve: LucianTokens.ease,
           padding: EdgeInsets.symmetric(
             horizontal: isLandscape ? 10 : 14,
             vertical: isLandscape ? 1 : 4,
