@@ -299,13 +299,12 @@ void main() {
       // Top profile card only has sign-out quick button, no delete button
       expect(find.byTooltip('Đăng xuất'), findsOneWidget);
 
-      // Scroll to bottom to find Danger Zone
+      // Scroll to bottom to find compact delete button
       await tester.drag(find.byType(ListView).first, const Offset(0, -1200));
       await tester.pumpAndSettle();
 
-      expect(find.text('VÙNG NGUY HIỂM'), findsOneWidget);
       expect(find.text('Xóa tài khoản & toàn bộ dữ liệu'), findsOneWidget);
-      expect(find.text('Xóa vĩnh viễn toàn bộ dữ liệu, giao dịch và tài khoản'), findsOneWidget);
+      expect(find.byIcon(Icons.delete_outline_rounded), findsOneWidget);
     });
   });
 }
