@@ -43,6 +43,63 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     super.dispose();
   }
 
+  Widget _buildHeaderMonthSwitcher({
+    required DateTime? selectedMonth,
+    required String locale,
+    required AppLocalizations l10n,
+    required ThemeData theme,
+  }) {
+    return AppleGlassCard(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+      child: SizedBox(
+        height: 30,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              tooltip: l10n.previousMonth,
+              padding: EdgeInsets.zero,
+              visualDensity: VisualDensity.compact,
+              constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                ref.read(transactionFilterProvider.notifier).setDateRange(null, null);
+                ref.read(selectedTransactionMonthProvider.notifier).previousMonth();
+              },
+              icon: const Icon(Icons.chevron_left_rounded, size: 18),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                selectedMonth != null
+                    ? AppDateUtils.formatMonthYear(selectedMonth, locale: locale)
+                    : l10n.all,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: -0.2,
+                ),
+              ),
+            ),
+            IconButton(
+              tooltip: l10n.nextMonth,
+              padding: EdgeInsets.zero,
+              visualDensity: VisualDensity.compact,
+              constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                ref.read(transactionFilterProvider.notifier).setDateRange(null, null);
+                ref.read(selectedTransactionMonthProvider.notifier).nextMonth();
+              },
+              icon: const Icon(Icons.chevron_right_rounded, size: 18),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<bool> _handleSoftDeleteWithUndo(TransactionEntity tx) async {
     final l10n = context.l10n;
     final messenger = ScaffoldMessenger.of(context);
@@ -102,6 +159,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
 
     final txStream = ref.watch(transactionsStreamProvider);
     final filter = ref.watch(transactionFilterProvider);
+    final selectedMonth = ref.watch(selectedTransactionMonthProvider);
     final grouped = ref.watch(groupedFilteredTransactionsProvider);
     final categoriesMap = ref.watch(categoriesMapProvider);
     final accountsMap = ref.watch(accountsMapProvider);
@@ -135,6 +193,17 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
             : AppleTokens.appBarHeightPortrait,
         title: Text(l10n.transactionsTitle),
         actions: [
+          if (isLandscape) ...[
+            Center(
+              child: _buildHeaderMonthSwitcher(
+                selectedMonth: selectedMonth,
+                locale: locale,
+                l10n: l10n,
+                theme: theme,
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
           Badge(
             isLabelVisible: filter.hasActiveFilters,
             child: IconButton(
@@ -148,6 +217,84 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
       ),
       body: Column(
         children: [
+          // Month Switcher Bar (only shown in portrait mode; merged into AppBar in landscape)
+          if (!isLandscape)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 6),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 540),
+                  child: AppleGlassCard(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 4,
+                    ),
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+                    child: SizedBox(
+                      height: 42,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                            tooltip: l10n.previousMonth,
+                            padding: EdgeInsets.zero,
+                            visualDensity: VisualDensity.compact,
+                            constraints: const BoxConstraints(
+                              minWidth: 40,
+                              minHeight: 36,
+                            ),
+                            onPressed: () {
+                              HapticFeedback.selectionClick();
+                              ref.read(transactionFilterProvider.notifier).setDateRange(null, null);
+                              ref.read(selectedTransactionMonthProvider.notifier).previousMonth();
+                            },
+                            icon: const Icon(
+                              Icons.chevron_left_rounded,
+                              size: 22,
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              selectedMonth != null
+                                  ? AppDateUtils.formatMonthYear(
+                                      selectedMonth,
+                                      locale: locale,
+                                    )
+                                  : l10n.all,
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            tooltip: l10n.nextMonth,
+                            padding: EdgeInsets.zero,
+                            visualDensity: VisualDensity.compact,
+                            constraints: const BoxConstraints(
+                              minWidth: 40,
+                              minHeight: 36,
+                            ),
+                            onPressed: () {
+                              HapticFeedback.selectionClick();
+                              ref.read(transactionFilterProvider.notifier).setDateRange(null, null);
+                              ref.read(selectedTransactionMonthProvider.notifier).nextMonth();
+                            },
+                            icon: const Icon(
+                              Icons.chevron_right_rounded,
+                              size: 22,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           // Responsive Search & Type Filter Bar
           Center(
             child: ConstrainedBox(
@@ -769,36 +916,37 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
 class _TransactionFilterBottomSheet extends ConsumerWidget {
   const _TransactionFilterBottomSheet();
 
-  static _DatePreset _resolveActivePreset(DateTime? start, DateTime? end) {
-    if (start == null && end == null) return _DatePreset.all;
-    if (start == null || end == null) return _DatePreset.custom;
-    final now = DateTime.now();
+  static _DatePreset _resolveActivePreset(
+    DateTime? start,
+    DateTime? end,
+    DateTime? selectedMonth,
+  ) {
+    if (start != null && end != null) {
+      final now = DateTime.now();
+      final thirtyDaysAgo = now.subtract(const Duration(days: 30));
+      if (AppDateUtils.isSameDay(start, thirtyDaysAgo) &&
+          AppDateUtils.isSameDay(end, now)) {
+        return _DatePreset.last30Days;
+      }
 
-    final thisMonthStart = DateTime(now.year, now.month, 1);
-    final thisMonthEnd = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
-    if (AppDateUtils.isSameDay(start, thisMonthStart) &&
-        AppDateUtils.isSameDay(end, thisMonthEnd)) {
+      final thisYearStart = DateTime(now.year, 1, 1);
+      final thisYearEnd = DateTime(now.year, 12, 31, 23, 59, 59);
+      if (AppDateUtils.isSameDay(start, thisYearStart) &&
+          AppDateUtils.isSameDay(end, thisYearEnd)) {
+        return _DatePreset.thisYear;
+      }
+      return _DatePreset.custom;
+    }
+    if (start != null || end != null) return _DatePreset.custom;
+
+    if (selectedMonth == null) return _DatePreset.all;
+    final now = DateTime.now();
+    if (AppDateUtils.isSameMonth(selectedMonth, now)) {
       return _DatePreset.thisMonth;
     }
-
-    final lastMonthStart = DateTime(now.year, now.month - 1, 1);
-    final lastMonthEnd = DateTime(now.year, now.month, 0, 23, 59, 59);
-    if (AppDateUtils.isSameDay(start, lastMonthStart) &&
-        AppDateUtils.isSameDay(end, lastMonthEnd)) {
+    final lastMonth = AppDateUtils.addMonths(now, -1);
+    if (AppDateUtils.isSameMonth(selectedMonth, lastMonth)) {
       return _DatePreset.lastMonth;
-    }
-
-    final thirtyDaysAgo = now.subtract(const Duration(days: 30));
-    if (AppDateUtils.isSameDay(start, thirtyDaysAgo) &&
-        AppDateUtils.isSameDay(end, now)) {
-      return _DatePreset.last30Days;
-    }
-
-    final thisYearStart = DateTime(now.year, 1, 1);
-    final thisYearEnd = DateTime(now.year, 12, 31, 23, 59, 59);
-    if (AppDateUtils.isSameDay(start, thisYearStart) &&
-        AppDateUtils.isSameDay(end, thisYearEnd)) {
-      return _DatePreset.thisYear;
     }
 
     return _DatePreset.custom;
@@ -808,17 +956,16 @@ class _TransactionFilterBottomSheet extends ConsumerWidget {
     final now = DateTime.now();
     switch (preset) {
       case _DatePreset.all:
+        ref.read(selectedTransactionMonthProvider.notifier).setMonth(null);
         ref.read(transactionFilterProvider.notifier).setDateRange(null, null);
       case _DatePreset.thisMonth:
-        ref.read(transactionFilterProvider.notifier).setDateRange(
-              DateTime(now.year, now.month, 1),
-              DateTime(now.year, now.month + 1, 0, 23, 59, 59),
-            );
+        ref.read(selectedTransactionMonthProvider.notifier).setMonth(now);
+        ref.read(transactionFilterProvider.notifier).setDateRange(null, null);
       case _DatePreset.lastMonth:
-        ref.read(transactionFilterProvider.notifier).setDateRange(
-              DateTime(now.year, now.month - 1, 1),
-              DateTime(now.year, now.month, 0, 23, 59, 59),
+        ref.read(selectedTransactionMonthProvider.notifier).setMonth(
+              AppDateUtils.addMonths(now, -1),
             );
+        ref.read(transactionFilterProvider.notifier).setDateRange(null, null);
       case _DatePreset.last30Days:
         ref.read(transactionFilterProvider.notifier).setDateRange(
               now.subtract(const Duration(days: 30)),
@@ -927,6 +1074,8 @@ class _TransactionFilterBottomSheet extends ConsumerWidget {
       return true;
     }).toList(growable: false);
 
+    final selectedMonth = ref.watch(selectedTransactionMonthProvider);
+
     // Calculate active filter count
     var activeFilterCount = 0;
     if (filter.type != null) activeFilterCount++;
@@ -934,7 +1083,7 @@ class _TransactionFilterBottomSheet extends ConsumerWidget {
     if (filter.accountId != null) activeFilterCount++;
     if (filter.categoryId != null) activeFilterCount++;
 
-    final activePreset = _resolveActivePreset(filter.startDate, filter.endDate);
+    final activePreset = _resolveActivePreset(filter.startDate, filter.endDate, selectedMonth);
     final sheetHeight = MediaQuery.of(context).size.height * 0.88;
 
     return Container(

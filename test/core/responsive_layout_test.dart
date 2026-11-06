@@ -9,7 +9,6 @@ import 'package:so_thu_chi/app.dart';
 import 'package:so_thu_chi/core/errors/result.dart';
 import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
-import 'package:so_thu_chi/core/utils/date_formatter.dart';
 import 'package:so_thu_chi/data/firebase/firebase_providers.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/accounts/data/repositories/firestore_account_repository.dart';
@@ -18,13 +17,11 @@ import 'package:so_thu_chi/features/accounts/presentation/screens/accounts_scree
 import 'package:so_thu_chi/features/auth/domain/entities/app_user.dart';
 import 'package:so_thu_chi/features/auth/domain/repositories/auth_repository.dart';
 import 'package:so_thu_chi/features/budgets/data/repositories/firestore_budget_repository.dart';
-import 'package:so_thu_chi/features/budgets/presentation/controllers/budgets_controller.dart';
 import 'package:so_thu_chi/features/budgets/presentation/screens/budgets_screen.dart';
 import 'package:so_thu_chi/features/categories/data/repositories/firestore_category_repository.dart';
 import 'package:so_thu_chi/features/categories/presentation/screens/categories_screen.dart';
 import 'package:so_thu_chi/features/debts/data/repositories/firestore_debt_repository.dart';
 import 'package:so_thu_chi/features/debts/presentation/screens/debts_screen.dart';
-import 'package:so_thu_chi/features/reports/presentation/controllers/reports_controller.dart';
 import 'package:so_thu_chi/features/reports/presentation/screens/reports_screen.dart';
 import 'package:so_thu_chi/features/savings/data/repositories/firestore_savings_goal_repository.dart';
 import 'package:so_thu_chi/features/savings/presentation/screens/savings_goals_screen.dart';
@@ -731,6 +728,48 @@ void main() {
       final prevMonthBtn = find.byTooltip('Tháng trước');
       expect(prevMonthBtn, findsOneWidget);
       await tester.tap(prevMonthBtn);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('TransactionsScreen merges month switcher into AppBar actions on Landscape and leaves it in body on Portrait', (tester) async {
+      // 1. Portrait mode (390x844): Month switcher is in body, AppBar actions only has filter button
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: const TransactionsScreen(),
+          size: const Size(390, 844),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final appBarFinder = find.byType(AppBar);
+      expect(appBarFinder, findsOneWidget);
+      final portraitAppBar = tester.widget<AppBar>(appBarFinder);
+      // In portrait: only Badge(Filter) + SizedBox
+      expect(portraitAppBar.actions?.length, 2);
+
+      // 2. Landscape mode (844x390): Month switcher + Filter button in AppBar actions
+      tester.view.physicalSize = const Size(844, 390);
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: const TransactionsScreen(),
+          size: const Size(844, 390),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final landscapeAppBar = tester.widget<AppBar>(appBarFinder);
+      // In landscape: Center(MonthSwitcher) + SizedBox + Badge(Filter) + SizedBox (4 elements)
+      expect(landscapeAppBar.actions?.length, 4);
+
+      // Verify chevrons can be tapped in landscape header
+      final nextMonthBtn = find.byTooltip('Tháng sau');
+      expect(nextMonthBtn, findsOneWidget);
+      await tester.tap(nextMonthBtn);
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });

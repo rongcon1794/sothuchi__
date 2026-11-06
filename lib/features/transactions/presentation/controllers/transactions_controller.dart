@@ -114,22 +114,49 @@ final transactionFilterProvider =
       TransactionFilterController.new,
     );
 
+/// Selected month anchor for viewing transactions on [TransactionsScreen].
+class SelectedTransactionMonthController extends Notifier<DateTime?> {
+  @override
+  DateTime? build() => AppDateUtils.startOfMonth(DateTime.now());
+
+  void previousMonth() {
+    final current = state ?? AppDateUtils.startOfMonth(DateTime.now());
+    state = AppDateUtils.addMonths(current, -1);
+  }
+
+  void nextMonth() {
+    final current = state ?? AppDateUtils.startOfMonth(DateTime.now());
+    state = AppDateUtils.addMonths(current, 1);
+  }
+
+  void setMonth(DateTime? date) {
+    state = date == null ? null : AppDateUtils.startOfMonth(date);
+  }
+}
+
+final selectedTransactionMonthProvider =
+    NotifierProvider<SelectedTransactionMonthController, DateTime?>(
+      SelectedTransactionMonthController.new,
+    );
+
 /// Filtered transactions matching search query, type, category, wallet, and date range.
 final filteredTransactionsProvider = Provider<List<TransactionEntity>>((ref) {
   final all =
       ref.watch(transactionsStreamProvider).value ??
       const <TransactionEntity>[];
   final filter = ref.watch(transactionFilterProvider);
+  final selectedMonth = ref.watch(selectedTransactionMonthProvider);
   final categoriesMap = ref.watch(categoriesMapProvider);
   final accountsMap = ref.watch(accountsMapProvider);
 
   final query = filter.searchQuery.trim().toLowerCase();
-  final rangeStart = filter.startDate != null
-      ? AppDateUtils.startOfDay(filter.startDate!)
-      : null;
-  final rangeEnd = filter.endDate != null
-      ? AppDateUtils.endOfDay(filter.endDate!)
-      : null;
+  final hasExplicitDateRange = filter.startDate != null || filter.endDate != null;
+  final rangeStart = hasExplicitDateRange
+      ? (filter.startDate != null ? AppDateUtils.startOfDay(filter.startDate!) : null)
+      : (selectedMonth != null ? AppDateUtils.startOfMonth(selectedMonth) : null);
+  final rangeEnd = hasExplicitDateRange
+      ? (filter.endDate != null ? AppDateUtils.endOfDay(filter.endDate!) : null)
+      : (selectedMonth != null ? AppDateUtils.endOfMonth(selectedMonth) : null);
 
   return all.where((tx) {
     if (filter.type != null && tx.type != filter.type) {
