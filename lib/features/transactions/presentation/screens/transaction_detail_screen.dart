@@ -98,6 +98,48 @@ class TransactionDetailScreen extends ConsumerWidget {
     }
   }
 
+  Future<void> _handleDirectHoldDelete(
+    BuildContext context,
+    WidgetRef ref,
+    TransactionEntity tx,
+  ) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    final res = await ref
+        .read(transactionsActionControllerProvider.notifier)
+        .softDelete(tx.id);
+
+    if (!context.mounted) return;
+    if (res.isSuccess) {
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
+      messenger
+        ..clearSnackBars()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(l10n.transactionDeleted),
+            action: SnackBarAction(
+              label: l10n.undo,
+              onPressed: () {
+                ref
+                    .read(transactionsActionControllerProvider.notifier)
+                    .restore(tx.id);
+              },
+            ),
+          ),
+        );
+    } else {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            context.localizeError(res.errorOrNull ?? 'Lỗi không xác định'),
+          ),
+        ),
+      );
+    }
+  }
+
   void _handleDuplicate(BuildContext context, TransactionEntity tx) {
     unawaited(HapticFeedback.lightImpact());
     context.push(
@@ -534,17 +576,15 @@ class TransactionDetailScreen extends ConsumerWidget {
                       ),
                       const SizedBox(width: 12),
 
-                      // Xóa button
+                      // Lucian Element #003: Hold to Delete Button (with Tap fallback)
                       Expanded(
-                        child: AppleButton(
-                          label: 'Xóa',
-                          icon: const Icon(
-                            CupertinoIcons.trash,
-                            size: 18,
-                            color: AppleTokens.systemRed,
-                          ),
-                          variant: AppleButtonVariant.destructive,
-                          onPressed: () => _handleDelete(context, ref, tx),
+                        child: LucianHoldToDeleteButton(
+                          label: l10n.delete,
+                          holdingLabel: 'Giữ...',
+                          confirmedLabel: 'Đã xóa!',
+                          onTap: () => _handleDelete(context, ref, tx),
+                          onConfirmed: () =>
+                              _handleDirectHoldDelete(context, ref, tx),
                         ),
                       ),
                     ],

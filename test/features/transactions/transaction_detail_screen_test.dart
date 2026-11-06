@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
-import 'package:so_thu_chi/core/widgets/apple_button.dart';
+import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/data/firebase/firebase_providers.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/accounts/data/repositories/firestore_account_repository.dart';
@@ -178,7 +178,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap Xóa button in primary action row
-      final deleteBtnFinder = find.widgetWithText(AppleButton, 'Xóa');
+      final deleteBtnFinder = find.widgetWithText(LucianHoldToDeleteButton, 'Xóa');
       await tester.tap(deleteBtnFinder);
       await tester.pumpAndSettle();
 
@@ -193,6 +193,48 @@ void main() {
       );
       await tester.tap(actionSheetDeleteBtn);
       await tester.pumpAndSettle();
+
+      // Verify transaction is deleted in repository
+      final allTxs = await txRepo.watchTransactions().first;
+      expect(allTxs.where((t) => t.id == tx.id), isEmpty);
+    });
+
+    testWidgets('holding LucianHoldToDeleteButton directly deletes transaction with undo toast', (tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      final wallet = ((await accRepo.createAccount(
+        name: 'Ví test',
+        type: AccountType.cash,
+        initialBalance: 1000000,
+        currency: 'VND',
+        icon: 'cash',
+        color: 0xFF00A86B,
+      )) as dynamic).value as Account;
+
+      final tx = ((await txRepo.addTransaction(
+        amount: 25000,
+        currency: 'VND',
+        type: TransactionType.expense,
+        accountId: wallet.id,
+        categoryId: 'default_food',
+        note: 'Cà phê',
+        date: DateTime.now(),
+      )) as dynamic).value as TransactionEntity;
+
+      await tester.pumpWidget(buildTestWidget(tx.id));
+      await tester.pumpAndSettle();
+
+      final deleteBtnFinder = find.widgetWithText(LucianHoldToDeleteButton, 'Xóa');
+      expect(deleteBtnFinder, findsOneWidget);
+
+      final gesture = await tester.startGesture(tester.getCenter(deleteBtnFinder));
+      // Hold for 1300ms to complete duration
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(milliseconds: 1000));
+      await tester.pumpAndSettle();
+      await gesture.up();
 
       // Verify transaction is deleted in repository
       final allTxs = await txRepo.watchTransactions().first;

@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
-import 'package:so_thu_chi/core/widgets/apple_month_year_picker_sheet.dart';
 import 'package:so_thu_chi/features/budgets/presentation/controllers/budgets_controller.dart';
 import 'package:so_thu_chi/features/budgets/presentation/screens/budgets_screen.dart';
 import 'package:so_thu_chi/features/reports/presentation/controllers/reports_controller.dart';
@@ -142,16 +141,16 @@ void main() {
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: MaterialApp(
-            locale: const Locale('vi'),
-            localizationsDelegates: const [
+          child: const MaterialApp(
+            locale: Locale('vi'),
+            localizationsDelegates: [
               AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            supportedLocales: const [Locale('vi'), Locale('en')],
-            home: const TransactionsScreen(),
+            supportedLocales: [Locale('vi'), Locale('en')],
+            home: TransactionsScreen(),
           ),
         ),
       );
@@ -193,16 +192,16 @@ void main() {
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: MaterialApp(
-            locale: const Locale('vi'),
-            localizationsDelegates: const [
+          child: const MaterialApp(
+            locale: Locale('vi'),
+            localizationsDelegates: [
               AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            supportedLocales: const [Locale('vi'), Locale('en')],
-            home: const BudgetsScreen(),
+            supportedLocales: [Locale('vi'), Locale('en')],
+            home: BudgetsScreen(),
           ),
         ),
       );
@@ -237,18 +236,18 @@ void main() {
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: MaterialApp(
-            locale: const Locale('vi'),
-            localizationsDelegates: const [
+          child: const MaterialApp(
+            locale: Locale('vi'),
+            localizationsDelegates: [
               AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            supportedLocales: const [Locale('vi'), Locale('en')],
+            supportedLocales: [Locale('vi'), Locale('en')],
             home: MediaQuery(
-              data: const MediaQueryData(size: Size(844, 390)),
-              child: const ReportsScreen(),
+              data: MediaQueryData(size: Size(844, 390)),
+              child: ReportsScreen(),
             ),
           ),
         ),

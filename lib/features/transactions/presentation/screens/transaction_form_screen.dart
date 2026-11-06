@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -526,6 +528,12 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     final allWallets = ref.watch(accountsStreamProvider).value ?? const [];
     final walletsForDropdown = _isEditing ? allWallets : activeWallets;
 
+    // Source wallet balance for Lucian Element #035 Balance Shield
+    final sourceWallet = walletsForDropdown
+        .where((w) => w.id == _accountId)
+        .firstOrNull;
+    final availableBalance = sourceWallet?.balanceMoney;
+
     final expenseCategories = ref.watch(expenseCategoriesProvider);
     final incomeCategories = ref.watch(incomeCategoriesProvider);
     final categoriesAsync = ref.watch(categoriesStreamProvider);
@@ -637,8 +645,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                  // 1. Hero Amount & Mode Card
-                  _HeroAmountCard(
+                        // 1. Hero Amount & Mode Card
+                        _HeroAmountCard(
                     type: _type,
                     amountController: _amountController,
                     focusNode: _amountFocusNode,
@@ -646,6 +654,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                     currencyCode: currencyCode,
                     locale: locale,
                     isEditing: _isEditing,
+                    availableWalletBalance: availableBalance,
                     onTypeChanged: (newType) {
                       setState(() {
                         _type = newType;
@@ -1032,12 +1041,9 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-        ),
-      ),
       bottomNavigationBar: SafeArea(
         top: false,
         child: Container(
@@ -1081,7 +1087,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   }
 }
 
-/// The centerpiece: Expressive, tactile Apple-style Hero Amount & Type Selector Card.
+/// The centerpiece: Expressive, tactile Apple & Lucian Element #035 Hero Amount Card.
+/// Features dynamic balance shield validation, horizontal shake physics, and quick chips.
 class _HeroAmountCard extends StatefulWidget {
   const _HeroAmountCard({
     required this.type,
@@ -1094,6 +1101,7 @@ class _HeroAmountCard extends StatefulWidget {
     required this.onTypeChanged,
     required this.onSetAmount,
     required this.onClear,
+    this.availableWalletBalance,
   });
 
   final TransactionType type;
@@ -1106,16 +1114,37 @@ class _HeroAmountCard extends StatefulWidget {
   final ValueChanged<TransactionType> onTypeChanged;
   final ValueChanged<int> onSetAmount;
   final VoidCallback onClear;
+  final Money? availableWalletBalance;
 
   @override
   State<_HeroAmountCard> createState() => _HeroAmountCardState();
 }
 
-class _HeroAmountCardState extends State<_HeroAmountCard> {
+class _HeroAmountCardState extends State<_HeroAmountCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _shakeController;
+  late final Animation<double> _shakeAnimation;
+  bool _wasOverBalance = false;
+
   @override
   void initState() {
     super.initState();
     widget.focusNode.addListener(_onFocusChange);
+    widget.amountController.addListener(_onAmountChange);
+
+    _shakeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 360),
+    );
+    _shakeAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: -8.0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: -8.0, end: 7.0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 7.0, end: -4.0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: -4.0, end: 2.0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 2.0, end: 0.0), weight: 1),
+    ]).animate(CurvedAnimation(parent: _shakeController, curve: LucianTokens.ease));
+
+    _checkBalance(notify: false);
   }
 
   @override
@@ -1125,16 +1154,51 @@ class _HeroAmountCardState extends State<_HeroAmountCard> {
       oldWidget.focusNode.removeListener(_onFocusChange);
       widget.focusNode.addListener(_onFocusChange);
     }
+    if (oldWidget.availableWalletBalance != widget.availableWalletBalance ||
+        oldWidget.type != widget.type) {
+      _checkBalance(notify: true);
+    }
   }
 
   @override
   void dispose() {
     widget.focusNode.removeListener(_onFocusChange);
+    widget.amountController.removeListener(_onAmountChange);
+    _shakeController.dispose();
     super.dispose();
   }
 
   void _onFocusChange() {
     if (mounted) setState(() {});
+  }
+
+  void _onAmountChange() {
+    _checkBalance(notify: true);
+  }
+
+  void _checkBalance({bool notify = true}) {
+    if (widget.type == TransactionType.income ||
+        widget.availableWalletBalance == null) {
+      if (_wasOverBalance) {
+        if (notify && mounted) setState(() => _wasOverBalance = false);
+      }
+      return;
+    }
+
+    final rawMoney = Money.tryParse(widget.amountController.text,
+        currencyCode: widget.currencyCode);
+    final currentMinor = rawMoney?.minorUnits ?? 0;
+    final isOver = currentMinor > widget.availableWalletBalance!.minorUnits;
+
+    if (isOver && !_wasOverBalance) {
+      if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+        _shakeController.forward(from: 0.0);
+        unawaited(HapticFeedback.mediumImpact());
+      }
+      if (notify && mounted) setState(() => _wasOverBalance = true);
+    } else if (!isOver && _wasOverBalance) {
+      if (notify && mounted) setState(() => _wasOverBalance = false);
+    }
   }
 
   @override
@@ -1143,11 +1207,15 @@ class _HeroAmountCardState extends State<_HeroAmountCard> {
     final isDark = theme.brightness == Brightness.dark;
     final isFocused = widget.focusNode.hasFocus;
 
-    final typeColor = switch (widget.type) {
+    final baseTypeColor = switch (widget.type) {
       TransactionType.expense => AppleTokens.rubyExpense,
       TransactionType.income => AppleTokens.jadePrimary,
       TransactionType.transfer => AppleTokens.cobaltTransfer,
     };
+
+    final typeColor = _wasOverBalance
+        ? LucianTokens.resolveDanger(isDark)
+        : baseTypeColor;
 
     final typeSign = switch (widget.type) {
       TransactionType.expense => '-',
@@ -1158,7 +1226,8 @@ class _HeroAmountCardState extends State<_HeroAmountCard> {
     final isLandscape = context.isLandscape;
 
     return AppleGlassCard(
-      padding: EdgeInsets.fromLTRB(16, isLandscape ? 10 : 16, 16, isLandscape ? 12 : 18),
+      padding: EdgeInsets.fromLTRB(
+          16, isLandscape ? 10 : 16, 16, isLandscape ? 12 : 18),
       borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
       borderColor: isFocused
           ? typeColor.withValues(alpha: isDark ? 0.6 : 0.45)
@@ -1172,47 +1241,57 @@ class _HeroAmountCardState extends State<_HeroAmountCard> {
           ),
           const SizedBox(height: 18),
 
-          // 2. Large Amount Input Display with Active Focus Effect
-          GestureDetector(
-            onTap: () {
-              if (!widget.focusNode.hasFocus) {
-                widget.focusNode.requestFocus();
-              }
+          // 2. Large Amount Input Display with Lucian Shake Animation
+          AnimatedBuilder(
+            animation: _shakeAnimation,
+            builder: (context, child) {
+              return Transform.translate(
+                offset: Offset(_shakeAnimation.value, 0),
+                child: child,
+              );
             },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeOutCubic,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: isFocused
-                    ? typeColor.withValues(alpha: isDark ? 0.12 : 0.07)
-                    : (isDark
-                        ? Colors.white.withValues(alpha: 0.04)
-                        : Colors.black.withValues(alpha: 0.02)),
-                borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                border: Border.all(
+            child: GestureDetector(
+              onTap: () {
+                if (!widget.focusNode.hasFocus) {
+                  widget.focusNode.requestFocus();
+                }
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
                   color: isFocused
-                      ? typeColor
+                      ? typeColor.withValues(alpha: isDark ? 0.12 : 0.07)
                       : (isDark
-                          ? Colors.white.withValues(alpha: 0.12)
-                          : Colors.black.withValues(alpha: 0.08)),
-                  width: isFocused ? 2.0 : 1.0,
+                          ? Colors.white.withValues(alpha: 0.04)
+                          : Colors.black.withValues(alpha: 0.02)),
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                  border: Border.all(
+                    color: isFocused
+                        ? typeColor
+                        : (isDark
+                            ? Colors.white.withValues(alpha: 0.12)
+                            : Colors.black.withValues(alpha: 0.08)),
+                    width: isFocused ? 2.0 : 1.0,
+                  ),
+                  boxShadow: isFocused
+                      ? [
+                          BoxShadow(
+                            color: typeColor.withValues(
+                                alpha: isDark ? 0.35 : 0.22),
+                            blurRadius: 16,
+                            spreadRadius: 1,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
                 ),
-                boxShadow: isFocused
-                    ? [
-                        BoxShadow(
-                          color: typeColor.withValues(alpha: isDark ? 0.35 : 0.22),
-                          blurRadius: 16,
-                          spreadRadius: 1,
-                          offset: const Offset(0, 2),
-                        ),
-                      ]
-                    : null,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
                   Text(
                     typeSign,
                     style: TextStyle(
@@ -1316,15 +1395,109 @@ class _HeroAmountCardState extends State<_HeroAmountCard> {
               ),
             ),
           ),
+        ),
 
-          // 3. Smart Zero Suggestions Bar (Reactive to amountController)
+          // Lucian Balance Shield Warning Badge
+          if (_wasOverBalance && widget.availableWalletBalance != null) ...[
+            const SizedBox(height: 10),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: LucianTokens.ease,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: LucianTokens.dangerLight.withValues(alpha: isDark ? 0.20 : 0.10),
+                borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                border: Border.all(
+                  color: LucianTokens.dangerLight.withValues(alpha: isDark ? 0.40 : 0.28),
+                  width: AppleTokens.hairline,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    CupertinoIcons.exclamationmark_triangle_fill,
+                    size: 13,
+                    color: isDark ? LucianTokens.dangerDark : LucianTokens.dangerLight,
+                  ),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      'Vượt số dư ví (${widget.availableWalletBalance!.format(locale: widget.locale)} khả dụng)',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? LucianTokens.dangerDark : LucianTokens.dangerLight,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
+          // 3. Smart Zero & Quick Amount Suggestions Bar (Reactive to amountController)
           ListenableBuilder(
             listenable: widget.amountController,
             builder: (context, _) {
               final l10n = context.l10n;
               final rawMoney = Money.tryParse(widget.amountController.text, currencyCode: widget.currencyCode);
               final currentMinor = rawMoney?.minorUnits ?? 0;
-              if (currentMinor <= 0) return const SizedBox.shrink();
+
+              // Quick starter chips when amount is empty (Lucian #035 quick-chips)
+              if (currentMinor <= 0) {
+                final isVnd = widget.currencyCode.toUpperCase() == 'VND';
+                if (!isVnd) return const SizedBox.shrink();
+                final starterChips = [
+                  (label: '+50k', value: 50000),
+                  (label: '+100k', value: 100000),
+                  (label: '+200k', value: 200000),
+                  (label: '+500k', value: 500000),
+                  (label: '+1tr', value: 1000000),
+                  (label: '+2tr', value: 2000000),
+                ];
+                return Padding(
+                  padding: const EdgeInsets.only(top: 14),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        for (final chip in starterChips)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: ApplePressable(
+                              scaleDown: 0.94,
+                              onTap: () => widget.onSetAmount(chip.value),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                                decoration: BoxDecoration(
+                                  color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
+                                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                                  border: Border.all(
+                                    color: isDark
+                                        ? typeColor.withValues(alpha: 0.3)
+                                        : typeColor.withValues(alpha: 0.25),
+                                    width: 1.0,
+                                  ),
+                                ),
+                                child: Text(
+                                  chip.label,
+                                  style: TextStyle(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: typeColor,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              }
 
               // Calculate suggestions for appending zeros (x10, x100, x1.000, x10.000, x100.000, x1.000.000, x10.000.000)
               final List<({String label, int value})> zeroSuggestions = [];

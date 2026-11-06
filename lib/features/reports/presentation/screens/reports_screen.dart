@@ -418,6 +418,11 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
     double height = 210,
     double diameter = 210,
   }) {
+    final isSliceActive = _touchedPieIndex >= 0 &&
+        _touchedPieIndex < report.categorySlices.length;
+    final activeSlice =
+        isSliceActive ? report.categorySlices[_touchedPieIndex] : null;
+
     return SizedBox(
       width: diameter,
       height: height,
@@ -427,20 +432,24 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
           ExcludeSemantics(
             child: PieChart(
               PieChartData(
-                sectionsSpace: 2.5,
-                centerSpaceRadius: 58,
+                sectionsSpace: 3.0,
+                centerSpaceRadius: 56,
                 pieTouchData: PieTouchData(
                   touchCallback: (FlTouchEvent event, response) {
-                    setState(() {
-                      if (!event.isInterestedForInteractions ||
-                          response == null ||
-                          response.touchedSection == null) {
-                        _touchedPieIndex = -1;
-                        return;
+                    if (!event.isInterestedForInteractions ||
+                        response == null ||
+                        response.touchedSection == null) {
+                      if (_touchedPieIndex != -1) {
+                        setState(() => _touchedPieIndex = -1);
                       }
-                      _touchedPieIndex =
-                          response.touchedSection!.touchedSectionIndex;
-                    });
+                      return;
+                    }
+                    final nextIndex =
+                        response.touchedSection!.touchedSectionIndex;
+                    if (_touchedPieIndex != nextIndex) {
+                      unawaited(HapticFeedback.selectionClick());
+                      setState(() => _touchedPieIndex = nextIndex);
+                    }
                   },
                 ),
                 sections: [
@@ -455,31 +464,99 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
             ),
           ),
           SizedBox(
-            width: 100,
+            width: 104,
             child: FittedBox(
               fit: BoxFit.scaleDown,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    l10n.expense,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 220),
+                transitionBuilder: (child, anim) => FadeTransition(
+                  opacity: anim,
+                  child: ScaleTransition(
+                    scale: Tween<double>(begin: 0.88, end: 1.0).animate(
+                      CurvedAnimation(
+                        parent: anim,
+                        curve: LucianTokens.spring,
+                      ),
                     ),
+                    child: child,
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    report.expenseMoney.format(
-                      locale: locale,
-                      masked: hideBalance,
-                    ),
-                    semanticsLabel: hideBalance ? l10n.balanceHidden : null,
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      fontFeatures: AppTheme.tabularFigures,
-                    ),
-                  ),
-                ],
+                ),
+                child: activeSlice != null
+                    ? Column(
+                        key: ValueKey<String>('active_${activeSlice.categoryId}'),
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            AppIconCatalog.resolve(activeSlice.icon),
+                            size: 18,
+                            color: Color(activeSlice.color),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            activeSlice.fallbackName,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            activeSlice.amountMoney.format(
+                              locale: locale,
+                              masked: hideBalance,
+                            ),
+                            semanticsLabel: hideBalance ? l10n.balanceHidden : null,
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              fontFeatures: AppTheme.tabularFigures,
+                              color: Color(activeSlice.color),
+                            ),
+                          ),
+                          const SizedBox(height: 1),
+                          Text(
+                            '${activeSlice.percentage}%',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: Color(activeSlice.color),
+                            ),
+                          ),
+                        ],
+                      )
+                    : Column(
+                        key: const ValueKey<String>('summary_total'),
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            l10n.expense,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            report.expenseMoney.format(
+                              locale: locale,
+                              masked: hideBalance,
+                            ),
+                            semanticsLabel: hideBalance ? l10n.balanceHidden : null,
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              fontFeatures: AppTheme.tabularFigures,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${report.categorySlices.length} nhóm',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              fontSize: 10,
+                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                            ),
+                          ),
+                        ],
+                      ),
               ),
             ),
           ),
@@ -504,13 +581,34 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
     return PieChartSectionData(
       color: sliceColor,
       value: visualValue,
-      radius: isTouched ? 44 : 36,
-      showTitle: slice.percentage >= 8,
+      radius: isTouched ? 48 : 36,
+      showTitle: slice.percentage >= 8 && !isTouched,
       title: '${slice.percentage}%',
       titleStyle: theme.textTheme.labelSmall?.copyWith(
         color: labelColor,
         fontWeight: FontWeight.w700,
       ),
+      badgeWidget: isTouched
+          ? Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.18),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
+              child: Icon(
+                AppIconCatalog.resolve(slice.icon),
+                size: 14,
+                color: sliceColor,
+              ),
+            )
+          : null,
+      badgePositionPercentageOffset: 1.15,
     );
   }
 }
