@@ -284,6 +284,18 @@ abstract class AppLocalizations {
   /// **'Xóa vĩnh viễn toàn bộ dữ liệu, giao dịch và tài khoản'**
   String get deleteDataAndAccountSubtitle;
 
+  /// No description provided for @keyboard.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bàn phím'**
+  String get keyboard;
+
+  /// No description provided for @hideKeyboard.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ẩn bàn phím'**
+  String get hideKeyboard;
+
   /// No description provided for @cancel.
   ///
   /// In vi, this message translates to:

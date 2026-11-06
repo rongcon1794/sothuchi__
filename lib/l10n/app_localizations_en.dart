@@ -111,6 +111,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Permanently erase all data, transactions, and account';
 
   @override
+  String get keyboard => 'Keyboard';
+
+  @override
+  String get hideKeyboard => 'Hide keyboard';
+
+  @override
   String get cancel => 'Cancel';
 
   @override

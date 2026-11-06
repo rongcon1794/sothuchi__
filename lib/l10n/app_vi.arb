@@ -34,6 +34,8 @@
   "deleteAccountAction": "Xóa vĩnh viễn",
   "dangerZoneSection": "VÙNG NGUY HIỂM",
   "deleteDataAndAccountSubtitle": "Xóa vĩnh viễn toàn bộ dữ liệu, giao dịch và tài khoản",
+  "keyboard": "Bàn phím",
+  "hideKeyboard": "Ẩn bàn phím",
   "cancel": "Hủy",
   "save": "Lưu",
   "edit": "Chỉnh sửa",

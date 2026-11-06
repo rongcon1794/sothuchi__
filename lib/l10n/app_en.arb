@@ -31,6 +31,8 @@
   "deleteAccountAction": "Delete permanently",
   "dangerZoneSection": "DANGER ZONE",
   "deleteDataAndAccountSubtitle": "Permanently erase all data, transactions, and account",
+  "keyboard": "Keyboard",
+  "hideKeyboard": "Hide keyboard",
   "cancel": "Cancel",
   "save": "Save",
   "edit": "Edit",

@@ -112,6 +112,12 @@ class AppLocalizationsVi extends AppLocalizations {
       'Xóa vĩnh viễn toàn bộ dữ liệu, giao dịch và tài khoản';
 
   @override
+  String get keyboard => 'Bàn phím';
+
+  @override
+  String get hideKeyboard => 'Ẩn bàn phím';
+
+  @override
   String get cancel => 'Hủy';
 
   @override

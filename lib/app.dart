@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:so_thu_chi/core/router/app_router.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/widgets/biometric_lock_gate.dart';
+import 'package:so_thu_chi/core/widgets/keyboard_accessory_bar.dart';
 import 'package:so_thu_chi/features/settings/domain/entities/app_settings.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:so_thu_chi/l10n/app_localizations.dart';
@@ -49,7 +50,8 @@ class SoThuChiApp extends ConsumerWidget {
       ],
       routerConfig: router,
       builder: (context, child) {
-        return rootWrapper(context, child ?? const SizedBox.shrink());
+        final content = rootWrapper(context, child ?? const SizedBox.shrink());
+        return KeyboardDismissBarOverlay(child: content);
       },
     );
   }
