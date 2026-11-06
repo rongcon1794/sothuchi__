@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
+import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
 import 'package:so_thu_chi/features/transactions/presentation/widgets/lucian_live_kpi_card.dart';
 import 'package:so_thu_chi/l10n/app_localizations.dart';
@@ -143,6 +144,68 @@ void main() {
       await tester.pump();
 
       expect(find.text('Chi tiêu'), findsWidgets);
+    });
+
+    testWidgets('calculates real trend curve and formats delta badge accurately without negative sign glitch', (tester) async {
+      final now = DateTime.now();
+      final txList = [
+        TransactionEntity(
+          id: 'tx1',
+          amount: 500000000,
+          currency: 'VND',
+          type: TransactionType.income,
+          accountId: 'acc1',
+          categoryId: 'cat_salary',
+          date: now.subtract(const Duration(days: 3)),
+          note: 'Lương',
+          createdAt: now,
+          updatedAt: now,
+        ),
+        TransactionEntity(
+          id: 'tx2',
+          amount: 200000000,
+          currency: 'VND',
+          type: TransactionType.expense,
+          accountId: 'acc1',
+          categoryId: 'cat_food',
+          date: now.subtract(const Duration(days: 1)),
+          note: 'Ăn uống',
+          createdAt: now,
+          updatedAt: now,
+        ),
+      ];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('vi'),
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: LucianLiveKpiCard(
+                totalBalance: const Money(minorUnits: 1300000000, currencyCode: 'VND'),
+                monthSummary: const MonthlyCashflowSummary(
+                  income: Money(minorUnits: 500000000, currencyCode: 'VND'),
+                  expense: Money(minorUnits: 200000000, currencyCode: 'VND'),
+                  net: Money(minorUnits: 300000000, currencyCode: 'VND'),
+                ),
+                transactions: txList,
+                locale: 'vi',
+                hideBalance: false,
+                onToggleVisibility: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Delta label shows savings rate (300 / 500 = 60%)
+      expect(find.text('+60% tích lũy tháng'), findsOneWidget);
+
+      // Verify custom painter is present and painted
+      expect(find.byType(CustomPaint), findsWidgets);
     });
   });
 

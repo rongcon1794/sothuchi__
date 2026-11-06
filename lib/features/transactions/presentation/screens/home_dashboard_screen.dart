@@ -28,6 +28,7 @@ import 'package:so_thu_chi/features/savings/domain/entities/savings_goal.dart';
 import 'package:so_thu_chi/features/savings/presentation/controllers/savings_goals_controller.dart';
 import 'package:so_thu_chi/features/savings/presentation/widgets/savings_arc_progress.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
 import 'package:so_thu_chi/features/transactions/presentation/widgets/lucian_live_kpi_card.dart';
 import 'package:so_thu_chi/features/transactions/presentation/widgets/transaction_tile.dart';
@@ -193,6 +194,7 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
             final heroBalanceCard = LucianLiveKpiCard(
               totalBalance: totalBalance,
               monthSummary: monthSummary,
+              transactions: txStream.value ?? const <TransactionEntity>[],
               locale: locale,
               hideBalance: hideBalance,
               onToggleVisibility: () =>

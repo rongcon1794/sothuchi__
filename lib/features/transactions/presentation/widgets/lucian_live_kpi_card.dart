@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
@@ -7,6 +9,7 @@ import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
+import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
 
 /// Available KPI Metric modes inspired by Lucian Element #098
@@ -29,6 +32,7 @@ class LucianLiveKpiCard extends StatefulWidget {
     super.key,
     required this.totalBalance,
     required this.monthSummary,
+    this.transactions = const <TransactionEntity>[],
     required this.locale,
     required this.hideBalance,
     required this.onToggleVisibility,
@@ -38,6 +42,7 @@ class LucianLiveKpiCard extends StatefulWidget {
 
   final Money totalBalance;
   final MonthlyCashflowSummary monthSummary;
+  final List<TransactionEntity> transactions;
   final String locale;
   final bool hideBalance;
   final VoidCallback onToggleVisibility;
@@ -65,7 +70,7 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
       duration: const Duration(milliseconds: 1600),
     );
 
-    if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (!kIsWeb && !Platform.environment.containsKey('FLUTTER_TEST')) {
       _pulseController.repeat();
     } else {
       _pulseController.value = 0.5;
@@ -113,39 +118,52 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
         ),
     };
 
-    // Calculate dynamic savings rate / net delta
+    // Calculate dynamic savings rate / net delta accurately
     final totalFlow = widget.monthSummary.income.minorUnits +
         widget.monthSummary.expense.minorUnits;
     final hasFlow = totalFlow > 0;
-    final savingsRate = widget.monthSummary.income.minorUnits > 0
-        ? ((widget.monthSummary.net.minorUnits /
-                    widget.monthSummary.income.minorUnits) *
-                100)
-            .round()
-        : 0;
+    final incomeUnits = widget.monthSummary.income.minorUnits;
+    final expenseUnits = widget.monthSummary.expense.minorUnits;
+    final netUnits = widget.monthSummary.net.minorUnits;
 
     final String deltaLabel;
     final bool isDeltaPositive;
     if (_activeMetric == LucianKpiMetric.balance) {
-      if (widget.monthSummary.net.minorUnits >= 0) {
-        deltaLabel = hasFlow ? '+$savingsRate% tích lũy tháng' : 'Số dư sẵn sàng';
+      if (netUnits > 0) {
+        final rate = incomeUnits > 0
+            ? ((netUnits / incomeUnits) * 100).round()
+            : 100;
+        deltaLabel = '+$rate% tích lũy tháng';
         isDeltaPositive = true;
-      } else {
-        deltaLabel = '${widget.monthSummary.net.minorUnits < 0 ? "-" : "+"}$savingsRate% thâm hụt';
+      } else if (netUnits < 0) {
+        if (incomeUnits > 0) {
+          final rate = ((netUnits.abs() / incomeUnits) * 100).round();
+          deltaLabel = '-$rate% thâm hụt';
+        } else {
+          deltaLabel = 'Chi ròng tháng này';
+        }
         isDeltaPositive = false;
+      } else {
+        deltaLabel = hasFlow ? 'Thu chi cân bằng' : 'Số dư ổn định';
+        isDeltaPositive = true;
       }
     } else if (_activeMetric == LucianKpiMetric.income) {
-      final incShare = hasFlow
-          ? ((widget.monthSummary.income.minorUnits / totalFlow) * 100).round()
-          : 0;
-      deltaLabel = '$incShare% dòng tiền vào';
+      if (incomeUnits > 0 && totalFlow > 0) {
+        final incShare = ((incomeUnits / totalFlow) * 100).round();
+        deltaLabel = '$incShare% dòng tiền vào';
+      } else {
+        deltaLabel = 'Chưa có thu nhập tháng';
+      }
       isDeltaPositive = true;
     } else {
-      final expShare = hasFlow
-          ? ((widget.monthSummary.expense.minorUnits / totalFlow) * 100).round()
-          : 0;
-      deltaLabel = '$expShare% tổng chi xuất';
-      isDeltaPositive = false;
+      if (expenseUnits > 0 && totalFlow > 0) {
+        final expShare = ((expenseUnits / totalFlow) * 100).round();
+        deltaLabel = '$expShare% tổng chi xuất';
+        isDeltaPositive = false;
+      } else {
+        deltaLabel = 'Chưa có chi tiêu tháng';
+        isDeltaPositive = true;
+      }
     }
 
     // Sparkline points derived from current month cashflow
@@ -497,20 +515,101 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
   }
 
   List<double> _generateSparklineData() {
-    // Generate normalized curve values (0.0 to 1.0)
-    final inc = widget.monthSummary.income.minorUnits.toDouble();
-    final exp = widget.monthSummary.expense.minorUnits.toDouble();
-    final net = widget.monthSummary.net.minorUnits.toDouble();
+    final now = DateTime.now();
+    final currentDay = now.day;
+    final currency = widget.totalBalance.currencyCode;
+
+    // Timeline: If early in the month (< 7 days), sample the last 7 calendar days.
+    // Otherwise use all days from day 1 to today in the current month.
+    final days = <DateTime>[];
+    if (currentDay < 7) {
+      for (var i = 6; i >= 0; i--) {
+        days.add(now.subtract(Duration(days: i)));
+      }
+    } else {
+      for (var d = 1; d <= currentDay; d++) {
+        days.add(DateTime(now.year, now.month, d));
+      }
+    }
+
+    // Filter transactions relevant to the active currency and exclude internal transfers
+    final currencyTxs = widget.transactions
+        .where((tx) => tx.currency == currency && tx.type != TransactionType.transfer)
+        .toList();
+
+    final rawValues = <double>[];
 
     if (_activeMetric == LucianKpiMetric.balance) {
-      const base = 0.5;
-      final shift = net >= 0 ? 0.35 : -0.25;
-      return [base - 0.15, base - 0.05, base + 0.05, base + shift * 0.6, base + shift];
+      final currentBalanceMinor = widget.totalBalance.minorUnits.toDouble();
+
+      for (final day in days) {
+        final endOfDay = DateTime(day.year, day.month, day.day, 23, 59, 59, 999);
+        // Transactions strictly AFTER this day's end must be subtracted from currentBalance
+        var futureNet = 0.0;
+        for (final tx in currencyTxs) {
+          if (tx.date.isAfter(endOfDay)) {
+            if (tx.type == TransactionType.income) {
+              futureNet += tx.amount;
+            } else if (tx.type == TransactionType.expense) {
+              futureNet -= tx.amount;
+            }
+          }
+        }
+        final balanceAtDay = currentBalanceMinor - futureNet;
+        rawValues.add(balanceAtDay);
+      }
     } else if (_activeMetric == LucianKpiMetric.income) {
-      return [0.2, 0.35, 0.5, 0.65, inc > 0 ? 0.85 : 0.2];
+      // Cumulative income across the month
+      final monthStart = DateTime(now.year, now.month, 1);
+      for (final day in days) {
+        final endOfDay = DateTime(day.year, day.month, day.day, 23, 59, 59, 999);
+        var cumIncome = 0.0;
+        for (final tx in currencyTxs) {
+          if (tx.type == TransactionType.income &&
+              !tx.date.isBefore(monthStart) &&
+              !tx.date.isAfter(endOfDay)) {
+            cumIncome += tx.amount;
+          }
+        }
+        rawValues.add(cumIncome);
+      }
     } else {
-      return [0.15, 0.3, 0.45, 0.6, exp > 0 ? 0.75 : 0.15];
+      // Cumulative expense across the month
+      final monthStart = DateTime(now.year, now.month, 1);
+      for (final day in days) {
+        final endOfDay = DateTime(day.year, day.month, day.day, 23, 59, 59, 999);
+        var cumExpense = 0.0;
+        for (final tx in currencyTxs) {
+          if (tx.type == TransactionType.expense &&
+              !tx.date.isBefore(monthStart) &&
+              !tx.date.isAfter(endOfDay)) {
+            cumExpense += tx.amount;
+          }
+        }
+        rawValues.add(cumExpense);
+      }
     }
+
+    if (rawValues.isEmpty) {
+      return List.filled(7, 0.5);
+    }
+
+    final minVal = rawValues.reduce(math.min);
+    final maxVal = rawValues.reduce(math.max);
+
+    // If completely flat
+    if (minVal == maxVal) {
+      if (minVal == 0) {
+        return List.filled(rawValues.length, 0.15);
+      }
+      return List.filled(rawValues.length, 0.5);
+    }
+
+    // Normalized to 0.15 .. 0.85 to provide comfortable vertical breathing room
+    return rawValues.map((v) {
+      final ratio = (v - minVal) / (maxVal - minVal);
+      return 0.15 + (0.70 * ratio);
+    }).toList();
   }
 }
 
