@@ -32,6 +32,7 @@ rules_version = '2';
 //      - icon: string (required, 1..64 chars)
 //      - color: int (required, 32-bit signed/unsigned ARGB integer)
 //      - archived: bool (required)
+//      - ledgerId: string | optional (1..128 chars, e.g. 'default_personal' or custom ledger ID)
 //      - createdAt: timestamp (required, immutable)
 //      - updatedAt: timestamp (required)
 //      - deletedAt: timestamp | null (optional)
@@ -45,6 +46,7 @@ rules_version = '2';
 //      - color: int (required, 32-bit signed/unsigned ARGB integer)
 //      - parentId: string | null (optional, 1..128 chars when string)
 //      - isDefault: bool (required)
+//      - ledgerId: string | null (optional, 1..128 chars when string)
 //      - createdAt: timestamp (required, immutable)
 //      - updatedAt: timestamp (required)
 //      - deletedAt: timestamp | null (optional)
@@ -61,6 +63,7 @@ rules_version = '2';
 //      - note: string (required, 0..1000 chars)
 //      - date: timestamp (required)
 //      - tags: list<string> (required, <= 20 items, each 1..64 chars)
+//      - ledgerId: string | optional (1..128 chars, e.g. 'default_personal' or custom ledger ID)
 //      - createdAt: timestamp (required, immutable)
 //      - updatedAt: timestamp (required)
 //      - deletedAt: timestamp | null (optional)
@@ -74,6 +77,7 @@ rules_version = '2';
 //      - period: string in ['month'] (required)
 //      - startDate: timestamp (required)
 //      - alertThreshold: int (required, 1..100)
+//      - ledgerId: string | optional (1..128 chars, e.g. 'default_personal' or custom ledger ID)
 //      - createdAt: timestamp (required, immutable)
 //      - updatedAt: timestamp (required)
 //      - deletedAt: timestamp | null (optional)
@@ -89,6 +93,7 @@ rules_version = '2';
 //      - currency: string in ['VND', 'USD', 'EUR', 'JPY', 'KRW'] (required)
 //      - dueDate: timestamp | null (optional)
 //      - accountId: string | null (optional, 1..128 chars when string)
+//      - ledgerId: string | null (optional, 1..128 chars when string)
 //      - note: string (required, 0..1000 chars)
 //      - createdAt: timestamp (required, immutable)
 //      - updatedAt: timestamp (required)
@@ -111,6 +116,7 @@ rules_version = '2';
 //      - accountId: string (required, 1..128 chars)
 //      - toAccountId: string | null (optional, 0..128 chars when string)
 //      - categoryId: string (required, 1..128 chars)
+//      - ledgerId: string | null (optional, 1..128 chars when string)
 //      - autoExecute: bool | optional
 //      - isPaused: bool | optional (at least one of isPaused, isActive)
 //      - isActive: bool | optional (at least one of isPaused, isActive)
@@ -133,6 +139,7 @@ rules_version = '2';
 //      - isCompleted: bool | optional
 //      - linkedAccountId: string | null (optional, 0..128 chars when string)
 //      - accountId: string | null (optional, 0..128 chars when string)
+//      - ledgerId: string | null (optional, 1..128 chars when string)
 //      - note: string | null (optional, 0..1000 chars)
 //      - createdAt: timestamp (required, immutable)
 //      - updatedAt: timestamp (required)
@@ -396,6 +403,7 @@ service cloud.firestore {
         'icon',
         'color',
         'archived',
+        'ledgerId',
         'createdAt',
         'updatedAt',
         'deletedAt'
@@ -412,6 +420,7 @@ service cloud.firestore {
              isBoundedString(data.icon, 1, 64) &&
              isValidColorInt(data.color) &&
              data.archived is bool &&
+             isOptionalNullableString(data, 'ledgerId', 1, 128) &&
              data.createdAt is timestamp &&
              data.updatedAt is timestamp &&
              isOptionalNullableTimestamp(data, 'deletedAt');
@@ -436,6 +445,7 @@ service cloud.firestore {
         'color',
         'parentId',
         'isDefault',
+        'ledgerId',
         'createdAt',
         'updatedAt',
         'deletedAt'
@@ -451,6 +461,7 @@ service cloud.firestore {
              isValidColorInt(data.color) &&
              isOptionalNullableString(data, 'parentId', 1, 128) &&
              data.isDefault is bool &&
+             isOptionalNullableString(data, 'ledgerId', 1, 128) &&
              data.createdAt is timestamp &&
              data.updatedAt is timestamp &&
              isOptionalNullableTimestamp(data, 'deletedAt');
@@ -489,6 +500,7 @@ service cloud.firestore {
         'note',
         'date',
         'tags',
+        'ledgerId',
         'createdAt',
         'updatedAt',
         'deletedAt'
@@ -507,6 +519,7 @@ service cloud.firestore {
              isBoundedString(data.note, 0, 1000) &&
              data.date is timestamp &&
              isValidStringTagsList(data.tags) &&
+             isOptionalNullableString(data, 'ledgerId', 1, 128) &&
              data.createdAt is timestamp &&
              data.updatedAt is timestamp &&
              isOptionalNullableTimestamp(data, 'deletedAt');
@@ -531,6 +544,7 @@ service cloud.firestore {
         'period',
         'startDate',
         'alertThreshold',
+        'ledgerId',
         'createdAt',
         'updatedAt',
         'deletedAt'
@@ -548,6 +562,7 @@ service cloud.firestore {
              data.alertThreshold is int &&
              data.alertThreshold >= 1 &&
              data.alertThreshold <= 100 &&
+             isOptionalNullableString(data, 'ledgerId', 1, 128) &&
              data.createdAt is timestamp &&
              data.updatedAt is timestamp &&
              isOptionalNullableTimestamp(data, 'deletedAt');
@@ -575,6 +590,7 @@ service cloud.firestore {
         'currency',
         'dueDate',
         'accountId',
+        'ledgerId',
         'note',
         'createdAt',
         'updatedAt',
@@ -595,6 +611,7 @@ service cloud.firestore {
              isValidCurrency(data.currency) &&
              isOptionalNullableTimestamp(data, 'dueDate') &&
              isOptionalNullableString(data, 'accountId', 1, 128) &&
+             isOptionalNullableString(data, 'ledgerId', 1, 128) &&
              isBoundedString(data.note, 0, 1000) &&
              data.createdAt is timestamp &&
              data.updatedAt is timestamp &&
@@ -629,6 +646,7 @@ service cloud.firestore {
         'accountId',
         'toAccountId',
         'categoryId',
+        'ledgerId',
         'autoExecute',
         'isPaused',
         'isActive',
@@ -657,6 +675,7 @@ service cloud.firestore {
              isBoundedString(data.accountId, 1, 128) &&
              isOptionalNullableString(data, 'toAccountId', 0, 128) &&
              isBoundedString(data.categoryId, 1, 128) &&
+             isOptionalNullableString(data, 'ledgerId', 1, 128) &&
              (!('autoExecute' in data) || data.autoExecute is bool) &&
              ('isActive' in data || 'isPaused' in data) &&
              (!('isActive' in data) || data.isActive is bool) &&
@@ -690,6 +709,7 @@ service cloud.firestore {
         'isCompleted',
         'linkedAccountId',
         'accountId',
+        'ledgerId',
         'note',
         'createdAt',
         'updatedAt',
@@ -711,6 +731,7 @@ service cloud.firestore {
              isBoundedString(data.icon, 1, 64) &&
              isValidColorInt(data.color) &&
              (!('isCompleted' in data) || data.isCompleted is bool) &&
+             isOptionalNullableString(data, 'ledgerId', 1, 128) &&
              isOptionalNullableString(data, 'note', 0, 1000) &&
              data.createdAt is timestamp &&
              data.updatedAt is timestamp &&

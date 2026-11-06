@@ -1088,4 +1088,123 @@ describe('Sổ Thu Chi — Firestore Security Rules', () => {
     await assertSucceeds(deleteDoc(ledgerDtoRef));
     await assertSucceeds(deleteDoc(ledgerNullsRef));
   });
+
+  it('validates ledgerId field support across budgets, accounts, transactions, debts, recurring, savings goals, and categories', async () => {
+    const aliceDb = testEnv.authenticatedContext(ALICE_UID).firestore();
+
+    // 1. Budget with ledgerId ('default_personal' and custom ledgerId)
+    const budget1Ref = doc(aliceDb, `users/${ALICE_UID}/budgets/b_ledger_1`);
+    const budget2Ref = doc(aliceDb, `users/${ALICE_UID}/budgets/b_ledger_2`);
+    await assertSucceeds(
+      setDoc(budget1Ref, {
+        ...validBudget('b_ledger_1'),
+        ledgerId: 'default_personal',
+      }),
+    );
+    await assertSucceeds(
+      setDoc(budget2Ref, {
+        ...validBudget('b_ledger_2'),
+        ledgerId: 'ledger_custom_biz',
+      }),
+    );
+
+    // 2. Account with ledgerId
+    const accRef = doc(aliceDb, `users/${ALICE_UID}/accounts/acc_ledger`);
+    await assertSucceeds(
+      setDoc(accRef, {
+        ...validAccount('acc_ledger'),
+        ledgerId: 'default_personal',
+      }),
+    );
+
+    // 3. Transaction with ledgerId
+    const txRef = doc(aliceDb, `users/${ALICE_UID}/transactions/tx_ledger`);
+    await assertSucceeds(
+      setDoc(txRef, {
+        ...validTransaction('tx_ledger'),
+        ledgerId: 'default_personal',
+      }),
+    );
+
+    // 4. Debt, Recurring, Savings Goal, Category with ledgerId
+    const debtRef = doc(aliceDb, `users/${ALICE_UID}/debts/debt_ledger`);
+    const recRef = doc(aliceDb, `users/${ALICE_UID}/recurring/rec_ledger`);
+    const goalRef = doc(aliceDb, `users/${ALICE_UID}/savings_goals/goal_ledger`);
+    const catRef = doc(aliceDb, `users/${ALICE_UID}/categories/cat_ledger`);
+
+    await assertSucceeds(
+      setDoc(debtRef, {
+        ...validDebt('debt_ledger'),
+        ledgerId: 'default_personal',
+      }),
+    );
+    await assertSucceeds(
+      setDoc(recRef, {
+        ...validRecurring('rec_ledger'),
+        ledgerId: 'default_personal',
+      }),
+    );
+    await assertSucceeds(
+      setDoc(goalRef, {
+        ...validSavingsGoal('goal_ledger'),
+        ledgerId: 'default_personal',
+      }),
+    );
+    await assertSucceeds(
+      setDoc(catRef, {
+        ...validCategory('cat_ledger'),
+        ledgerId: 'default_personal',
+      }),
+    );
+
+    // 5. Rejects empty string ledgerId ("")
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/budgets/b_empty_ledger`), {
+        ...validBudget('b_empty_ledger'),
+        ledgerId: '',
+      }),
+    );
+
+    // 6. Rejects oversized ledgerId (> 128 chars)
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/budgets/b_huge_ledger`), {
+        ...validBudget('b_huge_ledger'),
+        ledgerId: 'x'.repeat(129),
+      }),
+    );
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/accounts/acc_huge_ledger`), {
+        ...validAccount('acc_huge_ledger'),
+        ledgerId: 'x'.repeat(129),
+      }),
+    );
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/transactions/tx_huge_ledger`), {
+        ...validTransaction('tx_huge_ledger'),
+        ledgerId: 'x'.repeat(129),
+      }),
+    );
+
+    // 7. Rejects non-string ledgerId (e.g. number or bool)
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/budgets/b_bad_ledger_type`), {
+        ...validBudget('b_bad_ledger_type'),
+        ledgerId: 12345,
+      }),
+    );
+    await assertFails(
+      setDoc(doc(aliceDb, `users/${ALICE_UID}/accounts/acc_bad_ledger_type`), {
+        ...validAccount('acc_bad_ledger_type'),
+        ledgerId: true,
+      }),
+    );
+
+    // 8. Update with ledgerId succeeds
+    await assertSucceeds(
+      updateDoc(budget1Ref, {
+        ledgerId: 'ledger_updated_personal',
+        updatedAt: t1,
+      }),
+    );
+  });
 });
