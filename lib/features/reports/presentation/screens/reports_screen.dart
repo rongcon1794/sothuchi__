@@ -83,57 +83,25 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
 
   Widget _buildHeaderMonthSwitcher({
     required DateTime selectedMonth,
-    required String locale,
-    required AppLocalizations l10n,
-    required ThemeData theme,
   }) {
-    return AppleGlassCard(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-      child: SizedBox(
-        height: 26,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              tooltip: l10n.previousMonth,
-              padding: EdgeInsets.zero,
-              visualDensity: VisualDensity.compact,
-              constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
-              onPressed: () {
-                HapticFeedback.selectionClick();
-                setState(() => _touchedPieIndex = -1);
-                ref.read(selectedReportMonthProvider.notifier).previousMonth();
-              },
-              icon: const Icon(Icons.chevron_left_rounded, size: 16),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Text(
-                AppDateUtils.formatMonthYear(selectedMonth, locale: locale),
-                textAlign: TextAlign.center,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12,
-                  letterSpacing: -0.2,
-                ),
-              ),
-            ),
-            IconButton(
-              tooltip: l10n.nextMonth,
-              padding: EdgeInsets.zero,
-              visualDensity: VisualDensity.compact,
-              constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
-              onPressed: () {
-                HapticFeedback.selectionClick();
-                setState(() => _touchedPieIndex = -1);
-                ref.read(selectedReportMonthProvider.notifier).nextMonth();
-              },
-              icon: const Icon(Icons.chevron_right_rounded, size: 16),
-            ),
-          ],
-        ),
-      ),
+    return AppleCompactMonthSwitcher(
+      isHeaderMode: true,
+      selectedMonth: selectedMonth,
+      allowAllOption: false,
+      onPrevious: () {
+        setState(() => _touchedPieIndex = -1);
+        ref.read(selectedReportMonthProvider.notifier).previousMonth();
+      },
+      onNext: () {
+        setState(() => _touchedPieIndex = -1);
+        ref.read(selectedReportMonthProvider.notifier).nextMonth();
+      },
+      onSelectMonth: (month) {
+        if (month != null) {
+          setState(() => _touchedPieIndex = -1);
+          ref.read(selectedReportMonthProvider.notifier).setMonth(month);
+        }
+      },
     );
   }
 
@@ -161,9 +129,6 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
             Center(
               child: _buildHeaderMonthSwitcher(
                 selectedMonth: selectedMonth,
-                locale: locale,
-                l10n: l10n,
-                theme: theme,
               ),
             ),
             const SizedBox(width: 8),
@@ -181,80 +146,25 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
           // Month Switcher (only shown in portrait mode; merged into AppBar in landscape)
           if (!isLandscape)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+              padding: const EdgeInsets.fromLTRB(16, 2, 16, 6),
               child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 540),
-                  child: AppleGlassCard(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 4,
-                    ),
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-                    child: SizedBox(
-                      height: 42,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          IconButton(
-                            tooltip: l10n.previousMonth,
-                            padding: EdgeInsets.zero,
-                            visualDensity: VisualDensity.compact,
-                            constraints: const BoxConstraints(
-                              minWidth: 40,
-                              minHeight: 36,
-                            ),
-                            onPressed: () {
-                              HapticFeedback.selectionClick();
-                              setState(() => _touchedPieIndex = -1);
-                              ref
-                                  .read(selectedReportMonthProvider.notifier)
-                                  .previousMonth();
-                            },
-                            icon: const Icon(
-                              Icons.chevron_left_rounded,
-                              size: 22,
-                            ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              AppDateUtils.formatMonthYear(
-                                selectedMonth,
-                                locale: locale,
-                              ),
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: -0.2,
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                            tooltip: l10n.nextMonth,
-                            padding: EdgeInsets.zero,
-                            visualDensity: VisualDensity.compact,
-                            constraints: const BoxConstraints(
-                              minWidth: 40,
-                              minHeight: 36,
-                            ),
-                            onPressed: () {
-                              HapticFeedback.selectionClick();
-                              setState(() => _touchedPieIndex = -1);
-                              ref
-                                  .read(selectedReportMonthProvider.notifier)
-                                  .nextMonth();
-                            },
-                            icon: const Icon(
-                              Icons.chevron_right_rounded,
-                              size: 22,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                child: AppleCompactMonthSwitcher(
+                  selectedMonth: selectedMonth,
+                  allowAllOption: false,
+                  onPrevious: () {
+                    setState(() => _touchedPieIndex = -1);
+                    ref.read(selectedReportMonthProvider.notifier).previousMonth();
+                  },
+                  onNext: () {
+                    setState(() => _touchedPieIndex = -1);
+                    ref.read(selectedReportMonthProvider.notifier).nextMonth();
+                  },
+                  onSelectMonth: (month) {
+                    if (month != null) {
+                      setState(() => _touchedPieIndex = -1);
+                      ref.read(selectedReportMonthProvider.notifier).setMonth(month);
+                    }
+                  },
                 ),
               ),
             ),
