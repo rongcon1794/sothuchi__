@@ -246,7 +246,7 @@ void main() {
       expect(find.byType(ReportsScreen), findsOneWidget);
     });
 
-    testWidgets('TransactionsScreen renders cleanly on Phone Landscape and Tablet', (tester) async {
+    testWidgets('TransactionsScreen renders cleanly with summary bar and 2-column layout on Phone Landscape and Tablet', (tester) async {
       tester.view.physicalSize = const Size(844, 390);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(() => tester.view.resetPhysicalSize());
@@ -261,6 +261,28 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.byType(TransactionsScreen), findsOneWidget);
+      // Verify financial summary ticker pills are rendered
+      expect(find.text('2 sổ giao dịch'), findsOneWidget);
+      expect(find.textContaining('Thu nhập:'), findsOneWidget);
+      expect(find.textContaining('Chi tiêu:'), findsOneWidget);
+      expect(find.textContaining('Ròng:'), findsOneWidget);
+
+      // Verify on tablet (1024x768)
+      tester.view.physicalSize = const Size(1024, 768);
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: const TransactionsScreen(),
+          size: const Size(1024, 768),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(TransactionsScreen), findsOneWidget);
+      expect(find.text('2 sổ giao dịch'), findsOneWidget);
+      expect(find.textContaining('Thu nhập:'), findsOneWidget);
+      expect(find.textContaining('Chi tiêu:'), findsOneWidget);
+      expect(find.textContaining('Ròng:'), findsOneWidget);
     });
 
     testWidgets('AppShellScaffold renders 50dp non-obscured BottomBar with all 5 items on Phone Landscape', (tester) async {
