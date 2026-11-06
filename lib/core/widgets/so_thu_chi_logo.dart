@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 
 /// Signature Apple-grade Brand Mark for Sổ Thu Chi.
 ///
-/// Features a continuous Apple squircle canvas with a multi-layered
-/// metallic Jade/Emerald gradient, specular glass highlight, and an
-/// intersecting dual-loop finance insignia with a warm gold spark.
+/// Features a continuous Apple squircle canvas with a modern 2D flat design:
+/// clean emerald jade background, financial ledger book symbolism, dynamic
+/// dual-loop cashflow curves (Thu & Chi), and a warm gold coin accent.
 class SoThuChiLogo extends StatelessWidget {
   const SoThuChiLogo({
     super.key,
@@ -20,80 +20,54 @@ class SoThuChiLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final squircleRadius = BorderRadius.circular(size * 0.235);
+
     Widget logo = Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(size * 0.235), // Apple continuous squircle ratio
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF00BFA5), // Vibrant Emerald Teal
-            Color(0xFF00897B), // Deep Jade Primary
-            Color(0xFF004D40), // Rich Dark Forest Jade
-          ],
-          stops: [0.0, 0.55, 1.0],
-        ),
+        borderRadius: squircleRadius,
         boxShadow: showShadow
             ? [
                 BoxShadow(
-                  color: const Color(0xFF004D40).withValues(alpha: 0.35),
-                  blurRadius: size * 0.25,
-                  offset: Offset(0, size * 0.1),
+                  color: const Color(0xFF004D40).withValues(alpha: 0.18),
+                  blurRadius: size * 0.18,
+                  offset: Offset(0, size * 0.06),
                 ),
                 BoxShadow(
-                  color: const Color(0xFF00BFA5).withValues(alpha: 0.2),
-                  blurRadius: size * 0.1,
-                  offset: const Offset(0, 2),
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: size * 0.08,
+                  offset: const Offset(0, 1),
                 ),
               ]
             : null,
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.25),
-          width: math.max(0.75, size * 0.02),
-        ),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(size * 0.235),
+        borderRadius: squircleRadius,
         child: Image.asset(
           'assets/icon/app_icon.png',
           width: size,
           height: size,
           fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => Stack(
-            children: [
-              // Specular Glass Sheen (Top-left diagonal highlight)
-              Positioned(
-                top: -size * 0.2,
-                left: -size * 0.2,
-                width: size * 1.4,
-                height: size * 0.7,
-                child: Transform.rotate(
-                  angle: -math.pi / 5,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.white.withValues(alpha: 0.35),
-                          Colors.white.withValues(alpha: 0.0),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+          errorBuilder: (context, error, stackTrace) => Container(
+            width: size,
+            height: size,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFF1A826C), // Vibrant Emerald Jade Top
+                  Color(0xFF063A33), // Deep Forest Jade Bottom
+                ],
               ),
-
-              // Custom Painted Geometric Emblem (Intersecting Cashflow Curves & Gold Vault Spark)
-              Center(
-                child: CustomPaint(
-                  size: Size(size * 0.62, size * 0.62),
-                  painter: _LogoEmblemPainter(),
-                ),
+            ),
+            child: Center(
+              child: CustomPaint(
+                size: Size(size * 0.65, size * 0.65),
+                painter: _LogoEmblemPainter(),
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -107,67 +81,63 @@ class SoThuChiLogo extends StatelessWidget {
   }
 }
 
+/// 2D Flat Fallback Emblem Painter representing the Ledger (Sổ),
+/// Cashflow Curves (Thu & Chi), and Wealth Coin.
 class _LogoEmblemPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
 
-    // 1. Inflow Loop (Thu - Emerald Arc upward)
-    final inflowPaint = Paint()
+    // 1. Ledger Cover Outline & Spine (Sổ - 2D Flat Geometric Notebook)
+    final ledgerPaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.95)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = w * 0.13
+      ..strokeWidth = math.max(1.5, w * 0.08)
       ..strokeCap = StrokeCap.round
-      ..shader = const LinearGradient(
-        colors: [Colors.white, Color(0xFFB2DFDB)],
-        begin: Alignment.bottomLeft,
-        end: Alignment.topRight,
-      ).createShader(Rect.fromLTWH(0, 0, w, h));
+      ..strokeJoin = StrokeJoin.round;
 
-    final inflowPath = Path()
-      ..moveTo(w * 0.2, h * 0.68)
-      ..cubicTo(w * 0.15, h * 0.35, w * 0.45, h * 0.2, w * 0.75, h * 0.28);
-    canvas.drawPath(inflowPath, inflowPaint);
-
-    // 2. Outflow Loop (Chi - Intersecting Balance Arc downward)
-    final outflowPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = w * 0.13
-      ..strokeCap = StrokeCap.round
-      ..shader = LinearGradient(
-        colors: [
-          Colors.white.withValues(alpha: 0.95),
-          const Color(0xFF80CBC4).withValues(alpha: 0.8),
-        ],
-        begin: Alignment.topRight,
-        end: Alignment.bottomLeft,
-      ).createShader(Rect.fromLTWH(0, 0, w, h));
-
-    final outflowPath = Path()
-      ..moveTo(w * 0.8, h * 0.32)
-      ..cubicTo(w * 0.85, h * 0.65, w * 0.55, h * 0.8, w * 0.25, h * 0.72);
-    canvas.drawPath(outflowPath, outflowPaint);
-
-    // 3. Central Gold Diamond Spark (Wealth & Stability Accent)
-    final goldPaint = Paint()
-      ..style = PaintingStyle.fill
-      ..shader = const RadialGradient(
-        colors: [Color(0xFFFFEE58), Color(0xFFFFB300)],
-      ).createShader(Rect.fromCircle(center: Offset(w * 0.5, h * 0.5), radius: w * 0.18));
-
-    final sparkPath = Path()
-      ..moveTo(w * 0.5, h * 0.32)
-      ..quadraticBezierTo(w * 0.5, h * 0.5, w * 0.68, h * 0.5)
-      ..quadraticBezierTo(w * 0.5, h * 0.5, w * 0.5, h * 0.68)
-      ..quadraticBezierTo(w * 0.5, h * 0.5, w * 0.32, h * 0.5)
-      ..quadraticBezierTo(w * 0.5, h * 0.5, w * 0.5, h * 0.32)
+    final ledgerPath = Path()
+      ..moveTo(w * 0.22, h * 0.18)
+      ..lineTo(w * 0.78, h * 0.18)
+      ..quadraticBezierTo(w * 0.86, h * 0.18, w * 0.86, h * 0.26)
+      ..lineTo(w * 0.86, h * 0.78)
+      ..quadraticBezierTo(w * 0.86, h * 0.86, w * 0.78, h * 0.86)
+      ..lineTo(w * 0.22, h * 0.86)
       ..close();
+    canvas.drawPath(ledgerPath, ledgerPaint);
 
-    canvas.drawPath(sparkPath, goldPaint);
+    // Ledger Spine line
+    final spinePaint = Paint()
+      ..color = const Color(0xFF80CBC4)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = math.max(1.2, w * 0.06)
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(Offset(w * 0.36, h * 0.22), Offset(w * 0.36, h * 0.82), spinePaint);
 
-    // 4. Center Micro-Gleam
-    final dotPaint = Paint()..color = Colors.white;
-    canvas.drawCircle(Offset(w * 0.5, h * 0.5), w * 0.045, dotPaint);
+    // 2. Dynamic Cashflow Growth Curve (Thu & Chi - Upward Flow)
+    final flowPaint = Paint()
+      ..color = const Color(0xFF00BFA5)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = math.max(2.0, w * 0.10)
+      ..strokeCap = StrokeCap.round;
+
+    final flowPath = Path()
+      ..moveTo(w * 0.44, h * 0.68)
+      ..cubicTo(w * 0.52, h * 0.68, w * 0.56, h * 0.48, w * 0.74, h * 0.38);
+    canvas.drawPath(flowPath, flowPaint);
+
+    // 3. Central Gold Coin (Tài sản & Thịnh vượng)
+    final coinPaint = Paint()
+      ..color = const Color(0xFFFFB300)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(Offset(w * 0.62, h * 0.44), w * 0.14, coinPaint);
+
+    final innerCoinPaint = Paint()
+      ..color = const Color(0xFFFFD54F)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = math.max(1.0, w * 0.04);
+    canvas.drawCircle(Offset(w * 0.62, h * 0.44), w * 0.09, innerCoinPaint);
   }
 
   @override
