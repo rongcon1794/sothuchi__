@@ -84,8 +84,8 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
         title: Row(
           children: [
             Padding(
-              padding: const EdgeInsets.only(right: 10),
-              child: SoThuChiLogo(size: isLandscape ? 26 : 36),
+              padding: EdgeInsets.only(right: isLandscape ? 8 : 10),
+              child: SoThuChiLogo(size: isLandscape ? 22 : 36),
             ),
             Expanded(
               child: Builder(
@@ -110,7 +110,7 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
-                        fontSize: 15,
+                        fontSize: 14,
                         letterSpacing: -0.3,
                       ),
                     );
@@ -186,7 +186,7 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
             final isLandscape = context.isLandscape;
             final isWide = constraints.maxWidth >= 580 && isLandscape || constraints.maxWidth >= 720;
             final scrollBottomPadding = (isWide || isLandscape)
-                ? AppleTokens.scrollBottomPaddingLandscape + 54
+                ? AppleTokens.scrollBottomPaddingLandscape + 42
                 : AppleTokens.scrollBottomPaddingWithFab;
 
             final heroBalanceCard = _HeroBalanceCard(

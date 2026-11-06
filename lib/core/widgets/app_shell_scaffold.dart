@@ -169,11 +169,11 @@ class _AppleNavBarItem extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         AnimatedContainer(
-          duration: const Duration(milliseconds: 220),
+          duration: const Duration(milliseconds: 200),
           curve: Curves.easeOutCubic,
           padding: EdgeInsets.symmetric(
-            horizontal: isLandscape ? 12 : 14,
-            vertical: isLandscape ? 2 : 4,
+            horizontal: isLandscape ? 10 : 14,
+            vertical: isLandscape ? 1 : 4,
           ),
           decoration: BoxDecoration(
             color: isSelected
@@ -183,7 +183,7 @@ class _AppleNavBarItem extends StatelessWidget {
           ),
           child: Icon(
             isSelected ? data.activeIcon : data.icon,
-            size: isLandscape ? 20 : 22,
+            size: isLandscape ? 17 : 22,
             color: isSelected ? primaryColor : inactiveColor,
           ),
         ),
@@ -193,7 +193,7 @@ class _AppleNavBarItem extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            fontSize: isLandscape ? 10.0 : 10.5,
+            fontSize: isLandscape ? 9.5 : 10.5,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
             color: isSelected ? primaryColor : inactiveColor,
             letterSpacing: -0.2,

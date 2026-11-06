@@ -288,7 +288,7 @@ void main() {
       expect(find.textContaining('Ròng:'), findsOneWidget);
     });
 
-    testWidgets('AppShellScaffold renders 50dp non-obscured BottomBar with all 5 items on Phone Landscape', (tester) async {
+    testWidgets('AppShellScaffold renders compact 38dp non-obscured BottomBar with all 5 items on Phone Landscape', (tester) async {
       tester.view.physicalSize = const Size(844, 390);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(() => tester.view.resetPhysicalSize());
@@ -428,8 +428,8 @@ void main() {
 
       // Verify body is visible and takes vast majority of screen
       expect(homeRect.height, greaterThan(400));
-      // Verify bottom bar is docked at bottom, height is exactly navBarHeight (50dp)
-      expect(navBarRect.height, closeTo(50.0, 1.0));
+      // Verify bottom bar is docked at bottom, height is exactly navBarHeight (38dp)
+      expect(navBarRect.height, closeTo(38.0, 1.0));
       expect(navBarRect.bottom, equals(502.0));
       expect(homeRect.bottom, equals(navBarRect.top));
     });

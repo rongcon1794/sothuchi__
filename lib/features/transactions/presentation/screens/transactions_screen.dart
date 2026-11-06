@@ -50,10 +50,10 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     required ThemeData theme,
   }) {
     return AppleGlassCard(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
       borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
       child: SizedBox(
-        height: 30,
+        height: 26,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -61,13 +61,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
               tooltip: l10n.previousMonth,
               padding: EdgeInsets.zero,
               visualDensity: VisualDensity.compact,
-              constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+              constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
               onPressed: () {
                 HapticFeedback.selectionClick();
                 ref.read(transactionFilterProvider.notifier).setDateRange(null, null);
                 ref.read(selectedTransactionMonthProvider.notifier).previousMonth();
               },
-              icon: const Icon(Icons.chevron_left_rounded, size: 18),
+              icon: const Icon(Icons.chevron_left_rounded, size: 16),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -76,8 +76,9 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                     ? AppDateUtils.formatMonthYear(selectedMonth, locale: locale)
                     : l10n.all,
                 textAlign: TextAlign.center,
-                style: theme.textTheme.labelLarge?.copyWith(
+                style: theme.textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.w600,
+                  fontSize: 12,
                   letterSpacing: -0.2,
                 ),
               ),
@@ -86,13 +87,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
               tooltip: l10n.nextMonth,
               padding: EdgeInsets.zero,
               visualDensity: VisualDensity.compact,
-              constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+              constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
               onPressed: () {
                 HapticFeedback.selectionClick();
                 ref.read(transactionFilterProvider.notifier).setDateRange(null, null);
                 ref.read(selectedTransactionMonthProvider.notifier).nextMonth();
               },
-              icon: const Icon(Icons.chevron_right_rounded, size: 18),
+              icon: const Icon(Icons.chevron_right_rounded, size: 16),
             ),
           ],
         ),
@@ -108,13 +109,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 190, minWidth: 50),
       child: SizedBox(
-        height: 30,
+        height: 26,
         child: TextField(
           controller: _searchController,
           onChanged: (value) => ref
               .read(transactionFilterProvider.notifier)
               .setSearchQuery(value),
-          style: const TextStyle(fontSize: 12),
+          style: const TextStyle(fontSize: 11.5),
           decoration: InputDecoration(
             filled: true,
             fillColor: isDark
@@ -122,19 +123,19 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 : AppleTokens.bgLightSecondary,
             hintText: l10n.searchTransactionsHint,
             hintStyle: TextStyle(
-              fontSize: 11.5,
+              fontSize: 11,
               color: isDark ? Colors.white38 : Colors.black38,
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-            prefixIcon: const Icon(CupertinoIcons.search, size: 13),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+            prefixIcon: const Icon(CupertinoIcons.search, size: 12),
             prefixIconConstraints:
-                const BoxConstraints(minWidth: 24, minHeight: 24),
-            suffixIconConstraints:
                 const BoxConstraints(minWidth: 22, minHeight: 22),
+            suffixIconConstraints:
+                const BoxConstraints(minWidth: 20, minHeight: 20),
             suffixIcon: filter.searchQuery.isNotEmpty
                 ? IconButton(
                     padding: EdgeInsets.zero,
-                    iconSize: 13,
+                    iconSize: 12,
                     tooltip: l10n.clearFilters,
                     onPressed: () {
                       _searchController.clear();
@@ -269,7 +270,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
         ),
       ],
       child: Container(
-        height: 30,
+        height: 26,
         padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
           color: bgTint ?? defaultBg,
@@ -390,7 +391,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     final totalCount = filteredTxs.length;
 
     final scrollBottomPadding = isWide
-        ? AppleTokens.scrollBottomPaddingLandscape + 50
+        ? AppleTokens.scrollBottomPaddingLandscape + 42
         : AppleTokens.scrollBottomPaddingWithFab;
 
     return Scaffold(
@@ -447,8 +448,12 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
             isLabelVisible: filter.hasActiveFilters,
             child: IconButton(
               tooltip: l10n.filterTransactions,
+              padding: isLandscape ? EdgeInsets.zero : const EdgeInsets.all(8),
+              constraints: isLandscape
+                  ? const BoxConstraints(minWidth: 32, minHeight: 32)
+                  : null,
               onPressed: _openFilterSheet,
-              icon: const Icon(Icons.tune_rounded),
+              icon: Icon(Icons.tune_rounded, size: isLandscape ? 19 : 24),
             ),
           ),
           const SizedBox(width: 4),

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/ledger/presentation/controllers/ledgers_controller.dart';
@@ -35,6 +36,7 @@ class LedgerSelectorPill extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final isLandscape = context.isLandscape;
     final activeLedger = ref.watch(activeLedgerProvider);
     final color = Color(activeLedger.color);
 
@@ -48,13 +50,13 @@ class LedgerSelectorPill extends ConsumerWidget {
           },
           borderRadius: BorderRadius.circular(10),
           child: Container(
-            width: 36,
-            height: 36,
+            width: isLandscape ? 28 : 36,
+            height: isLandscape ? 28 : 36,
             decoration: BoxDecoration(
               color: isDark
                   ? AppleTokens.bgDarkSecondary
                   : AppleTokens.bgLightSecondary,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(isLandscape ? 8 : 10),
               border: Border.all(
                 color: color.withValues(alpha: isDark ? 0.35 : 0.22),
                 width: AppleTokens.hairline,
@@ -65,15 +67,15 @@ class LedgerSelectorPill extends ConsumerWidget {
               children: [
                 Icon(
                   _resolveIcon(activeLedger.icon),
-                  size: 17,
+                  size: isLandscape ? 15 : 17,
                   color: color,
                 ),
                 Positioned(
-                  top: 5,
-                  right: 5,
+                  top: isLandscape ? 4 : 5,
+                  right: isLandscape ? 4 : 5,
                   child: Container(
-                    width: 6,
-                    height: 6,
+                    width: isLandscape ? 5 : 6,
+                    height: isLandscape ? 5 : 6,
                     decoration: BoxDecoration(
                       color: color,
                       shape: BoxShape.circle,
@@ -100,7 +102,10 @@ class LedgerSelectorPill extends ConsumerWidget {
       },
       borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        padding: EdgeInsets.symmetric(
+          horizontal: isLandscape ? 8 : 10,
+          vertical: isLandscape ? 3 : 5,
+        ),
         decoration: BoxDecoration(
           color: isDark
               ? AppleTokens.bgDarkSecondary
@@ -115,31 +120,31 @@ class LedgerSelectorPill extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 8,
-              height: 8,
+              width: isLandscape ? 6 : 8,
+              height: isLandscape ? 6 : 8,
               decoration: BoxDecoration(
                 color: color,
                 shape: BoxShape.circle,
               ),
             ),
-            const SizedBox(width: 6),
-            Icon(_resolveIcon(activeLedger.icon), size: 14, color: color),
-            const SizedBox(width: 6),
+            SizedBox(width: isLandscape ? 4 : 6),
+            Icon(_resolveIcon(activeLedger.icon), size: isLandscape ? 13 : 14, color: color),
+            SizedBox(width: isLandscape ? 4 : 6),
             ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 130),
+              constraints: BoxConstraints(maxWidth: isLandscape ? 110 : 130),
               child: Text(
                 activeLedger.name,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w700,
-                  fontSize: 13,
+                  fontSize: isLandscape ? 12 : 13,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
             const SizedBox(width: 4),
-            const Icon(
+            Icon(
               CupertinoIcons.chevron_down,
-              size: 11,
+              size: isLandscape ? 10 : 11,
               color: AppleTokens.systemGray,
             ),
           ],

@@ -115,7 +115,7 @@ class _RecurringTransactionsScreenState
         ? AppleTokens.appBarHeightLandscape
         : AppleTokens.appBarHeightPortrait;
     final scrollBottomPadding = isWide
-        ? AppleTokens.scrollBottomPaddingLandscape + 54
+        ? AppleTokens.scrollBottomPaddingLandscape + 42
         : AppleTokens.scrollBottomPaddingWithFab;
 
     final locale = Localizations.localeOf(context).languageCode;

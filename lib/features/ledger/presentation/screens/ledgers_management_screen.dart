@@ -94,7 +94,7 @@ class _LedgersManagementScreenState
         ? AppleTokens.appBarHeightLandscape
         : AppleTokens.appBarHeightPortrait;
     final scrollBottomPadding = isWide
-        ? AppleTokens.scrollBottomPaddingLandscape + 54
+        ? AppleTokens.scrollBottomPaddingLandscape + 42
         : AppleTokens.scrollBottomPaddingWithFab;
 
     final ledgersAsync = ref.watch(ledgersStreamProvider);

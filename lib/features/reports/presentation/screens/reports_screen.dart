@@ -88,10 +88,10 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
     required ThemeData theme,
   }) {
     return AppleGlassCard(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
       borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
       child: SizedBox(
-        height: 30,
+        height: 26,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -99,21 +99,22 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
               tooltip: l10n.previousMonth,
               padding: EdgeInsets.zero,
               visualDensity: VisualDensity.compact,
-              constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+              constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
               onPressed: () {
                 HapticFeedback.selectionClick();
                 setState(() => _touchedPieIndex = -1);
                 ref.read(selectedReportMonthProvider.notifier).previousMonth();
               },
-              icon: const Icon(Icons.chevron_left_rounded, size: 18),
+              icon: const Icon(Icons.chevron_left_rounded, size: 16),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Text(
                 AppDateUtils.formatMonthYear(selectedMonth, locale: locale),
                 textAlign: TextAlign.center,
-                style: theme.textTheme.labelLarge?.copyWith(
+                style: theme.textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.w600,
+                  fontSize: 12,
                   letterSpacing: -0.2,
                 ),
               ),
@@ -122,13 +123,13 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
               tooltip: l10n.nextMonth,
               padding: EdgeInsets.zero,
               visualDensity: VisualDensity.compact,
-              constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+              constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
               onPressed: () {
                 HapticFeedback.selectionClick();
                 setState(() => _touchedPieIndex = -1);
                 ref.read(selectedReportMonthProvider.notifier).nextMonth();
               },
-              icon: const Icon(Icons.chevron_right_rounded, size: 18),
+              icon: const Icon(Icons.chevron_right_rounded, size: 16),
             ),
           ],
         ),

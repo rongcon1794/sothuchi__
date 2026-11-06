@@ -38,7 +38,7 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
         ? AppleTokens.appBarHeightLandscape
         : AppleTokens.appBarHeightPortrait;
     final scrollBottomPadding = isWide
-        ? AppleTokens.scrollBottomPaddingLandscape + 54
+        ? AppleTokens.scrollBottomPaddingLandscape + 42
         : AppleTokens.scrollBottomPaddingWithFab;
 
     final goalsAsync = ref.watch(savingsGoalsStreamProvider);
