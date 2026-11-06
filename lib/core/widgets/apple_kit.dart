@@ -279,6 +279,7 @@ class AppleListGroup extends StatelessWidget {
 }
 
 /// Squircle Badge Icon for Apple List Tiles & Category Icons.
+/// Enhanced with Lucian dual-stop depth gradient and optional atmospheric glow.
 class AppleSquircleBadge extends StatelessWidget {
   const AppleSquircleBadge({
     super.key,
@@ -289,6 +290,8 @@ class AppleSquircleBadge extends StatelessWidget {
     this.size = 32.0,
     this.iconSize = 18.0,
     this.radius = 8.0,
+    this.gradient,
+    this.showGlow = false,
   });
 
   final IconData icon;
@@ -298,15 +301,38 @@ class AppleSquircleBadge extends StatelessWidget {
   final double size;
   final double iconSize;
   final double radius;
+  final Gradient? gradient;
+  final bool showGlow;
 
   @override
   Widget build(BuildContext context) {
+    final baseColor = color ?? backgroundColor;
+    final effectiveRadius = radius == 8.0 && size > 32.0 ? size * 0.28 : radius;
+
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: color ?? backgroundColor,
-        borderRadius: BorderRadius.circular(radius),
+        color: gradient == null ? baseColor : null,
+        gradient: gradient ??
+            LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                baseColor,
+                Color.lerp(baseColor, Colors.black, 0.12)!,
+              ],
+            ),
+        borderRadius: BorderRadius.circular(effectiveRadius),
+        boxShadow: showGlow
+            ? [
+                BoxShadow(
+                  color: baseColor.withValues(alpha: 0.35),
+                  blurRadius: size * 0.35,
+                  offset: Offset(0, size * 0.1),
+                ),
+              ]
+            : null,
       ),
       child: Center(
         child: Icon(icon, color: iconColor, size: iconSize),
@@ -428,6 +454,12 @@ class AppleSegmentedPill<T> extends StatelessWidget {
             ? AppleTokens.bgDarkSecondary
             : AppleTokens.bgLightSecondary,
         borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.black.withValues(alpha: 0.04),
+          width: 0.5,
+        ),
       ),
       child: Row(
         children: [
@@ -442,8 +474,8 @@ class AppleSegmentedPill<T> extends StatelessWidget {
                 },
                 behavior: HitTestBehavior.opaque,
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 220),
-                  curve: Curves.easeOutCubic,
+                  duration: const Duration(milliseconds: 240),
+                  curve: LucianTokens.ease,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: key == selected
@@ -453,9 +485,9 @@ class AppleSegmentedPill<T> extends StatelessWidget {
                     boxShadow: key == selected
                         ? [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.08),
-                              blurRadius: 4,
-                              offset: const Offset(0, 1),
+                              color: Colors.black.withValues(alpha: isDark ? 0.32 : 0.08),
+                              blurRadius: 6,
+                              offset: const Offset(0, 1.5),
                             )
                           ]
                         : null,
@@ -621,8 +653,8 @@ class AppleIconSegmentedPill<T> extends StatelessWidget {
                   },
                   behavior: HitTestBehavior.opaque,
                   child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 220),
-                    curve: Curves.easeOutCubic,
+                    duration: const Duration(milliseconds: 240),
+                    curve: LucianTokens.ease,
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(

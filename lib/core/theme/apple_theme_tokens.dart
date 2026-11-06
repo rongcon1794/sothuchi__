@@ -26,19 +26,19 @@ abstract final class AppleTokens {
   static const Color cobaltTransfer = Color(0xFF0284C7);
 
   // --- Backgrounds & Grouped Surfaces (iOS 18 Fresh Luminous Canvas) ---
-  // Light Mode
-  static const Color bgLightGrouped = Color(0xFFF8FAFC);
+  // Light Mode (Lucian Warm Linen Canvas)
+  static const Color bgLightGrouped = Color(0xFFF4F2EE);
   static const Color bgLightPrimary = bgLightGrouped;
   static const Color bgLightCard = Color(0xFFFFFFFF);
-  static const Color bgLightSecondary = Color(0xFFF1F5F9);
-  static const Color borderLight = Color(0xFFE2E8F0);
+  static const Color bgLightSecondary = Color(0xFFF5F3EF);
+  static const Color borderLight = Color(0xFFE5E2DC);
 
-  // Dark Mode
-  static const Color bgDarkGrouped = Color(0xFF000000);
+  // Dark Mode (Lucian Velvety Obsidian Canvas)
+  static const Color bgDarkGrouped = Color(0xFF07080D);
   static const Color bgDarkPrimary = bgDarkGrouped;
-  static const Color bgDarkCard = Color(0xFF1C1C1E);
-  static const Color bgDarkSecondary = Color(0xFF2C2C2E);
-  static const Color bgDarkTertiary = Color(0xFF3A3A3C);
+  static const Color bgDarkCard = Color(0xFF13141C);
+  static const Color bgDarkSecondary = Color(0xFF1A1B25);
+  static const Color bgDarkTertiary = Color(0xFF252632);
 
   // --- Hairline Borders & Separators ---
   static const double hairline = 0.5;
