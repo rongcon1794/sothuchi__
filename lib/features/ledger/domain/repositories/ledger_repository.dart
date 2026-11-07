@@ -4,6 +4,8 @@ import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
 abstract interface class LedgerRepository {
   Stream<List<LedgerBook>> watchLedgers();
 
+  Future<List<LedgerBook>> getLedgers();
+
   Future<Result<LedgerBook>> createLedger(LedgerBook ledger);
 
   Future<Result<LedgerBook>> updateLedger(LedgerBook ledger);

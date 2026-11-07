@@ -32,6 +32,75 @@ class InitialSetupController extends Notifier<AsyncValue<void>> {
   @override
   AsyncValue<void> build() => const AsyncData(null);
 
+  /// Checks if the signed-in user already has existing data (transactions, custom
+  /// accounts or ledgers) on Firebase.
+  /// If data exists, restores their active ledger & default wallet and marks setup completed.
+  /// Returns `true` if existing data was found & restored, `false` if user is brand new.
+  Future<bool> checkAndRestoreIfExisting(String uid) async {
+    try {
+      final ledgerRepo = ref.read(ledgerRepositoryProvider);
+      final accRepo = ref.read(accountRepositoryProvider);
+      final txRepo = ref.read(transactionRepositoryProvider);
+      final catRepo = ref.read(categoryRepositoryProvider);
+
+      await catRepo.seedDefaultCategoriesIfNeeded();
+
+      final ledgers = await ledgerRepo.getLedgers();
+      final accounts = await accRepo.getAccounts();
+      final txs = await txRepo.getTransactions();
+
+      final hasTransactions = txs.isNotEmpty;
+      final hasCustomAccounts = accounts.any((a) =>
+          a.id != 'default_cash_wallet' &&
+          !a.id.startsWith('default_cash_wallet_'));
+      final hasAccountWithBalance = accounts.any((a) => a.balance != 0);
+      final hasCustomLedgers = ledgers.any((l) =>
+          l.id != LedgerBook.defaultPersonalId &&
+          l.id != 'default_family');
+      final hasMultipleAccounts = accounts.length > 1;
+      final hasMultipleLedgers = ledgers.length > 2;
+
+      final hasExistingData = hasTransactions ||
+          hasCustomAccounts ||
+          hasAccountWithBalance ||
+          hasCustomLedgers ||
+          hasMultipleAccounts ||
+          hasMultipleLedgers;
+
+      if (hasExistingData) {
+        // 1. Select user's default or primary ledger
+        if (ledgers.isNotEmpty) {
+          final targetLedger =
+              ledgers.where((l) => l.isDefault).firstOrNull ?? ledgers.first;
+          ref.read(activeLedgerIdProvider.notifier).selectLedger(targetLedger.id);
+        }
+
+        // 2. Select default wallet
+        if (accounts.isNotEmpty) {
+          final activeLedgerId = ref.read(activeLedgerIdProvider);
+          final targetWallet = accounts.firstWhere(
+            (a) => a.ledgerId == activeLedgerId,
+            orElse: () => accounts.first,
+          );
+          await ref
+              .read(settingsControllerProvider.notifier)
+              .setDefaultWalletId(targetWallet.id);
+        }
+
+        // 3. Mark initial setup completed
+        await ref
+            .read(settingsControllerProvider.notifier)
+            .completeInitialSetup(uid: uid);
+
+        return true;
+      }
+
+      return false;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<Result<void>> applyQuickDefaults({String? uid}) async {
     state = const AsyncLoading();
     try {

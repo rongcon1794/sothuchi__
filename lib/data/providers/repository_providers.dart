@@ -13,6 +13,7 @@ import 'package:so_thu_chi/features/categories/domain/repositories/category_repo
 import 'package:so_thu_chi/features/debts/data/repositories/firestore_debt_repository.dart';
 import 'package:so_thu_chi/features/debts/domain/repositories/debt_repository.dart';
 import 'package:so_thu_chi/features/ledger/data/repositories/firestore_ledger_repository.dart';
+import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
 import 'package:so_thu_chi/features/ledger/domain/repositories/ledger_repository.dart';
 import 'package:so_thu_chi/features/recurring/data/repositories/firestore_recurring_repository.dart';
 import 'package:so_thu_chi/features/recurring/domain/repositories/recurring_repository.dart';
@@ -72,34 +73,87 @@ final inMemoryLedgerRepoProvider = Provider<InMemoryLedgerRepository>((ref) {
   return InMemoryLedgerRepository();
 });
 
-/// Bootstrapper invoked when a user signs in: idempotently seeds Vietnamese
-/// default categories and ensures a default Cash wallet exists.
+/// Bootstrapper invoked when a user signs in:
+/// - If the user has existing data on Firebase, restores their state and marks initial setup complete.
+/// - If the user is a first-time user without data, only seeds categories and leaves initial setup
+///   to be completed via the InitialSetupScreen so no duplicate or phantom data is generated.
 final userBootstrapCallbackProvider = Provider<UserBootstrapCallback?>((ref) {
   return (AppUser user) async {
     final firestore = ref.read(firestoreProvider);
+    final settingsRepo = ref.read(settingsRepositoryProvider);
+
     if (user.isDemoUser || firestore == null) {
-      final ledgerRepo = ref.read(inMemoryLedgerRepoProvider);
       final catRepo = ref.read(inMemoryCategoryRepoProvider);
-      final accRepo = ref.read(inMemoryAccountRepoProvider);
-      await ledgerRepo.ensureDefaultLedgers();
       await catRepo.seedDefaultCategoriesIfNeeded();
-      await accRepo.ensureDefaultWallet(currency: user.defaultCurrency);
+      final accRepo = ref.read(inMemoryAccountRepoProvider);
+      final txRepo = ref.read(inMemoryTransactionRepoProvider);
+      final ledgerRepo = ref.read(inMemoryLedgerRepoProvider);
+
+      final accounts = await accRepo.getAccounts();
+      final txs = await txRepo.getTransactions();
+      final ledgers = await ledgerRepo.getLedgers();
+
+      final hasExistingData = txs.isNotEmpty ||
+          accounts.any((a) => a.balance != 0 || a.id != 'default_cash_wallet') ||
+          ledgers.any((l) => l.id != LedgerBook.defaultPersonalId && l.id != 'default_family');
+
+      if (hasExistingData) {
+        await settingsRepo.setInitialSetupCompleted(true, uid: user.uid);
+      }
     } else {
-      final ledgerRepo = FirestoreLedgerRepository(
-        firestore: firestore,
-        currentUserIdGetter: () => user.uid,
-      );
       final catRepo = FirestoreCategoryRepository(
         firestore: firestore,
         uid: user.uid,
+      );
+      await catRepo.seedDefaultCategoriesIfNeeded();
+
+      final ledgerRepo = FirestoreLedgerRepository(
+        firestore: firestore,
+        currentUserIdGetter: () => user.uid,
       );
       final accRepo = FirestoreAccountRepository(
         firestore: firestore,
         uid: user.uid,
       );
-      await ledgerRepo.ensureDefaultLedgers();
-      await catRepo.seedDefaultCategoriesIfNeeded();
-      await accRepo.ensureDefaultWallet(currency: user.defaultCurrency);
+      final txRepo = FirestoreTransactionRepository(
+        firestore: firestore,
+        uid: user.uid,
+      );
+
+      final ledgers = await ledgerRepo.getLedgers();
+      final accounts = await accRepo.getAccounts();
+      final txs = await txRepo.getTransactions();
+
+      final hasTransactions = txs.isNotEmpty;
+      final hasCustomAccounts = accounts.any((a) =>
+          a.id != 'default_cash_wallet' &&
+          !a.id.startsWith('default_cash_wallet_'));
+      final hasAccountWithBalance = accounts.any((a) => a.balance != 0);
+      final hasCustomLedgers = ledgers.any((l) =>
+          l.id != LedgerBook.defaultPersonalId &&
+          l.id != 'default_family');
+
+      final hasMultipleAccounts = accounts.length > 1;
+      final hasMultipleLedgers = ledgers.length > 2;
+
+      final hasExistingData = hasTransactions ||
+          hasCustomAccounts ||
+          hasAccountWithBalance ||
+          hasCustomLedgers ||
+          hasMultipleAccounts ||
+          hasMultipleLedgers;
+
+      if (hasExistingData) {
+        // User has existing data on Firebase -> restore setup state
+        await settingsRepo.setInitialSetupCompleted(true, uid: user.uid);
+
+        if (accounts.isNotEmpty) {
+          final settings = await settingsRepo.loadSettings();
+          if (settings.defaultWalletId == null || settings.defaultWalletId!.isEmpty) {
+            await settingsRepo.setDefaultWalletId(accounts.first.id);
+          }
+        }
+      }
     }
   };
 });

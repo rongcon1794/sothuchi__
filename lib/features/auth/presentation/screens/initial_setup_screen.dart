@@ -1,9 +1,12 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
+import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
@@ -106,6 +109,7 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
   String _selectedCurrency = AppCurrencies.defaultCode;
   String _defaultWalletKey = 'cash';
   bool _isSaving = false;
+  bool _isCheckingExistingData = true;
 
   @override
   void initState() {
@@ -113,6 +117,10 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
     _customLedgerNameController = TextEditingController(
       text: _ledgerPresets[0].name,
     );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAndRestoreIfExisting();
+    });
 
     _wallets = [
       _WalletConfigItem(
@@ -170,6 +178,22 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
       w.balanceController.dispose();
     }
     super.dispose();
+  }
+
+  Future<void> _checkAndRestoreIfExisting() async {
+    final user = ref.read(currentUserProvider);
+    if (user != null) {
+      final restored = await ref
+          .read(initialSetupControllerProvider.notifier)
+          .checkAndRestoreIfExisting(user.uid);
+      if (restored && mounted) {
+        context.go(AppRoutes.home);
+        return;
+      }
+    }
+    if (mounted) {
+      setState(() => _isCheckingExistingData = false);
+    }
   }
 
   Future<void> _applyQuickDefaults() async {
@@ -286,6 +310,29 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
     final scheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
     final currencyInfo = AppCurrencies.byCode(_selectedCurrency);
+
+    if (_isCheckingExistingData) {
+      return Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CupertinoActivityIndicator(radius: 14),
+              const SizedBox(height: 16),
+              Text(
+                'Đang kiểm tra và khôi phục dữ liệu...',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: isDark ? Colors.white70 : Colors.black87,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     // Check if user already has cloud ledgers or accounts
     final cloudLedgers = ref.watch(ledgersStreamProvider).value ?? const [];

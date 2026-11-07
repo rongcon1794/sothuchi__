@@ -5,7 +5,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:so_thu_chi/data/firebase/firebase_providers.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/accounts/data/repositories/firestore_account_repository.dart';
+import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
 import 'package:so_thu_chi/features/auth/domain/entities/app_user.dart';
+import 'package:so_thu_chi/features/auth/presentation/controllers/initial_setup_controller.dart';
 import 'package:so_thu_chi/features/auth/presentation/screens/initial_setup_screen.dart';
 import 'package:so_thu_chi/features/budgets/data/repositories/firestore_budget_repository.dart';
 import 'package:so_thu_chi/features/categories/data/repositories/firestore_category_repository.dart';
@@ -196,6 +198,38 @@ void main() {
       // Verify settings updated
       final settings = container.read(settingsControllerProvider).value;
       expect(settings?.initialSetupCompleted, isTrue);
+    });
+
+    test('checkAndRestoreIfExisting returns true and restores state for user with existing data', () async {
+      final container = createContainer();
+      await accRepo.createAccount(
+        name: 'Ví Techcombank',
+        type: AccountType.bank,
+        initialBalance: 12000000,
+        currency: 'VND',
+        icon: 'bank',
+        color: 0xFF007AFF,
+      );
+
+      final restored = await container
+          .read(initialSetupControllerProvider.notifier)
+          .checkAndRestoreIfExisting('existing_user_uid');
+
+      expect(restored, isTrue);
+      final settings = await container.read(settingsControllerProvider.future);
+      expect(settings.initialSetupCompleted, isTrue);
+      expect(settings.defaultWalletId, isNotNull);
+    });
+
+    test('checkAndRestoreIfExisting returns false for brand-new user without data', () async {
+      final container = createContainer();
+      final restored = await container
+          .read(initialSetupControllerProvider.notifier)
+          .checkAndRestoreIfExisting('brand_new_user_uid');
+
+      expect(restored, isFalse);
+      final settings = await container.read(settingsControllerProvider.future);
+      expect(settings.initialSetupCompleted, isFalse);
     });
   });
 }

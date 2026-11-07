@@ -44,6 +44,19 @@ class FirestoreLedgerRepository implements LedgerRepository {
   }
 
   @override
+  Future<List<LedgerBook>> getLedgers() async {
+    try {
+      final snapshot =
+          await _collection().orderBy('createdAt', descending: false).get();
+      return snapshot.docs
+          .map((doc) => LedgerBookDto.fromJson(doc.data(), doc.id).toDomain())
+          .toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  @override
   Future<Result<LedgerBook>> createLedger(LedgerBook ledger) async {
     try {
       final docRef = _collection().doc();
@@ -147,6 +160,12 @@ class InMemoryLedgerRepository implements LedgerRepository {
     yield _store.values.toList()
       ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
     yield* _controller.stream;
+  }
+
+  @override
+  Future<List<LedgerBook>> getLedgers() async {
+    return _store.values.toList()
+      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
   }
 
   @override
