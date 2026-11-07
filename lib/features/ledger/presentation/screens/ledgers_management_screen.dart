@@ -219,104 +219,123 @@ class _LedgersManagementScreenState
                 ),
                 for (final item in ledgers) ...[
                   AppleGlassCard(
+                    padding: EdgeInsets.zero,
                     borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
                     borderColor: item.id == activeId
                         ? Color(item.color).withValues(alpha: 0.5)
                         : null,
-                    child: Row(
-                      children: [
-                        AppleSquircleBadge(
-                          icon: _resolveIcon(item.icon),
-                          backgroundColor: Color(item.color),
-                          size: 44,
-                          iconSize: 22,
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
+                    child: ApplePressable(
+                      onTap: () {
+                        unawaited(HapticFeedback.lightImpact());
+                        LedgerFormSheet.show(context, existing: item);
+                      },
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                      child: Padding(
+                        padding: const EdgeInsets.all(14),
+                        child: Row(
+                          children: [
+                            AppleSquircleBadge(
+                              icon: _resolveIcon(item.icon),
+                              backgroundColor: Color(item.color),
+                              size: 44,
+                              iconSize: 22,
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    item.name,
-                                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
-                                  ),
-                                  if (item.id == activeId) ...[
-                                    const SizedBox(width: 8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: AppleTokens.jadePrimary.withValues(alpha: 0.15),
-                                        borderRadius: BorderRadius.circular(4),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        item.name,
+                                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
                                       ),
-                                      child: Text(
-                                        l10n.ledgerActiveBadge,
-                                        style: const TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w700,
-                                          color: AppleTokens.jadePrimary,
+                                      if (item.id == activeId) ...[
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: AppleTokens.jadePrimary.withValues(alpha: 0.15),
+                                            borderRadius: BorderRadius.circular(4),
+                                          ),
+                                          child: Text(
+                                            l10n.ledgerActiveBadge,
+                                            style: const TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w700,
+                                              color: AppleTokens.jadePrimary,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                _typeLabel(item.type, l10n),
-                                style: const TextStyle(fontSize: 12, color: AppleTokens.systemGray),
-                              ),
-                            ],
-                          ),
-                        ),
-                        PopupMenuButton<String>(
-                          icon: const Icon(CupertinoIcons.ellipsis, color: AppleTokens.systemGray, size: 18),
-                          onSelected: (val) {
-                            if (val == 'select') {
-                              ref.read(ledgersActionControllerProvider.notifier).switchLedger(item.id);
-                            } else if (val == 'edit') {
-                              LedgerFormSheet.show(context, existing: item);
-                            } else if (val == 'delete') {
-                              _confirmDelete(context, item);
-                            }
-                          },
-                          itemBuilder: (ctx) => [
-                            if (item.id != activeId)
-                              PopupMenuItem(
-                                value: 'select',
-                                child: Row(
-                                  children: [
-                                    const Icon(CupertinoIcons.check_mark, size: 18),
-                                    const SizedBox(width: 8),
-                                    Text(l10n.ledgerSelectActive),
-                                  ],
-                                ),
-                              ),
-                            PopupMenuItem(
-                              value: 'edit',
-                              child: Row(
-                                children: [
-                                  const Icon(CupertinoIcons.pencil, size: 18),
-                                  const SizedBox(width: 8),
-                                  Text(l10n.edit),
+                                      ],
+                                    ],
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    _typeLabel(item.type, l10n),
+                                    style: const TextStyle(fontSize: 12, color: AppleTokens.systemGray),
+                                  ),
                                 ],
                               ),
                             ),
-                            if (!item.isDefault)
-                              PopupMenuItem(
-                                value: 'delete',
-                                child: Row(
-                                  children: [
-                                    const Icon(CupertinoIcons.trash, color: AppleTokens.rubyExpense, size: 18),
-                                    const SizedBox(width: 8),
-                                    Text(l10n.ledgerDelete, style: const TextStyle(color: AppleTokens.rubyExpense)),
-                                  ],
+                            IconButton(
+                              icon: const Icon(CupertinoIcons.pencil, color: AppleTokens.systemGray, size: 18),
+                              tooltip: l10n.edit,
+                              onPressed: () {
+                                unawaited(HapticFeedback.lightImpact());
+                                LedgerFormSheet.show(context, existing: item);
+                              },
+                            ),
+                            PopupMenuButton<String>(
+                              icon: const Icon(CupertinoIcons.ellipsis, color: AppleTokens.systemGray, size: 18),
+                              onSelected: (val) {
+                                if (val == 'select') {
+                                  ref.read(ledgersActionControllerProvider.notifier).switchLedger(item.id);
+                                } else if (val == 'edit') {
+                                  LedgerFormSheet.show(context, existing: item);
+                                } else if (val == 'delete') {
+                                  _confirmDelete(context, item);
+                                }
+                              },
+                              itemBuilder: (ctx) => [
+                                if (item.id != activeId)
+                                  PopupMenuItem(
+                                    value: 'select',
+                                    child: Row(
+                                      children: [
+                                        const Icon(CupertinoIcons.check_mark, size: 18),
+                                        const SizedBox(width: 8),
+                                        Text(l10n.ledgerSelectActive),
+                                      ],
+                                    ),
+                                  ),
+                                PopupMenuItem(
+                                  value: 'edit',
+                                  child: Row(
+                                    children: [
+                                      const Icon(CupertinoIcons.pencil, size: 18),
+                                      const SizedBox(width: 8),
+                                      Text(l10n.edit),
+                                    ],
+                                  ),
                                 ),
-                              ),
+                                if (!item.isDefault && item.id != LedgerBook.defaultPersonalId)
+                                  PopupMenuItem(
+                                    value: 'delete',
+                                    child: Row(
+                                      children: [
+                                        const Icon(CupertinoIcons.trash, color: AppleTokens.rubyExpense, size: 18),
+                                        const SizedBox(width: 8),
+                                        Text(l10n.ledgerDelete, style: const TextStyle(color: AppleTokens.rubyExpense)),
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 10),

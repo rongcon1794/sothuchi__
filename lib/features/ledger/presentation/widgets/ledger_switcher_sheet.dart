@@ -3,7 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
+import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
@@ -49,6 +51,33 @@ class LedgerSwitcherSheet extends ConsumerWidget {
         return l10n.ledgerBusiness;
       case LedgerType.custom:
         return l10n.ledgerCustom;
+    }
+  }
+
+  Future<void> _confirmDelete(BuildContext context, WidgetRef ref, LedgerBook ledger) async {
+    final l10n = context.l10n;
+    final confirmed = await showCupertinoModalPopup<bool>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text(l10n.ledgerDeleteConfirmTitle(ledger.name)),
+        message: Text(l10n.ledgerDeleteConfirmBody),
+        actions: [
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.delete),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.of(ctx).pop(false),
+          child: Text(l10n.cancel),
+        ),
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      unawaited(HapticFeedback.mediumImpact());
+      await ref.read(ledgersActionControllerProvider.notifier).deleteLedger(ledger.id);
     }
   }
 
@@ -106,6 +135,14 @@ class LedgerSwitcherSheet extends ConsumerWidget {
                     ),
                   ),
                   IconButton(
+                    tooltip: l10n.ledgersTitle,
+                    icon: const Icon(CupertinoIcons.slider_horizontal_3, color: AppleTokens.systemGray, size: 20),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      context.push(AppRoutes.ledgers);
+                    },
+                  ),
+                  IconButton(
                     icon: const Icon(CupertinoIcons.xmark_circle_fill, color: AppleTokens.systemGray),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
@@ -133,6 +170,13 @@ class LedgerSwitcherSheet extends ConsumerWidget {
                             ref.read(ledgersActionControllerProvider.notifier).switchLedger(ledger.id);
                             Navigator.of(context).pop();
                           },
+                          onEdit: () {
+                            Navigator.of(context).pop();
+                            LedgerFormSheet.show(context, existing: ledger);
+                          },
+                          onDelete: (!ledger.isDefault && ledger.id != LedgerBook.defaultPersonalId)
+                              ? () => _confirmDelete(context, ref, ledger)
+                              : null,
                         ),
                         const SizedBox(height: 10),
                       ],
@@ -190,6 +234,8 @@ class _LedgerItemCard extends StatelessWidget {
     required this.icon,
     required this.typeLabel,
     required this.onTap,
+    required this.onEdit,
+    this.onDelete,
   });
 
   final LedgerBook ledger;
@@ -197,6 +243,8 @@ class _LedgerItemCard extends StatelessWidget {
   final IconData icon;
   final String typeLabel;
   final VoidCallback onTap;
+  final VoidCallback onEdit;
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -272,6 +320,43 @@ class _LedgerItemCard extends StatelessWidget {
               Icon(CupertinoIcons.checkmark_circle_fill, color: color, size: 24)
             else
               const Icon(CupertinoIcons.circle, color: AppleTokens.systemGray, size: 22),
+            const SizedBox(width: 4),
+            PopupMenuButton<String>(
+              icon: const Icon(CupertinoIcons.ellipsis_vertical, color: AppleTokens.systemGray, size: 18),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              tooltip: l10n.edit,
+              onSelected: (val) {
+                if (val == 'edit') {
+                  onEdit();
+                } else if (val == 'delete') {
+                  onDelete?.call();
+                }
+              },
+              itemBuilder: (ctx) => [
+                PopupMenuItem(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      const Icon(CupertinoIcons.pencil, size: 18),
+                      const SizedBox(width: 8),
+                      Text(l10n.edit),
+                    ],
+                  ),
+                ),
+                if (onDelete != null)
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        const Icon(CupertinoIcons.trash, color: AppleTokens.rubyExpense, size: 18),
+                        const SizedBox(width: 8),
+                        Text(l10n.ledgerDelete, style: const TextStyle(color: AppleTokens.rubyExpense)),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
           ],
         ),
       ),

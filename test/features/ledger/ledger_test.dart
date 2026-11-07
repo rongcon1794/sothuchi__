@@ -380,5 +380,49 @@ void main() {
       expect(freshContainer.read(activeLedgerProvider).name, 'Sổ Cá Nhân Cũ');
     });
   });
+
+  group('Ledger Edit and Delete Tests', () {
+    test('updates ledger name, icon and color successfully', () async {
+      final repo = InMemoryLedgerRepository();
+      final initialList = await repo.watchLedgers().first;
+      final familyBook = initialList.firstWhere((b) => b.id == 'default_family');
+
+      final updatedBook = familyBook.copyWith(
+        name: 'Gia Đình Nhỏ',
+        color: 0xFFFF9500,
+      );
+
+      final updateRes = await repo.updateLedger(updatedBook);
+      expect(updateRes.isSuccess, isTrue);
+
+      final updatedList = await repo.watchLedgers().first;
+      final fetched = updatedList.firstWhere((b) => b.id == 'default_family');
+      expect(fetched.name, 'Gia Đình Nhỏ');
+      expect(fetched.color, 0xFFFF9500);
+    });
+
+    test('deleting current ledger switches active ledger to default_personal', () async {
+      final repo = InMemoryLedgerRepository();
+      final container = ProviderContainer(
+        overrides: [
+          ledgerRepositoryProvider.overrideWithValue(repo),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      // Set active to default_family
+      container.read(activeLedgerIdProvider.notifier).selectLedger('default_family');
+      expect(container.read(activeLedgerIdProvider), 'default_family');
+
+      // Delete default_family
+      final delRes = await container
+          .read(ledgersActionControllerProvider.notifier)
+          .deleteLedger('default_family');
+      expect(delRes.isSuccess, isTrue);
+
+      // Active ledger should revert to defaultPersonalId
+      expect(container.read(activeLedgerIdProvider), LedgerBook.defaultPersonalId);
+    });
+  });
 }
 

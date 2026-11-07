@@ -81,11 +81,20 @@ class GoogleSignInV7Client implements GoogleSignInClient {
         idToken: auth.idToken,
       );
     } on GoogleSignInException catch (e) {
-      if (e.code == GoogleSignInExceptionCode.canceled) {
-        throw AuthCancelledException(e.description ?? 'Google sign-in canceled');
+      final desc = e.description?.trim();
+      final isGenuineUserCancel = e.code == GoogleSignInExceptionCode.canceled &&
+          (desc == null ||
+              desc.isEmpty ||
+              desc.toLowerCase().contains('user cancelled') ||
+              desc.toLowerCase().contains('activity is cancelled'));
+
+      if (isGenuineUserCancel) {
+        throw AuthCancelledException(desc ?? 'Google sign-in canceled');
       }
       throw AuthFailedException(
-        '${e.code.name}: ${e.description ?? 'Google authentication error'}',
+        desc?.isNotEmpty == true
+            ? desc!
+            : '${e.code.name}: Google authentication error',
       );
     } catch (e) {
       throw AuthFailedException(e.toString());

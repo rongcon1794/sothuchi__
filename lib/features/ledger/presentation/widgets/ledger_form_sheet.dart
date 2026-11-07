@@ -107,6 +107,47 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
     );
   }
 
+  Future<void> _delete() async {
+    final l10n = context.l10n;
+    final confirmed = await showCupertinoModalPopup<bool>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text(l10n.ledgerDeleteConfirmTitle(widget.existing!.name)),
+        message: Text(l10n.ledgerDeleteConfirmBody),
+        actions: [
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.delete),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.of(ctx).pop(false),
+          child: Text(l10n.cancel),
+        ),
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      unawaited(HapticFeedback.mediumImpact());
+      final res = await ref
+          .read(ledgersActionControllerProvider.notifier)
+          .deleteLedger(widget.existing!.id);
+      if (!mounted) return;
+      res.fold(
+        onSuccess: (_) {
+          unawaited(HapticFeedback.lightImpact());
+          Navigator.of(context).pop();
+        },
+        onFailure: (err) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.localizeError(err))),
+          );
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -228,6 +269,17 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
                         ),
                       ),
                       const SizedBox(height: 16),
+                      if (_isEditing &&
+                          !widget.existing!.isDefault &&
+                          widget.existing!.id != LedgerBook.defaultPersonalId) ...[
+                        const SizedBox(height: 8),
+                        AppleButton.destructive(
+                          label: l10n.ledgerDelete,
+                          icon: const Icon(CupertinoIcons.trash, size: 18),
+                          onPressed: _delete,
+                        ),
+                        const SizedBox(height: 16),
+                      ],
                     ],
                   ),
                 ),
