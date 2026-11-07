@@ -26,11 +26,8 @@ class BudgetFormBottomSheet extends ConsumerStatefulWidget {
     required DateTime monthStart,
     Budget? existing,
   }) {
-    return showModalBottomSheet<void>(
+    return AppleModalSheetLayout.show<void>(
       context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      showDragHandle: true,
       builder: (_) => BudgetFormBottomSheet(
         monthStart: monthStart,
         existing: existing,
@@ -122,29 +119,19 @@ class _BudgetFormBottomSheetState
 
     final isDark = theme.brightness == Brightness.dark;
 
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
-        top: 4,
-        bottom: MediaQuery.viewInsetsOf(context).bottom + 24,
+    return AppleModalSheetLayout(
+      title: widget.existing != null ? l10n.editBudget : l10n.addBudget,
+      bottomAction: AppleButton.primary(
+        onPressed: _save,
+        label: l10n.save,
       ),
       child: Form(
         key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                widget.existing != null ? l10n.editBudget : l10n.addBudget,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Scope Selector (Overall or Specific Expense Category)
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Scope Selector (Overall or Specific Expense Category)
               DropdownButtonFormField<String?>(
                 isExpanded: true,
                 initialValue: _selectedCategoryId,
@@ -318,16 +305,10 @@ class _BudgetFormBottomSheetState
                 ),
               ),
               const SizedBox(height: 16),
-
-              AppleButton.primary(
-                onPressed: _save,
-                label: l10n.save,
-              ),
             ],
           ),
         ),
-      ),
-    );
+      );
+    }
   }
-}
 

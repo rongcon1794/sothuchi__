@@ -23,10 +23,8 @@ class RecurringFormSheet extends ConsumerStatefulWidget {
   final RecurringTransaction? existing;
 
   static Future<void> show(BuildContext context, {RecurringTransaction? existing}) {
-    return showModalBottomSheet<void>(
+    return AppleModalSheetLayout.show<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (_) => RecurringFormSheet(existing: existing),
     );
   }
@@ -158,8 +156,6 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final l10n = context.l10n;
     final wallets = ref.watch(activeAccountsProvider);
     final expenseCats = ref.watch(expenseCategoriesProvider);
@@ -174,64 +170,26 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
       _categoryId = availableCats.first.id;
     }
 
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.88,
+    return AppleModalSheetLayout(
+      title: _isEditing ? l10n.recurringEditTitle : l10n.recurringNewTitle,
+      bottomAction: AppleButton.primary(
+        label: _isEditing ? l10n.recurringConfirmUpdate : l10n.recurringConfirmCreate,
+        color: AppleTokens.jadePrimary,
+        onPressed: _submit,
       ),
-      decoration: BoxDecoration(
-        color: isDark ? AppleTokens.bgDarkCard : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppleTokens.radiusSheet)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: Column(
-            children: [
-              // Drag Handle
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 10),
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-
-              // Sheet Header
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 4, 16, 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      _isEditing ? l10n.recurringEditTitle : l10n.recurringNewTitle,
-                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-                    ),
-                    IconButton(
-                      icon: const Icon(CupertinoIcons.xmark_circle_fill, color: AppleTokens.systemGray),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ],
-                ),
-              ),
-
-              Expanded(
-                child: Form(
-                  key: _formKey,
-                  child: ListView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    children: [
-                      // Title input
-                      AppleTextField(
-                        controller: _titleController,
-                        label: l10n.recurringTitleLabel,
-                        prefixIcon: const Icon(CupertinoIcons.tag, size: 18),
-                        validator: (v) => (v == null || v.trim().isEmpty) ? l10n.recurringTitleRequired : null,
-                      ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Title input
+            AppleTextField(
+              controller: _titleController,
+              label: l10n.recurringTitleLabel,
+              prefixIcon: const Icon(CupertinoIcons.tag, size: 18),
+              validator: (v) => (v == null || v.trim().isEmpty) ? l10n.recurringTitleRequired : null,
+            ),
                       const SizedBox(height: 12),
 
                       // Amount input
@@ -335,29 +293,16 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                       ),
                       const SizedBox(height: 12),
 
-                      // Auto execute toggle
-                      SwitchListTile.adaptive(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(l10n.recurringAutoExecute, style: const TextStyle(fontWeight: FontWeight.w600)),
-                        subtitle: Text(l10n.recurringAutoExecuteSubtitle),
-                        value: _autoExecute,
-                        onChanged: (v) => setState(() => _autoExecute = v),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Submit Button
-                      AppleButton.primary(
-                        label: _isEditing ? l10n.recurringConfirmUpdate : l10n.recurringConfirmCreate,
-                        color: AppleTokens.jadePrimary,
-                        onPressed: _submit,
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+            // Auto execute toggle
+            SwitchListTile.adaptive(
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.recurringAutoExecute, style: const TextStyle(fontWeight: FontWeight.w600)),
+              subtitle: Text(l10n.recurringAutoExecuteSubtitle),
+              value: _autoExecute,
+              onChanged: (v) => setState(() => _autoExecute = v),
+            ),
+            const SizedBox(height: 16),
+          ],
         ),
       ),
     );

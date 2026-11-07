@@ -17,11 +17,8 @@ class WalletFormSheet extends ConsumerStatefulWidget {
   final Account? existing;
 
   static Future<void> show(BuildContext context, {Account? existing}) {
-    return showModalBottomSheet<void>(
+    return AppleModalSheetLayout.show<void>(
       context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      showDragHandle: true,
       builder: (_) => WalletFormSheet(existing: existing),
     );
   }
@@ -114,110 +111,96 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
     final locale =
         ref.watch(settingsControllerProvider).value?.localeCode ?? 'vi';
     final currencyInfo = AppCurrencies.byCode(_currency);
 
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
-        bottom: MediaQuery.viewInsetsOf(context).bottom + 24,
+    return AppleModalSheetLayout(
+      title: widget.existing == null ? l10n.addWallet : l10n.editWallet,
+      bottomAction: AppleButton.primary(
+        onPressed: _submit,
+        label: l10n.save,
       ),
-      child: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                widget.existing == null ? l10n.addWallet : l10n.editWallet,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppleTextField(
+              controller: _nameController,
+              maxLength: 100,
+              textInputAction: TextInputAction.next,
+              label: l10n.walletName,
+              placeholder: l10n.walletNameHint,
+              validator: (v) {
+                final trimmed = v?.trim() ?? '';
+                if (trimmed.isEmpty || trimmed.length > 100) {
+                  return l10n.errorValidation;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 14),
+            LucianSlidingPillTabs<AccountType>(
+              items: [
+                LucianTabItem(
+                  value: AccountType.cash,
+                  label: l10n.walletTypeCash,
+                  icon: Icons.money_rounded,
                 ),
-              ),
-              const SizedBox(height: 16),
-              AppleTextField(
-                controller: _nameController,
-                maxLength: 100,
-                textInputAction: TextInputAction.next,
-                label: l10n.walletName,
-                placeholder: l10n.walletNameHint,
-                validator: (v) {
-                  final trimmed = v?.trim() ?? '';
-                  if (trimmed.isEmpty || trimmed.length > 100) {
-                    return l10n.errorValidation;
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 14),
-              LucianSlidingPillTabs<AccountType>(
-                items: [
-                  LucianTabItem(
-                    value: AccountType.cash,
-                    label: l10n.walletTypeCash,
-                    icon: Icons.money_rounded,
-                  ),
-                  LucianTabItem(
-                    value: AccountType.bank,
-                    label: l10n.walletTypeBank,
-                    icon: Icons.account_balance_rounded,
-                  ),
-                  LucianTabItem(
-                    value: AccountType.ewallet,
-                    label: l10n.walletTypeEwallet,
-                    icon: Icons.phone_android_rounded,
-                  ),
-                  LucianTabItem(
-                    value: AccountType.card,
-                    label: l10n.walletTypeCard,
-                    icon: Icons.credit_card_rounded,
-                  ),
-                ],
-                selected: _type,
-                onChanged: (value) {
-                  setState(() {
-                    _type = value;
-                    _icon = value.defaultIconKey;
-                  });
-                },
-              ),
-              const SizedBox(height: 14),
-              AppleTextField(
-                controller: _balanceController,
-                keyboardType: TextInputType.numberWithOptions(
-                  decimal: currencyInfo.decimalDigits > 0,
+                LucianTabItem(
+                  value: AccountType.bank,
+                  label: l10n.walletTypeBank,
+                  icon: Icons.account_balance_rounded,
                 ),
-                inputFormatters: [
-                  MoneyInputFormatter(currencyCode: _currency, locale: locale),
-                ],
-                label: widget.existing == null
-                    ? l10n.initialBalance
-                    : l10n.currentBalance,
-                suffix: Text(
-                  currencyInfo.symbol,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                LucianTabItem(
+                  value: AccountType.ewallet,
+                  label: l10n.walletTypeEwallet,
+                  icon: Icons.phone_android_rounded,
                 ),
+                LucianTabItem(
+                  value: AccountType.card,
+                  label: l10n.walletTypeCard,
+                  icon: Icons.credit_card_rounded,
+                ),
+              ],
+              selected: _type,
+              onChanged: (value) {
+                setState(() {
+                  _type = value;
+                  _icon = value.defaultIconKey;
+                });
+              },
+            ),
+            const SizedBox(height: 14),
+            AppleTextField(
+              controller: _balanceController,
+              keyboardType: TextInputType.numberWithOptions(
+                decimal: currencyInfo.decimalDigits > 0,
               ),
-              const SizedBox(height: 18),
-              IconAndColorPicker(
-                selectedIcon: _icon,
-                selectedColor: _color,
-                onIconChanged: (v) => setState(() => _icon = v),
-                onColorChanged: (v) => setState(() => _color = v),
-                iconSectionLabel: l10n.selectIcon,
-                colorSectionLabel: l10n.selectColor,
+              inputFormatters: [
+                MoneyInputFormatter(currencyCode: _currency, locale: locale),
+              ],
+              label: widget.existing == null
+                  ? l10n.initialBalance
+                  : l10n.currentBalance,
+              suffix: Text(
+                currencyInfo.symbol,
+                style: const TextStyle(fontWeight: FontWeight.w600),
               ),
-              const SizedBox(height: 24),
-              AppleButton.primary(
-                onPressed: _submit,
-                label: l10n.save,
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 18),
+            IconAndColorPicker(
+              selectedIcon: _icon,
+              selectedColor: _color,
+              onIconChanged: (v) => setState(() => _icon = v),
+              onColorChanged: (v) => setState(() => _color = v),
+              iconSectionLabel: l10n.selectIcon,
+              colorSectionLabel: l10n.selectColor,
+            ),
+            const SizedBox(height: 16),
+          ],
         ),
       ),
     );

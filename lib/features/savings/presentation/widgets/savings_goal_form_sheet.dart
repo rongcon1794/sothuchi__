@@ -22,10 +22,8 @@ class SavingsGoalFormSheet extends ConsumerStatefulWidget {
   final SavingsGoal? existing;
 
   static Future<void> show(BuildContext context, {SavingsGoal? existing}) {
-    return showModalBottomSheet<void>(
+    return AppleModalSheetLayout.show<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (_) => SavingsGoalFormSheet(existing: existing),
     );
   }
@@ -165,66 +163,28 @@ class _SavingsGoalFormSheetState extends ConsumerState<SavingsGoalFormSheet> {
     final l10n = context.l10n;
     final wallets = ref.watch(activeAccountsProvider);
 
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.90,
+    return AppleModalSheetLayout(
+      title: _isEditing ? l10n.savingsEditGoalTitle : l10n.savingsNewGoalTitle,
+      bottomAction: AppleButton.primary(
+        color: Color(_selectedColor),
+        label: _isEditing ? l10n.save : l10n.savingsNewGoal,
+        onPressed: _submit,
       ),
-      decoration: BoxDecoration(
-        color: isDark ? AppleTokens.bgDarkCard : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppleTokens.radiusSheet)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: Column(
-            children: [
-              // Drag Handle
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 10),
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-
-              // Header
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 4, 16, 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      _isEditing ? l10n.savingsEditGoalTitle : l10n.savingsNewGoalTitle,
-                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-                    ),
-                    IconButton(
-                      icon: const Icon(CupertinoIcons.xmark_circle_fill, color: AppleTokens.systemGray),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ],
-                ),
-              ),
-
-              Expanded(
-                child: Form(
-                  key: _formKey,
-                  child: ListView(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    children: [
-                      // Title
-                      AppleTextField(
-                        controller: _titleController,
-                        label: l10n.savingsGoalName,
-                        placeholder: l10n.savingsGoalNameHint,
-                        prefixIcon: const Icon(CupertinoIcons.flag, size: 18),
-                        validator: (v) => (v == null || v.trim().isEmpty) ? l10n.savingsTargetRequired : null,
-                      ),
-                      const SizedBox(height: 14),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Title
+            AppleTextField(
+              controller: _titleController,
+              label: l10n.savingsGoalName,
+              placeholder: l10n.savingsGoalNameHint,
+              prefixIcon: const Icon(CupertinoIcons.flag, size: 18),
+              validator: (v) => (v == null || v.trim().isEmpty) ? l10n.savingsTargetRequired : null,
+            ),
+            const SizedBox(height: 14),
 
                       // Target amount
                       AppleTextField(
@@ -352,27 +312,14 @@ class _SavingsGoalFormSheetState extends ConsumerState<SavingsGoalFormSheet> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Note
-                      AppleTextField(
-                        controller: _noteController,
-                        label: l10n.savingsMotivationNote,
-                        prefixIcon: const Icon(CupertinoIcons.quote_bubble, size: 18),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Submit
-                      AppleButton.primary(
-                        color: Color(_selectedColor),
-                        label: _isEditing ? l10n.save : l10n.savingsNewGoal,
-                        onPressed: _submit,
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+            // Note
+            AppleTextField(
+              controller: _noteController,
+              label: l10n.savingsMotivationNote,
+              prefixIcon: const Icon(CupertinoIcons.quote_bubble, size: 18),
+            ),
+            const SizedBox(height: 16),
+          ],
         ),
       ),
     );

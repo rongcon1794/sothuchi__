@@ -26,11 +26,8 @@ class CategoryFormSheet extends ConsumerStatefulWidget {
     required CategoryType initialType,
     Category? existing,
   }) {
-    return showModalBottomSheet<Category>(
+    return AppleModalSheetLayout.show<Category>(
       context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      backgroundColor: Colors.transparent,
       builder: (_) => CategoryFormSheet(
         initialType: initialType,
         existing: existing,
@@ -102,79 +99,63 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+    return AppleModalSheetLayout(
+      title: widget.existing == null ? l10n.addCategory : l10n.editCategory,
+      bottomAction: AppleButton.primary(
+        onPressed: _submit,
+        label: l10n.save,
       ),
-      padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
-        top: 8,
-        bottom: MediaQuery.viewInsetsOf(context).bottom + 24,
-      ),
-      child: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                widget.existing == null ? l10n.addCategory : l10n.editCategory,
-                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 16),
-              LucianSlidingPillTabs<CategoryType>(
-                items: [
-                  LucianTabItem(
-                    value: CategoryType.expense,
-                    label: l10n.expense,
-                    icon: Icons.trending_down_rounded,
-                    activeColor: LucianTokens.resolveDanger(isDark),
-                  ),
-                  LucianTabItem(
-                    value: CategoryType.income,
-                    label: l10n.income,
-                    icon: Icons.trending_up_rounded,
-                    activeColor: LucianTokens.resolveMint(isDark),
-                  ),
-                ],
-                selected: _type,
-                onChanged: widget.existing != null
-                    ? (_) {}
-                    : (val) => setState(() => _type = val),
-              ),
-              const SizedBox(height: 16),
-              AppleTextField(
-                controller: _nameController,
-                maxLength: 100,
-                label: l10n.categoryName,
-                placeholder: l10n.categoryNameHint,
-                validator: (v) {
-                  final trimmed = v?.trim() ?? '';
-                  if (trimmed.isEmpty || trimmed.length > 100) {
-                    return l10n.errorValidation;
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 18),
-              IconAndColorPicker(
-                selectedIcon: _icon,
-                selectedColor: _color,
-                onIconChanged: (v) => setState(() => _icon = v),
-                onColorChanged: (v) => setState(() => _color = v),
-                iconSectionLabel: l10n.selectIcon,
-                colorSectionLabel: l10n.selectColor,
-              ),
-              const SizedBox(height: 24),
-              AppleButton.primary(
-                onPressed: _submit,
-                label: l10n.save,
-              ),
-            ],
-          ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            LucianSlidingPillTabs<CategoryType>(
+              items: [
+                LucianTabItem(
+                  value: CategoryType.expense,
+                  label: l10n.expense,
+                  icon: Icons.trending_down_rounded,
+                  activeColor: LucianTokens.resolveDanger(isDark),
+                ),
+                LucianTabItem(
+                  value: CategoryType.income,
+                  label: l10n.income,
+                  icon: Icons.trending_up_rounded,
+                  activeColor: LucianTokens.resolveMint(isDark),
+                ),
+              ],
+              selected: _type,
+              onChanged: widget.existing != null
+                  ? (_) {}
+                  : (val) => setState(() => _type = val),
+            ),
+            const SizedBox(height: 16),
+            AppleTextField(
+              controller: _nameController,
+              maxLength: 100,
+              label: l10n.categoryName,
+              placeholder: l10n.categoryNameHint,
+              validator: (v) {
+                final trimmed = v?.trim() ?? '';
+                if (trimmed.isEmpty || trimmed.length > 100) {
+                  return l10n.errorValidation;
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 18),
+            IconAndColorPicker(
+              selectedIcon: _icon,
+              selectedColor: _color,
+              onIconChanged: (v) => setState(() => _icon = v),
+              onColorChanged: (v) => setState(() => _color = v),
+              iconSectionLabel: l10n.selectIcon,
+              colorSectionLabel: l10n.selectColor,
+            ),
+            const SizedBox(height: 16),
+          ],
         ),
       ),
     );

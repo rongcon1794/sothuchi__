@@ -17,10 +17,8 @@ class DebtFormSheet extends ConsumerStatefulWidget {
   final Debt? initialDebt;
 
   static Future<void> show(BuildContext context, {Debt? initialDebt}) {
-    return showModalBottomSheet<void>(
+    return AppleModalSheetLayout.show<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (_) => DebtFormSheet(initialDebt: initialDebt),
     );
   }
@@ -181,51 +179,22 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
 
     final isLent = _selectedType == DebtType.lent;
 
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.88,
-      ),
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-        left: 20,
-        right: 20,
-        top: 16,
-      ),
-      decoration: BoxDecoration(
-        color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightPrimary,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppleTokens.radiusHero)),
+    return AppleModalSheetLayout(
+      title: isEditing ? l10n.debtEditTitle : l10n.debtNewTitle,
+      bottomAction: AppleButton.primary(
+        label: isEditing ? l10n.save : l10n.debtSubmitNew,
+        color: isLent ? AppleTokens.systemGreen : AppleTokens.systemOrange,
+        isLoading: _isSaving,
+        onPressed: _save,
       ),
       child: Form(
         key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Grabber
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              Text(
-                isEditing ? l10n.debtEditTitle : l10n.debtNewTitle,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 18,
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Segmented Type: Cho vay vs Đi vay
-              LucianSlidingPillTabs<DebtType>(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Segmented Type: Cho vay vs Đi vay
+            LucianSlidingPillTabs<DebtType>(
                 items: [
                   LucianTabItem(
                     value: DebtType.lent,
@@ -427,19 +396,10 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                 placeholder: l10n.noteHint,
                 prefixIcon: const Icon(CupertinoIcons.doc_text, size: 18),
               ),
-              const SizedBox(height: 24),
-
-              // Save Button
-              AppleButton.primary(
-                label: isEditing ? l10n.save : l10n.debtSubmitNew,
-                color: isLent ? AppleTokens.systemGreen : AppleTokens.systemOrange,
-                isLoading: _isSaving,
-                onPressed: _save,
-              ),
+              const SizedBox(height: 16),
             ],
           ),
         ),
-      ),
-    );
+      );
+    }
   }
-}

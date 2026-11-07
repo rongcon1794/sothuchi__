@@ -23,6 +23,23 @@ class AppleModalSheetLayout extends StatelessWidget {
   final EdgeInsetsGeometry padding;
   final bool showDragHandle;
 
+  /// Helper to display a modal bottom sheet formatted with [AppleModalSheetLayout].
+  static Future<T?> show<T>({
+    required BuildContext context,
+    required WidgetBuilder builder,
+    bool isDismissible = true,
+    bool enableDrag = true,
+  }) {
+    return showModalBottomSheet<T>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      isDismissible: isDismissible,
+      enableDrag: enableDrag,
+      builder: builder,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

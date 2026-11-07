@@ -16,10 +16,8 @@ class LedgerFormSheet extends ConsumerStatefulWidget {
   final LedgerBook? existing;
 
   static Future<void> show(BuildContext context, {LedgerBook? existing}) {
-    return showModalBottomSheet<void>(
+    return AppleModalSheetLayout.show<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (_) => LedgerFormSheet(existing: existing),
     );
   }
@@ -115,67 +113,27 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
     final isDark = theme.brightness == Brightness.dark;
     final l10n = context.l10n;
 
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.85,
+    return AppleModalSheetLayout(
+      title: _isEditing ? l10n.ledgerEditTitle : l10n.ledgerNewTitle,
+      bottomAction: AppleButton.primary(
+        color: Color(_selectedColor),
+        label: _isEditing ? l10n.ledgerConfirmUpdate : l10n.ledgerConfirmCreate,
+        onPressed: _submit,
       ),
-      decoration: BoxDecoration(
-        color: isDark ? AppleTokens.bgDarkCard : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppleTokens.radiusSheet)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Drag handle
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 10),
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-
-              // Header
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 4, 16, 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      _isEditing ? l10n.ledgerEditTitle : l10n.ledgerNewTitle,
-                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-                    ),
-                    IconButton(
-                      icon: const Icon(CupertinoIcons.xmark_circle_fill, color: AppleTokens.systemGray),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ],
-                ),
-              ),
-
-              Flexible(
-                child: Form(
-                  key: _formKey,
-                  child: ListView(
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    children: [
-                      // Name input
-                      AppleTextField(
-                        controller: _nameController,
-                        label: l10n.ledgerName,
-                        placeholder: l10n.ledgerNameHint,
-                        prefixIcon: const Icon(CupertinoIcons.book, size: 18),
-                        validator: (v) => (v == null || v.trim().isEmpty) ? l10n.ledgerNameRequired : null,
-                      ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Name input
+            AppleTextField(
+              controller: _nameController,
+              label: l10n.ledgerName,
+              placeholder: l10n.ledgerNameHint,
+              prefixIcon: const Icon(CupertinoIcons.book, size: 18),
+              validator: (v) => (v == null || v.trim().isEmpty) ? l10n.ledgerNameRequired : null,
+            ),
                       const SizedBox(height: 16),
 
                       // Type selector
@@ -269,24 +227,11 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
                           },
                         ),
                       ),
-                      const SizedBox(height: 24),
-
-                      // Submit button
-                      AppleButton.primary(
-                        color: Color(_selectedColor),
-                        label: _isEditing ? l10n.ledgerConfirmUpdate : l10n.ledgerConfirmCreate,
-                        onPressed: _submit,
-                      ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
                     ],
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
+              );
+            }
+          }
 
