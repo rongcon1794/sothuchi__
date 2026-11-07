@@ -17,16 +17,49 @@ class ActiveLedgerIdController extends Notifier<String> {
 
   @override
   String build() {
+    String initialId = LedgerBook.defaultPersonalId;
     try {
       final prefs = ref.watch(sharedPreferencesProvider);
-      return prefs.getString(_prefKey) ?? LedgerBook.defaultPersonalId;
-    } catch (_) {
-      return LedgerBook.defaultPersonalId;
+      initialId = prefs.getString(_prefKey) ?? LedgerBook.defaultPersonalId;
+    } catch (_) {}
+
+    // Listen to ledgersStreamProvider: when Firestore/cloud ledgers load,
+    // if current active ledger doesn't exist in the loaded ledgers,
+    // auto-select the user's default ledger or first ledger so they never get
+    // stranded on an unlinked phantom ledger.
+    ref.listen<AsyncValue<List<LedgerBook>>>(ledgersStreamProvider, (_, next) {
+      final list = next.value;
+      if (list != null && list.isNotEmpty) {
+        final matches = list.any((l) => l.id == state);
+        if (!matches) {
+          final target =
+              list.where((l) => l.isDefault).firstOrNull ?? list.first;
+          selectLedger(target.id);
+        }
+      }
+    });
+
+    // Check if ledgers are already loaded synchronously
+    final currentList = ref.watch(ledgersStreamProvider).value;
+    if (currentList != null && currentList.isNotEmpty) {
+      if (!currentList.any((l) => l.id == initialId)) {
+        final target =
+            currentList.where((l) => l.isDefault).firstOrNull ?? currentList.first;
+        initialId = target.id;
+        try {
+          final prefs = ref.read(sharedPreferencesProvider);
+          prefs.setString(_prefKey, initialId);
+        } catch (_) {}
+      }
     }
+
+    return initialId;
   }
 
   void selectLedger(String id) {
-    state = id;
+    if (state != id) {
+      state = id;
+    }
     try {
       final prefs = ref.read(sharedPreferencesProvider);
       prefs.setString(_prefKey, id);

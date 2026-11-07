@@ -347,6 +347,38 @@ void main() {
       expect(activeBudgets.length, 1);
       expect(activeBudgets.first.amount, 2000000);
     });
+
+    test('auto-selects user cloud ledger on fresh install if default_personal is absent', () async {
+      final customLedger = LedgerBook(
+        id: 'custom_cloud_ledger_99',
+        name: 'Sổ Cá Nhân Cũ',
+        type: LedgerType.personal,
+        icon: 'wallet',
+        color: 0xFF0D7C66,
+        isDefault: true,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      final customRepo = InMemoryLedgerRepository();
+      customRepo.clear();
+      await customRepo.createLedger(customLedger);
+
+      final freshContainer = ProviderContainer(
+        overrides: [
+          ledgerRepositoryProvider.overrideWithValue(customRepo),
+          accountRepositoryProvider.overrideWithValue(accountRepo),
+        ],
+      );
+      addTearDown(freshContainer.dispose);
+
+      freshContainer.listen(activeLedgerIdProvider, (_, _) {});
+      freshContainer.listen(ledgersStreamProvider, (_, _) {});
+
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      expect(freshContainer.read(activeLedgerIdProvider), 'custom_cloud_ledger_99');
+      expect(freshContainer.read(activeLedgerProvider).name, 'Sổ Cá Nhân Cũ');
+    });
   });
 }
 

@@ -51,6 +51,7 @@ final inMemoryBudgetRepoProvider = Provider<InMemoryBudgetRepository>((ref) {
 final inMemoryDebtRepoProvider = Provider<InMemoryDebtRepository>((ref) {
   return InMemoryDebtRepository(
     accountRepo: ref.watch(inMemoryAccountRepoProvider),
+    seedDemoData: false,
   );
 });
 
@@ -77,11 +78,17 @@ final userBootstrapCallbackProvider = Provider<UserBootstrapCallback?>((ref) {
   return (AppUser user) async {
     final firestore = ref.read(firestoreProvider);
     if (user.isDemoUser || firestore == null) {
+      final ledgerRepo = ref.read(inMemoryLedgerRepoProvider);
       final catRepo = ref.read(inMemoryCategoryRepoProvider);
       final accRepo = ref.read(inMemoryAccountRepoProvider);
+      await ledgerRepo.ensureDefaultLedgers();
       await catRepo.seedDefaultCategoriesIfNeeded();
       await accRepo.ensureDefaultWallet(currency: user.defaultCurrency);
     } else {
+      final ledgerRepo = FirestoreLedgerRepository(
+        firestore: firestore,
+        currentUserIdGetter: () => user.uid,
+      );
       final catRepo = FirestoreCategoryRepository(
         firestore: firestore,
         uid: user.uid,
@@ -90,6 +97,7 @@ final userBootstrapCallbackProvider = Provider<UserBootstrapCallback?>((ref) {
         firestore: firestore,
         uid: user.uid,
       );
+      await ledgerRepo.ensureDefaultLedgers();
       await catRepo.seedDefaultCategoriesIfNeeded();
       await accRepo.ensureDefaultWallet(currency: user.defaultCurrency);
     }

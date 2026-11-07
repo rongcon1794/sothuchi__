@@ -195,7 +195,6 @@ class InMemoryLedgerRepository implements LedgerRepository {
 
   void clear() {
     _store.clear();
-    _seedDefault();
     _emit();
   }
 

@@ -235,8 +235,11 @@ class InMemoryDebtRepository implements DebtRepository {
   InMemoryDebtRepository({
     this.accountRepo,
     Uuid? uuid,
+    bool seedDemoData = true,
   }) : _uuid = uuid ?? const Uuid() {
-    _seedDefaultDemoDebts();
+    if (seedDemoData) {
+      _seedDefaultDemoDebts();
+    }
   }
 
   final InMemoryAccountRepository? accountRepo;
