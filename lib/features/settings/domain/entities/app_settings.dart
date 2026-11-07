@@ -13,6 +13,8 @@ abstract class AppSettings with _$AppSettings {
     @Default(false) bool biometricLockEnabled,
     @Default(false) bool hideBalance,
     @Default(false) bool onboardingCompleted,
+    @Default(false) bool initialSetupCompleted,
+    String? defaultWalletId,
     @Default(0) int accentColorIndex,
   }) = _AppSettings;
 }

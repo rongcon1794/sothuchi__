@@ -9,6 +9,7 @@ import 'package:so_thu_chi/features/accounts/presentation/screens/account_detail
 import 'package:so_thu_chi/features/accounts/presentation/screens/accounts_screen.dart';
 import 'package:so_thu_chi/features/auth/domain/entities/app_user.dart';
 import 'package:so_thu_chi/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:so_thu_chi/features/auth/presentation/screens/initial_setup_screen.dart';
 import 'package:so_thu_chi/features/auth/presentation/screens/login_screen.dart';
 import 'package:so_thu_chi/features/auth/presentation/screens/onboarding_screen.dart';
 import 'package:so_thu_chi/features/auth/presentation/screens/splash_screen.dart';
@@ -51,6 +52,7 @@ class AppScreenRegistry {
     required this.splashBuilder,
     required this.onboardingBuilder,
     required this.loginBuilder,
+    required this.initialSetupBuilder,
     required this.homeBuilder,
     required this.transactionsBuilder,
     required this.transactionDetailBuilder,
@@ -77,6 +79,7 @@ class AppScreenRegistry {
   final WidgetBuilder splashBuilder;
   final WidgetBuilder onboardingBuilder;
   final WidgetBuilder loginBuilder;
+  final WidgetBuilder initialSetupBuilder;
   final WidgetBuilder homeBuilder;
   final WidgetBuilder transactionsBuilder;
   final Widget Function(BuildContext context, GoRouterState state)
@@ -112,6 +115,7 @@ class AppScreenRegistry {
       splashBuilder: (_) => const SplashScreen(),
       onboardingBuilder: (_) => const OnboardingScreen(),
       loginBuilder: (_) => const LoginScreen(),
+      initialSetupBuilder: (_) => const InitialSetupScreen(),
       homeBuilder: (_) => const HomeDashboardScreen(),
       transactionsBuilder: (_) => const TransactionsScreen(),
       transactionDetailBuilder: (_, state) =>
@@ -199,9 +203,18 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         return location == AppRoutes.login ? null : AppRoutes.login;
       }
 
+      final initialSetupDone =
+          settingsAsync.value?.initialSetupCompleted ?? false;
+      if (!initialSetupDone) {
+        return location == AppRoutes.initialSetup
+            ? null
+            : AppRoutes.initialSetup;
+      }
+
       if (location == AppRoutes.splash ||
           location == AppRoutes.onboarding ||
-          location == AppRoutes.login) {
+          location == AppRoutes.login ||
+          location == AppRoutes.initialSetup) {
         return AppRoutes.home;
       }
 
@@ -219,6 +232,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.login,
         builder: (context, _) => screens.loginBuilder(context),
+      ),
+      GoRoute(
+        path: AppRoutes.initialSetup,
+        builder: (context, _) => screens.initialSetupBuilder(context),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {

@@ -10,6 +10,8 @@ abstract interface class SettingsRepository {
   Future<Result<void>> setBiometricLockEnabled(bool enabled);
   Future<Result<void>> setHideBalance(bool hidden);
   Future<Result<void>> setOnboardingCompleted(bool completed);
+  Future<Result<void>> setInitialSetupCompleted(bool completed, {String? uid});
+  Future<Result<void>> setDefaultWalletId(String? walletId);
   Future<Result<void>> setAccentColorIndex(int index);
 }
 

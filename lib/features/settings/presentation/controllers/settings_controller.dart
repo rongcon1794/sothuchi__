@@ -110,6 +110,28 @@ class SettingsController extends AsyncNotifier<AppSettings> {
     return res;
   }
 
+  Future<Result<void>> completeInitialSetup({String? uid}) async {
+    final repo = ref.read(settingsRepositoryProvider);
+    final res = await repo.setInitialSetupCompleted(true, uid: uid);
+    if (res.isSuccess) {
+      state = AsyncData(
+        currentOrDefaults.copyWith(initialSetupCompleted: true),
+      );
+    }
+    return res;
+  }
+
+  Future<Result<void>> setDefaultWalletId(String? walletId) async {
+    final repo = ref.read(settingsRepositoryProvider);
+    final res = await repo.setDefaultWalletId(walletId);
+    if (res.isSuccess) {
+      state = AsyncData(
+        currentOrDefaults.copyWith(defaultWalletId: walletId),
+      );
+    }
+    return res;
+  }
+
   Future<Result<void>> updateAccentColor(int index) async {
     final repo = ref.read(settingsRepositoryProvider);
     final res = await repo.setAccentColorIndex(index);

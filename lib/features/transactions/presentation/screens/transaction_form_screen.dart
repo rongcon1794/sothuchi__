@@ -544,7 +544,12 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     // Auto-select sensible default wallet on first render
     if (!_initializedDefaults && !_isEditing) {
       if (_accountId == null && walletsForDropdown.isNotEmpty) {
-        _accountId = walletsForDropdown.first.id;
+        final defaultWalletId =
+            ref.read(settingsControllerProvider).value?.defaultWalletId;
+        final matched = walletsForDropdown
+            .where((w) => w.id == defaultWalletId)
+            .firstOrNull;
+        _accountId = matched?.id ?? walletsForDropdown.first.id;
       }
       if (_toAccountId == null && walletsForDropdown.length > 1) {
         final srcCurrency = _resolveEffectiveCurrency(walletsForDropdown);

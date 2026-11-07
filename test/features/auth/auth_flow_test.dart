@@ -165,6 +165,15 @@ void main() {
         expect(find.text('Đăng nhập với Google'), findsOneWidget);
         await tester.tap(find.text('Đăng nhập với Google'));
         await tester.pumpAndSettle();
+
+        // First-time user setup wizard ("Thiết lập ban đầu")
+        expect(find.text('Thiết lập ban đầu'), findsOneWidget);
+        expect(find.text('Áp dụng đề xuất & Bắt đầu ngay'), findsOneWidget);
+
+        // Apply quick defaults & start
+        await tester.tap(find.text('Áp dụng đề xuất & Bắt đầu ngay'));
+        await tester.pumpAndSettle();
+
         expect(find.text('Tổng quan'), findsWidgets);
 
         // Sign out returns to Login screen

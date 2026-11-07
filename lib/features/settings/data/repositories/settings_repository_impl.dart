@@ -18,6 +18,8 @@ class SettingsRepositoryImpl implements SettingsRepository {
   static const String _keyCurrency = 'settings.currency_code';
   static const String _keyHideBalance = 'settings.hide_balance';
   static const String _keyOnboardingDone = 'settings.onboarding_completed';
+  static const String _keyInitialSetupDone = 'settings.initial_setup_completed';
+  static const String _keyDefaultWallet = 'default_wallet_id';
   static const String _keyBiometricLock = 'settings.biometric_lock_enabled';
   static const String _keyAccentColor = 'settings.accent_color_index';
 
@@ -39,6 +41,8 @@ class SettingsRepositoryImpl implements SettingsRepository {
     ).code;
     final hideBalance = prefs.getBool(_keyHideBalance) ?? false;
     final onboardingCompleted = prefs.getBool(_keyOnboardingDone) ?? false;
+    final initialSetupCompleted = prefs.getBool(_keyInitialSetupDone) ?? false;
+    final defaultWalletId = prefs.getString(_keyDefaultWallet);
     final accentColorIndex = prefs.getInt(_keyAccentColor) ?? 0;
 
     var biometricEnabled = false;
@@ -56,6 +60,8 @@ class SettingsRepositoryImpl implements SettingsRepository {
       biometricLockEnabled: biometricEnabled,
       hideBalance: hideBalance,
       onboardingCompleted: onboardingCompleted,
+      initialSetupCompleted: initialSetupCompleted,
+      defaultWalletId: defaultWalletId,
       accentColorIndex: accentColorIndex,
     );
   }
@@ -126,6 +132,33 @@ class SettingsRepositoryImpl implements SettingsRepository {
   Future<Result<void>> setOnboardingCompleted(bool completed) async {
     try {
       await prefs.setBool(_keyOnboardingDone, completed);
+      return const Success(null);
+    } catch (e) {
+      return Failure(StorageException(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> setInitialSetupCompleted(bool completed, {String? uid}) async {
+    try {
+      await prefs.setBool(_keyInitialSetupDone, completed);
+      if (uid != null && uid.isNotEmpty) {
+        await prefs.setBool('${_keyInitialSetupDone}_$uid', completed);
+      }
+      return const Success(null);
+    } catch (e) {
+      return Failure(StorageException(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> setDefaultWalletId(String? walletId) async {
+    try {
+      if (walletId == null || walletId.isEmpty) {
+        await prefs.remove(_keyDefaultWallet);
+      } else {
+        await prefs.setString(_keyDefaultWallet, walletId);
+      }
       return const Success(null);
     } catch (e) {
       return Failure(StorageException(e.toString()));
