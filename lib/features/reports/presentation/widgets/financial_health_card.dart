@@ -107,7 +107,10 @@ class FinancialHealthCard extends StatelessWidget {
           const SizedBox(height: 14),
 
           // Rating badge & bar
-          Row(
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 4,
+            runSpacing: 4,
             children: [
               Text(
                 'Mức độ: ',

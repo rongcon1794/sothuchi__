@@ -370,7 +370,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
 
                     return Center(
                       child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 900),
+                        constraints: const BoxConstraints(maxWidth: 1024),
                         child: ListView(
                           padding: EdgeInsets.fromLTRB(16, 4, 16, scrollBottomPadding),
                           children: [
@@ -844,54 +844,117 @@ class _CategoryLegendRow extends StatelessWidget {
       excludeSemantics: true,
       child: Column(
         children: [
-          Row(
-            children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: catColor.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  AppIconCatalog.resolve(slice.icon),
-                  size: 18,
-                  color: catColor,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  name,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
+          LayoutBuilder(
+            builder: (context, rowConstraints) {
+              final isLargeFont = MediaQuery.textScalerOf(context).scale(14) >= 20;
+              if (isLargeFont) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 34,
+                          height: 34,
+                          decoration: BoxDecoration(
+                            color: catColor.withValues(alpha: 0.16),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            AppIconCatalog.resolve(slice.icon),
+                            size: 18,
+                            color: catColor,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            name,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '${slice.percentage}%',
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                            fontFeatures: AppTheme.tabularFigures,
+                          ),
+                        ),
+                        Flexible(
+                          child: Text(
+                            formattedAmount,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              fontFeatures: AppTheme.tabularFigures,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              }
+              return Row(
+                children: [
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: catColor.withValues(alpha: 0.16),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      AppIconCatalog.resolve(slice.icon),
+                      size: 18,
+                      color: catColor,
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                '${slice.percentage}%',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  fontFeatures: AppTheme.tabularFigures,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Flexible(
-                flex: 0,
-                child: Text(
-                  formattedAmount,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    fontFeatures: AppTheme.tabularFigures,
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ],
+                  const SizedBox(width: 6),
+                  Text(
+                    '${slice.percentage}%',
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontFeatures: AppTheme.tabularFigures,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Flexible(
+                    child: Text(
+                      formattedAmount,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontFeatures: AppTheme.tabularFigures,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
           const SizedBox(height: 6),
           ClipRRect(

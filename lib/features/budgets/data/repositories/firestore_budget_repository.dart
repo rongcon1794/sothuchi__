@@ -120,9 +120,21 @@ class FirestoreBudgetRepository implements BudgetRepository {
         updatedAt: now,
       );
 
-      await _col
-          .doc(targetId)
-          .set(BudgetDto.fromDomain(entity).toJson(), SetOptions(merge: true));
+      final isExisting = existingId != null || duplicate != null;
+      if (isExisting) {
+        final updatePayload = <String, dynamic>{
+          'amount': amount,
+          'currency': currency,
+          'alertThreshold': clampedThreshold,
+          'updatedAt': Timestamp.fromDate(now),
+        };
+        if (normalizedCategory != null) {
+          updatePayload['categoryId'] = normalizedCategory;
+        }
+        await _col.doc(targetId).update(updatePayload);
+      } else {
+        await _col.doc(targetId).set(BudgetDto.fromDomain(entity).toJson());
+      }
       return Success(entity);
     } on FirebaseException catch (e) {
       return Failure(StorageException('${e.code}: ${e.message}'));

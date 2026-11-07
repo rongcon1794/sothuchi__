@@ -26,6 +26,7 @@ import 'package:so_thu_chi/features/ledger/presentation/widgets/ledger_selector_
 import 'package:so_thu_chi/features/reports/presentation/screens/reports_screen.dart';
 import 'package:so_thu_chi/features/savings/data/repositories/firestore_savings_goal_repository.dart';
 import 'package:so_thu_chi/features/savings/presentation/screens/savings_goals_screen.dart';
+import 'package:so_thu_chi/features/settings/presentation/screens/settings_screen.dart';
 import 'package:so_thu_chi/features/transactions/data/repositories/firestore_transaction_repository.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:so_thu_chi/features/transactions/presentation/screens/home_dashboard_screen.dart';
@@ -123,6 +124,7 @@ void main() {
     setUp(() async {
       SharedPreferences.setMockInitialValues({
         'settings.onboarding_completed': true,
+        'settings.initial_setup_completed': true,
       });
       FlutterSecureStorage.setMockInitialValues({});
       prefs = await SharedPreferences.getInstance();
@@ -344,6 +346,11 @@ void main() {
       await tester.tap(find.descendant(of: bottomBarFinder, matching: find.text('Báo cáo')));
       await tester.pumpAndSettle();
       expect(find.byType(ReportsScreen), findsOneWidget);
+
+      // Tap 'Cài đặt' tab
+      await tester.tap(find.descendant(of: bottomBarFinder, matching: find.text('Cài đặt')));
+      await tester.pumpAndSettle();
+      expect(find.byType(SettingsScreen), findsOneWidget);
     });
 
     testWidgets('AppShellScaffold on compact Phone Landscape (640x360) with 1.25x text scaling never truncates tab labels', (tester) async {
@@ -572,6 +579,34 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       expect(find.byType(SavingsGoalsScreen), findsOneWidget);
+    });
+
+    testWidgets('SettingsScreen renders 2-column layout without overflow on Landscape Phone and Tablet', (tester) async {
+      tester.view.physicalSize = const Size(844, 390);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: const SettingsScreen(),
+          size: const Size(844, 390),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(SettingsScreen), findsOneWidget);
+
+      // Verify on tablet
+      tester.view.physicalSize = const Size(1024, 768);
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: const SettingsScreen(),
+          size: const Size(1024, 768),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(SettingsScreen), findsOneWidget);
     });
 
     testWidgets('HomeDashboardScreen renders 2-column layout without overflow on 16:9 Phone Landscape (640x360)', (tester) async {

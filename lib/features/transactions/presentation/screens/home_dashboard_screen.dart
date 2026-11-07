@@ -411,11 +411,14 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                   ..invalidate(transactionsStreamProvider)
                   ..invalidate(categoriesStreamProvider);
               },
-              child: ListView(
-                padding: EdgeInsets.fromLTRB(16, 8, 16, scrollBottomPadding),
-                children: [
-                  if (isWide)
-                    Row(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1024),
+                  child: ListView(
+                    padding: EdgeInsets.fromLTRB(16, 8, 16, scrollBottomPadding),
+                    children: [
+                      if (isWide)
+                        Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
@@ -482,7 +485,9 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                   ],
                 ],
               ),
-            );
+            ),
+          ),
+        );
           },
         ),
       ),
