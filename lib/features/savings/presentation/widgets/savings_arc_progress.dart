@@ -86,19 +86,21 @@ class _SavingsArcProgressIndicatorState
       child: Stack(
         alignment: Alignment.center,
         children: [
-          AnimatedBuilder(
-            animation: _animation,
-            builder: (context, _) {
-              return CustomPaint(
-                size: Size(widget.size, widget.size),
-                painter: _ArcPainter(
-                  progress: _animation.value,
-                  color: widget.color,
-                  trackColor: trackColor,
-                  strokeWidth: widget.strokeWidth,
-                ),
-              );
-            },
+          RepaintBoundary(
+            child: AnimatedBuilder(
+              animation: _animation,
+              builder: (context, _) {
+                return CustomPaint(
+                  size: Size(widget.size, widget.size),
+                  painter: _ArcPainter(
+                    progress: _animation.value,
+                    color: widget.color,
+                    trackColor: trackColor,
+                    strokeWidth: widget.strokeWidth,
+                  ),
+                );
+              },
+            ),
           ),
           if (widget.child != null) widget.child!,
         ],

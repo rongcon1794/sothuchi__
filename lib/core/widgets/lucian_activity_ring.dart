@@ -100,21 +100,23 @@ class _LucianActivityRingState extends State<LucianActivityRing>
       child: Stack(
         alignment: Alignment.center,
         children: [
-          AnimatedBuilder(
-            animation: _animation,
-            builder: (context, _) {
-              return CustomPaint(
-                size: Size(widget.size, widget.size),
-                painter: _LucianRingPainter(
-                  progress: _animation.value,
-                  strokeWidth: widget.strokeWidth,
-                  primaryColor: primary,
-                  secondaryColor: secondary,
-                  backgroundColor: trackColor,
-                  showGlow: widget.showGlow,
-                ),
-              );
-            },
+          RepaintBoundary(
+            child: AnimatedBuilder(
+              animation: _animation,
+              builder: (context, _) {
+                return CustomPaint(
+                  size: Size(widget.size, widget.size),
+                  painter: _LucianRingPainter(
+                    progress: _animation.value,
+                    strokeWidth: widget.strokeWidth,
+                    primaryColor: primary,
+                    secondaryColor: secondary,
+                    backgroundColor: trackColor,
+                    showGlow: widget.showGlow,
+                  ),
+                );
+              },
+            ),
           ),
           if (widget.child != null) widget.child!,
         ],

@@ -242,8 +242,9 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
     final totalRows = (totalCells / 7).ceil();
     final cellRadius = BorderRadius.circular(8);
 
-    return Column(
-      children: [
+    return RepaintBoundary(
+      child: Column(
+        children: [
         for (var r = 0; r < totalRows; r++) ...[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -326,8 +327,9 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
           if (r < totalRows - 1) const SizedBox(height: 6),
         ],
       ],
-    );
-  }
+    ),
+  );
+}
 
   /// Right inspector panel on wide screens (Landscape/Tablet).
   Widget _buildWideInspectorPanel({

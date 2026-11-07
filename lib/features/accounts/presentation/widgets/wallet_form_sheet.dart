@@ -112,7 +112,7 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final locale =
-        ref.watch(settingsControllerProvider).value?.localeCode ?? 'vi';
+        ref.watch(settingsControllerProvider.select((s) => s.value?.localeCode ?? 'vi'));
     final currencyInfo = AppCurrencies.byCode(_currency);
 
     return AppleModalSheetLayout(

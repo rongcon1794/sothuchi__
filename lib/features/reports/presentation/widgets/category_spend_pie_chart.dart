@@ -53,14 +53,15 @@ class _CategorySpendPieChartState extends State<CategorySpendPieChart> {
     final activeSlice =
         isSliceActive ? report.categorySlices[_touchedPieIndex] : null;
 
-    return SizedBox(
-      width: widget.diameter,
-      height: widget.height,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          ExcludeSemantics(
-            child: PieChart(
+    return RepaintBoundary(
+      child: SizedBox(
+        width: widget.diameter,
+        height: widget.height,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            ExcludeSemantics(
+              child: PieChart(
               PieChartData(
                 sectionsSpace: 3.0,
                 centerSpaceRadius: 56,
@@ -192,8 +193,9 @@ class _CategorySpendPieChartState extends State<CategorySpendPieChart> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   PieChartSectionData _buildPieSection({
     required CategorySpendSlice slice,

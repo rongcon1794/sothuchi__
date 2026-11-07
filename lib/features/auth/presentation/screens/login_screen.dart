@@ -105,7 +105,7 @@ class LoginScreen extends ConsumerWidget {
         .watch(authActionControllerProvider.notifier)
         .isCloudAuthConfigured;
     final currentLocale =
-        ref.watch(settingsControllerProvider).value?.localeCode ?? 'vi';
+        ref.watch(settingsControllerProvider.select((s) => s.value?.localeCode ?? 'vi'));
 
     return Scaffold(
       body: SafeArea(

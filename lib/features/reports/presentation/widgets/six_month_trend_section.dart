@@ -52,7 +52,8 @@ class SixMonthTrendBarChart extends StatelessWidget {
       container: true,
       label: screenReaderSummary,
       excludeSemantics: true,
-      child: BarChart(
+      child: RepaintBoundary(
+        child: BarChart(
         BarChartData(
           maxY: visualMaxY,
           minY: 0,
@@ -142,8 +143,9 @@ class SixMonthTrendBarChart extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 class SixMonthSummaryPanel extends StatelessWidget {
