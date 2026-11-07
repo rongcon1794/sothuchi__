@@ -453,11 +453,13 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        const Text(
-                          'Thiết lập đề xuất (1 chạm)',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14,
+                        const Expanded(
+                          child: Text(
+                            'Thiết lập đề xuất (1 chạm)',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
                           ),
                         ),
                       ],
