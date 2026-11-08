@@ -28,9 +28,10 @@ class SixMonthTrendBarChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final financeColors = context.financeColors;
     final textScale = MediaQuery.textScalerOf(context).scale(1);
-    final bottomReserved = math.max(28.0, 22.0 * textScale);
+    final bottomReserved = math.max(34.0, 26.0 * textScale);
 
     var maxMinor = 0;
     for (final bar in bars) {
@@ -48,6 +49,27 @@ class SixMonthTrendBarChart extends StatelessWidget {
             '${l10n.expense} ${hideBalance ? l10n.balanceHidden : bar.expenseMoney.format(locale: locale)}',
     ].join('; ');
 
+    final ghostColor = isDark
+        ? Colors.white.withValues(alpha: 0.045)
+        : Colors.black.withValues(alpha: 0.035);
+
+    final incomeGradient = LinearGradient(
+      begin: Alignment.bottomCenter,
+      end: Alignment.topCenter,
+      colors: [
+        financeColors.income,
+        financeColors.income.withValues(alpha: 0.8),
+      ],
+    );
+    final expenseGradient = LinearGradient(
+      begin: Alignment.bottomCenter,
+      end: Alignment.topCenter,
+      colors: [
+        financeColors.expense,
+        financeColors.expense.withValues(alpha: 0.8),
+      ],
+    );
+
     return Semantics(
       container: true,
       label: screenReaderSummary,
@@ -62,8 +84,9 @@ class SixMonthTrendBarChart extends StatelessWidget {
           gridData: FlGridData(
             drawVerticalLine: false,
             getDrawingHorizontalLine: (_) => FlLine(
-              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.25),
               strokeWidth: 1,
+              dashArray: [4, 4],
             ),
           ),
           barTouchData: BarTouchData(
@@ -72,15 +95,17 @@ class SixMonthTrendBarChart extends StatelessWidget {
               getTooltipItem: (group, groupIndex, rod, rodIndex) {
                 if (groupIndex < 0 || groupIndex >= bars.length) return null;
                 final item = bars[groupIndex];
-                final money = rodIndex == 0
+                final isIncome = rodIndex == 0;
+                final money = isIncome
                     ? item.incomeMoney
                     : item.expenseMoney;
+                final tag = isIncome ? l10n.income : l10n.expense;
                 return BarTooltipItem(
-                  money.format(locale: locale),
+                  '$tag\n${money.format(locale: locale)}',
                   TextStyle(
                     color: theme.colorScheme.onInverseSurface,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 11.5,
                   ),
                 );
               },
@@ -99,17 +124,37 @@ class SixMonthTrendBarChart extends StatelessWidget {
                   if (idx < 0 || idx >= bars.length) {
                     return const SizedBox.shrink();
                   }
+                  final item = bars[idx];
                   final label = AppDateUtils.formatShortMonth(
-                    bars[idx].monthAnchor,
+                    item.monthAnchor,
                     locale: locale,
                   );
+                  final isNetSurplus = item.incomeMinorUnits >= item.expenseMinorUnits;
+
                   return SideTitleWidget(
                     meta: meta,
-                    child: Text(
-                      label,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          label,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Container(
+                          width: 4,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isNetSurplus
+                                ? financeColors.income.withValues(alpha: 0.8)
+                                : financeColors.expense.withValues(alpha: 0.8),
+                          ),
+                        ),
+                      ],
                     ),
                   );
                 },
@@ -124,18 +169,28 @@ class SixMonthTrendBarChart extends StatelessWidget {
                 barRods: [
                   BarChartRodData(
                     toY: bars[i].incomeMinorUnits.toDouble(),
-                    color: financeColors.income,
+                    gradient: incomeGradient,
                     width: isWide ? 14 : 11,
                     borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(4),
+                      top: Radius.circular(5),
+                    ),
+                    backDrawRodData: BackgroundBarChartRodData(
+                      show: true,
+                      toY: visualMaxY,
+                      color: ghostColor,
                     ),
                   ),
                   BarChartRodData(
                     toY: bars[i].expenseMinorUnits.toDouble(),
-                    color: financeColors.expense,
+                    gradient: expenseGradient,
                     width: isWide ? 14 : 11,
                     borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(4),
+                      top: Radius.circular(5),
+                    ),
+                    backDrawRodData: BackgroundBarChartRodData(
+                      show: true,
+                      toY: visualMaxY,
+                      color: ghostColor,
                     ),
                   ),
                 ],

@@ -67,6 +67,18 @@ class _CategorySpendPieChartState extends State<CategorySpendPieChart> {
         child: Stack(
           alignment: Alignment.center,
           children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 260),
+              curve: Curves.easeOutCubic,
+              width: 88,
+              height: 88,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: activeSlice != null
+                    ? Color(activeSlice.color).withValues(alpha: 0.12)
+                    : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.25),
+              ),
+            ),
             ExcludeSemantics(
               child: PieChart(
               PieChartData(
