@@ -13,6 +13,7 @@ import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/core/widgets/empty_state_view.dart';
 import 'package:so_thu_chi/core/widgets/skeleton_box.dart';
 import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_controller.dart';
+import 'package:so_thu_chi/features/accounts/presentation/widgets/wallet_form_sheet.dart';
 import 'package:so_thu_chi/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:so_thu_chi/features/budgets/presentation/controllers/budgets_controller.dart';
 import 'package:so_thu_chi/features/budgets/presentation/widgets/budget_alert_banner.dart';
@@ -278,7 +279,12 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                         );
                       }
                       return DashboardAddWalletCard(
-                        onTap: () => context.push(AppRoutes.accounts),
+                        onTap: () async {
+                          final created = await WalletFormSheet.show(context);
+                          if (created != null && context.mounted) {
+                            await context.push(AppRoutes.accountDetail(created.id));
+                          }
+                        },
                       );
                     },
                   ),

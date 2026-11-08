@@ -17,6 +17,7 @@ import 'package:so_thu_chi/features/categories/presentation/screens/category_det
 import 'package:so_thu_chi/features/categories/presentation/screens/categories_screen.dart';
 import 'package:so_thu_chi/features/transactions/data/repositories/firestore_transaction_repository.dart';
 import 'package:so_thu_chi/features/transactions/presentation/widgets/dashboard_mini_cards.dart';
+import 'package:so_thu_chi/features/transactions/presentation/widgets/dashboard_quick_action_bar.dart';
 import 'package:so_thu_chi/l10n/app_localizations.dart';
 
 void main() {
@@ -243,6 +244,78 @@ void main() {
 
       expect(find.text('Tiền mặt'), findsOneWidget);
       expect(find.byType(CustomPaint), findsWidgets);
+    });
+
+    testWidgets('DashboardMiniWalletCard triggers onTap when tapped', (tester) async {
+      var tapped = false;
+      final account = Account(
+        id: 'acc1',
+        name: 'Tiền mặt',
+        type: AccountType.cash,
+        balance: 5000000,
+        currency: 'VND',
+        icon: 'cash',
+        color: 0xFF00A86B,
+        archived: false,
+        ledgerId: 'ledger1',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DashboardMiniWalletCard(
+              account: account,
+              locale: 'vi',
+              hideBalance: false,
+              onTap: () => tapped = true,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Tiền mặt'));
+      await tester.pumpAndSettle();
+
+      expect(tapped, isTrue);
+    });
+
+    testWidgets('DashboardQuickActionBar renders and triggers wallet action', (tester) async {
+      SharedPreferences.setMockInitialValues({'onboarding_completed': true});
+      final prefs = await SharedPreferences.getInstance();
+      final firestore = FakeFirebaseFirestore();
+      final accRepo = FirestoreAccountRepository(firestore: firestore, uid: 'u1');
+      await accRepo.createAccount(
+        name: 'Ví Tiền Mặt',
+        type: AccountType.cash,
+        initialBalance: 1000000,
+        currency: 'VND',
+        icon: 'cash',
+        color: 0xFF00A86B,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            accountRepositoryProvider.overrideWithValue(accRepo),
+          ],
+          child: MaterialApp(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: AppTheme.light(),
+            home: const Scaffold(
+              body: DashboardQuickActionBar(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Ví tiền'), findsOneWidget);
     });
 
     testWidgets('CategoryDetailScreen renders category information and actions', (tester) async {
