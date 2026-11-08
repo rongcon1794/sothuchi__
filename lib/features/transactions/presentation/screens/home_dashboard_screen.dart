@@ -60,6 +60,7 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
     final accountsMap = ref.watch(accountsMapProvider);
     final categoriesMap = ref.watch(categoriesMapProvider);
     final txStream = ref.watch(transactionsStreamProvider);
+    final allTxs = txStream.value ?? const <TransactionEntity>[];
     final recentTxs = ref.watch(recentTransactionsProvider);
     final customBudgetBanner = ref.watch(dashboardBudgetAlertSlotProvider);
     final triggeredBudgets = ref.watch(currentMonthTriggeredBudgetsProvider);
@@ -272,7 +273,8 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                           account: wallet,
                           locale: locale,
                           hideBalance: hideBalance,
-                          onTap: () => context.push(AppRoutes.accounts),
+                          transactions: allTxs,
+                          onTap: () => context.push(AppRoutes.accountDetail(wallet.id)),
                         );
                       }
                       return DashboardAddWalletCard(

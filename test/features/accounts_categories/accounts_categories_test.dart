@@ -16,6 +16,7 @@ import 'package:so_thu_chi/features/categories/domain/entities/category.dart';
 import 'package:so_thu_chi/features/categories/presentation/screens/category_detail_screen.dart';
 import 'package:so_thu_chi/features/categories/presentation/screens/categories_screen.dart';
 import 'package:so_thu_chi/features/transactions/data/repositories/firestore_transaction_repository.dart';
+import 'package:so_thu_chi/features/transactions/presentation/widgets/dashboard_mini_cards.dart';
 import 'package:so_thu_chi/l10n/app_localizations.dart';
 
 void main() {
@@ -205,8 +206,43 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Ví Tiền Mặt'), findsAtLeastNWidgets(1));
+      expect(find.text('Biến động 14 ngày qua'), findsOneWidget);
+      expect(find.text('Số dư ổn định 14 ngày'), findsOneWidget);
       expect(find.text('Chưa có giao dịch trên ví này'), findsOneWidget);
       expect(find.text('Thêm giao dịch'), findsAtLeastNWidgets(1));
+    });
+
+    testWidgets('DashboardMiniWalletCard renders accurate sparkline for wallet balance', (tester) async {
+      final account = Account(
+        id: 'acc1',
+        name: 'Tiền mặt',
+        type: AccountType.cash,
+        balance: 5000000,
+        currency: 'VND',
+        icon: 'cash',
+        color: 0xFF00A86B,
+        archived: false,
+        ledgerId: 'ledger1',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DashboardMiniWalletCard(
+              account: account,
+              locale: 'vi',
+              hideBalance: false,
+              onTap: () {},
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Tiền mặt'), findsOneWidget);
+      expect(find.byType(CustomPaint), findsWidgets);
     });
 
     testWidgets('CategoryDetailScreen renders category information and actions', (tester) async {

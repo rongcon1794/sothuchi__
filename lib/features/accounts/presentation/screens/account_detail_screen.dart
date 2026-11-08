@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -355,7 +356,17 @@ class AccountDetailScreen extends ConsumerWidget {
                             color: walletColor,
                           ),
                         ),
-                        const SizedBox(height: 18),
+                        const SizedBox(height: 14),
+                        // Real-Time 14-Day Balance Trend Sparkline with Touch Scrubbing
+                        _WalletBalanceTrendSparkline(
+                          account: account,
+                          walletTxs: walletTxs,
+                          walletColor: walletColor,
+                          locale: locale,
+                          hideBalance: hideBalance,
+                          isDark: isDark,
+                        ),
+                        const SizedBox(height: 16),
                         // Cashflow Tri-Stat Strip
                         Container(
                           padding: const EdgeInsets.all(12),
@@ -568,6 +579,388 @@ class AccountDetailScreen extends ConsumerWidget {
         );
       },
     );
+  }
+}
+
+class _WalletPoint {
+  const _WalletPoint({
+    required this.date,
+    required this.balanceMinor,
+    required this.normalizedY,
+  });
+
+  final DateTime date;
+  final double balanceMinor;
+  final double normalizedY;
+}
+
+class _WalletBalanceTrendSparkline extends StatefulWidget {
+  const _WalletBalanceTrendSparkline({
+    required this.account,
+    required this.walletTxs,
+    required this.walletColor,
+    required this.locale,
+    required this.hideBalance,
+    required this.isDark,
+  });
+
+  final Account account;
+  final List<TransactionEntity> walletTxs;
+  final Color walletColor;
+  final String locale;
+  final bool hideBalance;
+  final bool isDark;
+
+  @override
+  State<_WalletBalanceTrendSparkline> createState() =>
+      _WalletBalanceTrendSparklineState();
+}
+
+class _WalletBalanceTrendSparklineState
+    extends State<_WalletBalanceTrendSparkline> {
+  int? _scrubbedIndex;
+  Timer? _resetTimer;
+
+  @override
+  void dispose() {
+    _resetTimer?.cancel();
+    super.dispose();
+  }
+
+  void _onScrub(double localX, double totalWidth, int count) {
+    if (totalWidth <= 0 || count <= 1) return;
+    _resetTimer?.cancel();
+    final clampedX = localX.clamp(0.0, totalWidth);
+    final index =
+        ((clampedX / totalWidth) * (count - 1)).round().clamp(0, count - 1);
+    if (index != _scrubbedIndex) {
+      HapticFeedback.selectionClick();
+      setState(() => _scrubbedIndex = index);
+    }
+  }
+
+  void _scheduleReset() {
+    _resetTimer?.cancel();
+    _resetTimer = Timer(const Duration(milliseconds: 1400), () {
+      if (mounted) setState(() => _scrubbedIndex = null);
+    });
+  }
+
+  List<_WalletPoint> _buildPoints() {
+    final now = DateTime.now();
+    final days = List.generate(
+      14,
+      (i) => DateTime(now.year, now.month, now.day)
+          .subtract(Duration(days: 13 - i)),
+    );
+
+    final currencyTxs = widget.walletTxs
+        .where((tx) => tx.currency == widget.account.currency)
+        .toList(growable: false);
+
+    final currentBalanceMinor = widget.account.balance.toDouble();
+    final rawBalances = <double>[];
+
+    for (final day in days) {
+      final endOfDay = DateTime(day.year, day.month, day.day, 23, 59, 59, 999);
+      var futureNet = 0.0;
+      for (final tx in currencyTxs) {
+        if (tx.date.isAfter(endOfDay)) {
+          if (tx.type == TransactionType.income) {
+            futureNet += tx.amount;
+          } else if (tx.type == TransactionType.expense) {
+            futureNet -= tx.amount;
+          } else if (tx.type == TransactionType.transfer) {
+            if (tx.accountId == widget.account.id) {
+              futureNet -= tx.amount;
+            } else if (tx.toAccountId == widget.account.id) {
+              futureNet += tx.amount;
+            }
+          }
+        }
+      }
+      rawBalances.add(currentBalanceMinor - futureNet);
+    }
+
+    final minVal = rawBalances.reduce(math.min);
+    final maxVal = rawBalances.reduce(math.max);
+
+    return List.generate(rawBalances.length, (i) {
+      final b = rawBalances[i];
+      final double normY;
+      if (minVal == maxVal) {
+        normY = 0.5;
+      } else {
+        final ratio = (b - minVal) / (maxVal - minVal);
+        normY = 0.15 + (0.70 * ratio);
+      }
+      return _WalletPoint(
+        date: days[i],
+        balanceMinor: b,
+        normalizedY: normY,
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final points = _buildPoints();
+    final scrubbedPoint = (_scrubbedIndex != null &&
+            _scrubbedIndex! >= 0 &&
+            _scrubbedIndex! < points.length)
+        ? points[_scrubbedIndex!]
+        : null;
+
+    final firstBalance = points.first.balanceMinor;
+    final lastBalance = points.last.balanceMinor;
+    final delta = lastBalance - firstBalance;
+
+    final String trendLabel;
+    final Color trendColor;
+    if (delta > 0) {
+      final pct = firstBalance > 0
+          ? ((delta / firstBalance) * 100).round()
+          : 100;
+      trendLabel = '+$pct% trong 14 ngày';
+      trendColor = AppleTokens.emeraldIncome;
+    } else if (delta < 0) {
+      final pct = firstBalance > 0
+          ? ((delta.abs() / firstBalance) * 100).round()
+          : 100;
+      trendLabel = '-$pct% trong 14 ngày';
+      trendColor = AppleTokens.rubyExpense;
+    } else {
+      trendLabel = 'Số dư ổn định 14 ngày';
+      trendColor = widget.walletColor;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Status Row (Scrubbing info OR 14-day delta)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            if (scrubbedPoint != null) ...[
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(CupertinoIcons.calendar,
+                      size: 12, color: widget.walletColor),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${scrubbedPoint.date.day.toString().padLeft(2, '0')}/${scrubbedPoint.date.month.toString().padLeft(2, '0')}: ',
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      color: widget.walletColor,
+                    ),
+                  ),
+                  Text(
+                    Money(
+                      minorUnits: scrubbedPoint.balanceMinor.round(),
+                      currencyCode: widget.account.currency,
+                    ).format(locale: widget.locale, masked: widget.hideBalance),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      fontFeatures: AppTheme.tabularFigures,
+                      color: widget.walletColor,
+                    ),
+                  ),
+                ],
+              ),
+            ] else ...[
+              Text(
+                'Biến động 14 ngày qua',
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w600,
+                  color: widget.isDark
+                      ? Colors.white.withValues(alpha: 0.6)
+                      : Colors.black.withValues(alpha: 0.55),
+                ),
+              ),
+            ],
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color:
+                    trendColor.withValues(alpha: widget.isDark ? 0.20 : 0.12),
+                borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                border: Border.all(
+                  color: trendColor.withValues(alpha: 0.35),
+                  width: AppleTokens.hairline,
+                ),
+              ),
+              child: Text(
+                trendLabel,
+                style: TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w700,
+                  color: trendColor,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        // Interactive Scrubbing Chart Canvas
+        SizedBox(
+          height: 48,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onHorizontalDragStart: (d) => _onScrub(
+                    d.localPosition.dx, constraints.maxWidth, points.length),
+                onHorizontalDragUpdate: (d) => _onScrub(
+                    d.localPosition.dx, constraints.maxWidth, points.length),
+                onHorizontalDragEnd: (_) => _scheduleReset(),
+                onTapDown: (d) => _onScrub(
+                    d.localPosition.dx, constraints.maxWidth, points.length),
+                onTapUp: (_) => _scheduleReset(),
+                child: CustomPaint(
+                  painter: _WalletDetailSparklinePainter(
+                    points: points.map((p) => p.normalizedY).toList(),
+                    color: widget.walletColor,
+                    selectedIndex: _scrubbedIndex,
+                    isDark: widget.isDark,
+                  ),
+                  size: Size.infinite,
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _WalletDetailSparklinePainter extends CustomPainter {
+  const _WalletDetailSparklinePainter({
+    required this.points,
+    required this.color,
+    required this.isDark,
+    this.selectedIndex,
+  });
+
+  final List<double> points;
+  final Color color;
+  final bool isDark;
+  final int? selectedIndex;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (points.length < 2) return;
+
+    final width = size.width;
+    final height = size.height;
+    final stepX = width / (points.length - 1);
+
+    final List<Offset> coords = [];
+    for (var i = 0; i < points.length; i++) {
+      final x = i * stepX;
+      final y = height - (points[i].clamp(0.08, 0.92) * height);
+      coords.add(Offset(x, y));
+    }
+
+    final fillPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          color.withValues(alpha: isDark ? 0.28 : 0.20),
+          color.withValues(alpha: 0.01),
+        ],
+      ).createShader(Rect.fromLTWH(0, 0, width, height))
+      ..style = PaintingStyle.fill;
+
+    final linePaint = Paint()
+      ..color = color.withValues(alpha: isDark ? 0.75 : 0.65)
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final linePath = Path();
+    final fillPath = Path();
+
+    linePath.moveTo(coords[0].dx, coords[0].dy);
+    fillPath.moveTo(coords[0].dx, height);
+    fillPath.lineTo(coords[0].dx, coords[0].dy);
+
+    for (var i = 0; i < coords.length - 1; i++) {
+      final p0 = coords[i];
+      final p1 = coords[i + 1];
+      final controlX1 = p0.dx + (p1.dx - p0.dx) / 2;
+      final controlY1 = p0.dy;
+      final controlX2 = p0.dx + (p1.dx - p0.dx) / 2;
+      final controlY2 = p1.dy;
+
+      linePath.cubicTo(
+          controlX1, controlY1, controlX2, controlY2, p1.dx, p1.dy);
+      fillPath.cubicTo(
+          controlX1, controlY1, controlX2, controlY2, p1.dx, p1.dy);
+    }
+
+    fillPath.lineTo(coords.last.dx, height);
+    fillPath.close();
+
+    canvas.drawPath(fillPath, fillPaint);
+    canvas.drawPath(linePath, linePaint);
+
+    // If scrubbed, draw vertical guide line and indicator
+    if (selectedIndex != null &&
+        selectedIndex! >= 0 &&
+        selectedIndex! < coords.length) {
+      final active = coords[selectedIndex!];
+      final cursorPaint = Paint()
+        ..color = (isDark ? Colors.white : Colors.black).withValues(alpha: 0.25)
+        ..strokeWidth = 1.0
+        ..style = PaintingStyle.stroke;
+
+      canvas.drawLine(
+          Offset(active.dx, 0), Offset(active.dx, height), cursorPaint);
+
+      final glowPaint = Paint()
+        ..color = color.withValues(alpha: 0.4)
+        ..style = PaintingStyle.fill;
+      final pointPaint = Paint()
+        ..color = isDark ? Colors.white : color
+        ..style = PaintingStyle.fill;
+
+      canvas.drawCircle(active, 5.0, glowPaint);
+      canvas.drawCircle(active, 3.0, pointPaint);
+    } else {
+      // Latest point dot
+      final last = coords.last;
+      final glowPaint = Paint()
+        ..color = color.withValues(alpha: 0.4)
+        ..style = PaintingStyle.fill;
+      final pointPaint = Paint()
+        ..color = color
+        ..style = PaintingStyle.fill;
+
+      canvas.drawCircle(last, 4.0, glowPaint);
+      canvas.drawCircle(last, 2.5, pointPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _WalletDetailSparklinePainter oldDelegate) {
+    if (oldDelegate.color != color ||
+        oldDelegate.isDark != isDark ||
+        oldDelegate.selectedIndex != selectedIndex ||
+        oldDelegate.points.length != points.length) {
+      return true;
+    }
+    for (var i = 0; i < points.length; i++) {
+      if (oldDelegate.points[i] != points[i]) return true;
+    }
+    return false;
   }
 }
 

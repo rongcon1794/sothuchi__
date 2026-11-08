@@ -638,8 +638,9 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
     // Otherwise use all days from day 1 to today in the current month.
     final days = <DateTime>[];
     if (currentDay < 7) {
+      final todayMidnight = DateTime(now.year, now.month, now.day);
       for (var i = 6; i >= 0; i--) {
-        days.add(now.subtract(Duration(days: i)));
+        days.add(todayMidnight.subtract(Duration(days: i)));
       }
     } else {
       for (var d = 1; d <= currentDay; d++) {
@@ -674,14 +675,14 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
         rawValues.add(balanceAtDay);
       }
     } else if (_activeMetric == LucianKpiMetric.income) {
-      // Cumulative income across the month
-      final monthStart = DateTime(now.year, now.month, 1);
+      // Cumulative income across the month (or 7-day window if early in month)
+      final rangeStart = currentDay < 7 ? days.first : DateTime(now.year, now.month, 1);
       for (final day in days) {
         final endOfDay = DateTime(day.year, day.month, day.day, 23, 59, 59, 999);
         var cumIncome = 0.0;
         for (final tx in currencyTxs) {
           if (tx.type == TransactionType.income &&
-              !tx.date.isBefore(monthStart) &&
+              !tx.date.isBefore(rangeStart) &&
               !tx.date.isAfter(endOfDay)) {
             cumIncome += tx.amount;
           }
@@ -689,14 +690,14 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
         rawValues.add(cumIncome);
       }
     } else {
-      // Cumulative expense across the month
-      final monthStart = DateTime(now.year, now.month, 1);
+      // Cumulative expense across the month (or 7-day window if early in month)
+      final rangeStart = currentDay < 7 ? days.first : DateTime(now.year, now.month, 1);
       for (final day in days) {
         final endOfDay = DateTime(day.year, day.month, day.day, 23, 59, 59, 999);
         var cumExpense = 0.0;
         for (final tx in currencyTxs) {
           if (tx.type == TransactionType.expense &&
-              !tx.date.isBefore(monthStart) &&
+              !tx.date.isBefore(rangeStart) &&
               !tx.date.isAfter(endOfDay)) {
             cumExpense += tx.amount;
           }
