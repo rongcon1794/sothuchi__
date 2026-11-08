@@ -8,7 +8,9 @@ void main() {
       expect(m.format(locale: 'vi'), '1.250.000 ₫');
       expect(m.format(locale: 'en'), '1,250,000 ₫');
       expect(m.format(locale: 'vi', showPlusSign: true), '+1.250.000 ₫');
+      expect(m.format(locale: 'vi', showMinusSign: true), '-1.250.000 ₫');
       expect((-m).format(locale: 'vi'), '-1.250.000 ₫');
+      expect(const Money.zero().format(locale: 'vi', showMinusSign: true), '0 ₫');
       expect(m.format(masked: true), '•••••• ₫');
     });
 

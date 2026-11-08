@@ -139,11 +139,17 @@ void main() {
       expect(find.text('Thu nhập'), findsOneWidget);
       expect(find.text('Chi tiêu'), findsOneWidget);
 
+      // Switch tab to Thu nhập
+      await tester.tap(find.text('Thu nhập'));
+      await tester.pumpAndSettle();
+      expect(find.text('+2.500.000.000 ₫'), findsOneWidget);
+
       // Switch tab to Chi tiêu
       await tester.tap(find.text('Chi tiêu'));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       expect(find.text('Chi tiêu'), findsWidgets);
+      expect(find.text('-950.000.000 ₫'), findsOneWidget);
     });
 
     testWidgets('calculates real trend curve and formats delta badge accurately without negative sign glitch', (tester) async {

@@ -413,6 +413,7 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
                     locale: widget.locale,
                     masked: widget.hideBalance,
                     showPlusSign: _activeMetric == LucianKpiMetric.income,
+                    showMinusSign: _activeMetric == LucianKpiMetric.expense,
                   ),
                   style: TextStyle(
                     fontSize: 34,

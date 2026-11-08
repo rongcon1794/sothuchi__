@@ -12,6 +12,7 @@ class AppleAnimatedMoneyText extends StatefulWidget {
     this.locale = 'vi',
     this.masked = false,
     this.showPlusSign = false,
+    this.showMinusSign = false,
     this.style,
     this.semanticsLabel,
     this.duration = const Duration(milliseconds: 600),
@@ -22,6 +23,7 @@ class AppleAnimatedMoneyText extends StatefulWidget {
   final String locale;
   final bool masked;
   final bool showPlusSign;
+  final bool showMinusSign;
   final TextStyle? style;
   final String? semanticsLabel;
   final Duration duration;
@@ -83,6 +85,7 @@ class _AppleAnimatedMoneyTextState extends State<AppleAnimatedMoneyText>
         widget.money.format(
           locale: widget.locale,
           showPlusSign: widget.showPlusSign,
+          showMinusSign: widget.showMinusSign,
           masked: true,
         ),
         semanticsLabel: widget.semanticsLabel,
@@ -106,6 +109,7 @@ class _AppleAnimatedMoneyTextState extends State<AppleAnimatedMoneyText>
           currentMoney.format(
             locale: widget.locale,
             showPlusSign: widget.showPlusSign,
+            showMinusSign: widget.showMinusSign,
             masked: false,
           ),
           semanticsLabel: widget.semanticsLabel,

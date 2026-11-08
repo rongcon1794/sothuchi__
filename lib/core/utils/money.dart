@@ -125,6 +125,7 @@ class Money implements Comparable<Money> {
   String format({
     String locale = 'vi',
     bool showPlusSign = false,
+    bool showMinusSign = false,
     bool masked = false,
   }) {
     final info = currency;
@@ -150,7 +151,7 @@ class Money implements Comparable<Money> {
       numberPart = '$majorGrouped$decimalSep$fractionStr';
     }
 
-    final signPrefix = minorUnits < 0
+    final signPrefix = minorUnits < 0 || (showMinusSign && minorUnits > 0)
         ? '-'
         : (showPlusSign && minorUnits > 0 ? '+' : '');
 
