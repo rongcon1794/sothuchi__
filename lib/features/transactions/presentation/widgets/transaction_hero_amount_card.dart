@@ -235,10 +235,7 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
                           focusNode: widget.focusNode,
                           autofocus: !widget.isEditing,
                           textAlign: TextAlign.center,
-                          showCursor: true,
-                          cursorColor: typeColor,
-                          cursorWidth: 3.0,
-                          cursorRadius: const Radius.circular(2),
+                          showCursor: false,
                           keyboardType: TextInputType.numberWithOptions(
                             decimal: widget.currencyInfo.decimalDigits > 0,
                           ),

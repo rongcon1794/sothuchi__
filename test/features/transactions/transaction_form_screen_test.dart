@@ -82,9 +82,9 @@ void main() {
       expect(find.text('Thu nhập'), findsOneWidget);
       expect(find.text('Chuyển khoản'), findsOneWidget);
 
-      // Verify cursor is visible for clear interactive feedback
+      // Verify cursor is hidden inside amount field for clean presentation
       final textField = tester.widget<TextField>(find.byType(TextField).first);
-      expect(textField.showCursor, isTrue);
+      expect(textField.showCursor, isFalse);
 
       // Verify Save button (l10n.save in Vietnamese is 'Lưu')
       expect(find.text('Lưu'), findsOneWidget);
@@ -180,11 +180,11 @@ void main() {
       expect(find.text('Khác'), findsOneWidget);
       expect(find.text('Thêm'), findsOneWidget);
 
-      // Verify TextField for amount has showCursor: true for active user feedback
+      // Verify TextField for amount has showCursor: false
       final textField = tester.widget<TextField>(
         find.byType(TextField).first,
       );
-      expect(textField.showCursor, isTrue);
+      expect(textField.showCursor, isFalse);
     });
 
     testWidgets('when categories are empty, it automatically seeds defaults and displays categories', (tester) async {
