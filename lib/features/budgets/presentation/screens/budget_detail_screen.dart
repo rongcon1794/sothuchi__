@@ -458,6 +458,7 @@ class BudgetDetailScreen extends ConsumerWidget {
                                   : null,
                               locale: locale,
                               hideAmount: hideBalance,
+                              showDate: true,
                               onTap: () => context.push(
                                 AppRoutes.transactionDetail(budgetTxs[i].id),
                               ),

@@ -8,6 +8,7 @@ import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
+import 'package:so_thu_chi/core/utils/date_formatter.dart';
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
 import 'package:so_thu_chi/features/categories/domain/entities/category.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
@@ -24,6 +25,7 @@ class TransactionTile extends StatelessWidget {
     required this.onTap,
     this.onSwipeEdit,
     this.onSwipeDelete,
+    this.showDate = false,
   });
 
   final TransactionEntity transaction;
@@ -35,6 +37,7 @@ class TransactionTile extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback? onSwipeEdit;
   final Future<bool> Function()? onSwipeDelete;
+  final bool showDate;
 
   @override
   Widget build(BuildContext context) {
@@ -104,10 +107,18 @@ class TransactionTile extends StatelessWidget {
     final displayAmount = hideAmount ? formattedMoney : '$prefix$formattedMoney';
     final spokenAmount = hideAmount ? l10n.balanceHidden : displayAmount;
 
+    final formattedDate = showDate
+        ? AppDateUtils.formatTransactionTileDate(
+            transaction.date,
+            locale: locale,
+          )
+        : null;
+
     final semanticParts = <String>[
       typeLabel,
       title,
       spokenAmount,
+      ?formattedDate,
       if (subtitleText.isNotEmpty) subtitleText,
       if (transaction.tags.isNotEmpty)
         transaction.tags.take(3).map((t) => '#$t').join(', '),
@@ -230,13 +241,46 @@ class TransactionTile extends StatelessWidget {
                   if (stackAmountBelow) ...[
                     const SizedBox(height: 6),
                     amountWidget,
+                    if (formattedDate != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        formattedDate,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          fontFeatures: AppTheme.tabularFigures,
+                        ),
+                      ),
+                    ],
                   ],
                 ],
               ),
             ),
             if (!stackAmountBelow) ...[
               const SizedBox(width: 10),
-              Flexible(flex: 0, child: amountWidget),
+              Flexible(
+                flex: 0,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    amountWidget,
+                    if (formattedDate != null) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        formattedDate,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          fontFeatures: AppTheme.tabularFigures,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ],
           ],
         ),

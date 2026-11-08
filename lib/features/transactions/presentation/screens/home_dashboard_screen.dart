@@ -395,6 +395,7 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                                   : null,
                               locale: locale,
                               hideAmount: hideBalance,
+                              showDate: true,
                               onTap: () => context.push(
                                 AppRoutes.transactionDetail(recentTxs[i].id),
                               ),

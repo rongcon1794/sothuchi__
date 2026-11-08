@@ -108,5 +108,30 @@ abstract final class AppDateUtils {
 
   static String formatVnDate(DateTime date) =>
       formatShortDate(date, locale: 'vi');
+
+  /// Formats transaction date for compact tile display (e.g., 'Hôm nay, 08/11' or '05/11/2026').
+  static String formatTransactionTileDate(
+    DateTime date, {
+    String locale = 'vi',
+    DateTime? nowOverride,
+  }) {
+    final localDate = date.toLocal();
+    final now = (nowOverride ?? DateTime.now()).toLocal();
+    final dateOnly = startOfDay(localDate);
+    final today = startOfDay(now);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final isVi = locale.toLowerCase().startsWith('vi');
+
+    final d = localDate.day.toString().padLeft(2, '0');
+    final m = localDate.month.toString().padLeft(2, '0');
+
+    if (dateOnly == today) {
+      return isVi ? 'Hôm nay, $d/$m' : 'Today, $d/$m';
+    }
+    if (dateOnly == yesterday) {
+      return isVi ? 'Hôm qua, $d/$m' : 'Yesterday, $d/$m';
+    }
+    return '$d/$m/${localDate.year}';
+  }
 }
 

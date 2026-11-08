@@ -45,6 +45,41 @@ void main() {
         'Tháng 11, 2026',
       );
     });
+
+    test('formats compact transaction tile date for Today, Yesterday, and other dates', () {
+      final now = DateTime(2026, 11, 8, 14, 0);
+      final todayTx = DateTime(2026, 11, 8, 9, 30);
+      final yesterdayTx = DateTime(2026, 11, 7, 20, 15);
+      final olderTxThisYear = DateTime(2026, 11, 2, 8, 0);
+      final lastYearTx = DateTime(2025, 12, 25, 12, 0);
+
+      expect(
+        AppDateUtils.formatTransactionTileDate(todayTx, locale: 'vi', nowOverride: now),
+        'Hôm nay, 08/11',
+      );
+      expect(
+        AppDateUtils.formatTransactionTileDate(yesterdayTx, locale: 'vi', nowOverride: now),
+        'Hôm qua, 07/11',
+      );
+      expect(
+        AppDateUtils.formatTransactionTileDate(olderTxThisYear, locale: 'vi', nowOverride: now),
+        '02/11/2026',
+      );
+      expect(
+        AppDateUtils.formatTransactionTileDate(lastYearTx, locale: 'vi', nowOverride: now),
+        '25/12/2025',
+      );
+
+      // English locale
+      expect(
+        AppDateUtils.formatTransactionTileDate(todayTx, locale: 'en', nowOverride: now),
+        'Today, 08/11',
+      );
+      expect(
+        AppDateUtils.formatTransactionTileDate(yesterdayTx, locale: 'en', nowOverride: now),
+        'Yesterday, 07/11',
+      );
+    });
   });
 }
 

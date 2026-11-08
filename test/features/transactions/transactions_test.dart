@@ -11,11 +11,13 @@ import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/accounts/data/repositories/firestore_account_repository.dart';
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
 import 'package:so_thu_chi/features/categories/data/repositories/firestore_category_repository.dart';
+import 'package:so_thu_chi/features/categories/domain/entities/category.dart';
 import 'package:so_thu_chi/features/transactions/data/repositories/firestore_transaction_repository.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:so_thu_chi/features/transactions/presentation/screens/home_dashboard_screen.dart';
 import 'package:so_thu_chi/features/transactions/presentation/screens/transaction_form_screen.dart';
 import 'package:so_thu_chi/features/transactions/presentation/screens/transactions_screen.dart';
+import 'package:so_thu_chi/features/transactions/presentation/widgets/transaction_tile.dart';
 import 'package:so_thu_chi/l10n/app_localizations.dart';
 
 void main() {
@@ -345,6 +347,93 @@ void main() {
         expect(find.text('LOẠI GIAO DỊCH'), findsNothing);
       },
     );
+
+    testWidgets('TransactionTile displays transaction date when showDate is true', (tester) async {
+      final now = DateTime(2026, 11, 8, 10, 0);
+      final tx = TransactionEntity(
+        id: 'tx_date_1',
+        amount: 45000,
+        currency: 'VND',
+        type: TransactionType.expense,
+        accountId: 'acc1',
+        categoryId: 'cat_food',
+        note: 'Bánh mì chả lụa',
+        date: DateTime(2026, 11, 5, 8, 0),
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      final cat = Category(
+        id: 'cat_food',
+        name: 'Ăn uống',
+        type: CategoryType.expense,
+        icon: 'food',
+        color: 0xFFFF5722,
+        isDefault: true,
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      final wallet = Account(
+        id: 'acc1',
+        name: 'Ví tiền mặt',
+        type: AccountType.cash,
+        balance: 1000000,
+        currency: 'VND',
+        icon: 'cash',
+        color: 0xFF0D7C66,
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      // Without showDate
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('vi'),
+          home: Scaffold(
+            body: TransactionTile(
+              transaction: tx,
+              category: cat,
+              sourceAccount: wallet,
+              locale: 'vi',
+              hideAmount: false,
+              showDate: false,
+              onTap: () {},
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('-45.000 ₫'), findsOneWidget);
+      expect(find.text('05/11/2026'), findsNothing);
+
+      // With showDate
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('vi'),
+          home: Scaffold(
+            body: TransactionTile(
+              transaction: tx,
+              category: cat,
+              sourceAccount: wallet,
+              locale: 'vi',
+              hideAmount: false,
+              showDate: true,
+              onTap: () {},
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('-45.000 ₫'), findsOneWidget);
+      expect(find.text('05/11/2026'), findsOneWidget);
+    });
   });
 }
 
