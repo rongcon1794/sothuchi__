@@ -71,6 +71,42 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
     ]).animate(CurvedAnimation(parent: _shakeController, curve: LucianTokens.ease));
 
     _checkBalance(notify: false);
+
+    if (!widget.isEditing) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final route = ModalRoute.of(context);
+        if (route != null &&
+            route.animation != null &&
+            !route.animation!.isCompleted) {
+          void onRouteAnimation(AnimationStatus status) {
+            if (status == AnimationStatus.completed) {
+              route.animation?.removeStatusListener(onRouteAnimation);
+              if (mounted) {
+                if (!widget.focusNode.hasFocus) {
+                  widget.focusNode.requestFocus();
+                }
+                SystemChannels.textInput.invokeMethod<void>('TextInput.show');
+              }
+            }
+          }
+
+          route.animation!.addStatusListener(onRouteAnimation);
+        } else {
+          if (!widget.focusNode.hasFocus) {
+            widget.focusNode.requestFocus();
+          }
+          SystemChannels.textInput.invokeMethod<void>('TextInput.show');
+        }
+
+        Future.delayed(const Duration(milliseconds: 250), () {
+          if (mounted && !widget.focusNode.hasFocus) {
+            widget.focusNode.requestFocus();
+            SystemChannels.textInput.invokeMethod<void>('TextInput.show');
+          }
+        });
+      });
+    }
   }
 
   @override
@@ -199,6 +235,7 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
                 if (!widget.focusNode.hasFocus) {
                   widget.focusNode.requestFocus();
                 }
+                SystemChannels.textInput.invokeMethod<void>('TextInput.show');
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 220),

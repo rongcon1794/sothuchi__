@@ -99,12 +99,57 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     if (_isEditing) {
       _loadExistingTransaction();
     } else {
+      _scheduleAutoFocus();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           ref.read(categoriesActionControllerProvider.notifier).seedDefaultsIfNeeded();
         }
       });
     }
+  }
+
+  void _scheduleAutoFocus() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _isEditing) return;
+
+      final modalRoute = ModalRoute.of(context);
+      if (modalRoute != null &&
+          modalRoute.animation != null &&
+          !modalRoute.animation!.isCompleted) {
+        void onAnimationCompleted(AnimationStatus status) {
+          if (status == AnimationStatus.completed) {
+            modalRoute.animation?.removeStatusListener(onAnimationCompleted);
+            if (mounted && !_isEditing) {
+              _requestAmountFocus();
+            }
+          }
+        }
+
+        modalRoute.animation!.addStatusListener(onAnimationCompleted);
+      } else {
+        _requestAmountFocus();
+      }
+
+      // Safeguard fallback: ensure focus is requested after route transition settles
+      Future.delayed(const Duration(milliseconds: 250), () {
+        if (mounted && !_isEditing) {
+          _requestAmountFocus();
+        }
+      });
+    });
+  }
+
+  void _requestAmountFocus() {
+    if (!mounted || _isEditing) return;
+    if (!_amountFocusNode.hasFocus) {
+      _amountFocusNode.requestFocus();
+    }
+    if (_amountController.text.isNotEmpty) {
+      _amountController.selection = TextSelection.collapsed(
+        offset: _amountController.text.length,
+      );
+    }
+    SystemChannels.textInput.invokeMethod<void>('TextInput.show');
   }
 
   Future<void> _loadExistingTransaction() async {

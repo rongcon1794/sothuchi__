@@ -85,6 +85,8 @@ void main() {
       // Verify cursor is hidden inside amount field for clean presentation
       final textField = tester.widget<TextField>(find.byType(TextField).first);
       expect(textField.showCursor, isFalse);
+      // Verify amount field is automatically focused on new transaction form
+      expect(textField.focusNode?.hasFocus, isTrue);
 
       // Verify Save button (l10n.save in Vietnamese is 'Lưu')
       expect(find.text('Lưu'), findsOneWidget);
