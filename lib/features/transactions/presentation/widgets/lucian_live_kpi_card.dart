@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
@@ -53,11 +54,25 @@ class LucianLiveKpiCard extends StatefulWidget {
   State<LucianLiveKpiCard> createState() => _LucianLiveKpiCardState();
 }
 
+class LucianSparkPoint {
+  const LucianSparkPoint({
+    required this.date,
+    required this.rawValue,
+    required this.normalizedY,
+  });
+
+  final DateTime date;
+  final double rawValue;
+  final double normalizedY;
+}
+
 class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
     with SingleTickerProviderStateMixin {
   late LucianKpiMetric _activeMetric;
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
+  int? _scrubbedIndex;
+  Timer? _scrubResetTimer;
 
   @override
   void initState() {
@@ -83,6 +98,7 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
 
   @override
   void dispose() {
+    _scrubResetTimer?.cancel();
     _pulseController.dispose();
     super.dispose();
   }
@@ -90,7 +106,38 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
   void _switchMetric(LucianKpiMetric metric) {
     if (_activeMetric == metric) return;
     HapticFeedback.selectionClick();
-    setState(() => _activeMetric = metric);
+    _scrubResetTimer?.cancel();
+    setState(() {
+      _activeMetric = metric;
+      _scrubbedIndex = null;
+    });
+  }
+
+  void _onScrub(double localX, double totalWidth, int count) {
+    if (count < 2 || totalWidth <= 0) return;
+    _scrubResetTimer?.cancel();
+    final step = totalWidth / (count - 1);
+    final index = (localX / step).round().clamp(0, count - 1);
+    if (index != _scrubbedIndex) {
+      unawaited(HapticFeedback.selectionClick());
+      setState(() => _scrubbedIndex = index);
+    }
+  }
+
+  void _scheduleScrubReset() {
+    _scrubResetTimer?.cancel();
+    _scrubResetTimer = Timer(const Duration(milliseconds: 1600), () {
+      if (mounted) {
+        setState(() => _scrubbedIndex = null);
+      }
+    });
+  }
+
+  void _resetScrub() {
+    _scrubResetTimer?.cancel();
+    if (_scrubbedIndex != null && mounted) {
+      setState(() => _scrubbedIndex = null);
+    }
   }
 
   @override
@@ -167,7 +214,20 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
     }
 
     // Sparkline points derived from current month cashflow
-    final sparkPoints = _generateSparklineData();
+    final sparkData = _generateSparkData();
+    final sparkPoints = sparkData.map((p) => p.normalizedY).toList();
+    final scrubbedPoint = (_scrubbedIndex != null &&
+            _scrubbedIndex! >= 0 &&
+            _scrubbedIndex! < sparkData.length)
+        ? sparkData[_scrubbedIndex!]
+        : null;
+
+    final displayMoney = scrubbedPoint != null
+        ? Money(
+            minorUnits: scrubbedPoint.rawValue.round(),
+            currencyCode: widget.totalBalance.currencyCode,
+          )
+        : activeMoney;
 
     return Container(
       decoration: BoxDecoration(
@@ -234,16 +294,54 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(
-                  metricTitle,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.3,
-                    color: isDark
-                        ? LucianTokens.ink2Dark
-                        : LucianTokens.ink2Light,
-                  ),
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        metricTitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.3,
+                          color: isDark
+                              ? LucianTokens.ink2Dark
+                              : LucianTokens.ink2Light,
+                        ),
+                      ),
+                    ),
+                    if (scrubbedPoint != null) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: accentColor.withValues(alpha: isDark ? 0.22 : 0.14),
+                          borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                          border: Border.all(
+                            color: accentColor.withValues(alpha: 0.35),
+                            width: AppleTokens.hairline,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(CupertinoIcons.calendar, size: 10.5, color: accentColor),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${scrubbedPoint.date.day.toString().padLeft(2, '0')}/${scrubbedPoint.date.month.toString().padLeft(2, '0')}',
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w700,
+                                color: accentColor,
+                                fontFeatures: AppTheme.tabularFigures,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
               // Visibility Toggle Button
@@ -301,9 +399,9 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
                 );
               },
               child: KeyedSubtree(
-                key: ValueKey('kpi_${_activeMetric.name}_${widget.hideBalance}'),
+                key: ValueKey('kpi_${_activeMetric.name}_${widget.hideBalance}_${_scrubbedIndex ?? -1}'),
                 child: Text(
-                  activeMoney.format(
+                  displayMoney.format(
                     locale: widget.locale,
                     masked: widget.hideBalance,
                     showPlusSign: _activeMetric == LucianKpiMetric.income,
@@ -382,16 +480,33 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
           ),
           const SizedBox(height: 10),
 
-          // 4. Lucian Sparkline Bezier Trend Curve
+          // 4. Lucian Sparkline Bezier Trend Curve with Touch Scrubbing
           SizedBox(
-            height: 48,
-            child: CustomPaint(
-              painter: _LucianSparklinePainter(
-                points: sparkPoints,
-                lineColor: accentColor,
-                isDark: isDark,
-              ),
-              size: Size.infinite,
+            height: 52,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onHorizontalDragStart: (details) =>
+                      _onScrub(details.localPosition.dx, constraints.maxWidth, sparkData.length),
+                  onHorizontalDragUpdate: (details) =>
+                      _onScrub(details.localPosition.dx, constraints.maxWidth, sparkData.length),
+                  onHorizontalDragEnd: (_) => _scheduleScrubReset(),
+                  onTapDown: (details) =>
+                      _onScrub(details.localPosition.dx, constraints.maxWidth, sparkData.length),
+                  onTapUp: (_) => _scheduleScrubReset(),
+                  onTapCancel: () => _resetScrub(),
+                  child: CustomPaint(
+                    painter: _LucianSparklinePainter(
+                      points: sparkPoints,
+                      lineColor: accentColor,
+                      isDark: isDark,
+                      selectedIndex: _scrubbedIndex,
+                    ),
+                    size: Size.infinite,
+                  ),
+                );
+              },
             ),
           ),
           const SizedBox(height: 12),
@@ -514,7 +629,7 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
     );
   }
 
-  List<double> _generateSparklineData() {
+  List<LucianSparkPoint> _generateSparkData() {
     final now = DateTime.now();
     final currentDay = now.day;
     final currency = widget.totalBalance.currencyCode;
@@ -591,25 +706,34 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
     }
 
     if (rawValues.isEmpty) {
-      return List.filled(7, 0.5);
+      return List.generate(
+        7,
+        (i) => LucianSparkPoint(
+          date: now.subtract(Duration(days: 6 - i)),
+          rawValue: 0.0,
+          normalizedY: 0.5,
+        ),
+      );
     }
 
     final minVal = rawValues.reduce(math.min);
     final maxVal = rawValues.reduce(math.max);
 
-    // If completely flat
-    if (minVal == maxVal) {
-      if (minVal == 0) {
-        return List.filled(rawValues.length, 0.15);
+    return List.generate(rawValues.length, (i) {
+      final v = rawValues[i];
+      final double normY;
+      if (minVal == maxVal) {
+        normY = (minVal == 0) ? 0.15 : 0.5;
+      } else {
+        final ratio = (v - minVal) / (maxVal - minVal);
+        normY = 0.15 + (0.70 * ratio);
       }
-      return List.filled(rawValues.length, 0.5);
-    }
-
-    // Normalized to 0.15 .. 0.85 to provide comfortable vertical breathing room
-    return rawValues.map((v) {
-      final ratio = (v - minVal) / (maxVal - minVal);
-      return 0.15 + (0.70 * ratio);
-    }).toList();
+      return LucianSparkPoint(
+        date: days[i],
+        rawValue: v,
+        normalizedY: normY,
+      );
+    });
   }
 }
 
@@ -619,11 +743,13 @@ class _LucianSparklinePainter extends CustomPainter {
     required this.points,
     required this.lineColor,
     required this.isDark,
+    this.selectedIndex,
   });
 
   final List<double> points;
   final Color lineColor;
   final bool isDark;
+  final int? selectedIndex;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -701,12 +827,54 @@ class _LucianSparklinePainter extends CustomPainter {
       ..color = isDark ? LucianTokens.surfaceDark : Colors.white
       ..style = PaintingStyle.fill;
     canvas.drawCircle(last, 1.5, centerDotPaint);
+
+    // 4. Interactive touch scrub cursor and active highlight point
+    if (selectedIndex != null &&
+        selectedIndex! >= 0 &&
+        selectedIndex! < coords.length) {
+      final scrubPt = coords[selectedIndex!];
+
+      // Vertical luminous guideline
+      final cursorPaint = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            lineColor.withValues(alpha: 0.05),
+            lineColor.withValues(alpha: 0.85),
+            lineColor.withValues(alpha: 0.15),
+          ],
+        ).createShader(Rect.fromLTWH(scrubPt.dx - 1, 0, 2, height))
+        ..strokeWidth = 1.5;
+      canvas.drawLine(
+        Offset(scrubPt.dx, 0),
+        Offset(scrubPt.dx, height),
+        cursorPaint,
+      );
+
+      // Active focal glowing head
+      final scrubGlowPaint = Paint()
+        ..color = lineColor.withValues(alpha: 0.45)
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(scrubPt, 8.5, scrubGlowPaint);
+
+      final scrubHeadPaint = Paint()
+        ..color = lineColor
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(scrubPt, 4.5, scrubHeadPaint);
+
+      final scrubCenterPaint = Paint()
+        ..color = isDark ? LucianTokens.surfaceDark : Colors.white
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(scrubPt, 2.0, scrubCenterPaint);
+    }
   }
 
   @override
   bool shouldRepaint(covariant _LucianSparklinePainter oldDelegate) {
     return oldDelegate.lineColor != lineColor ||
         oldDelegate.points != points ||
-        oldDelegate.isDark != isDark;
+        oldDelegate.isDark != isDark ||
+        oldDelegate.selectedIndex != selectedIndex;
   }
 }

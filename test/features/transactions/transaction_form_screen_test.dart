@@ -11,6 +11,8 @@ import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
 import 'package:so_thu_chi/features/categories/data/repositories/firestore_category_repository.dart';
 import 'package:so_thu_chi/features/transactions/data/repositories/firestore_transaction_repository.dart';
 import 'package:so_thu_chi/features/transactions/presentation/screens/transaction_form_screen.dart';
+import 'package:so_thu_chi/features/transactions/presentation/widgets/apple_financial_keypad.dart';
+import 'package:so_thu_chi/features/transactions/presentation/widgets/transaction_wallet_picker_sheet.dart';
 import 'package:so_thu_chi/l10n/app_localizations.dart';
 
 void main() {
@@ -140,16 +142,33 @@ void main() {
 
       // Bottom sheet is visible with title
       expect(find.text('Chọn ví thanh toán'), findsOneWidget);
-      expect(find.text('Tiền mặt'), findsOneWidget);
-      expect(find.text('Techcombank'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(TransactionWalletPickerSheet),
+          matching: find.text('Tiền mặt'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(TransactionWalletPickerSheet),
+          matching: find.text('Techcombank'),
+        ),
+        findsOneWidget,
+      );
 
-      // Tap Techcombank to select it
-      await tester.tap(find.text('Techcombank'));
+      // Tap Techcombank to select it in sheet
+      await tester.tap(
+        find.descendant(
+          of: find.byType(TransactionWalletPickerSheet),
+          matching: find.text('Techcombank'),
+        ),
+      );
       await tester.pumpAndSettle();
 
       // Sheet is closed
       expect(find.text('Chọn ví thanh toán'), findsNothing);
-      expect(find.textContaining('Techcombank'), findsOneWidget);
+      expect(find.textContaining('Techcombank'), findsWidgets);
     });
 
     testWidgets('category selection card displays active category and supports 1-tap selection', (tester) async {
@@ -265,6 +284,27 @@ void main() {
       await tester.tap(deleteChip);
       await tester.pumpAndSettle();
       expect(find.byIcon(CupertinoIcons.xmark_circle_fill), findsNothing);
+    });
+
+    testWidgets('toggles financial keypad and quick-selects wallet via chips', (tester) async {
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pumpAndSettle();
+
+      // Quick wallet chip selects Techcombank directly
+      final techcombankChip = find.text('Techcombank');
+      expect(techcombankChip, findsOneWidget);
+      await tester.tap(techcombankChip);
+      await tester.pumpAndSettle();
+
+      // Toggle financial keypad
+      final keypadToggle = find.byIcon(CupertinoIcons.number_square);
+      expect(keypadToggle, findsOneWidget);
+      await tester.tap(keypadToggle);
+      await tester.pumpAndSettle();
+
+      // Keypad is open
+      expect(find.byType(AppleFinancialKeypad), findsOneWidget);
+      expect(find.text('000'), findsOneWidget);
     });
   });
 }

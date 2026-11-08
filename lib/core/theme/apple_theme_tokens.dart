@@ -50,6 +50,7 @@ abstract final class AppleTokens {
   static const double radiusCard = 18.0;
   static const double radiusSheet = 20.0;
   static const double radiusControl = 12.0;
+  static const double radiusSm = 10.0;
   static const double radiusPill = 999.0;
 
   // --- Shadows ---
@@ -101,4 +102,18 @@ abstract final class AppleTokens {
   static const double scrollBottomPaddingWithFab = 120.0;
   static const double scrollBottomPaddingNoFab = 40.0;
   static const double scrollBottomPaddingLandscape = 24.0;
+
+  // --- Unified Layout Max Width Constraints ---
+  /// Main screens (Overview, Transactions, Accounts, Budgets, Reports, Settings, etc.)
+  static const double maxContentWidth = 1024.0;
+  /// Detail views and forms on tablets/desktops
+  static const double maxDetailWidth = 860.0;
+  /// Compact auth / modal / alert screens
+  static const double maxCardDialogWidth = 480.0;
+
+  // --- OLED True Black Palette Tokens ---
+  static const Color bgOledPrimary = Color(0xFF000000);
+  static const Color bgOledCard = Color(0xFF0D0D10);
+  static const Color bgOledSecondary = Color(0xFF141418);
+  static const Color bgOledBorder = Color(0xFF222228);
 }

@@ -198,7 +198,7 @@ class _RecurringTransactionsScreenState
             },
             child: Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 860),
+                constraints: const BoxConstraints(maxWidth: AppleTokens.maxContentWidth),
                 child: ListView(
                   padding: EdgeInsets.fromLTRB(16, 8, 16, scrollBottomPadding),
                   children: [

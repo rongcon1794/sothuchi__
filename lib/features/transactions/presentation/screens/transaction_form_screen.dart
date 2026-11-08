@@ -23,6 +23,7 @@ import 'package:so_thu_chi/features/categories/presentation/widgets/category_for
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
+import 'package:so_thu_chi/features/transactions/presentation/widgets/apple_financial_keypad.dart';
 import 'package:so_thu_chi/features/transactions/presentation/widgets/transaction_category_picker_section.dart';
 import 'package:so_thu_chi/features/transactions/presentation/widgets/transaction_hero_amount_card.dart';
 import 'package:so_thu_chi/features/transactions/presentation/widgets/transaction_smart_note_section.dart';
@@ -64,6 +65,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   TransactionEntity? _existingTx;
   bool _loadingExisting = false;
   bool _initializedDefaults = false;
+  bool _showFinancialKeypad = false;
 
   bool get _isEditing => widget.editTransactionId != null;
 
@@ -248,6 +250,80 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         }
       });
     }
+  }
+
+  Widget _buildQuickWalletSelector({
+    required List<Account> wallets,
+    required String? selectedWalletId,
+    required String locale,
+    required ValueChanged<String> onSelect,
+  }) {
+    if (wallets.isEmpty) return const SizedBox.shrink();
+    return SizedBox(
+      height: 38,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        itemCount: wallets.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final w = wallets[index];
+          final isSelected = w.id == selectedWalletId;
+          final color = AppIconCatalog.contrastSafeColor(
+            Color(w.color),
+            Theme.of(context).brightness,
+          );
+          return ApplePressable(
+            scaleDown: 0.94,
+            onTap: () {
+              unawaited(HapticFeedback.selectionClick());
+              onSelect(w.id);
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? color.withValues(alpha: 0.18)
+                    : (Theme.of(context).brightness == Brightness.dark
+                        ? AppleTokens.bgDarkSecondary
+                        : AppleTokens.bgLightCard),
+                borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                border: Border.all(
+                  color: isSelected ? color : AppleTokens.borderLight.withValues(alpha: 0.4),
+                  width: isSelected ? 1.5 : AppleTokens.hairline,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(AppIconCatalog.resolve(w.icon), size: 14, color: color),
+                  const SizedBox(width: 6),
+                  Text(
+                    w.name,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                      color: isSelected ? color : null,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    w.balanceMoney.format(locale: locale),
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      fontFeatures: AppTheme.tabularFigures,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   Future<void> _openCreateCategorySheet(BuildContext context) async {
@@ -648,7 +724,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               key: _formKey,
               child: Center(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 860),
+                  constraints: const BoxConstraints(maxWidth: AppleTokens.maxDetailWidth),
                   child: SingleChildScrollView(
                     padding: EdgeInsets.fromLTRB(16, 8, 16, scrollBottomPadding),
                     child: Column(
@@ -664,6 +740,15 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                     locale: locale,
                     isEditing: _isEditing,
                     availableWalletBalance: availableBalance,
+                    isKeypadOpen: _showFinancialKeypad,
+                    onToggleKeypad: () {
+                      setState(() {
+                        _showFinancialKeypad = !_showFinancialKeypad;
+                        if (_showFinancialKeypad) {
+                          _amountFocusNode.unfocus();
+                        }
+                      });
+                    },
                     onTypeChanged: (newType) {
                       setState(() {
                         _type = newType;
@@ -680,6 +765,24 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                     onSetAmount: (amount) => _setAmount(amount, currencyCode, locale),
                     onClear: _clearAmount,
                   ),
+                  if (_showFinancialKeypad) ...[
+                    const SizedBox(height: 12),
+                    AppleGlassCard(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+                      child: AppleFinancialKeypad(
+                        amountController: _amountController,
+                        currencyCode: currencyCode,
+                        locale: locale,
+                        primaryColor: _type == TransactionType.income
+                            ? AppleTokens.jadePrimary
+                            : (_type == TransactionType.transfer
+                                ? AppleTokens.cobaltTransfer
+                                : AppleTokens.rubyExpense),
+                        onDone: () => setState(() => _showFinancialKeypad = false),
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 18),
 
                   // 2. Category Selection Section (Only for Expense & Income)
@@ -839,7 +942,18 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                     ],
                   ],
 
-                  // 3. Wallet Selection Section
+                  // 3. Wallet Selection Section & Quick Wallet Chips
+                  if (walletsForDropdown.isNotEmpty) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: _buildQuickWalletSelector(
+                        wallets: walletsForDropdown,
+                        selectedWalletId: _accountId,
+                        locale: locale,
+                        onSelect: (id) => setState(() => _accountId = id),
+                      ),
+                    ),
+                  ],
                   AppleListGroup(
                     header: l10n.walletsTitle,
                     margin: const EdgeInsets.only(bottom: 20),

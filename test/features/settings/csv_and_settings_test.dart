@@ -306,6 +306,42 @@ void main() {
       expect(find.text('Xóa tài khoản & toàn bộ dữ liệu'), findsOneWidget);
       expect(find.byIcon(Icons.delete_outline_rounded), findsOneWidget);
     });
+
+    testWidgets('displays OLED True Black mode toggle in dark theme', (tester) async {
+      FlutterSecureStorage.setMockInitialValues({});
+      SharedPreferences.setMockInitialValues({
+        'settings.theme_mode': 'dark',
+      });
+      final prefs = await SharedPreferences.getInstance();
+      final fakeBio = FakeBiometricService();
+      final fakeCsv = FakeWidgetCsvExportService();
+      final accRepo = InMemoryAccountRepository();
+      final catRepo = InMemoryCategoryRepository();
+      final txRepo = InMemoryTransactionRepository(accountRepo: accRepo);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            biometricServiceProvider.overrideWithValue(fakeBio),
+            csvExportServiceProvider.overrideWithValue(fakeCsv),
+            accountRepositoryProvider.overrideWithValue(accRepo),
+            categoryRepositoryProvider.overrideWithValue(catRepo),
+            transactionRepositoryProvider.overrideWithValue(txRepo),
+          ],
+          child: MaterialApp(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: AppTheme.dark(AppTheme.seedColor, true),
+            home: const SettingsScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('OLED True Black'), findsOneWidget);
+    });
   });
 }
 

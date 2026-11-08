@@ -47,7 +47,6 @@ class DashboardMiniWalletCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: isDark ? AppleTokens.bgDarkCard : AppleTokens.bgLightCard,
             borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
@@ -63,60 +62,128 @@ class DashboardMiniWalletCard extends StatelessWidget {
               ),
             ],
           ),
-          child: Semantics(
-            button: true,
-            excludeSemantics: true,
-            label:
-                '${account.name}, ${hideBalance ? l10n.balanceHidden : formattedBalance}',
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.16),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        AppIconCatalog.resolve(account.icon),
-                        size: 16,
-                        color: color,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        account.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Text(
-                  formattedBalance,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    fontFeatures: AppTheme.tabularFigures,
-                    color: isDark ? Colors.white : const Color(0xFF1C1C1E),
+          clipBehavior: Clip.antiAlias,
+          child: Stack(
+            children: [
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: 28,
+                child: IgnorePointer(
+                  child: CustomPaint(
+                    painter: _MiniWalletWavePainter(color: color),
                   ),
                 ),
-              ],
-            ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Semantics(
+                  button: true,
+                  excludeSemantics: true,
+                  label:
+                      '${account.name}, ${hideBalance ? l10n.balanceHidden : formattedBalance}',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              color: color.withValues(alpha: 0.16),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              AppIconCatalog.resolve(account.icon),
+                              size: 16,
+                              color: color,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              account.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        formattedBalance,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          fontFeatures: AppTheme.tabularFigures,
+                          color: isDark ? Colors.white : const Color(0xFF1C1C1E),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
+}
+
+class _MiniWalletWavePainter extends CustomPainter {
+  const _MiniWalletWavePainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final fillPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          color.withValues(alpha: 0.18),
+          color.withValues(alpha: 0.02),
+        ],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
+      ..style = PaintingStyle.fill;
+
+    final linePaint = Paint()
+      ..color = color.withValues(alpha: 0.38)
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    final path = Path();
+    path.moveTo(0, size.height * 0.72);
+    path.cubicTo(
+      size.width * 0.35,
+      size.height * 0.40,
+      size.width * 0.65,
+      size.height * 0.88,
+      size.width,
+      size.height * 0.35,
+    );
+
+    final fillPath = Path.from(path)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+
+    canvas.drawPath(fillPath, fillPaint);
+    canvas.drawPath(path, linePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _MiniWalletWavePainter oldDelegate) =>
+      oldDelegate.color != color;
 }
 
 class DashboardAddWalletCard extends StatelessWidget {

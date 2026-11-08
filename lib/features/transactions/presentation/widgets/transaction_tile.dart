@@ -1,5 +1,9 @@
+import 'dart:async';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
@@ -254,12 +258,19 @@ class TransactionTile extends StatelessWidget {
     return Dismissible(
       key: ValueKey('tx_${transaction.id}'),
       direction: DismissDirection.horizontal,
+      onUpdate: (details) {
+        if (details.reached && !details.previousReached) {
+          unawaited(HapticFeedback.mediumImpact());
+        }
+      },
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.startToEnd) {
+          unawaited(HapticFeedback.lightImpact());
           onSwipeEdit?.call();
           return false;
         }
         if (direction == DismissDirection.endToStart && onSwipeDelete != null) {
+          unawaited(HapticFeedback.mediumImpact());
           return await onSwipeDelete!();
         }
         return false;
@@ -268,14 +279,15 @@ class TransactionTile extends StatelessWidget {
         alignment: Alignment.centerLeft,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
-          color: const Color(0xFF007AFF),
+          color: AppleTokens.systemBlue,
           borderRadius: BorderRadius.circular(14),
         ),
         child: Row(
           children: [
             const Icon(
-              Icons.edit_rounded,
+              CupertinoIcons.pencil,
               color: Colors.white,
+              size: 20,
             ),
             const SizedBox(width: 8),
             Text(
@@ -292,7 +304,7 @@ class TransactionTile extends StatelessWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
-          color: const Color(0xFFFF3B30),
+          color: AppleTokens.rubyExpense,
           borderRadius: BorderRadius.circular(14),
         ),
         child: Row(
@@ -307,8 +319,9 @@ class TransactionTile extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             const Icon(
-              Icons.delete_outline_rounded,
+              CupertinoIcons.trash,
               color: Colors.white,
+              size: 20,
             ),
           ],
         ),

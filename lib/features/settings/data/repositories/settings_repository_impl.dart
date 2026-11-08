@@ -22,6 +22,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
   static const String _keyDefaultWallet = 'default_wallet_id';
   static const String _keyBiometricLock = 'settings.biometric_lock_enabled';
   static const String _keyAccentColor = 'settings.accent_color_index';
+  static const String _keyOledMode = 'settings.oled_mode';
 
   final SharedPreferences prefs;
   final FlutterSecureStorage secureStorage;
@@ -44,6 +45,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
     final initialSetupCompleted = prefs.getBool(_keyInitialSetupDone) ?? false;
     final defaultWalletId = prefs.getString(_keyDefaultWallet);
     final accentColorIndex = prefs.getInt(_keyAccentColor) ?? 0;
+    final oledMode = prefs.getBool(_keyOledMode) ?? false;
 
     var biometricEnabled = false;
     try {
@@ -63,6 +65,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
       initialSetupCompleted: initialSetupCompleted,
       defaultWalletId: defaultWalletId,
       accentColorIndex: accentColorIndex,
+      oledMode: oledMode,
     );
   }
 
@@ -169,6 +172,16 @@ class SettingsRepositoryImpl implements SettingsRepository {
   Future<Result<void>> setAccentColorIndex(int index) async {
     try {
       await prefs.setInt(_keyAccentColor, index);
+      return const Success(null);
+    } catch (e) {
+      return Failure(StorageException(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> setOledMode(bool enabled) async {
+    try {
+      await prefs.setBool(_keyOledMode, enabled);
       return const Success(null);
     } catch (e) {
       return Failure(StorageException(e.toString()));

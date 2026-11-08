@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
+import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/reports/domain/entities/monthly_report.dart';
 
 class CategoryLegendRow extends StatelessWidget {
@@ -11,16 +13,21 @@ class CategoryLegendRow extends StatelessWidget {
     required this.slice,
     required this.locale,
     required this.hideBalance,
+    this.isSelected = false,
+    this.onTap,
   });
 
   final CategorySpendSlice slice;
   final String locale;
   final bool hideBalance;
+  final bool isSelected;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final catColor = AppIconCatalog.contrastSafeColor(
       Color(slice.color),
       theme.brightness,
@@ -35,12 +42,28 @@ class CategoryLegendRow extends StatelessWidget {
       masked: hideBalance,
     );
 
-    return Semantics(
+    final rowWidget = Semantics(
       container: true,
       label:
           '$name, ${slice.percentage}%, ${hideBalance ? l10n.balanceHidden : formattedAmount}',
       excludeSemantics: true,
-      child: Column(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? catColor.withValues(alpha: isDark ? 0.20 : 0.10)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppleTokens.radiusSm),
+          border: Border.all(
+            color: isSelected
+                ? catColor.withValues(alpha: isDark ? 0.6 : 0.45)
+                : Colors.transparent,
+            width: 1.5,
+          ),
+        ),
+        child: Column(
         children: [
           LayoutBuilder(
             builder: (context, rowConstraints) {
@@ -166,7 +189,20 @@ class CategoryLegendRow extends StatelessWidget {
           ),
         ],
       ),
+      ),
     );
+
+    if (onTap != null) {
+      return ApplePressable(
+        borderRadius: BorderRadius.circular(AppleTokens.radiusSm),
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap!();
+        },
+        child: rowWidget,
+      );
+    }
+    return rowWidget;
   }
 }
 

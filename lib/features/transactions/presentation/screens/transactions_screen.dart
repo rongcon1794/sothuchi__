@@ -208,7 +208,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
           // Responsive Search & Type Filter Bar (rendered in body, not pinned/fixed in header)
           Center(
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: isWide ? 1100 : 860),
+              constraints: const BoxConstraints(maxWidth: AppleTokens.maxContentWidth),
               child: isLandscape
                   ? Padding(
                       padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
@@ -442,7 +442,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
               padding: EdgeInsets.fromLTRB(16, isLandscape ? 2 : 6, 16, isLandscape ? 4 : 6),
               child: Center(
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: isWide ? 1100 : 860),
+                  constraints: const BoxConstraints(maxWidth: AppleTokens.maxContentWidth),
                   child: AppleGlassCard(
                     padding: EdgeInsets.symmetric(
                       horizontal: isLandscape ? 10 : 14,
@@ -579,7 +579,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
 
                     return Center(
                       child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1100),
+                        constraints: const BoxConstraints(maxWidth: AppleTokens.maxContentWidth),
                         child: ListView(
                           padding: EdgeInsets.fromLTRB(16, 2, 16, scrollBottomPadding),
                           children: [
@@ -639,7 +639,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
 
                   return Center(
                     child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 860),
+                      constraints: const BoxConstraints(maxWidth: AppleTokens.maxContentWidth),
                       child: ListView.builder(
                         padding: EdgeInsets.fromLTRB(16, 4, 16, scrollBottomPadding),
                         itemCount: grouped.length,

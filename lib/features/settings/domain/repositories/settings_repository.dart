@@ -13,5 +13,6 @@ abstract interface class SettingsRepository {
   Future<Result<void>> setInitialSetupCompleted(bool completed, {String? uid});
   Future<Result<void>> setDefaultWalletId(String? walletId);
   Future<Result<void>> setAccentColorIndex(int index);
+  Future<Result<void>> setOledMode(bool enabled);
 }
 

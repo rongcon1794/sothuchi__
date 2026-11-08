@@ -35,7 +35,7 @@ class SoThuChiApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       onGenerateTitle: (ctx) => AppLocalizations.of(ctx).appTitle,
       theme: AppTheme.light(seedColor),
-      darkTheme: AppTheme.dark(seedColor),
+      darkTheme: AppTheme.dark(seedColor, settings.oledMode),
       themeMode: settings.themeMode,
       locale: Locale(settings.localeCode),
       supportedLocales: const [

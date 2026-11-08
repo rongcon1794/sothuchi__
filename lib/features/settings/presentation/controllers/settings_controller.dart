@@ -140,6 +140,15 @@ class SettingsController extends AsyncNotifier<AppSettings> {
     }
     return res;
   }
+
+  Future<Result<void>> updateOledMode(bool enabled) async {
+    final repo = ref.read(settingsRepositoryProvider);
+    final res = await repo.setOledMode(enabled);
+    if (res.isSuccess) {
+      state = AsyncData(currentOrDefaults.copyWith(oledMode: enabled));
+    }
+    return res;
+  }
 }
 
 final settingsControllerProvider =

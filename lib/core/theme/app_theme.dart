@@ -163,16 +163,18 @@ abstract final class AppTheme {
   static ThemeData light([Color seed = seedColor]) =>
       _build(Brightness.light, seed);
 
-  static ThemeData dark([Color seed = seedColor]) =>
-      _build(Brightness.dark, seed);
+  static ThemeData dark([Color seed = seedColor, bool oledMode = false]) =>
+      _build(Brightness.dark, seed, oledMode: oledMode);
 
-  static ThemeData _build(Brightness brightness, Color seed) {
+  static ThemeData _build(Brightness brightness, Color seed, {bool oledMode = false}) {
     final isDark = brightness == Brightness.dark;
     final colorScheme = ColorScheme.fromSeed(
       seedColor: seed,
       primary: seed,
       brightness: brightness,
-      surface: isDark ? AppleTokens.bgDarkCard : AppleTokens.bgLightCard,
+      surface: isDark
+          ? (oledMode ? AppleTokens.bgOledCard : AppleTokens.bgDarkCard)
+          : AppleTokens.bgLightCard,
     );
     final baseText = Typography.material2021().black.apply(
       bodyColor: colorScheme.onSurface,
@@ -183,8 +185,9 @@ abstract final class AppTheme {
       useMaterial3: true,
       brightness: brightness,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor:
-          isDark ? AppleTokens.bgDarkGrouped : AppleTokens.bgLightGrouped,
+      scaffoldBackgroundColor: isDark
+          ? (oledMode ? AppleTokens.bgOledPrimary : AppleTokens.bgDarkGrouped)
+          : AppleTokens.bgLightGrouped,
       extensions: [isDark ? FinanceColors.dark : FinanceColors.light],
       textTheme: baseText.copyWith(
         displaySmall: baseText.displaySmall?.copyWith(

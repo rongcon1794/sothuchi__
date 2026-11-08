@@ -107,7 +107,7 @@ class AppShellScaffold extends StatelessWidget {
                   height: navBarHeight,
                   child: Center(
                     child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 860),
+                      constraints: const BoxConstraints(maxWidth: AppleTokens.maxContentWidth),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [

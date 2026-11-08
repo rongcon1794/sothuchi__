@@ -640,6 +640,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ],
           ),
         ),
+        if (settings.themeMode == ThemeMode.dark || (settings.themeMode == ThemeMode.system && isDark))
+          ListTile(
+            leading: const AppleSquircleBadge(
+              icon: CupertinoIcons.circle_fill,
+              backgroundColor: Colors.black,
+            ),
+            title: const Text('OLED True Black', style: TextStyle(fontWeight: FontWeight.w600)),
+            subtitle: const Text('Màu đen sâu (#000000) tối ưu pin cho màn hình AMOLED', style: TextStyle(fontSize: 12)),
+            trailing: CupertinoSwitch(
+              value: settings.oledMode,
+              activeTrackColor: AppleTokens.systemGreen,
+              onChanged: (val) {
+                HapticFeedback.selectionClick();
+                ref.read(settingsControllerProvider.notifier).updateOledMode(val);
+              },
+            ),
+          ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Row(

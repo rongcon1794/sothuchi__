@@ -409,7 +409,7 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
               },
               child: Center(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1024),
+                  constraints: const BoxConstraints(maxWidth: AppleTokens.maxContentWidth),
                   child: ListView(
                     padding: EdgeInsets.fromLTRB(16, 8, 16, scrollBottomPadding),
                     children: [

@@ -28,6 +28,8 @@ class TransactionHeroAmountCard extends StatefulWidget {
     required this.onSetAmount,
     required this.onClear,
     this.availableWalletBalance,
+    this.isKeypadOpen = false,
+    this.onToggleKeypad,
   });
 
   final TransactionType type;
@@ -41,6 +43,8 @@ class TransactionHeroAmountCard extends StatefulWidget {
   final ValueChanged<int> onSetAmount;
   final VoidCallback onClear;
   final Money? availableWalletBalance;
+  final bool isKeypadOpen;
+  final VoidCallback? onToggleKeypad;
 
   @override
   State<TransactionHeroAmountCard> createState() => _TransactionHeroAmountCardState();
@@ -233,7 +237,8 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
                         child: TextFormField(
                           controller: widget.amountController,
                           focusNode: widget.focusNode,
-                          autofocus: !widget.isEditing,
+                          autofocus: !widget.isEditing && !widget.isKeypadOpen,
+                          readOnly: widget.isKeypadOpen,
                           textAlign: TextAlign.center,
                           showCursor: true,
                           cursorColor: typeColor,
@@ -318,6 +323,32 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
                         );
                       },
                     ),
+                    if (widget.onToggleKeypad != null)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 6),
+                        child: ApplePressable(
+                          scaleDown: 0.88,
+                          onTap: widget.onToggleKeypad!,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: widget.isKeypadOpen
+                                  ? typeColor.withValues(alpha: 0.18)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                            ),
+                            child: Icon(
+                              widget.isKeypadOpen
+                                  ? CupertinoIcons.keyboard
+                                  : CupertinoIcons.number_square,
+                              size: 20,
+                              color: widget.isKeypadOpen
+                                  ? typeColor
+                                  : typeColor.withValues(alpha: 0.75),
+                            ),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),

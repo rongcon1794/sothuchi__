@@ -15,6 +15,8 @@ class CategorySpendPieChart extends StatefulWidget {
     required this.report,
     required this.locale,
     required this.hideBalance,
+    this.selectedIndex,
+    this.onSliceSelected,
     this.height = 210,
     this.diameter = 210,
   });
@@ -22,6 +24,8 @@ class CategorySpendPieChart extends StatefulWidget {
   final MonthlyReportData report;
   final String locale;
   final bool hideBalance;
+  final int? selectedIndex;
+  final ValueChanged<int?>? onSliceSelected;
   final double height;
   final double diameter;
 
@@ -31,6 +35,8 @@ class CategorySpendPieChart extends StatefulWidget {
 
 class _CategorySpendPieChartState extends State<CategorySpendPieChart> {
   int _touchedPieIndex = -1;
+
+  int get _effectiveIndex => widget.selectedIndex ?? _touchedPieIndex;
 
   @override
   void didUpdateWidget(covariant CategorySpendPieChart oldWidget) {
@@ -48,10 +54,11 @@ class _CategorySpendPieChartState extends State<CategorySpendPieChart> {
     final locale = widget.locale;
     final hideBalance = widget.hideBalance;
 
-    final isSliceActive = _touchedPieIndex >= 0 &&
-        _touchedPieIndex < report.categorySlices.length;
+    final effectiveIndex = _effectiveIndex;
+    final isSliceActive = effectiveIndex >= 0 &&
+        effectiveIndex < report.categorySlices.length;
     final activeSlice =
-        isSliceActive ? report.categorySlices[_touchedPieIndex] : null;
+        isSliceActive ? report.categorySlices[effectiveIndex] : null;
 
     return RepaintBoundary(
       child: SizedBox(
@@ -70,16 +77,21 @@ class _CategorySpendPieChartState extends State<CategorySpendPieChart> {
                     if (!event.isInterestedForInteractions ||
                         response == null ||
                         response.touchedSection == null) {
-                      if (_touchedPieIndex != -1) {
+                      if (widget.selectedIndex == null && _touchedPieIndex != -1) {
                         setState(() => _touchedPieIndex = -1);
+                        widget.onSliceSelected?.call(null);
                       }
                       return;
                     }
                     final nextIndex =
                         response.touchedSection!.touchedSectionIndex;
-                    if (_touchedPieIndex != nextIndex) {
+                    if (nextIndex < 0 || nextIndex >= report.categorySlices.length) {
+                      return;
+                    }
+                    if (_effectiveIndex != nextIndex) {
                       unawaited(HapticFeedback.selectionClick());
                       setState(() => _touchedPieIndex = nextIndex);
+                      widget.onSliceSelected?.call(nextIndex);
                     }
                   },
                 ),
@@ -87,7 +99,7 @@ class _CategorySpendPieChartState extends State<CategorySpendPieChart> {
                   for (var i = 0; i < report.categorySlices.length; i++)
                     _buildPieSection(
                       slice: report.categorySlices[i],
-                      isTouched: i == _touchedPieIndex,
+                      isTouched: i == effectiveIndex,
                       theme: theme,
                     ),
                 ],

@@ -24,8 +24,16 @@ import 'package:so_thu_chi/features/reports/presentation/widgets/six_month_trend
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
 
-class ReportsScreen extends ConsumerWidget {
+class ReportsScreen extends ConsumerStatefulWidget {
   const ReportsScreen({super.key});
+
+  @override
+  ConsumerState<ReportsScreen> createState() => _ReportsScreenState();
+}
+
+class _ReportsScreenState extends ConsumerState<ReportsScreen> {
+  int? _selectedCategoryIndex;
+  DateTime? _lastMonth;
 
   Future<void> _shareFinancialSummary(
     MonthlyReportData report,
@@ -96,7 +104,7 @@ class ReportsScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final isLandscape = context.isLandscape;
     final l10n = context.l10n;
     final theme = Theme.of(context);
@@ -105,6 +113,10 @@ class ReportsScreen extends ConsumerWidget {
     final hideBalance = settings?.hideBalance ?? false;
 
     final selectedMonth = ref.watch(selectedReportMonthProvider);
+    if (_lastMonth != selectedMonth) {
+      _lastMonth = selectedMonth;
+      _selectedCategoryIndex = null;
+    }
     final txStream = ref.watch(transactionsStreamProvider);
     final report = ref.watch(monthlyReportProvider);
 
@@ -223,6 +235,10 @@ class ReportsScreen extends ConsumerWidget {
                                         report: report,
                                         locale: locale,
                                         hideBalance: hideBalance,
+                                        selectedIndex: _selectedCategoryIndex,
+                                        onSliceSelected: (idx) {
+                                          setState(() => _selectedCategoryIndex = idx);
+                                        },
                                         height: 230,
                                         diameter: 230,
                                       ),
@@ -232,11 +248,18 @@ class ReportsScreen extends ConsumerWidget {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            for (final slice in report.categorySlices) ...[
+                                            for (var i = 0; i < report.categorySlices.length; i++) ...[
                                               CategoryLegendRow(
-                                                slice: slice,
+                                                slice: report.categorySlices[i],
                                                 locale: locale,
                                                 hideBalance: hideBalance,
+                                                isSelected: _selectedCategoryIndex == i,
+                                                onTap: () {
+                                                  setState(() {
+                                                    _selectedCategoryIndex =
+                                                        _selectedCategoryIndex == i ? null : i;
+                                                  });
+                                                },
                                               ),
                                               const SizedBox(height: 10),
                                             ],
@@ -255,16 +278,27 @@ class ReportsScreen extends ConsumerWidget {
                                         report: report,
                                         locale: locale,
                                         hideBalance: hideBalance,
+                                        selectedIndex: _selectedCategoryIndex,
+                                        onSliceSelected: (idx) {
+                                          setState(() => _selectedCategoryIndex = idx);
+                                        },
                                         height: 210,
                                         diameter: 210,
                                       ),
                                     ),
                                     const SizedBox(height: 16),
-                                    for (final slice in report.categorySlices) ...[
+                                    for (var i = 0; i < report.categorySlices.length; i++) ...[
                                       CategoryLegendRow(
-                                        slice: slice,
+                                        slice: report.categorySlices[i],
                                         locale: locale,
                                         hideBalance: hideBalance,
+                                        isSelected: _selectedCategoryIndex == i,
+                                        onTap: () {
+                                          setState(() {
+                                            _selectedCategoryIndex =
+                                                _selectedCategoryIndex == i ? null : i;
+                                          });
+                                        },
                                       ),
                                       const SizedBox(height: 10),
                                     ],
@@ -354,7 +388,7 @@ class ReportsScreen extends ConsumerWidget {
 
                     return Center(
                       child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1024),
+                        constraints: const BoxConstraints(maxWidth: AppleTokens.maxContentWidth),
                         child: ListView(
                           padding: EdgeInsets.fromLTRB(16, 4, 16, scrollBottomPadding),
                           children: [
