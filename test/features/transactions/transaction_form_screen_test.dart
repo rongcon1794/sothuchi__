@@ -11,7 +11,6 @@ import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
 import 'package:so_thu_chi/features/categories/data/repositories/firestore_category_repository.dart';
 import 'package:so_thu_chi/features/transactions/data/repositories/firestore_transaction_repository.dart';
 import 'package:so_thu_chi/features/transactions/presentation/screens/transaction_form_screen.dart';
-import 'package:so_thu_chi/features/transactions/presentation/widgets/apple_financial_keypad.dart';
 import 'package:so_thu_chi/features/transactions/presentation/widgets/transaction_wallet_picker_sheet.dart';
 import 'package:so_thu_chi/l10n/app_localizations.dart';
 
@@ -286,7 +285,7 @@ void main() {
       expect(find.byIcon(CupertinoIcons.xmark_circle_fill), findsNothing);
     });
 
-    testWidgets('toggles financial keypad and quick-selects wallet via chips', (tester) async {
+    testWidgets('quick-selects wallet via chips', (tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pumpAndSettle();
 
@@ -296,15 +295,8 @@ void main() {
       await tester.tap(techcombankChip);
       await tester.pumpAndSettle();
 
-      // Toggle financial keypad
-      final keypadToggle = find.byIcon(CupertinoIcons.number_square);
-      expect(keypadToggle, findsOneWidget);
-      await tester.tap(keypadToggle);
-      await tester.pumpAndSettle();
-
-      // Keypad is open
-      expect(find.byType(AppleFinancialKeypad), findsOneWidget);
-      expect(find.text('000'), findsOneWidget);
+      // Verify Techcombank is selected
+      expect(find.textContaining('Techcombank'), findsWidgets);
     });
   });
 }

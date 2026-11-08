@@ -23,7 +23,6 @@ import 'package:so_thu_chi/features/categories/presentation/widgets/category_for
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
-import 'package:so_thu_chi/features/transactions/presentation/widgets/apple_financial_keypad.dart';
 import 'package:so_thu_chi/features/transactions/presentation/widgets/transaction_category_picker_section.dart';
 import 'package:so_thu_chi/features/transactions/presentation/widgets/transaction_hero_amount_card.dart';
 import 'package:so_thu_chi/features/transactions/presentation/widgets/transaction_smart_note_section.dart';
@@ -65,7 +64,6 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   TransactionEntity? _existingTx;
   bool _loadingExisting = false;
   bool _initializedDefaults = false;
-  bool _showFinancialKeypad = false;
 
   bool get _isEditing => widget.editTransactionId != null;
 
@@ -740,15 +738,6 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                     locale: locale,
                     isEditing: _isEditing,
                     availableWalletBalance: availableBalance,
-                    isKeypadOpen: _showFinancialKeypad,
-                    onToggleKeypad: () {
-                      setState(() {
-                        _showFinancialKeypad = !_showFinancialKeypad;
-                        if (_showFinancialKeypad) {
-                          _amountFocusNode.unfocus();
-                        }
-                      });
-                    },
                     onTypeChanged: (newType) {
                       setState(() {
                         _type = newType;
@@ -765,24 +754,6 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                     onSetAmount: (amount) => _setAmount(amount, currencyCode, locale),
                     onClear: _clearAmount,
                   ),
-                  if (_showFinancialKeypad) ...[
-                    const SizedBox(height: 12),
-                    AppleGlassCard(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
-                      child: AppleFinancialKeypad(
-                        amountController: _amountController,
-                        currencyCode: currencyCode,
-                        locale: locale,
-                        primaryColor: _type == TransactionType.income
-                            ? AppleTokens.jadePrimary
-                            : (_type == TransactionType.transfer
-                                ? AppleTokens.cobaltTransfer
-                                : AppleTokens.rubyExpense),
-                        onDone: () => setState(() => _showFinancialKeypad = false),
-                      ),
-                    ),
-                  ],
                   const SizedBox(height: 18),
 
                   // 2. Category Selection Section (Only for Expense & Income)
