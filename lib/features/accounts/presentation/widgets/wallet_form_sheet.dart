@@ -16,8 +16,8 @@ class WalletFormSheet extends ConsumerStatefulWidget {
 
   final Account? existing;
 
-  static Future<void> show(BuildContext context, {Account? existing}) {
-    return AppleModalSheetLayout.show<void>(
+  static Future<Account?> show(BuildContext context, {Account? existing}) {
+    return AppleModalSheetLayout.show<Account?>(
       context: context,
       builder: (_) => WalletFormSheet(existing: existing),
     );
@@ -99,7 +99,7 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
 
     if (!mounted) return;
     result.fold(
-      onSuccess: (_) => Navigator.of(context).pop(),
+      onSuccess: (acc) => Navigator.of(context).pop(acc),
       onFailure: (err) {
         ScaffoldMessenger.of(
           context,

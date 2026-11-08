@@ -16,6 +16,7 @@ import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
 import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_controller.dart';
+import 'package:so_thu_chi/features/accounts/presentation/widgets/wallet_form_sheet.dart';
 import 'package:so_thu_chi/features/budgets/presentation/controllers/budgets_controller.dart';
 import 'package:so_thu_chi/features/categories/domain/entities/category.dart';
 import 'package:so_thu_chi/features/categories/presentation/controllers/categories_controller.dart';
@@ -281,6 +282,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         title: isDestination
             ? (locale.startsWith('vi') ? 'Chọn ví nhận tiền' : l10n.txDestWallet)
             : (locale.startsWith('vi') ? 'Chọn ví thanh toán' : l10n.txSelectWallet),
+        onCreateNew: () => _createNewWallet(isDestination: isDestination),
       ),
     );
 
@@ -295,21 +297,77 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     }
   }
 
+  Future<void> _createNewWallet({bool isDestination = false}) async {
+    final created = await WalletFormSheet.show(context);
+    if (created != null && mounted) {
+      setState(() {
+        if (isDestination) {
+          _toAccountId = created.id;
+        } else {
+          _accountId = created.id;
+        }
+      });
+    }
+  }
+
   Widget _buildQuickWalletSelector({
     required List<Account> wallets,
     required String? selectedWalletId,
     required String locale,
     required ValueChanged<String> onSelect,
   }) {
-    if (wallets.isEmpty) return const SizedBox.shrink();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isOled = context.isOled;
+
     return SizedBox(
       height: 38,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
-        itemCount: wallets.length,
+        itemCount: wallets.length + 1,
         separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
+          if (index == wallets.length) {
+            // Quick Add Wallet Chip
+            return ApplePressable(
+              scaleDown: 0.94,
+              onTap: () {
+                unawaited(HapticFeedback.lightImpact());
+                _createNewWallet();
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isOled
+                      ? AppleTokens.bgOledSecondary
+                      : (isDark
+                          ? AppleTokens.bgDarkSecondary
+                          : AppleTokens.bgLightCard),
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                  border: Border.all(
+                    color: AppleTokens.systemBlue.withValues(alpha: 0.45),
+                    width: AppleTokens.hairline,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(CupertinoIcons.plus, size: 13, color: AppleTokens.systemBlue),
+                    const SizedBox(width: 4),
+                    Text(
+                      locale.startsWith('vi') ? 'Thêm ví' : context.l10n.addWallet,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppleTokens.systemBlue,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
           final w = wallets[index];
           final isSelected = w.id == selectedWalletId;
           final color = AppIconCatalog.contrastSafeColor(
@@ -328,9 +386,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               decoration: BoxDecoration(
                 color: isSelected
                     ? color.withValues(alpha: 0.18)
-                    : (Theme.of(context).brightness == Brightness.dark
-                        ? AppleTokens.bgDarkSecondary
-                        : AppleTokens.bgLightCard),
+                    : (isOled
+                        ? AppleTokens.bgOledSecondary
+                        : (isDark
+                            ? AppleTokens.bgDarkSecondary
+                            : AppleTokens.bgLightCard)),
                 borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                 border: Border.all(
                   color: isSelected ? color : AppleTokens.borderLight.withValues(alpha: 0.4),
@@ -959,17 +1019,15 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                   ],
 
                   // 3. Wallet Selection Section & Quick Wallet Chips
-                  if (walletsForDropdown.isNotEmpty) ...[
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: _buildQuickWalletSelector(
-                        wallets: walletsForDropdown,
-                        selectedWalletId: _accountId,
-                        locale: locale,
-                        onSelect: (id) => setState(() => _accountId = id),
-                      ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: _buildQuickWalletSelector(
+                      wallets: walletsForDropdown,
+                      selectedWalletId: _accountId,
+                      locale: locale,
+                      onSelect: (id) => setState(() => _accountId = id),
                     ),
-                  ],
+                  ),
                   AppleListGroup(
                     header: l10n.walletsTitle,
                     margin: const EdgeInsets.only(bottom: 20),

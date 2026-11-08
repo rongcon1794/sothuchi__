@@ -8,6 +8,7 @@ import 'package:so_thu_chi/data/firebase/firebase_providers.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/accounts/data/repositories/firestore_account_repository.dart';
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
+import 'package:so_thu_chi/features/accounts/presentation/widgets/wallet_form_sheet.dart';
 import 'package:so_thu_chi/features/categories/data/repositories/firestore_category_repository.dart';
 import 'package:so_thu_chi/features/transactions/data/repositories/firestore_transaction_repository.dart';
 import 'package:so_thu_chi/features/transactions/presentation/screens/transaction_form_screen.dart';
@@ -299,6 +300,20 @@ void main() {
 
       // Verify Techcombank is selected
       expect(find.textContaining('Techcombank'), findsWidgets);
+    });
+
+    testWidgets('shows Thêm ví chip and tapping it opens WalletFormSheet', (tester) async {
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pumpAndSettle();
+
+      final addWalletChip = find.text('Thêm ví');
+      expect(addWalletChip, findsOneWidget);
+
+      await tester.tap(addWalletChip);
+      await tester.pumpAndSettle();
+
+      // WalletFormSheet is opened
+      expect(find.byType(WalletFormSheet), findsOneWidget);
     });
 
     testWidgets('dynamically scales down amount font size as input gets longer', (tester) async {
