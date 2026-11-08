@@ -80,6 +80,10 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
       oldWidget.focusNode.removeListener(_onFocusChange);
       widget.focusNode.addListener(_onFocusChange);
     }
+    if (oldWidget.amountController != widget.amountController) {
+      oldWidget.amountController.removeListener(_onAmountChange);
+      widget.amountController.addListener(_onAmountChange);
+    }
     if (oldWidget.availableWalletBalance != widget.availableWalletBalance ||
         oldWidget.type != widget.type) {
       _checkBalance(notify: true);
@@ -99,7 +103,16 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
   }
 
   void _onAmountChange() {
-    _checkBalance(notify: true);
+    _checkBalance(notify: false);
+    if (mounted) setState(() {});
+  }
+
+  double _getDynamicFontSize(int textLength) {
+    if (textLength <= 7) return 38.0;
+    if (textLength <= 9) return 32.0;
+    if (textLength <= 12) return 26.0;
+    if (textLength <= 15) return 20.0;
+    return 17.0;
   }
 
   void _checkBalance({bool notify = true}) {
@@ -151,6 +164,11 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
 
     final isLandscape = context.isLandscape;
 
+    final textLength = widget.amountController.text.length;
+    final amountFontSize = _getDynamicFontSize(textLength);
+    final typeSignFontSize = (amountFontSize * 0.9).clamp(16.0, 34.0);
+    final symbolFontSize = (amountFontSize * 0.6).clamp(13.0, 22.0);
+
     return AppleGlassCard(
       padding: EdgeInsets.fromLTRB(
           16, isLandscape ? 10 : 16, 16, isLandscape ? 12 : 18),
@@ -185,6 +203,8 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 220),
                 curve: Curves.easeOutCubic,
+                constraints: const BoxConstraints(minHeight: 62),
+                alignment: Alignment.center,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
@@ -221,7 +241,7 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
                     Text(
                       typeSign,
                       style: TextStyle(
-                        fontSize: 34,
+                        fontSize: typeSignFontSize,
                         fontWeight: FontWeight.w800,
                         color: typeColor,
                         height: 1.0,
@@ -246,7 +266,7 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
                             ),
                           ],
                           style: theme.textTheme.displaySmall?.copyWith(
-                            fontSize: 38,
+                            fontSize: amountFontSize,
                             fontWeight: FontWeight.w800,
                             color: typeColor,
                             letterSpacing: -0.8,
@@ -265,6 +285,7 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
                             isDense: true,
                             hintText: '0',
                             hintStyle: TextStyle(
+                              fontSize: amountFontSize,
                               color: typeColor.withValues(alpha: 0.25),
                               fontWeight: FontWeight.w800,
                             ),
@@ -285,7 +306,7 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
                     Text(
                       widget.currencyInfo.symbol,
                       style: TextStyle(
-                        fontSize: 22,
+                        fontSize: symbolFontSize,
                         fontWeight: FontWeight.w700,
                         color: typeColor.withValues(alpha: 0.85),
                         height: 1.0,

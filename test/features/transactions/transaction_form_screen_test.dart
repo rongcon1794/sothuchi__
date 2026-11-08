@@ -298,5 +298,40 @@ void main() {
       // Verify Techcombank is selected
       expect(find.textContaining('Techcombank'), findsWidgets);
     });
+
+    testWidgets('dynamically scales down amount font size as input gets longer', (tester) async {
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pumpAndSettle();
+
+      final amountField = find.byType(TextField).first;
+
+      // Initial empty / short amount (<= 7 chars) -> fontSize is 38
+      var textFieldWidget = tester.widget<TextField>(amountField);
+      expect(textFieldWidget.style?.fontSize, equals(38.0));
+
+      // Enter 8-9 chars (e.g. 5.000.000) -> fontSize is 32
+      await tester.enterText(amountField, '5.000.000');
+      await tester.pumpAndSettle();
+      textFieldWidget = tester.widget<TextField>(amountField);
+      expect(textFieldWidget.style?.fontSize, equals(32.0));
+
+      // Enter 10-12 chars (e.g. 50.000.000) -> fontSize is 26
+      await tester.enterText(amountField, '50.000.000');
+      await tester.pumpAndSettle();
+      textFieldWidget = tester.widget<TextField>(amountField);
+      expect(textFieldWidget.style?.fontSize, equals(26.0));
+
+      // Enter 13-15 chars (e.g. 500.000.000.000) -> fontSize is 20
+      await tester.enterText(amountField, '500.000.000.000');
+      await tester.pumpAndSettle();
+      textFieldWidget = tester.widget<TextField>(amountField);
+      expect(textFieldWidget.style?.fontSize, equals(20.0));
+
+      // Enter > 15 chars -> fontSize is 17
+      await tester.enterText(amountField, '5.000.000.000.000');
+      await tester.pumpAndSettle();
+      textFieldWidget = tester.widget<TextField>(amountField);
+      expect(textFieldWidget.style?.fontSize, equals(17.0));
+    });
   });
 }
