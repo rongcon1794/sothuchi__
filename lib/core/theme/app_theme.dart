@@ -156,6 +156,21 @@ abstract final class AppTheme {
     'Hoàng Hôn',
     'Thạch Anh',
   ];
+  static const List<String> paletteNamesEn = [
+    'Emerald Jade',
+    'Ocean Blue',
+    'Sunset Amber',
+    'Amethyst Violet',
+  ];
+
+  /// Returns the localized palette name based on [locale].
+  static String localizedPaletteName(int index, {String locale = 'vi'}) {
+    final clamped = index.clamp(0, palettes.length - 1);
+    if (locale.toLowerCase().startsWith('en')) {
+      return paletteNamesEn[clamped];
+    }
+    return paletteNames[clamped];
+  }
   static const List<FontFeature> tabularFigures = [
     FontFeature.tabularFigures(),
   ];

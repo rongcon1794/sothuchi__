@@ -677,7 +677,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      AppTheme.paletteNames[settings.accentColorIndex.clamp(0, AppTheme.paletteNames.length - 1)],
+                      AppTheme.localizedPaletteName(
+                        settings.accentColorIndex,
+                        locale: Localizations.localeOf(context).languageCode,
+                      ),
                       style: TextStyle(
                         fontSize: 12,
                         color: theme.colorScheme.primary,
@@ -700,34 +703,42 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               .read(settingsControllerProvider.notifier)
                               .updateAccentColor(i);
                         },
-                        child: Container(
-                          width: 28,
-                          height: 28,
-                          decoration: BoxDecoration(
-                            color: AppTheme.palettes[i],
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: (settings.accentColorIndex == i)
-                                  ? (isDark ? Colors.white : Colors.black87)
-                                  : Colors.transparent,
-                              width: 2.5,
-                            ),
-                            boxShadow: [
-                              if (settings.accentColorIndex == i)
-                                BoxShadow(
-                                  color: AppTheme.palettes[i].withValues(alpha: 0.4),
-                                  blurRadius: 6,
-                                  spreadRadius: 1,
-                                ),
-                            ],
+                        child: Semantics(
+                          label: AppTheme.localizedPaletteName(
+                            i,
+                            locale: Localizations.localeOf(context).languageCode,
                           ),
-                          child: settings.accentColorIndex == i
-                              ? const Icon(
-                                  CupertinoIcons.checkmark,
-                                  size: 14,
-                                  color: Colors.white,
-                                )
-                              : null,
+                          button: true,
+                          selected: settings.accentColorIndex == i,
+                          child: Container(
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              color: AppTheme.palettes[i],
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: (settings.accentColorIndex == i)
+                                    ? (isDark ? Colors.white : Colors.black87)
+                                    : Colors.transparent,
+                                width: 2.5,
+                              ),
+                              boxShadow: [
+                                if (settings.accentColorIndex == i)
+                                  BoxShadow(
+                                    color: AppTheme.palettes[i].withValues(alpha: 0.4),
+                                    blurRadius: 6,
+                                    spreadRadius: 1,
+                                  ),
+                              ],
+                            ),
+                            child: settings.accentColorIndex == i
+                                ? const Icon(
+                                    CupertinoIcons.checkmark,
+                                    size: 14,
+                                    color: Colors.white,
+                                  )
+                                : null,
+                          ),
                         ),
                       ),
                     ),

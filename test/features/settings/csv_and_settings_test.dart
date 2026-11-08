@@ -247,6 +247,57 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Gam màu chủ đạo'), findsOneWidget);
+      expect(find.text('Ngọc Bích'), findsOneWidget);
+
+      // Verify English locale renders English palette names
+      SharedPreferences.setMockInitialValues({'settings.locale_code': 'en'});
+      final enPrefs = await SharedPreferences.getInstance();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(enPrefs),
+            biometricServiceProvider.overrideWithValue(fakeBio),
+            csvExportServiceProvider.overrideWithValue(fakeCsv),
+            accountRepositoryProvider.overrideWithValue(accRepo),
+            categoryRepositoryProvider.overrideWithValue(catRepo),
+            transactionRepositoryProvider.overrideWithValue(txRepo),
+            currentUserProvider.overrideWithValue(
+              AppUser(
+                uid: 'u1',
+                email: 'test@example.com',
+                displayName: 'Huy Nguyen',
+                isDemoUser: false,
+                createdAt: DateTime(2026, 1, 1),
+                updatedAt: DateTime(2026, 1, 1),
+              ),
+            ),
+          ],
+          child: MaterialApp(
+            locale: const Locale('en'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: AppTheme.light(),
+            home: const SettingsScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Theme Accent Color'), findsOneWidget);
+      expect(find.text('Emerald Jade'), findsOneWidget);
+    });
+
+    test('AppTheme.localizedPaletteName returns Vietnamese and English names accurately', () {
+      expect(AppTheme.localizedPaletteName(0, locale: 'vi'), 'Ngọc Bích');
+      expect(AppTheme.localizedPaletteName(1, locale: 'vi'), 'Đại Dương');
+      expect(AppTheme.localizedPaletteName(2, locale: 'vi'), 'Hoàng Hôn');
+      expect(AppTheme.localizedPaletteName(3, locale: 'vi'), 'Thạch Anh');
+
+      expect(AppTheme.localizedPaletteName(0, locale: 'en'), 'Emerald Jade');
+      expect(AppTheme.localizedPaletteName(1, locale: 'en'), 'Ocean Blue');
+      expect(AppTheme.localizedPaletteName(2, locale: 'en'), 'Sunset Amber');
+      expect(AppTheme.localizedPaletteName(3, locale: 'en'), 'Amethyst Violet');
     });
 
     testWidgets('places delete account & data in dedicated Danger Zone section away from quick actions', (tester) async {
