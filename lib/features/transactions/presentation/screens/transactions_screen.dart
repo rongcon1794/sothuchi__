@@ -691,6 +691,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     final isSelected = filter.type == type;
 
     return FilterChip(
+      showCheckmark: false,
       visualDensity: isLandscape ? VisualDensity.compact : VisualDensity.standard,
       padding: EdgeInsets.symmetric(horizontal: isLandscape ? 6 : 8),
       materialTapTargetSize: isLandscape ? MaterialTapTargetSize.shrinkWrap : null,

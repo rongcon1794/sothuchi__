@@ -850,20 +850,6 @@ class _WalletFilterList extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   iconWidget,
-                  if (isSelected)
-                    Container(
-                      width: 18,
-                      height: 18,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        CupertinoIcons.checkmark,
-                        size: 11,
-                        color: Colors.white,
-                      ),
-                    ),
                 ],
               ),
               const SizedBox(height: 8),
@@ -1018,14 +1004,6 @@ class _CategoryFilterChips extends StatelessWidget {
                 ),
               ),
             ),
-            if (isSelected) ...[
-              const SizedBox(width: 6),
-              Icon(
-                CupertinoIcons.checkmark,
-                size: 13,
-                color: theme.colorScheme.primary,
-              ),
-            ],
           ],
         ),
       ),

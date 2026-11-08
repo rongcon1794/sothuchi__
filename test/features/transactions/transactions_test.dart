@@ -226,6 +226,13 @@ void main() {
         );
         await tester.pumpAndSettle();
 
+        // Verify FilterChips highlight without checkmark at the start
+        final chips = tester.widgetList<FilterChip>(find.byType(FilterChip));
+        expect(chips, isNotEmpty);
+        for (final chip in chips) {
+          expect(chip.showCheckmark, isFalse);
+        }
+
         expect(find.textContaining('Phở bò tái lăn'), findsOneWidget);
         expect(find.textContaining('Lương tháng 11'), findsOneWidget);
 

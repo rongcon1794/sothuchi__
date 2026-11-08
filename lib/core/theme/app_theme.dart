@@ -332,6 +332,9 @@ abstract final class AppTheme {
         thickness: 1,
         color: colorScheme.outlineVariant.withValues(alpha: 0.4),
       ),
+      chipTheme: const ChipThemeData(
+        showCheckmark: false,
+      ),
     );
   }
 }
