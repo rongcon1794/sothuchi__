@@ -113,7 +113,43 @@ abstract final class AppleTokens {
 
   // --- OLED True Black Palette Tokens ---
   static const Color bgOledPrimary = Color(0xFF000000);
-  static const Color bgOledCard = Color(0xFF0D0D10);
-  static const Color bgOledSecondary = Color(0xFF141418);
-  static const Color bgOledBorder = Color(0xFF222228);
+  static const Color bgOledCard = Color(0xFF070709);
+  static const Color bgOledSecondary = Color(0xFF101014);
+  static const Color bgOledBorder = Color(0xFF24242A);
+
+  /// Returns true if the app is currently in Dark Mode with OLED True Black enabled.
+  static bool isOled(BuildContext context) {
+    final theme = Theme.of(context);
+    return theme.brightness == Brightness.dark &&
+        theme.scaffoldBackgroundColor == bgOledPrimary;
+  }
+
+  /// Resolves the card/surface background adapting seamlessly across Light, Dark, and OLED True Black.
+  static Color resolveSurface(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    if (!isDark) return bgLightCard;
+    return isOled(context) ? bgOledCard : bgDarkCard;
+  }
+
+  /// Resolves the secondary/control background adapting seamlessly across Light, Dark, and OLED True Black.
+  static Color resolveSecondary(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    if (!isDark) return bgLightSecondary;
+    return isOled(context) ? bgOledSecondary : bgDarkSecondary;
+  }
+
+  /// Resolves surface borders with sharp high-contrast hairline in OLED mode.
+  static Color resolveBorder(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    if (!isDark) return borderLight;
+    return isOled(context) ? bgOledBorder : Colors.white.withValues(alpha: 0.12);
+  }
+}
+
+/// Extension on [BuildContext] for ergonomic OLED and theme awareness.
+extension AppleThemeContextX on BuildContext {
+  bool get isOled => AppleTokens.isOled(this);
 }

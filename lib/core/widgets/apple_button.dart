@@ -116,7 +116,11 @@ class AppleButton extends StatelessWidget {
         break;
       case AppleButtonVariant.secondary:
         bg = color ??
-            (isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary);
+            (isDark
+                ? (context.isOled
+                    ? AppleTokens.bgOledSecondary
+                    : AppleTokens.bgDarkSecondary)
+                : AppleTokens.bgLightSecondary);
         fg = textColor ?? (isDark ? Colors.white : Colors.black87);
         border = Border.all(
           color: isDark

@@ -145,17 +145,24 @@ class AppleGlassCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isOled = context.isOled;
     final radius = borderRadius ?? BorderRadius.circular(AppleTokens.radiusCard);
     final bg = backgroundColor ??
         (isDark
-            ? AppleTokens.bgDarkCard.withValues(alpha: 0.85)
+            ? (isOled
+                ? AppleTokens.bgOledCard
+                : AppleTokens.bgDarkCard.withValues(alpha: 0.85))
             : AppleTokens.bgLightCard.withValues(alpha: 0.88));
     final border = borderColor ??
         (isDark
-            ? Colors.white.withValues(alpha: 0.12)
+            ? (isOled
+                ? AppleTokens.bgOledBorder
+                : Colors.white.withValues(alpha: 0.12))
             : AppleTokens.borderLight);
     final shadow = boxShadow ??
-        (isDark ? AppleTokens.cardShadowDark : AppleTokens.cardShadowLight);
+        (isDark
+            ? (isOled ? const <BoxShadow>[] : AppleTokens.cardShadowDark)
+            : AppleTokens.cardShadowLight);
 
     Widget content = Container(
       padding: padding ?? const EdgeInsets.all(16),
@@ -171,7 +178,7 @@ class AppleGlassCard extends StatelessWidget {
       ),
     );
 
-    if (blurSigma > 0) {
+    if (blurSigma > 0 && !isOled) {
       content = ClipRRect(
         borderRadius: radius,
         child: BackdropFilter(
@@ -451,9 +458,7 @@ class AppleSegmentedPill<T> extends StatelessWidget {
       height: height,
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: isDark
-            ? AppleTokens.bgDarkSecondary
-            : AppleTokens.bgLightSecondary,
+        color: AppleTokens.resolveSecondary(context),
         borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
         border: Border.all(
           color: isDark
@@ -480,7 +485,7 @@ class AppleSegmentedPill<T> extends StatelessWidget {
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: key == selected
-                        ? (isDark ? AppleTokens.bgDarkCard : Colors.white)
+                        ? AppleTokens.resolveSurface(context)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                     boxShadow: key == selected
@@ -547,8 +552,7 @@ class AppleIconButton extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final bg = backgroundColor ??
-        (isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary);
+    final bg = backgroundColor ?? AppleTokens.resolveSecondary(context);
     final fg = foregroundColor ?? (isDark ? Colors.white : Colors.black87);
     final border = borderColor ??
         (isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.06));
@@ -628,8 +632,7 @@ class AppleIconSegmentedPill<T> extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final bg = backgroundColor ??
-        (isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary);
+    final bg = backgroundColor ?? AppleTokens.resolveSecondary(context);
 
     return Container(
       height: height,
@@ -660,7 +663,7 @@ class AppleIconSegmentedPill<T> extends StatelessWidget {
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: seg.value == selected
-                          ? (isDark ? AppleTokens.bgDarkCard : Colors.white)
+                          ? AppleTokens.resolveSurface(context)
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                       boxShadow: seg.value == selected

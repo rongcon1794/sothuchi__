@@ -251,8 +251,7 @@ class TransactionDetailScreen extends ConsumerWidget {
             '${AppDateUtils.formatFullDate(tx.date, locale: locale)} • $timeStr';
 
         return Scaffold(
-          backgroundColor:
-              isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightPrimary,
+          backgroundColor: theme.scaffoldBackgroundColor,
           appBar: AppBar(
             toolbarHeight: isLandscape
                 ? AppleTokens.appBarHeightLandscape

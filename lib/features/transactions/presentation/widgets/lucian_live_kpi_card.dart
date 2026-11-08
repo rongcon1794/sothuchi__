@@ -231,11 +231,17 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? LucianTokens.surfaceDark : Colors.white,
+        color: isDark
+            ? (context.isOled
+                ? AppleTokens.bgOledCard
+                : LucianTokens.surfaceDark)
+            : Colors.white,
         borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
         border: Border.all(
           color: isDark
-              ? Colors.white.withValues(alpha: 0.12)
+              ? (context.isOled
+                  ? AppleTokens.bgOledBorder
+                  : Colors.white.withValues(alpha: 0.12))
               : const Color(0xFF16151B).withValues(alpha: 0.08),
           width: AppleTokens.hairline,
         ),
@@ -356,7 +362,9 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
                   height: 32,
                   decoration: BoxDecoration(
                     color: isDark
-                        ? LucianTokens.surface2Dark
+                        ? (context.isOled
+                            ? AppleTokens.bgOledSecondary
+                            : LucianTokens.surface2Dark)
                         : LucianTokens.surface2Light,
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
@@ -516,7 +524,9 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
             padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(
               color: isDark
-                  ? LucianTokens.surface2Dark
+                  ? (context.isOled
+                      ? AppleTokens.bgOledSecondary
+                      : LucianTokens.surface2Dark)
                   : LucianTokens.surface2Light,
               borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
               border: Border.all(

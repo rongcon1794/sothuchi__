@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:so_thu_chi/core/theme/app_theme.dart';
+import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 
 void main() {
@@ -139,6 +141,36 @@ void main() {
       expect(find.text('Điền thông tin chi tiết'), findsOneWidget);
       expect(find.text('Nội dung biểu mẫu'), findsOneWidget);
       expect(find.text('Xác nhận'), findsOneWidget);
+    });
+
+    testWidgets('OLED True Black applies pitch black background and card surfaces', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.dark(AppTheme.seedColor, true),
+          home: Builder(
+            builder: (context) {
+              return Scaffold(
+                body: Column(
+                  children: [
+                    const AppleCard(child: Text('Card Content')),
+                    const AppleGlassCard(child: Text('Glass Card Content')),
+                    Text('Is OLED: ${context.isOled}'),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Is OLED: true'), findsOneWidget);
+      expect(find.text('Card Content'), findsOneWidget);
+      expect(find.text('Glass Card Content'), findsOneWidget);
+
+      final theme = Theme.of(tester.element(find.byType(Scaffold)));
+      expect(theme.scaffoldBackgroundColor, equals(AppleTokens.bgOledPrimary));
+      expect(theme.scaffoldBackgroundColor, equals(const Color(0xFF000000)));
     });
   });
 }

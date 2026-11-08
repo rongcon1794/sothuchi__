@@ -179,7 +179,7 @@ class BudgetDetailScreen extends ConsumerWidget {
         final dailyMoney = Money(minorUnits: dailyMinor, currencyCode: budget.currency);
 
         return Scaffold(
-          backgroundColor: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightPrimary,
+          backgroundColor: theme.scaffoldBackgroundColor,
           appBar: AppBar(
             toolbarHeight: isLandscape
                 ? AppleTokens.appBarHeightLandscape

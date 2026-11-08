@@ -191,7 +191,11 @@ class TransactionFilterBottomSheet extends ConsumerWidget {
     return Container(
       constraints: BoxConstraints(maxHeight: sheetHeight),
       decoration: BoxDecoration(
-        color: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightPrimary,
+        color: isDark
+            ? (context.isOled
+                ? AppleTokens.bgOledCard
+                : AppleTokens.bgDarkPrimary)
+            : AppleTokens.bgLightPrimary,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(AppleTokens.radiusHero),
         ),

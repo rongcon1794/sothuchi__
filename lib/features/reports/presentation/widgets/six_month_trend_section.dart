@@ -190,7 +190,9 @@ class SixMonthSummaryPanel extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: isDark
-            ? AppleTokens.bgDarkPrimary.withValues(alpha: 0.6)
+            ? (context.isOled
+                ? AppleTokens.bgOledSecondary.withValues(alpha: 0.6)
+                : AppleTokens.bgDarkPrimary.withValues(alpha: 0.6))
             : AppleTokens.bgLightSecondary.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
         border: Border.all(

@@ -129,7 +129,11 @@ class _AppleTextFieldState extends State<AppleTextField> {
     final radius = widget.borderRadius ?? BorderRadius.circular(AppleTokens.radiusControl);
 
     final bg = widget.backgroundColor ??
-        (isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary);
+        (isDark
+            ? (context.isOled
+                ? AppleTokens.bgOledSecondary
+                : AppleTokens.bgDarkSecondary)
+            : AppleTokens.bgLightSecondary);
 
     final borderColor = _isFocused
         ? primary.withValues(alpha: 0.8)

@@ -68,9 +68,59 @@ class AppShellScaffold extends StatelessWidget {
     ];
 
     final isLandscape = context.isLandscape;
+    final isOled = context.isOled;
     final navBarHeight = isLandscape
         ? AppleTokens.navBarHeightLandscape
         : AppleTokens.navBarHeightPortrait;
+
+    final navBarContent = Container(
+      decoration: BoxDecoration(
+        color: isDark
+            ? (isOled
+                ? const Color(0xFF000000)
+                : const Color(0xFF1C1C1E).withValues(alpha: 0.90))
+            : Colors.white.withValues(alpha: 0.90),
+        border: Border(
+          top: BorderSide(
+            color: isDark
+                ? (isOled
+                    ? AppleTokens.bgOledBorder
+                    : Colors.white.withValues(alpha: 0.12))
+                : Colors.black.withValues(alpha: 0.08),
+            width: AppleTokens.hairline,
+          ),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        left: true,
+        right: true,
+        bottom: true,
+        child: MediaQuery.withClampedTextScaling(
+          maxScaleFactor: isLandscape ? 1.05 : 1.15,
+          child: SizedBox(
+            height: navBarHeight,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: AppleTokens.maxContentWidth),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    for (int i = 0; i < destinations.length; i++)
+                      _AppleNavBarItem(
+                        data: destinations[i],
+                        isSelected: i == currentIndex,
+                        isLandscape: isLandscape,
+                        onTap: () => _onDestinationSelected(i),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
 
     return Scaffold(
       body: Column(
@@ -79,55 +129,14 @@ class AppShellScaffold extends StatelessWidget {
           Expanded(child: navigationShell),
         ],
       ),
-      bottomNavigationBar: ClipRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-          child: Container(
-            decoration: BoxDecoration(
-              color: isDark
-                  ? const Color(0xFF1C1C1E).withValues(alpha: 0.90)
-                  : Colors.white.withValues(alpha: 0.90),
-              border: Border(
-                top: BorderSide(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.12)
-                      : Colors.black.withValues(alpha: 0.08),
-                  width: AppleTokens.hairline,
-                ),
+      bottomNavigationBar: isOled
+          ? navBarContent
+          : ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                child: navBarContent,
               ),
             ),
-            child: SafeArea(
-              top: false,
-              left: true,
-              right: true,
-              bottom: true,
-              child: MediaQuery.withClampedTextScaling(
-                maxScaleFactor: isLandscape ? 1.05 : 1.15,
-                child: SizedBox(
-                  height: navBarHeight,
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: AppleTokens.maxContentWidth),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          for (int i = 0; i < destinations.length; i++)
-                            _AppleNavBarItem(
-                              data: destinations[i],
-                              isSelected: i == currentIndex,
-                              isLandscape: isLandscape,
-                              onTap: () => _onDestinationSelected(i),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

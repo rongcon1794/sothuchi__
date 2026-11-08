@@ -687,7 +687,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     }
 
     return Scaffold(
-      backgroundColor: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightPrimary,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         toolbarHeight: appBarHeight,
         title: Text(

@@ -256,7 +256,11 @@ class _InsightRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightSecondary,
+        color: isDark
+            ? (context.isOled
+                ? AppleTokens.bgOledSecondary
+                : AppleTokens.bgDarkPrimary)
+            : AppleTokens.bgLightSecondary,
         borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
       ),
       child: Row(

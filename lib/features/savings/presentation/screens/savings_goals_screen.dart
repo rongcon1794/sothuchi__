@@ -48,7 +48,7 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
     final hideBalance = settings?.hideBalance ?? false;
 
     return Scaffold(
-      backgroundColor: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightPrimary,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         toolbarHeight: appBarHeight,
         title: Text(l10n.savingsTitle, style: const TextStyle(fontWeight: FontWeight.w700)),

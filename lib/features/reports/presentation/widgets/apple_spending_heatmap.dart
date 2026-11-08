@@ -344,7 +344,11 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
       return Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightSecondary,
+          color: isDark
+              ? (context.isOled
+                  ? AppleTokens.bgOledSecondary
+                  : AppleTokens.bgDarkPrimary)
+              : AppleTokens.bgLightSecondary,
           borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
           border: Border.all(
             color: AppleTokens.jadePrimary.withValues(alpha: 0.35),
@@ -419,7 +423,9 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: isDark
-            ? AppleTokens.bgDarkPrimary.withValues(alpha: 0.6)
+            ? (context.isOled
+                ? AppleTokens.bgOledSecondary.withValues(alpha: 0.6)
+                : AppleTokens.bgDarkPrimary.withValues(alpha: 0.6))
             : AppleTokens.bgLightSecondary.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
         border: Border.all(
@@ -541,7 +547,11 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightSecondary,
+        color: isDark
+            ? (context.isOled
+                ? AppleTokens.bgOledSecondary
+                : AppleTokens.bgDarkPrimary)
+            : AppleTokens.bgLightSecondary,
         borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
         border: Border.all(
           color: AppleTokens.jadePrimary.withValues(alpha: 0.3),

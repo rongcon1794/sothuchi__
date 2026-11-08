@@ -101,7 +101,7 @@ class _LedgersManagementScreenState
     final activeId = ref.watch(activeLedgerIdProvider);
 
     return Scaffold(
-      backgroundColor: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightPrimary,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         toolbarHeight: appBarHeight,
         title: Text(l10n.ledgersTitle, style: const TextStyle(fontWeight: FontWeight.w700)),

@@ -165,7 +165,7 @@ class AccountDetailScreen extends ConsumerWidget {
         final netMoney = Money(minorUnits: totalIncomeMinor - totalExpenseMinor, currencyCode: account.currency);
 
         return Scaffold(
-          backgroundColor: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightPrimary,
+          backgroundColor: theme.scaffoldBackgroundColor,
           appBar: AppBar(
             toolbarHeight: isLandscape
                 ? AppleTokens.appBarHeightLandscape

@@ -128,7 +128,7 @@ class _RecurringTransactionsScreenState
     final hideBalance = settings?.hideBalance ?? false;
 
     return Scaffold(
-      backgroundColor: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightPrimary,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         toolbarHeight: appBarHeight,
         title: Text(l10n.recurringTitle, style: const TextStyle(fontWeight: FontWeight.w700)),

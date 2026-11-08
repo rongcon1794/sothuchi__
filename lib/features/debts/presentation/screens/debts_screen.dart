@@ -29,7 +29,6 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final l10n = context.l10n;
     final debtsAsync = ref.watch(debtsStreamProvider);
     final filteredDebts = ref.watch(filteredDebtsProvider);
@@ -47,7 +46,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
         : AppleTokens.scrollBottomPaddingWithFab;
 
     return Scaffold(
-      backgroundColor: isDark ? AppleTokens.bgDarkPrimary : AppleTokens.bgLightPrimary,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         toolbarHeight: appBarHeight,
         title: Text(l10n.debtBookTitle, style: const TextStyle(fontWeight: FontWeight.w700)),

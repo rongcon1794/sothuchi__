@@ -224,19 +224,24 @@ abstract final class AppTheme {
         centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 0,
-        backgroundColor:
-            isDark ? AppleTokens.bgDarkGrouped : AppleTokens.bgLightGrouped,
+        backgroundColor: isDark
+            ? (oledMode ? AppleTokens.bgOledPrimary : AppleTokens.bgDarkGrouped)
+            : AppleTokens.bgLightGrouped,
         foregroundColor: colorScheme.onSurface,
       ),
       cardTheme: CardThemeData(
         elevation: 0,
         margin: EdgeInsets.zero,
-        color: isDark ? AppleTokens.bgDarkCard : AppleTokens.bgLightCard,
+        color: isDark
+            ? (oledMode ? AppleTokens.bgOledCard : AppleTokens.bgDarkCard)
+            : AppleTokens.bgLightCard,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
           side: BorderSide(
             color: isDark
-                ? Colors.white.withValues(alpha: 0.08)
+                ? (oledMode
+                    ? AppleTokens.bgOledBorder
+                    : Colors.white.withValues(alpha: 0.08))
                 : Colors.black.withValues(alpha: 0.05),
             width: AppleTokens.hairline,
           ),
@@ -245,7 +250,9 @@ abstract final class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: isDark
-            ? AppleTokens.bgDarkSecondary
+            ? (oledMode
+                ? AppleTokens.bgOledSecondary
+                : AppleTokens.bgDarkSecondary)
             : AppleTokens.bgLightSecondary.withValues(alpha: 0.7),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
@@ -303,10 +310,18 @@ abstract final class AppTheme {
       navigationBarTheme: NavigationBarThemeData(
         elevation: 0,
         backgroundColor: isDark
-            ? colorScheme.surfaceContainerLow
+            ? (oledMode
+                ? AppleTokens.bgOledPrimary
+                : colorScheme.surfaceContainerLow)
             : colorScheme.surfaceContainerLowest,
         indicatorColor: colorScheme.primaryContainer,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: isDark
+            ? (oledMode ? AppleTokens.bgOledCard : AppleTokens.bgDarkCard)
+            : AppleTokens.bgLightCard,
+        surfaceTintColor: Colors.transparent,
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,

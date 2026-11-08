@@ -102,7 +102,11 @@ class DashboardMiniWalletCard extends StatelessWidget {
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            color: isDark ? AppleTokens.bgDarkCard : AppleTokens.bgLightCard,
+            color: isDark
+                ? (context.isOled
+                    ? AppleTokens.bgOledCard
+                    : AppleTokens.bgDarkCard)
+                : AppleTokens.bgLightCard,
             borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
             border: Border.all(
               color: color.withValues(alpha: isDark ? 0.35 : 0.22),
@@ -391,7 +395,11 @@ class DashboardMiniSavingsGoalCard extends StatelessWidget {
         width: 220,
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: isDark ? AppleTokens.bgDarkCard : Colors.white,
+          color: isDark
+              ? (context.isOled
+                  ? AppleTokens.bgOledCard
+                  : AppleTokens.bgDarkCard)
+              : Colors.white,
           borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
           border: Border.all(
             color: accentColor.withValues(alpha: isDark ? 0.25 : 0.2),

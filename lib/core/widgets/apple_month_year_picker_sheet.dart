@@ -156,7 +156,7 @@ class _AppleMonthYearPickerSheetState extends State<AppleMonthYearPickerSheet> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
             decoration: BoxDecoration(
-              color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
+              color: AppleTokens.resolveSecondary(context),
               borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
               border: Border.all(
                 color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
@@ -261,7 +261,7 @@ class _AppleMonthYearPickerSheetState extends State<AppleMonthYearPickerSheet> {
                   decoration: BoxDecoration(
                     color: isSelected
                         ? primaryColor
-                        : (isDark ? AppleTokens.bgDarkCard : AppleTokens.bgLightCard),
+                        : AppleTokens.resolveSurface(context),
                     borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
                     border: Border.all(
                       color: isSelected
@@ -342,7 +342,7 @@ class _AppleMonthYearPickerSheetState extends State<AppleMonthYearPickerSheet> {
         decoration: BoxDecoration(
           color: isSelected
               ? primaryColor.withValues(alpha: 0.16)
-              : (isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary),
+              : AppleTokens.resolveSecondary(context),
           borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
           border: Border.all(
             color: isSelected

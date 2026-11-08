@@ -34,16 +34,14 @@ class AppleCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final radius = borderRadius ?? BorderRadius.circular(AppleTokens.radiusCard);
 
-    final bg = backgroundColor ??
-        (isDark ? AppleTokens.bgDarkCard : AppleTokens.bgLightCard);
+    final bg = backgroundColor ?? AppleTokens.resolveSurface(context);
 
-    final border = borderColor ??
-        (isDark
-            ? Colors.white.withValues(alpha: 0.1)
-            : AppleTokens.borderLight);
+    final border = borderColor ?? AppleTokens.resolveBorder(context);
 
     final shadow = boxShadow ??
-        (isDark ? AppleTokens.cardShadowDark : AppleTokens.cardShadowLight);
+        (isDark
+            ? (context.isOled ? const <BoxShadow>[] : AppleTokens.cardShadowDark)
+            : AppleTokens.cardShadowLight);
 
     final Widget card = Container(
       margin: margin,

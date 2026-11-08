@@ -74,7 +74,11 @@ class DashboardQuickActionBar extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
         decoration: BoxDecoration(
-          color: isDark ? AppleTokens.bgDarkCard : AppleTokens.bgLightCard,
+          color: isDark
+              ? (context.isOled
+                  ? AppleTokens.bgOledCard
+                  : AppleTokens.bgDarkCard)
+              : AppleTokens.bgLightCard,
           borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
           border: Border.all(
             color: isDark ? AppleTokens.separatorDark : AppleTokens.borderLight,
