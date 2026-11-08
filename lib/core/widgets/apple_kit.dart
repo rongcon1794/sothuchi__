@@ -126,6 +126,7 @@ class AppleGlassCard extends StatelessWidget {
     this.margin,
     this.borderRadius,
     this.blurSigma = 18.0,
+    this.enableBlur,
     this.backgroundColor,
     this.borderColor,
     this.gradient,
@@ -137,6 +138,11 @@ class AppleGlassCard extends StatelessWidget {
   final EdgeInsetsGeometry? margin;
   final BorderRadius? borderRadius;
   final double blurSigma;
+
+  /// Explicitly control BackdropFilter blur shader.
+  /// If null (default), BackdropFilter is automatically bypassed on Android and OLED
+  /// devices to eliminate GPU raster thread stalls and keep scrolling locked at 60/120Hz.
+  final bool? enableBlur;
   final Color? backgroundColor;
   final Color? borderColor;
   final Gradient? gradient;
@@ -146,13 +152,23 @@ class AppleGlassCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isOled = context.isOled;
+    final isAndroid = Theme.of(context).platform == TargetPlatform.android;
     final radius = borderRadius ?? BorderRadius.circular(AppleTokens.radiusCard);
+
+    // On Android, live BackdropFilter blurs in scrollable lists cause heavy raster thread stalls.
+    // Allow explicit enableBlur=true to override, otherwise bypass blur on Android or OLED.
+    final effectiveBlur = (enableBlur ?? !isAndroid) && blurSigma > 0 && !isOled;
+
     final bg = backgroundColor ??
         (isDark
             ? (isOled
                 ? AppleTokens.bgOledCard
-                : AppleTokens.bgDarkCard.withValues(alpha: 0.85))
-            : AppleTokens.bgLightCard.withValues(alpha: 0.88));
+                : (effectiveBlur
+                    ? AppleTokens.bgDarkCard.withValues(alpha: 0.85)
+                    : AppleTokens.bgDarkCard))
+            : (effectiveBlur
+                ? AppleTokens.bgLightCard.withValues(alpha: 0.88)
+                : AppleTokens.bgLightCard));
     final border = borderColor ??
         (isDark
             ? (isOled
@@ -178,7 +194,7 @@ class AppleGlassCard extends StatelessWidget {
       ),
     );
 
-    if (blurSigma > 0 && !isOled) {
+    if (effectiveBlur) {
       content = ClipRRect(
         borderRadius: radius,
         child: BackdropFilter(

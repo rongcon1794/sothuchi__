@@ -94,13 +94,19 @@ class AppleCompactMonthSwitcher extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        monthLabel,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                          letterSpacing: -0.2,
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 180),
+                        transitionBuilder: (child, animation) =>
+                            FadeTransition(opacity: animation, child: child),
+                        child: Text(
+                          monthLabel,
+                          key: ValueKey('header_$monthLabel'),
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                            letterSpacing: -0.2,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 3),
@@ -166,13 +172,19 @@ class AppleCompactMonthSwitcher extends StatelessWidget {
                       color: primaryColor,
                     ),
                     const SizedBox(width: 5),
-                    Text(
-                      monthLabel,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12.5,
-                        letterSpacing: -0.2,
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 180),
+                      transitionBuilder: (child, animation) =>
+                          FadeTransition(opacity: animation, child: child),
+                      child: Text(
+                        monthLabel,
+                        key: ValueKey('body_$monthLabel'),
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12.5,
+                          letterSpacing: -0.2,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 4),

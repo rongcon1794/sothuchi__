@@ -173,9 +173,12 @@ class AppleButton extends StatelessWidget {
 
     Widget content;
     if (isLoading) {
-      content = CupertinoActivityIndicator(
-        color: fg,
-        radius: 9,
+      content = KeyedSubtree(
+        key: const ValueKey('apple_btn_loading'),
+        child: CupertinoActivityIndicator(
+          color: fg,
+          radius: 9,
+        ),
       );
     } else if (icon != null) {
       Widget iconWidget;
@@ -184,18 +187,31 @@ class AppleButton extends StatelessWidget {
       } else {
         iconWidget = icon as Widget;
       }
-      content = Row(
-        mainAxisSize: isFullWidth ? MainAxisSize.max : MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          iconWidget,
-          const SizedBox(width: 8),
-          Flexible(child: labelWidget),
-        ],
+      content = KeyedSubtree(
+        key: const ValueKey('apple_btn_icon_label'),
+        child: Row(
+          mainAxisSize: isFullWidth ? MainAxisSize.max : MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            iconWidget,
+            const SizedBox(width: 8),
+            Flexible(child: labelWidget),
+          ],
+        ),
       );
     } else {
-      content = labelWidget;
+      content = KeyedSubtree(
+        key: const ValueKey('apple_btn_label'),
+        child: labelWidget,
+      );
     }
+
+    final animatedContent = AnimatedSwitcher(
+      duration: const Duration(milliseconds: 200),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      child: content,
+    );
 
     Widget button = Container(
       height: height,
@@ -215,7 +231,7 @@ class AppleButton extends StatelessWidget {
               ]
             : null,
       ),
-      child: content,
+      child: animatedContent,
     );
 
     if (isFullWidth) {

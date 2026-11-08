@@ -264,6 +264,7 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                 SizedBox(
                   height: walletStripHeight,
                   child: ListView.separated(
+                    physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                     scrollDirection: Axis.horizontal,
                     itemCount: activeWallets.length + 1,
                     separatorBuilder: (_, _) => const SizedBox(width: 10),
@@ -314,6 +315,7 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                       SizedBox(
                         height: 94,
                         child: ListView.separated(
+                          physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                           scrollDirection: Axis.horizontal,
                           itemCount: activeGoals.length,
                           separatorBuilder: (_, _) => const SizedBox(width: 10),
@@ -420,6 +422,7 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: AppleTokens.maxContentWidth),
                   child: ListView(
+                    physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                     padding: EdgeInsets.fromLTRB(16, 8, 16, scrollBottomPadding),
                     children: [
                       if (isWide)
@@ -431,11 +434,11 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              heroBalanceCard,
+                              RepaintBoundary(child: heroBalanceCard),
                               const SizedBox(height: 14),
-                              walletsSection,
+                              RepaintBoundary(child: walletsSection),
                               const SizedBox(height: 14),
-                              spendingPaceCard,
+                              RepaintBoundary(child: spendingPaceCard),
                               if (dueBillsWidget != null) ...[
                                 const SizedBox(height: 14),
                                 dueBillsWidget,
@@ -459,16 +462,16 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                             children: [
                               quickActionBar,
                               const SizedBox(height: 12),
-                              recentTransactionsSection,
+                              RepaintBoundary(child: recentTransactionsSection),
                             ],
                           ),
                         ),
                       ],
                     )
                   else ...[
-                    heroBalanceCard,
+                    RepaintBoundary(child: heroBalanceCard),
                     const SizedBox(height: 12),
-                    spendingPaceCard,
+                    RepaintBoundary(child: spendingPaceCard),
                     const SizedBox(height: 14),
                     quickActionBar,
                     if (dueBillsWidget != null) ...[
@@ -480,13 +483,13 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                       budgetAlertBanner,
                     ],
                     const SizedBox(height: 14),
-                    walletsSection,
+                    RepaintBoundary(child: walletsSection),
                     if (savingsSection != null) ...[
                       const SizedBox(height: 20),
                       savingsSection,
                     ],
                     const SizedBox(height: 20),
-                    recentTransactionsSection,
+                    RepaintBoundary(child: recentTransactionsSection),
                   ],
                 ],
               ),

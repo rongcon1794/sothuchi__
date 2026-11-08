@@ -173,16 +173,32 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
                     ),
                   ),
 
-                  // Compact Day Detail Card (Portrait)
-                  if (_selectedDay != null) ...[
-                    const SizedBox(height: 14),
-                    _buildPortraitDetailCard(
-                      theme: theme,
-                      isDark: isDark,
-                      selectedAmount: selectedAmount,
-                      avgMinor: avgMinor,
+                  // Smooth Animated Compact Day Detail Card (Portrait)
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 220),
+                    switchInCurve: Curves.easeOutCubic,
+                    switchOutCurve: Curves.easeInCubic,
+                    transitionBuilder: (child, animation) => FadeTransition(
+                      opacity: animation,
+                      child: SizeTransition(
+                        sizeFactor: animation,
+                        alignment: Alignment.topCenter,
+                        child: child,
+                      ),
                     ),
-                  ],
+                    child: _selectedDay != null
+                        ? Padding(
+                            key: ValueKey('day_detail_$_selectedDay'),
+                            padding: const EdgeInsets.only(top: 14),
+                            child: _buildPortraitDetailCard(
+                              theme: theme,
+                              isDark: isDark,
+                              selectedAmount: selectedAmount,
+                              avgMinor: avgMinor,
+                            ),
+                          )
+                        : const SizedBox.shrink(key: ValueKey('day_detail_none')),
+                  ),
 
                   const SizedBox(height: 14),
                   _buildLegend(theme, isDark),

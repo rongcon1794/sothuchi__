@@ -581,6 +581,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: AppleTokens.maxContentWidth),
                         child: ListView(
+                          physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                           padding: EdgeInsets.fromLTRB(16, 2, 16, scrollBottomPadding),
                           children: [
                             Row(
@@ -591,18 +592,20 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.stretch,
                                     children: [
                                       for (final group in leftGroups)
-                                        _buildDayGroupCard(
-                                          context,
-                                          group,
-                                          categoriesMap,
-                                          accountsMap,
-                                          locale,
-                                          currency,
-                                          hideBalance,
-                                          isDark,
-                                          theme,
-                                          l10n,
-                                          true,
+                                        RepaintBoundary(
+                                          child: _buildDayGroupCard(
+                                            context,
+                                            group,
+                                            categoriesMap,
+                                            accountsMap,
+                                            locale,
+                                            currency,
+                                            hideBalance,
+                                            isDark,
+                                            theme,
+                                            l10n,
+                                            true,
+                                          ),
                                         ),
                                     ],
                                   ),
@@ -613,18 +616,20 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.stretch,
                                     children: [
                                       for (final group in rightGroups)
-                                        _buildDayGroupCard(
-                                          context,
-                                          group,
-                                          categoriesMap,
-                                          accountsMap,
-                                          locale,
-                                          currency,
-                                          hideBalance,
-                                          isDark,
-                                          theme,
-                                          l10n,
-                                          true,
+                                        RepaintBoundary(
+                                          child: _buildDayGroupCard(
+                                            context,
+                                            group,
+                                            categoriesMap,
+                                            accountsMap,
+                                            locale,
+                                            currency,
+                                            hideBalance,
+                                            isDark,
+                                            theme,
+                                            l10n,
+                                            true,
+                                          ),
                                         ),
                                     ],
                                   ),
@@ -641,21 +646,24 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: AppleTokens.maxContentWidth),
                       child: ListView.builder(
+                        physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                         padding: EdgeInsets.fromLTRB(16, 4, 16, scrollBottomPadding),
                         itemCount: grouped.length,
                         itemBuilder: (context, groupIndex) {
-                          return _buildDayGroupCard(
-                            context,
-                            grouped[groupIndex],
-                            categoriesMap,
-                            accountsMap,
-                            locale,
-                            currency,
-                            hideBalance,
-                            isDark,
-                            theme,
-                            l10n,
-                            false,
+                          return RepaintBoundary(
+                            child: _buildDayGroupCard(
+                              context,
+                              grouped[groupIndex],
+                              categoriesMap,
+                              accountsMap,
+                              locale,
+                              currency,
+                              hideBalance,
+                              isDark,
+                              theme,
+                              l10n,
+                              false,
+                            ),
                           );
                         },
                       ),

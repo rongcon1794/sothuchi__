@@ -188,8 +188,18 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                   );
                 }
 
-                return LayoutBuilder(
-                  builder: (context, constraints) {
+                return AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 260),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  transitionBuilder: (child, animation) => FadeTransition(
+                    opacity: animation,
+                    child: child,
+                  ),
+                  child: KeyedSubtree(
+                    key: ValueKey('report_view_${selectedMonth.year}_${selectedMonth.month}'),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
                     final isLandscape = context.isLandscape;
                     final isWide = constraints.maxWidth >= 640 || isLandscape;
                     final scrollBottomPadding = isWide
@@ -390,35 +400,44 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: AppleTokens.maxContentWidth),
                         child: ListView(
+                          physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                           padding: EdgeInsets.fromLTRB(16, 4, 16, scrollBottomPadding),
                           children: [
-                            MonthlySummaryHeader(
-                              report: report,
-                              locale: locale,
-                              hideBalance: hideBalance,
+                            RepaintBoundary(
+                              child: MonthlySummaryHeader(
+                                report: report,
+                                locale: locale,
+                                hideBalance: hideBalance,
+                              ),
                             ),
                             const SizedBox(height: 16),
-                            FinancialHealthCard(
-                              report: report,
-                              locale: locale,
-                              hideBalance: hideBalance,
+                            RepaintBoundary(
+                              child: FinancialHealthCard(
+                                report: report,
+                                locale: locale,
+                                hideBalance: hideBalance,
+                              ),
                             ),
                             const SizedBox(height: 16),
-                            AppleSpendingHeatmap(
-                              report: report,
-                              locale: locale,
-                              hideBalance: hideBalance,
+                            RepaintBoundary(
+                              child: AppleSpendingHeatmap(
+                                report: report,
+                                locale: locale,
+                                hideBalance: hideBalance,
+                              ),
                             ),
                             const SizedBox(height: 16),
-                            donutChartCard,
+                            RepaintBoundary(child: donutChartCard),
                             const SizedBox(height: 16),
-                            barChartCard,
+                            RepaintBoundary(child: barChartCard),
                           ],
                         ),
                       ),
                     );
                   },
-                );
+                ),
+              ),
+            );
               },
             ),
           ),

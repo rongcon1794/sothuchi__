@@ -203,20 +203,22 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
 
                   final budgetCardsList = <Widget>[
                     for (final item in progressList) ...[
-                      _BudgetProgressCard(
-                        progress: item,
-                        category: item.budget.categoryId != null
-                            ? categoriesMap[item.budget.categoryId!]
-                            : null,
-                        locale: locale,
-                        hideBalance: hideBalance,
-                        onEdit: () => _openBudgetForm(
-                          context,
-                          selectedMonth: selectedMonth,
-                          existing: item.budget,
+                      RepaintBoundary(
+                        child: _BudgetProgressCard(
+                          progress: item,
+                          category: item.budget.categoryId != null
+                              ? categoriesMap[item.budget.categoryId!]
+                              : null,
+                          locale: locale,
+                          hideBalance: hideBalance,
+                          onEdit: () => _openBudgetForm(
+                            context,
+                            selectedMonth: selectedMonth,
+                            existing: item.budget,
+                          ),
+                          onDelete: () =>
+                              _deleteBudget(context, item.budget.id),
                         ),
-                        onDelete: () =>
-                            _deleteBudget(context, item.budget.id),
                       ),
                       const SizedBox(height: 12),
                     ],
@@ -226,6 +228,7 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 1024),
                       child: ListView(
+                        physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                         padding: EdgeInsets.fromLTRB(
                           16,
                           4,
