@@ -15,8 +15,9 @@ class AppleAnimatedMoneyText extends StatefulWidget {
     this.showMinusSign = false,
     this.style,
     this.semanticsLabel,
-    this.duration = const Duration(milliseconds: 600),
+    this.duration = const Duration(milliseconds: 450),
     this.curve = Curves.easeOutCubic,
+    this.textAlign,
   });
 
   final Money money;
@@ -28,6 +29,7 @@ class AppleAnimatedMoneyText extends StatefulWidget {
   final String? semanticsLabel;
   final Duration duration;
   final Curve curve;
+  final TextAlign? textAlign;
 
   @override
   State<AppleAnimatedMoneyText> createState() => _AppleAnimatedMoneyTextState();
@@ -61,10 +63,29 @@ class _AppleAnimatedMoneyTextState extends State<AppleAnimatedMoneyText>
   void didUpdateWidget(covariant AppleAnimatedMoneyText oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.money.minorUnits != widget.money.minorUnits && !widget.masked) {
-      _oldUnits = oldWidget.money.minorUnits;
-      _targetUnits = widget.money.minorUnits;
-      _controller.forward(from: 0.0);
+    if (widget.duration != oldWidget.duration) {
+      _controller.duration = widget.duration;
+    }
+
+    final unitsChanged = oldWidget.money.minorUnits != widget.money.minorUnits;
+    final signChanged = oldWidget.showPlusSign != widget.showPlusSign ||
+        oldWidget.showMinusSign != widget.showMinusSign;
+    final unmasked = oldWidget.masked && !widget.masked;
+
+    if ((unitsChanged || signChanged || unmasked) && !widget.masked) {
+      if (widget.duration == Duration.zero) {
+        _oldUnits = widget.money.minorUnits;
+        _targetUnits = widget.money.minorUnits;
+        _controller.value = 1.0;
+      } else {
+        _oldUnits = oldWidget.masked
+            ? 0
+            : (_controller.isAnimating
+                ? (_oldUnits + ((_targetUnits - _oldUnits) * _animation.value)).round()
+                : oldWidget.money.minorUnits);
+        _targetUnits = widget.money.minorUnits;
+        _controller.forward(from: 0.0);
+      }
     }
   }
 
@@ -76,46 +97,53 @@ class _AppleAnimatedMoneyTextState extends State<AppleAnimatedMoneyText>
 
   @override
   Widget build(BuildContext context) {
-    final effectiveStyle = (widget.style ?? const TextStyle()).copyWith(
-      fontFeatures: AppTheme.tabularFigures,
+    final baseStyle = widget.style ?? DefaultTextStyle.of(context).style;
+    final effectiveStyle = baseStyle.copyWith(
+      fontFeatures: [
+        ...?baseStyle.fontFeatures,
+        ...AppTheme.tabularFigures,
+      ],
     );
 
-    if (widget.masked) {
-      return Text(
-        widget.money.format(
-          locale: widget.locale,
-          showPlusSign: widget.showPlusSign,
-          showMinusSign: widget.showMinusSign,
-          masked: true,
-        ),
-        semanticsLabel: widget.semanticsLabel,
-        style: effectiveStyle,
-      );
-    }
+    return AnimatedDefaultTextStyle(
+      duration: widget.duration,
+      curve: widget.curve,
+      style: effectiveStyle,
+      child: widget.masked
+          ? Text(
+              widget.money.format(
+                locale: widget.locale,
+                showPlusSign: widget.showPlusSign,
+                showMinusSign: widget.showMinusSign,
+                masked: true,
+              ),
+              textAlign: widget.textAlign,
+              semanticsLabel: widget.semanticsLabel,
+            )
+          : AnimatedBuilder(
+              animation: _animation,
+              builder: (context, child) {
+                final currentUnits = _controller.isAnimating
+                    ? (_oldUnits + ((_targetUnits - _oldUnits) * _animation.value)).round()
+                    : widget.money.minorUnits;
 
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        final currentUnits = _controller.isAnimating
-            ? (_oldUnits + ((_targetUnits - _oldUnits) * _animation.value)).round()
-            : widget.money.minorUnits;
+                final currentMoney = Money(
+                  minorUnits: currentUnits,
+                  currencyCode: widget.money.currencyCode,
+                );
 
-        final currentMoney = Money(
-          minorUnits: currentUnits,
-          currencyCode: widget.money.currencyCode,
-        );
-
-        return Text(
-          currentMoney.format(
-            locale: widget.locale,
-            showPlusSign: widget.showPlusSign,
-            showMinusSign: widget.showMinusSign,
-            masked: false,
-          ),
-          semanticsLabel: widget.semanticsLabel,
-          style: effectiveStyle,
-        );
-      },
+                return Text(
+                  currentMoney.format(
+                    locale: widget.locale,
+                    showPlusSign: widget.showPlusSign,
+                    showMinusSign: widget.showMinusSign,
+                    masked: false,
+                  ),
+                  textAlign: widget.textAlign,
+                  semanticsLabel: widget.semanticsLabel,
+                );
+              },
+            ),
     );
   }
 }

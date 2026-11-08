@@ -229,6 +229,14 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
           )
         : activeMoney;
 
+    final amountColor = switch (_activeMetric) {
+      LucianKpiMetric.balance => displayMoney.minorUnits < 0
+          ? LucianTokens.resolveDanger(isDark)
+          : (isDark ? Colors.white : LucianTokens.inkLight),
+      LucianKpiMetric.income => LucianTokens.resolveMint(isDark),
+      LucianKpiMetric.expense => LucianTokens.resolveDanger(isDark),
+    };
+
     return Container(
       decoration: BoxDecoration(
         color: isDark
@@ -389,51 +397,40 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
           ),
           const SizedBox(height: 10),
 
-          // 2. Large Hero Amount with Smooth Animated Number
+          // 2. Large Hero Amount with Smooth Rolling Number & Dynamic Semantic Color Transitions
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              switchInCurve: LucianTokens.spring,
-              switchOutCurve: Curves.easeOut,
-              transitionBuilder: (child, animation) {
-                return SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0.0, 0.2),
-                    end: Offset.zero,
-                  ).animate(animation),
-                  child: FadeTransition(opacity: animation, child: child),
-                );
-              },
-              child: KeyedSubtree(
-                key: ValueKey('kpi_${_activeMetric.name}_${widget.hideBalance}_${_scrubbedIndex ?? -1}'),
-                child: Text(
-                  displayMoney.format(
-                    locale: widget.locale,
-                    masked: widget.hideBalance,
-                    showPlusSign: _activeMetric == LucianKpiMetric.income,
-                    showMinusSign: _activeMetric == LucianKpiMetric.expense,
-                  ),
-                  style: TextStyle(
-                    fontSize: 34,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.8,
-                    height: 1.15,
-                    color: isDark ? Colors.white : LucianTokens.inkLight,
-                    fontFeatures: AppTheme.tabularFigures,
-                  ),
-                ),
+            child: AppleAnimatedMoneyText(
+              money: displayMoney,
+              locale: widget.locale,
+              masked: widget.hideBalance,
+              showPlusSign: _activeMetric == LucianKpiMetric.income,
+              showMinusSign: _activeMetric == LucianKpiMetric.expense ||
+                  (_activeMetric == LucianKpiMetric.balance && displayMoney.minorUnits < 0),
+              duration: _scrubbedIndex != null
+                  ? Duration.zero
+                  : const Duration(milliseconds: 420),
+              curve: Curves.easeOutCubic,
+              style: TextStyle(
+                fontSize: 34,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.8,
+                height: 1.15,
+                color: amountColor,
+                fontFeatures: AppTheme.tabularFigures,
               ),
             ),
           ),
           const SizedBox(height: 6),
 
-          // 3. Dynamic Delta Badge
+          // 3. Dynamic Delta Badge with Smooth Animated Color & Crossfade
           Row(
             children: [
               Flexible(
-                child: Container(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOutCubic,
                   height: 22,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
@@ -450,38 +447,42 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
                       width: AppleTokens.hairline,
                     ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        isDeltaPositive
-                            ? CupertinoIcons.arrow_up_right
-                            : CupertinoIcons.arrow_down_right,
-                        size: 11,
-                        color: isDeltaPositive
-                            ? (isDark ? LucianTokens.mintDark : LucianTokens.mintLight)
-                            : (isDark
-                                ? LucianTokens.dangerDark
-                                : LucianTokens.dangerLight),
-                      ),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          deltaLabel,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w800,
-                            color: isDeltaPositive
-                                ? (isDark ? LucianTokens.mintDark : LucianTokens.mintLight)
-                                : (isDark
-                                    ? LucianTokens.dangerDark
-                                    : LucianTokens.dangerLight),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 220),
+                    child: Row(
+                      key: ValueKey('delta_${_activeMetric.name}_$isDeltaPositive'),
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isDeltaPositive
+                              ? CupertinoIcons.arrow_up_right
+                              : CupertinoIcons.arrow_down_right,
+                          size: 11,
+                          color: isDeltaPositive
+                              ? (isDark ? LucianTokens.mintDark : LucianTokens.mintLight)
+                              : (isDark
+                                  ? LucianTokens.dangerDark
+                                  : LucianTokens.dangerLight),
+                        ),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            deltaLabel,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w800,
+                              color: isDeltaPositive
+                                  ? (isDark ? LucianTokens.mintDark : LucianTokens.mintLight)
+                                  : (isDark
+                                      ? LucianTokens.dangerDark
+                                      : LucianTokens.dangerLight),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
