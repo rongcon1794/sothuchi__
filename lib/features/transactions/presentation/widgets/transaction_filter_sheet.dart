@@ -549,7 +549,7 @@ class _TypeSegmentSelector extends StatelessWidget {
     final items = <(TransactionType?, String, IconData, Color)>[
       (
         null,
-        l10n.filterDateAll,
+        l10n.all,
         CupertinoIcons.square_grid_2x2,
         theme.colorScheme.primary,
       ),

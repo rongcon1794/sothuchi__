@@ -1560,7 +1560,7 @@ class AppLocalizationsVi extends AppLocalizations {
   }
 
   @override
-  String get filterDateAll => 'Toàn thời gian';
+  String get filterDateAll => 'Tất cả';
 
   @override
   String get filterDateThisMonth => 'Tháng này';
