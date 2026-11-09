@@ -516,3 +516,4 @@ class DefaultWalletPickerSheet extends StatelessWidget {
     );
   }
 }
+

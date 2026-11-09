@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
@@ -12,12 +13,16 @@ import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/theme/lucian_theme_tokens.dart';
+import 'package:so_thu_chi/core/utils/date_formatter.dart';
+import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
+import 'package:so_thu_chi/core/widgets/apple_modal_sheet.dart';
 import 'package:so_thu_chi/core/widgets/empty_state_view.dart';
 import 'package:so_thu_chi/core/widgets/skeleton_box.dart';
 import 'package:so_thu_chi/features/categories/domain/entities/category.dart';
 import 'package:so_thu_chi/features/categories/presentation/controllers/categories_controller.dart';
 import 'package:so_thu_chi/features/categories/presentation/widgets/category_form_sheet.dart';
+import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
 
@@ -150,6 +155,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     required int expenseCount,
     required int incomeCount,
     required int totalTransactions,
+    required Money monthExpenseMoney,
+    required Money monthIncomeMoney,
+    required String locale,
+    required bool hideBalance,
   }) {
     final totalCategories = expenseCount + incomeCount;
 
@@ -162,8 +171,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
           Row(
             children: [
               Container(
-                width: 40,
-                height: 40,
+                width: 42,
+                height: 42,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
@@ -180,7 +189,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                 child: Icon(
                   CupertinoIcons.square_grid_2x2,
                   color: theme.colorScheme.primary,
-                  size: 20,
+                  size: 21,
                 ),
               ),
               const SizedBox(width: 12),
@@ -211,6 +220,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             ],
           ),
           const SizedBox(height: 14),
+
           // Metric Pills Strip
           Row(
             children: [
@@ -252,6 +262,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                 ),
               ),
               const SizedBox(width: 8),
+
               // Income badge
               Expanded(
                 child: Container(
@@ -291,26 +302,117 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               ),
             ],
           ),
-          if (totalTransactions > 0) ...[
-            const SizedBox(height: 10),
-            Row(
+
+          // Monthly Total Strip
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.04)
+                  : Colors.black.withValues(alpha: 0.03),
+              borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+            ),
+            child: Row(
               children: [
-                const Icon(
-                  Icons.receipt_long_rounded,
-                  size: 14,
-                  color: AppleTokens.systemGray,
-                ),
-                const SizedBox(width: 5),
-                Text(
-                  '$totalTransactions giao dịch đã được phân loại',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppleTokens.systemGray,
-                    fontSize: 11.5,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Chi tháng này',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w600,
+                          color: AppleTokens.systemGray,
+                        ),
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        monthExpenseMoney.format(locale: locale, masked: hideBalance),
+                        style: const TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          fontFeatures: AppTheme.tabularFigures,
+                          color: AppleTokens.rubyExpense,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
                 ),
+                Container(
+                  width: 1,
+                  height: 24,
+                  color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Thu tháng này',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w600,
+                          color: AppleTokens.systemGray,
+                        ),
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        monthIncomeMoney.format(locale: locale, masked: hideBalance),
+                        style: const TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          fontFeatures: AppTheme.tabularFigures,
+                          color: AppleTokens.emeraldIncome,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                if (totalTransactions > 0) ...[
+                  Container(
+                    width: 1,
+                    height: 24,
+                    color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Đã phân loại',
+                          style: TextStyle(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w600,
+                            color: AppleTokens.systemGray,
+                          ),
+                        ),
+                        const SizedBox(height: 1),
+                        Text(
+                          '$totalTransactions GD',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w700,
+                            fontFeatures: AppTheme.tabularFigures,
+                            color: theme.textTheme.bodyMedium?.color,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
-          ],
+          ),
         ],
       ),
     );
@@ -322,6 +424,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     required ThemeData theme,
     required bool isDark,
     required int txCount,
+    required int monthSpendMinor,
+    required String currency,
+    required String locale,
+    required bool hideBalance,
   }) {
     final l10n = context.l10n;
     final color = AppIconCatalog.contrastSafeColor(
@@ -337,6 +443,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         : cat.name;
 
     final isIncome = cat.type == CategoryType.income;
+    final monthMoney = Money(minorUnits: monthSpendMinor, currencyCode: currency);
 
     return ApplePressable(
       borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
@@ -418,7 +525,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       // Transaction count indicator
                       Flexible(
                         child: Text(
-                          txCount > 0 ? '$txCount giao dịch' : 'Chưa dùng',
+                          txCount > 0 ? '$txCount GD' : 'Chưa dùng',
                           style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
@@ -435,46 +542,76 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               ),
             ),
 
-            // Trailing actions and navigation arrow
-            Row(
+            // Right Column: Month Spend & Actions
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
               children: [
-                ApplePopupMenuButton<String>(
-                  tooltip: l10n.moreOptions,
-                  onSelected: (value) {
-                    if (value == 'detail') {
-                      context.push(AppRoutes.categoryDetail(cat.id));
-                    } else if (value == 'edit') {
-                      _openCategorySheet(existing: cat);
-                    } else if (value == 'delete') {
-                      _deleteCategory(cat);
-                    }
-                  },
-                  itemBuilder: (ctx) => [
-                    ApplePopupMenuItem(
-                      value: 'detail',
-                      icon: CupertinoIcons.chart_bar_alt_fill,
-                      title: 'Xem báo cáo chi tiết',
+                if (monthSpendMinor > 0)
+                  Text(
+                    isIncome
+                        ? '+${monthMoney.format(locale: locale, masked: hideBalance)}'
+                        : '-${monthMoney.format(locale: locale, masked: hideBalance)}',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: AppTheme.tabularFigures,
+                      color: isIncome ? AppleTokens.emeraldIncome : AppleTokens.rubyExpense,
                     ),
-                    ApplePopupMenuItem(
-                      value: 'edit',
-                      icon: Icons.edit_outlined,
-                      title: l10n.edit,
+                  )
+                else
+                  Text(
+                    '0 ${currency == 'VND' ? '₫' : currency}',
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w500,
+                      color: isDark ? Colors.white24 : Colors.black26,
                     ),
-                    if (!cat.isDefault)
-                      ApplePopupMenuItem(
-                        value: 'delete',
-                        icon: Icons.delete_outline_rounded,
-                        title: l10n.delete,
-                        isDestructive: true,
-                      ),
+                  ),
+                const SizedBox(height: 2),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ApplePopupMenuButton<String>(
+                      tooltip: l10n.moreOptions,
+                      iconSize: 18,
+                      size: 26,
+                      onSelected: (value) {
+                        if (value == 'detail') {
+                          context.push(AppRoutes.categoryDetail(cat.id));
+                        } else if (value == 'edit') {
+                          _openCategorySheet(existing: cat);
+                        } else if (value == 'delete') {
+                          _deleteCategory(cat);
+                        }
+                      },
+                      itemBuilder: (ctx) => [
+                        ApplePopupMenuItem(
+                          value: 'detail',
+                          icon: CupertinoIcons.chart_bar_alt_fill,
+                          title: 'Xem báo cáo chi tiết',
+                        ),
+                        ApplePopupMenuItem(
+                          value: 'edit',
+                          icon: Icons.edit_outlined,
+                          title: l10n.edit,
+                        ),
+                        if (!cat.isDefault)
+                          ApplePopupMenuItem(
+                            value: 'delete',
+                            icon: Icons.delete_outline_rounded,
+                            title: l10n.delete,
+                            isDestructive: true,
+                          ),
+                      ],
+                    ),
+                    const SizedBox(width: 2),
+                    const Icon(
+                      CupertinoIcons.chevron_forward,
+                      size: 14,
+                      color: AppleTokens.systemGray,
+                    ),
                   ],
-                ),
-                const SizedBox(width: 4),
-                const Icon(
-                  CupertinoIcons.chevron_forward,
-                  size: 16,
-                  color: AppleTokens.systemGray,
                 ),
               ],
             ),
@@ -503,13 +640,36 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     final incomeList = ref.watch(incomeCategoriesProvider);
     final currentList = _selectedType == CategoryType.expense ? expenseList : incomeList;
 
-    // Collect transactions count per category safely
+    // Currency and settings
+    final settings = ref.watch(settingsControllerProvider).value;
+    final locale = settings?.localeCode ?? 'vi';
+    final currency = settings?.currencyCode ?? AppCurrencies.defaultCode;
+    final hideBalance = settings?.hideBalance ?? false;
+
+    // Collect transactions count & month spend per category safely
     final transactionsAsync = ref.watch(transactionsStreamProvider);
     final txList = transactionsAsync.asData?.value ?? const <TransactionEntity>[];
     final txCounts = <String, int>{};
+    final txMonthTotals = <String, int>{};
+    final now = DateTime.now();
+
+    var totalExpenseMonthMinor = 0;
+    var totalIncomeMonthMinor = 0;
+
     for (final tx in txList) {
       txCounts[tx.categoryId] = (txCounts[tx.categoryId] ?? 0) + 1;
+      if (tx.currency == currency && AppDateUtils.isSameMonth(tx.date, now)) {
+        txMonthTotals[tx.categoryId] = (txMonthTotals[tx.categoryId] ?? 0) + tx.amount;
+        if (tx.type == TransactionType.expense) {
+          totalExpenseMonthMinor += tx.amount;
+        } else if (tx.type == TransactionType.income) {
+          totalIncomeMonthMinor += tx.amount;
+        }
+      }
     }
+
+    final monthExpenseMoney = Money(minorUnits: totalExpenseMonthMinor, currencyCode: currency);
+    final monthIncomeMoney = Money(minorUnits: totalIncomeMonthMinor, currencyCode: currency);
 
     // Filter items based on search query
     final query = _searchQuery.toLowerCase();
@@ -530,6 +690,11 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         toolbarHeight: appBarHeight,
+        leading: IconButton(
+          icon: const Icon(CupertinoIcons.chevron_left, size: 22),
+          tooltip: 'Quay lại',
+          onPressed: () => context.pop(),
+        ),
         title: Text(
           l10n.categoriesTitle,
           style: const TextStyle(fontWeight: FontWeight.w700),
@@ -563,237 +728,247 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
           const SizedBox(width: 8),
         ],
       ),
-      body: SafeArea(
-        top: false,
-        bottom: false,
-        child: Column(
-          children: [
-            // Top Controls Section: Search & Sliding Tabs
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 680),
-                  child: Column(
-                    children: [
-                      // Apple Search Bar
-                      AppleTextField(
-                        controller: _searchController,
-                        placeholder: l10n.searchCategories,
-                        prefixIcon: const Icon(CupertinoIcons.search, size: 18),
-                        suffixIcon: _searchQuery.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(
-                                  CupertinoIcons.clear_thick_circled,
-                                  size: 17,
-                                ),
-                                onPressed: () {
-                                  unawaited(HapticFeedback.lightImpact());
-                                  _searchController.clear();
-                                },
-                              )
-                            : null,
-                      ),
-                      const SizedBox(height: 10),
-                      // Lucian Segmented Sliding Pill Tabs
-                      LucianSlidingPillTabs<CategoryType>(
-                        items: [
-                          LucianTabItem(
-                            value: CategoryType.expense,
-                            label: l10n.expense,
-                            icon: Icons.trending_down_rounded,
-                            badgeCount: expenseList.length,
-                            activeColor: LucianTokens.resolveDanger(isDark),
-                          ),
-                          LucianTabItem(
-                            value: CategoryType.income,
-                            label: l10n.income,
-                            icon: Icons.trending_up_rounded,
-                            badgeCount: incomeList.length,
-                            activeColor: LucianTokens.resolveMint(isDark),
-                          ),
-                        ],
-                        selected: _selectedType,
-                        onChanged: (type) {
-                          unawaited(HapticFeedback.selectionClick());
-                          setState(() => _selectedType = type);
-                        },
-                      ),
-                    ],
-                  ),
-                ),
+      body: AppleEdgeSwipeToDismiss(
+        onDismiss: () => context.pop(),
+        child: SafeArea(
+          top: false,
+          bottom: false,
+          child: NotificationListener<UserScrollNotification>(
+            onNotification: (notification) {
+              if (notification.direction == ScrollDirection.reverse) {
+                if (_isFabVisible) {
+                  setState(() {
+                    _isFabVisible = false;
+                    _isFabExpanded = false;
+                  });
+                }
+              } else if (notification.direction == ScrollDirection.forward) {
+                if (!_isFabVisible) {
+                  setState(() {
+                    _isFabVisible = true;
+                  });
+                }
+              } else if (notification.metrics.pixels <= 30) {
+                if (!_isFabVisible || !_isFabExpanded) {
+                  setState(() {
+                    _isFabVisible = true;
+                    _isFabExpanded = true;
+                  });
+                }
+              }
+              return false;
+            },
+            child: categoriesAsync.when(
+              loading: () => const SkeletonListView(),
+              error: (err, _) => Center(
+                child: Text(context.localizeError(err)),
               ),
-            ),
+              data: (_) {
+                return Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1024),
+                    child: CustomScrollView(
+                      slivers: [
+                        // 1. Overview Hero Summary Card
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                            child: _buildHeroSummaryCard(
+                              context: context,
+                              theme: theme,
+                              isDark: isDark,
+                              expenseCount: expenseList.length,
+                              incomeCount: incomeList.length,
+                              totalTransactions: txList.length,
+                              monthExpenseMoney: monthExpenseMoney,
+                              monthIncomeMoney: monthIncomeMoney,
+                              locale: locale,
+                              hideBalance: hideBalance,
+                            ),
+                          ),
+                        ),
 
-            // List or Grid View of Categories
-            Expanded(
-              child: NotificationListener<UserScrollNotification>(
-                onNotification: (notification) {
-                  if (notification.direction == ScrollDirection.reverse) {
-                    if (_isFabVisible) {
-                      setState(() {
-                        _isFabVisible = false;
-                        _isFabExpanded = false;
-                      });
-                    }
-                  } else if (notification.direction == ScrollDirection.forward) {
-                    if (!_isFabVisible) {
-                      setState(() {
-                        _isFabVisible = true;
-                      });
-                    }
-                  } else if (notification.metrics.pixels <= 30) {
-                    if (!_isFabVisible || !_isFabExpanded) {
-                      setState(() {
-                        _isFabVisible = true;
-                        _isFabExpanded = true;
-                      });
-                    }
-                  }
-                  return false;
-                },
-                child: categoriesAsync.when(
-                  loading: () => const SkeletonListView(),
-                  error: (err, _) => Center(
-                    child: Text(context.localizeError(err)),
-                  ),
-                  data: (_) {
-                    return Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1024),
-                        child: CustomScrollView(
-                          slivers: [
-                            // Overview Hero Card Sliver
-                            SliverToBoxAdapter(
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(16, 2, 16, 12),
-                                child: _buildHeroSummaryCard(
-                                  context: context,
-                                  theme: theme,
-                                  isDark: isDark,
-                                  expenseCount: expenseList.length,
-                                  incomeCount: incomeList.length,
-                                  totalTransactions: txList.length,
+                        // 2. Search & Segmented Sliding Tabs Controls
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                            child: Center(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(maxWidth: 680),
+                                child: Column(
+                                  children: [
+                                    // Apple Search Bar
+                                    AppleTextField(
+                                      controller: _searchController,
+                                      placeholder: l10n.searchCategories,
+                                      prefixIcon: const Icon(CupertinoIcons.search, size: 18),
+                                      suffixIcon: _searchQuery.isNotEmpty
+                                          ? IconButton(
+                                              icon: const Icon(
+                                                CupertinoIcons.clear_thick_circled,
+                                                size: 17,
+                                              ),
+                                              onPressed: () {
+                                                unawaited(HapticFeedback.lightImpact());
+                                                _searchController.clear();
+                                              },
+                                            )
+                                          : null,
+                                    ),
+                                    const SizedBox(height: 10),
+                                    // Lucian Segmented Sliding Pill Tabs
+                                    LucianSlidingPillTabs<CategoryType>(
+                                      items: [
+                                        LucianTabItem(
+                                          value: CategoryType.expense,
+                                          label: l10n.expense,
+                                          icon: Icons.trending_down_rounded,
+                                          badgeCount: expenseList.length,
+                                          activeColor: LucianTokens.resolveDanger(isDark),
+                                        ),
+                                        LucianTabItem(
+                                          value: CategoryType.income,
+                                          label: l10n.income,
+                                          icon: Icons.trending_up_rounded,
+                                          badgeCount: incomeList.length,
+                                          activeColor: LucianTokens.resolveMint(isDark),
+                                        ),
+                                      ],
+                                      selected: _selectedType,
+                                      onChanged: (type) {
+                                        unawaited(HapticFeedback.selectionClick());
+                                        setState(() => _selectedType = type);
+                                      },
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
+                          ),
+                        ),
 
-                            // If searching, show result counter badge
-                            if (_searchQuery.isNotEmpty)
-                              SliverToBoxAdapter(
-                                child: Padding(
-                                  padding: const EdgeInsets.fromLTRB(20, 2, 20, 8),
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        'Tìm thấy ${items.length} danh mục phù hợp',
-                                        style: theme.textTheme.labelMedium?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          color: AppleTokens.systemGray,
-                                        ),
-                                      ),
-                                    ],
+                        // 3. Search result counter indicator
+                        if (_searchQuery.isNotEmpty)
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    'Tìm thấy ${items.length} danh mục phù hợp',
+                                    style: theme.textTheme.labelMedium?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: AppleTokens.systemGray,
+                                    ),
                                   ),
-                                ),
+                                ],
                               ),
+                            ),
+                          ),
 
-                            // Category items or Empty State
-                            if (items.isEmpty)
-                              SliverFillRemaining(
-                                hasScrollBody: false,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 24,
-                                    vertical: 36,
-                                  ),
-                                  child: _searchQuery.isNotEmpty
-                                      ? EmptyStateView(
-                                          icon: CupertinoIcons.search,
-                                          title: l10n.noCategoriesFound,
-                                          subtitle:
-                                              'Không tìm thấy danh mục nào phù hợp với từ khóa "$_searchQuery".',
-                                          actionLabel:
-                                              'Tạo danh mục "$_searchQuery"',
-                                          onAction: () => _openCategorySheet(
-                                            initialName: _searchQuery,
-                                          ),
-                                        )
-                                      : EmptyStateView(
-                                          icon: CupertinoIcons.folder_badge_plus,
-                                          title: l10n.noCategories,
-                                          subtitle:
-                                              _selectedType == CategoryType.expense
-                                                  ? 'Chưa có danh mục chi tiêu nào.'
-                                                  : 'Chưa có danh mục thu nhập nào.',
-                                          actionLabel: l10n.addCategory,
-                                          onAction: _openCategorySheet,
-                                        ),
+                        // 4. Category items or Empty State
+                        if (items.isEmpty)
+                          SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 36,
+                              ),
+                              child: _searchQuery.isNotEmpty
+                                  ? EmptyStateView(
+                                      icon: CupertinoIcons.search,
+                                      title: l10n.noCategoriesFound,
+                                      subtitle:
+                                          'Không tìm thấy danh mục nào phù hợp với từ khóa "$_searchQuery".',
+                                      actionLabel:
+                                          'Tạo danh mục "$_searchQuery"',
+                                      onAction: () => _openCategorySheet(
+                                        initialName: _searchQuery,
+                                      ),
+                                    )
+                                  : EmptyStateView(
+                                      icon: CupertinoIcons.folder_badge_plus,
+                                      title: l10n.noCategories,
+                                      subtitle:
+                                          _selectedType == CategoryType.expense
+                                              ? 'Chưa có danh mục chi tiêu nào.'
+                                              : 'Chưa có danh mục thu nhập nào.',
+                                      actionLabel: l10n.addCategory,
+                                      onAction: _openCategorySheet,
+                                    ),
+                            ),
+                          )
+                        else if (isWide)
+                          SliverPadding(
+                            padding: EdgeInsets.fromLTRB(
+                              16,
+                              4,
+                              16,
+                              scrollBottomPadding,
+                            ),
+                            sliver: SliverGrid(
+                              gridDelegate:
+                                  const SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 440,
+                                mainAxisExtent: 88,
+                                crossAxisSpacing: 12,
+                                mainAxisSpacing: 10,
+                              ),
+                              delegate: SliverChildBuilderDelegate(
+                                (context, index) => _buildCategoryCard(
+                                  context: context,
+                                  cat: items[index],
+                                  theme: theme,
+                                  isDark: isDark,
+                                  txCount: txCounts[items[index].id] ?? 0,
+                                  monthSpendMinor: txMonthTotals[items[index].id] ?? 0,
+                                  currency: currency,
+                                  locale: locale,
+                                  hideBalance: hideBalance,
                                 ),
-                              )
-                            else if (isWide)
-                              SliverPadding(
-                                padding: EdgeInsets.fromLTRB(
-                                  16,
-                                  4,
-                                  16,
-                                  scrollBottomPadding,
-                                ),
-                                sliver: SliverGrid(
-                                  gridDelegate:
-                                      const SliverGridDelegateWithMaxCrossAxisExtent(
-                                    maxCrossAxisExtent: 440,
-                                    mainAxisExtent: 84,
-                                    crossAxisSpacing: 12,
-                                    mainAxisSpacing: 10,
-                                  ),
-                                  delegate: SliverChildBuilderDelegate(
-                                    (context, index) => _buildCategoryCard(
+                                childCount: items.length,
+                              ),
+                            ),
+                          )
+                        else
+                          SliverPadding(
+                            padding: EdgeInsets.fromLTRB(
+                              16,
+                              4,
+                              16,
+                              scrollBottomPadding,
+                            ),
+                            sliver: SliverList(
+                              delegate: SliverChildBuilderDelegate(
+                                (context, index) {
+                                  final item = items[index];
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 10),
+                                    child: _buildCategoryCard(
                                       context: context,
-                                      cat: items[index],
+                                      cat: item,
                                       theme: theme,
                                       isDark: isDark,
-                                      txCount: txCounts[items[index].id] ?? 0,
+                                      txCount: txCounts[item.id] ?? 0,
+                                      monthSpendMinor: txMonthTotals[item.id] ?? 0,
+                                      currency: currency,
+                                      locale: locale,
+                                      hideBalance: hideBalance,
                                     ),
-                                    childCount: items.length,
-                                  ),
-                                ),
-                              )
-                            else
-                              SliverPadding(
-                                padding: EdgeInsets.fromLTRB(
-                                  16,
-                                  4,
-                                  16,
-                                  scrollBottomPadding,
-                                ),
-                                sliver: SliverList(
-                                  delegate: SliverChildBuilderDelegate(
-                                    (context, index) {
-                                      final item = items[index];
-                                      return Padding(
-                                        padding: const EdgeInsets.only(bottom: 10),
-                                        child: _buildCategoryCard(
-                                          context: context,
-                                          cat: item,
-                                          theme: theme,
-                                          isDark: isDark,
-                                          txCount: txCounts[item.id] ?? 0,
-                                        ),
-                                      );
-                                    },
-                                    childCount: items.length,
-                                  ),
-                                ),
+                                  );
+                                },
+                                childCount: items.length,
                               ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
-          ],
+          ),
         ),
       ),
       floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),

@@ -356,6 +356,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     final activeWallets = ref.watch(activeAccountsProvider);
     final categoriesMap = ref.watch(categoriesMapProvider);
+    final expenseCategories = ref.watch(expenseCategoriesProvider);
+    final incomeCategories = ref.watch(incomeCategoriesProvider);
     final debtsAsync = ref.watch(debtsStreamProvider);
     final unsettledDebtsCount = (debtsAsync.value ?? const [])
         .where((d) => !d.isSettled)
@@ -534,6 +536,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   backgroundColor: AppleTokens.systemOrange,
                 ),
                 title: Text(l10n.categoriesTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: Text(
+                  '${expenseCategories.length} khoản chi • ${incomeCategories.length} khoản thu',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
