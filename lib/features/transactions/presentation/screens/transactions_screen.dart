@@ -226,6 +226,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                     Container(
                       height: isLandscape ? 34 : 40,
                       padding: const EdgeInsets.all(3),
+                      clipBehavior: Clip.antiAlias,
                       decoration: BoxDecoration(
                         color: colors.inputBackground,
                         borderRadius: BorderRadius.circular(AppleTokens.radiusPill),

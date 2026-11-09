@@ -23,6 +23,7 @@ class AppleSearchBar extends StatefulWidget {
     this.onChanged,
     this.onClear,
     this.height,
+    this.borderRadius,
     this.isLandscape = false,
     this.autofocus = false,
   });
@@ -33,6 +34,7 @@ class AppleSearchBar extends StatefulWidget {
   final ValueChanged<String>? onChanged;
   final VoidCallback? onClear;
   final double? height;
+  final double? borderRadius;
   final bool isLandscape;
   final bool autofocus;
 
@@ -113,13 +115,17 @@ class _AppleSearchBarState extends State<AppleSearchBar> {
     final barHeight = widget.height ?? (widget.isLandscape ? 34.0 : 40.0);
     final iconSize = widget.isLandscape ? 15.0 : 17.0;
     final fontSize = widget.isLandscape ? 12.5 : 13.5;
+    final effectiveRadius = BorderRadius.circular(
+      widget.borderRadius ?? AppleTokens.radiusPill,
+    );
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 180),
       height: barHeight,
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: colors.inputBackground,
-        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+        borderRadius: effectiveRadius,
         border: Border.all(
           color: _isFocused ? primary : colors.inputBorder,
           width: _isFocused ? 1.3 : 1.0,
@@ -133,66 +139,74 @@ class _AppleSearchBarState extends State<AppleSearchBar> {
         ],
       ),
       alignment: Alignment.center,
-      child: TextField(
-        controller: _controller,
-        focusNode: _focusNode,
-        autofocus: widget.autofocus,
-        onChanged: widget.onChanged,
-        textAlignVertical: TextAlignVertical.center,
-        style: TextStyle(
-          fontSize: fontSize,
-          fontWeight: FontWeight.w500,
-          color: colors.textPrimary,
-        ),
-        decoration: InputDecoration(
-          isDense: true,
-          contentPadding: EdgeInsets.zero,
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
-          prefixIcon: Padding(
-            padding: EdgeInsetsDirectional.only(
-              start: widget.isLandscape ? 10 : 12,
-              end: 8,
-            ),
-            child: Icon(
-              CupertinoIcons.search,
-              size: iconSize,
-              color: _isFocused ? primary : colors.textTertiary,
-            ),
+      child: ClipRRect(
+        borderRadius: effectiveRadius,
+        child: TextField(
+          controller: _controller,
+          focusNode: _focusNode,
+          autofocus: widget.autofocus,
+          onChanged: widget.onChanged,
+          textAlignVertical: TextAlignVertical.center,
+          style: TextStyle(
+            fontSize: fontSize,
+            fontWeight: FontWeight.w500,
+            color: colors.textPrimary,
           ),
-          prefixIconConstraints: BoxConstraints(
-            minWidth: widget.isLandscape ? 32 : 38,
-            minHeight: barHeight,
-          ),
-          suffixIcon: _hasText
-              ? Padding(
-                  padding: EdgeInsetsDirectional.only(
-                    end: widget.isLandscape ? 6 : 8,
-                  ),
-                  child: ApplePressable(
-                    scaleDown: 0.88,
-                    onTap: _clearText,
-                    child: Padding(
-                      padding: const EdgeInsets.all(4),
-                      child: Icon(
-                        CupertinoIcons.clear_circled_solid,
-                        size: iconSize,
-                        color: colors.textTertiary,
+          decoration: InputDecoration(
+            filled: false,
+            fillColor: Colors.transparent,
+            isDense: true,
+            contentPadding: EdgeInsets.zero,
+            border: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
+            errorBorder: InputBorder.none,
+            focusedErrorBorder: InputBorder.none,
+            disabledBorder: InputBorder.none,
+            prefixIcon: Padding(
+              padding: EdgeInsetsDirectional.only(
+                start: widget.isLandscape ? 10 : 12,
+                end: 8,
+              ),
+              child: Icon(
+                CupertinoIcons.search,
+                size: iconSize,
+                color: _isFocused ? primary : colors.textTertiary,
+              ),
+            ),
+            prefixIconConstraints: BoxConstraints(
+              minWidth: widget.isLandscape ? 32 : 38,
+              minHeight: barHeight,
+            ),
+            suffixIcon: _hasText
+                ? Padding(
+                    padding: EdgeInsetsDirectional.only(
+                      end: widget.isLandscape ? 6 : 8,
+                    ),
+                    child: ApplePressable(
+                      scaleDown: 0.88,
+                      onTap: _clearText,
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: Icon(
+                          CupertinoIcons.clear_circled_solid,
+                          size: iconSize,
+                          color: colors.textTertiary,
+                        ),
                       ),
                     ),
-                  ),
-                )
-              : null,
-          suffixIconConstraints: BoxConstraints(
-            minWidth: widget.isLandscape ? 28 : 34,
-            minHeight: barHeight,
-          ),
-          hintText: widget.hintText,
-          hintStyle: TextStyle(
-            fontSize: fontSize,
-            color: colors.textTertiary,
-            fontWeight: FontWeight.w400,
+                  )
+                : null,
+            suffixIconConstraints: BoxConstraints(
+              minWidth: widget.isLandscape ? 28 : 34,
+              minHeight: barHeight,
+            ),
+            hintText: widget.hintText,
+            hintStyle: TextStyle(
+              fontSize: fontSize,
+              color: colors.textTertiary,
+              fontWeight: FontWeight.w400,
+            ),
           ),
         ),
       ),
