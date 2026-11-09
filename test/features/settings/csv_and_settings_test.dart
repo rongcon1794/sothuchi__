@@ -18,6 +18,7 @@ import 'package:so_thu_chi/features/categories/data/datasources/default_categori
 import 'package:so_thu_chi/features/categories/data/repositories/firestore_category_repository.dart';
 import 'package:so_thu_chi/features/categories/domain/entities/category.dart';
 import 'package:so_thu_chi/features/settings/presentation/screens/settings_screen.dart';
+import 'package:so_thu_chi/features/settings/presentation/widgets/default_wallet_picker_sheet.dart';
 import 'package:so_thu_chi/features/transactions/data/repositories/firestore_transaction_repository.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:so_thu_chi/l10n/app_localizations.dart';
@@ -392,6 +393,95 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('OLED True Black'), findsOneWidget);
+    });
+
+    testWidgets('DefaultWalletPickerSheet renders hero banner, active default card, and updates selection', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(800, 1200));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      final now = DateTime(2026, 11, 1);
+      final w1 = Account(
+        id: 'w1',
+        name: 'Tiền mặt',
+        type: AccountType.cash,
+        balance: 1500000,
+        currency: 'VND',
+        icon: 'cash',
+        color: 0xFF0D7C66,
+        createdAt: now,
+        updatedAt: now,
+      );
+      final w2 = Account(
+        id: 'w2',
+        name: 'Vietcombank',
+        type: AccountType.bank,
+        balance: 12000000,
+        currency: 'VND',
+        icon: 'bank',
+        color: 0xFF1D5BD6,
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      String? selectedId = 'w1';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('vi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          theme: AppTheme.light(),
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => ElevatedButton(
+                onPressed: () {
+                  DefaultWalletPickerSheet.show(
+                    context: context,
+                    wallets: [w1, w2],
+                    currentDefaultId: selectedId,
+                    onSelected: (id) => selectedId = id,
+                  );
+                },
+                child: const Text('Open Default Wallet Sheet'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Open Default Wallet Sheet'));
+      await tester.pumpAndSettle();
+
+      // Check Header and Info banner
+      expect(find.text('Ví mặc định chi tiêu'), findsOneWidget);
+      expect(find.text('Tiết kiệm thao tác nhập liệu'), findsOneWidget);
+
+      // Check Active Default Hero card
+      expect(find.text('VÍ ĐANG ĐƯỢC CHỌN MẶC ĐỊNH'), findsOneWidget);
+      expect(find.text('MẶC ĐỊNH'), findsOneWidget);
+
+      // Check all wallets list
+      expect(find.text('TẤT CẢ VÍ & TÀI KHOẢN (2)'), findsOneWidget);
+      expect(find.text('Vietcombank'), findsOneWidget);
+
+      // Tap Vietcombank to set it as default
+      await tester.tap(find.text('Vietcombank'));
+      await tester.pumpAndSettle();
+
+      expect(selectedId, 'w2');
+
+      // Re-open and tap 'Không đặt ví mặc định'
+      await tester.tap(find.text('Open Default Wallet Sheet'));
+      await tester.pumpAndSettle();
+
+      final clearDefaultBtn = find.text('Không đặt ví mặc định');
+      expect(clearDefaultBtn, findsOneWidget);
+      await tester.ensureVisible(clearDefaultBtn);
+      await tester.tap(clearDefaultBtn);
+      await tester.pumpAndSettle();
+
+      expect(selectedId, isNull);
     });
   });
 }
