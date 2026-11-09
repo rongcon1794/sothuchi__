@@ -281,7 +281,8 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        alignment: Alignment.center,
                         decoration: BoxDecoration(
                           color: isDark
                               ? AppleTokens.bgDarkSecondary
@@ -294,6 +295,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             color: AppleTokens.systemGray,
+                            height: 1.2,
                           ),
                         ),
                       ),
@@ -726,6 +728,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      alignment: Alignment.center,
       decoration: BoxDecoration(
         color: isDark
             ? Colors.black.withValues(alpha: 0.3)
@@ -738,6 +741,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Icon(icon, size: 13, color: color),
           const SizedBox(width: 5),
@@ -750,6 +754,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: isDark ? Colors.white70 : Colors.black87,
+                height: 1.2,
               ),
             ),
           ),
@@ -763,6 +768,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                 fontWeight: FontWeight.w800,
                 color: color,
                 fontFeatures: AppTheme.tabularFigures,
+                height: 1.2,
               ),
             ),
           ),
@@ -818,7 +824,8 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
             borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
               decoration: BoxDecoration(
                 color: isSelected
                     ? (isDark ? Colors.white : Colors.black87)
@@ -837,12 +844,14 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
               ),
               child: Text(
                 f.label,
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   color: isSelected
                       ? (isDark ? Colors.black : Colors.white)
                       : (isDark ? Colors.white70 : Colors.black87),
+                  height: 1.2,
                 ),
               ),
             ),
@@ -1032,9 +1041,10 @@ class _WalletTile extends StatelessWidget {
                                   // Wallet Type Pill with Icon
                                   Container(
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: 7,
-                                      vertical: 2.5,
+                                      horizontal: 8,
+                                      vertical: 3.5,
                                     ),
+                                    alignment: Alignment.center,
                                     decoration: BoxDecoration(
                                       color: walletColor.withValues(
                                         alpha: isDark ? 0.20 : 0.12,
@@ -1045,6 +1055,7 @@ class _WalletTile extends StatelessWidget {
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
                                         Icon(
                                           _typeIcon(account.type),
@@ -1062,6 +1073,7 @@ class _WalletTile extends StatelessWidget {
                                             color: isDark
                                               ? Colors.white70
                                               : walletColor,
+                                            height: 1.2,
                                           ),
                                         ),
                                       ],
@@ -1072,9 +1084,10 @@ class _WalletTile extends StatelessWidget {
                                   if (isDefault)
                                     Container(
                                       padding: const EdgeInsets.symmetric(
-                                        horizontal: 7,
-                                        vertical: 2.5,
+                                        horizontal: 8,
+                                        vertical: 3.5,
                                       ),
+                                      alignment: Alignment.center,
                                       decoration: BoxDecoration(
                                         gradient: const LinearGradient(
                                           colors: [
@@ -1096,6 +1109,7 @@ class _WalletTile extends StatelessWidget {
                                       ),
                                       child: const Row(
                                         mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
                                           Icon(
                                             Icons.star_rounded,
@@ -1110,6 +1124,7 @@ class _WalletTile extends StatelessWidget {
                                               fontWeight: FontWeight.w800,
                                               color: Color(0xFF4A3500),
                                               letterSpacing: 0.1,
+                                              height: 1.2,
                                             ),
                                           ),
                                         ],
@@ -1119,9 +1134,10 @@ class _WalletTile extends StatelessWidget {
                                   // Currency Code Pill
                                   Container(
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 2.5,
+                                      horizontal: 7,
+                                      vertical: 3.5,
                                     ),
+                                    alignment: Alignment.center,
                                     decoration: BoxDecoration(
                                       color: isDark
                                           ? Colors.white.withValues(alpha: 0.08)
@@ -1139,6 +1155,7 @@ class _WalletTile extends StatelessWidget {
                                             ? Colors.white54
                                             : Colors.black54,
                                         letterSpacing: 0.2,
+                                        height: 1.2,
                                       ),
                                     ),
                                   ),
@@ -1147,9 +1164,10 @@ class _WalletTile extends StatelessWidget {
                                   if (account.archived)
                                     Container(
                                       padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 2.5,
+                                        horizontal: 7,
+                                        vertical: 3.5,
                                       ),
+                                      alignment: Alignment.center,
                                       decoration: BoxDecoration(
                                         color: AppleTokens.rubyExpense
                                             .withValues(alpha: 0.15),
@@ -1163,6 +1181,7 @@ class _WalletTile extends StatelessWidget {
                                           fontSize: 10,
                                           fontWeight: FontWeight.w600,
                                           color: AppleTokens.rubyExpense,
+                                          height: 1.2,
                                         ),
                                       ),
                                     ),
@@ -1638,7 +1657,8 @@ class _TransferBetweenWalletsSheetState
                               onTap: () => _setPresetAmount(p.minorUnits, currency, locale),
                               borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                padding: const EdgeInsets.symmetric(horizontal: 10),
+                                alignment: Alignment.center,
                                 decoration: BoxDecoration(
                                   color: isDark ? Colors.white10 : Colors.white,
                                   borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
@@ -1649,10 +1669,12 @@ class _TransferBetweenWalletsSheetState
                                 ),
                                 child: Text(
                                   p.label,
+                                  textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 11.5,
                                     fontWeight: FontWeight.w600,
                                     color: isDark ? Colors.white70 : Colors.black87,
+                                    height: 1.2,
                                   ),
                                 ),
                               ),
@@ -1664,7 +1686,8 @@ class _TransferBetweenWalletsSheetState
                             onTap: () => _appendTripleZeros(currency, locale),
                             borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 color: AppleTokens.systemBlue.withValues(alpha: isDark ? 0.22 : 0.12),
                                 borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
@@ -1675,10 +1698,12 @@ class _TransferBetweenWalletsSheetState
                               ),
                               child: const Text(
                                 '+000',
+                                textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 11.5,
                                   fontWeight: FontWeight.w800,
                                   color: AppleTokens.systemBlue,
+                                  height: 1.2,
                                 ),
                               ),
                             ),
