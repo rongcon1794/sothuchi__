@@ -210,3 +210,4 @@ extension SemanticColorsBuildContextX on BuildContext {
             : AppSemanticColors.light);
   }
 }
+

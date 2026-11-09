@@ -10,6 +10,7 @@ import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
+import 'package:so_thu_chi/core/theme/tokens/app_semantic_colors.dart';
 import 'package:so_thu_chi/core/utils/date_formatter.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
@@ -116,6 +117,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final colors = context.semanticColors;
     final settings = ref.watch(settingsControllerProvider).value;
     final locale = settings?.localeCode ?? 'vi';
     final currency = settings?.currencyCode ?? AppCurrencies.defaultCode;
@@ -208,95 +210,27 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: Container(
-                        height: isLandscape ? 32 : 36,
-                        decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
-                          borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                          border: Border.all(
-                            color: isDark ? const Color(0xFF38383A) : const Color(0xFFD1D1D6),
-                            width: 1.0,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
-                              blurRadius: 4,
-                              offset: const Offset(0, 1),
-                            ),
-                          ],
-                        ),
-                        alignment: Alignment.center,
-                        child: TextField(
-                          controller: _searchController,
-                          onChanged: (value) => ref
-                              .read(transactionFilterProvider.notifier)
-                              .setSearchQuery(value),
-                          textAlignVertical: TextAlignVertical.center,
-                          style: TextStyle(
-                            fontSize: isLandscape ? 12 : 12.5,
-                            fontWeight: FontWeight.w500,
-                            color: isDark ? Colors.white : Colors.black87,
-                          ),
-                          decoration: InputDecoration(
-                            isDense: true,
-                            contentPadding: EdgeInsets.zero,
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            prefixIcon: Icon(
-                              CupertinoIcons.search,
-                              size: isLandscape ? 14 : 16,
-                              color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6C6C70),
-                            ),
-                            prefixIconConstraints: BoxConstraints(
-                              minWidth: isLandscape ? 30 : 34,
-                              minHeight: isLandscape ? 32 : 36,
-                            ),
-                            suffixIcon: filter.searchQuery.isNotEmpty
-                                ? Tooltip(
-                                    message: l10n.clearFilters,
-                                    child: CupertinoButton(
-                                      padding: EdgeInsets.zero,
-                                      minimumSize: Size(isLandscape ? 24 : 28, isLandscape ? 24 : 28),
-                                      onPressed: () {
-                                        _searchController.clear();
-                                        ref
-                                            .read(transactionFilterProvider.notifier)
-                                            .setSearchQuery('');
-                                      },
-                                      child: Icon(
-                                        CupertinoIcons.clear_circled_solid,
-                                        size: isLandscape ? 14 : 15,
-                                        color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF8E8E93),
-                                      ),
-                                    ),
-                                  )
-                                : null,
-                            suffixIconConstraints: BoxConstraints(
-                              minWidth: isLandscape ? 30 : 34,
-                              minHeight: isLandscape ? 32 : 36,
-                            ),
-                            hintText: l10n.searchTransactionsHint,
-                            hintStyle: TextStyle(
-                              fontSize: isLandscape ? 11.5 : 12,
-                              color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF8E8E93),
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ),
+                      child: AppleSearchBar(
+                        controller: _searchController,
+                        hintText: l10n.searchTransactionsHint,
+                        isLandscape: isLandscape,
+                        onChanged: (value) => ref
+                            .read(transactionFilterProvider.notifier)
+                            .setSearchQuery(value),
+                        onClear: () => ref
+                            .read(transactionFilterProvider.notifier)
+                            .setSearchQuery(''),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Container(
-                      height: isLandscape ? 32 : 36,
-                      padding: const EdgeInsets.all(2),
+                      height: isLandscape ? 34 : 40,
+                      padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
+                        color: colors.inputBackground,
                         borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                         border: Border.all(
-                          color: isDark
-                              ? const Color(0xFF38383A)
-                              : const Color(0xFFD1D1D6),
+                          color: colors.inputBorder,
                           width: 1.0,
                         ),
                         boxShadow: [
@@ -358,7 +292,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                             Container(
                               width: 1,
                               height: isLandscape ? 16 : 20,
-                              color: isDark ? const Color(0xFF3A3A3C) : const Color(0xFFD1D1D6),
+                              color: colors.divider,
                             ),
                             const SizedBox(width: 3),
                             Tooltip(
@@ -370,8 +304,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                                   ref.read(transactionFilterProvider.notifier).clearAll();
                                 },
                                 child: Container(
-                                  width: isLandscape ? 28 : 32,
-                                  height: isLandscape ? 28 : 32,
+                                  width: isLandscape ? 28 : 34,
+                                  height: isLandscape ? 28 : 34,
                                   alignment: Alignment.center,
                                   decoration: BoxDecoration(
                                     color: AppleTokens.systemRed.withValues(alpha: isDark ? 0.2 : 0.1),
@@ -379,7 +313,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                                   ),
                                   child: const Icon(
                                     Icons.filter_alt_off_rounded,
-                                    size: 14,
+                                    size: 15,
                                     color: AppleTokens.systemRed,
                                   ),
                                 ),
@@ -697,8 +631,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
   }) {
     final isSelected = filter.type == type;
     final activeColor = iconColor ?? theme.colorScheme.primary;
-    final size = isLandscape ? 28.0 : 32.0;
-    final iconSize = isLandscape ? 13.5 : 15.0;
+    final size = isLandscape ? 28.0 : 34.0;
+    final iconSize = isLandscape ? 13.5 : 15.5;
 
     return Tooltip(
       message: tooltip,

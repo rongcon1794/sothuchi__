@@ -144,3 +144,4 @@ class AppleSelectorRow extends StatelessWidget {
     );
   }
 }
+

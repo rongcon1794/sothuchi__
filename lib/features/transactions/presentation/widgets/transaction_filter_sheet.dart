@@ -1289,25 +1289,11 @@ class _ExpandableCategoryMenu extends StatelessWidget {
                     if (categories.length > 5) ...[
                       Padding(
                         padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                            border: Border.all(
-                              color: isDark ? const Color(0xFF38383A) : const Color(0xFFD1D1D6),
-                              width: 1.0,
-                            ),
-                          ),
-                          child: CupertinoSearchTextField(
-                            controller: searchController,
-                            placeholder: 'Tìm danh mục...',
-                            backgroundColor: Colors.transparent,
-                            style: TextStyle(
-                              fontSize: 12.5,
-                              color: isDark ? Colors.white : Colors.black87,
-                            ),
-                            onChanged: onSearchChanged,
-                          ),
+                        child: AppleSearchBar(
+                          controller: searchController,
+                          hintText: 'Tìm danh mục...',
+                          height: 38,
+                          onChanged: onSearchChanged,
                         ),
                       ),
                       Divider(
