@@ -123,6 +123,16 @@ class MonthlyReportData {
     return days > 0 ? totalExpenseMinor ~/ days : 0;
   }
 
+  /// Average expense on days where spending actually occurred.
+  /// Used for benchmark tiering (Low, Medium, High) so that spending levels
+  /// reflect genuine spending intensity on active days rather than being
+  /// diluted by zero-spending days.
+  int get activeDailyExpenseMinor {
+    final count = activeSpendingDaysCount;
+    if (count <= 0) return averageDailyExpenseMinor;
+    return totalExpenseMinor ~/ count;
+  }
+
   /// Day with the highest expense (`1..31`), or `0` if no spending.
   int get peakSpendingDay {
     if (dailyExpenseMinor.isEmpty) return 0;

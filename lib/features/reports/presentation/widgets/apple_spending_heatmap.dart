@@ -56,6 +56,7 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
     final report = widget.report;
     final totalDays = report.daysInMonth;
     final avgMinor = report.averageDailyExpenseMinor;
+    final benchmarkMinor = report.activeDailyExpenseMinor;
 
     // First day of month weekday (1 = Mon, 7 = Sun)
     final firstWeekday =
@@ -226,6 +227,7 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
                             dailyExpenseMinor: report.dailyExpenseMinor,
                             daysInMonth: totalDays,
                             avgMinor: avgMinor,
+                            benchmarkMinor: benchmarkMinor,
                             peakSpendingDay: report.peakSpendingDay,
                             selectedDay: _selectedDay,
                             isDark: isDark,
@@ -267,6 +269,7 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
                             leadingEmptyCount: leadingEmptyCount,
                             totalDays: totalDays,
                             avgMinor: avgMinor,
+                            benchmarkMinor: benchmarkMinor,
                             isDark: isDark,
                           ),
                         ],
@@ -284,6 +287,7 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
                             isDark: isDark,
                             selectedAmount: selectedAmount,
                             avgMinor: avgMinor,
+                            benchmarkMinor: benchmarkMinor,
                           ),
                           const SizedBox(height: 14),
                           _buildSpendingPillarsStrip(
@@ -322,6 +326,7 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
                             leadingEmptyCount: leadingEmptyCount,
                             totalDays: totalDays,
                             avgMinor: avgMinor,
+                            benchmarkMinor: benchmarkMinor,
                             isDark: isDark,
                           ),
                         ],
@@ -522,6 +527,7 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
     required int leadingEmptyCount,
     required int totalDays,
     required int avgMinor,
+    required int benchmarkMinor,
     required bool isDark,
   }) {
     final report = widget.report;
@@ -549,7 +555,7 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
                     final isSelected = _selectedDay == dayNumber;
                     final cellColor = _resolveHeatmapColor(
                       expense: dayExpense,
-                      avgExpense: avgMinor,
+                      benchmarkExpense: benchmarkMinor,
                       isDark: isDark,
                     );
 
@@ -601,7 +607,7 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
                                 : FontWeight.w500,
                             color: isSelected
                                 ? (isDark ? Colors.white : AppleTokens.jadeDark)
-                                : _resolveTextColor(dayExpense, avgMinor, isDark),
+                                : _resolveTextColor(dayExpense, benchmarkMinor, isDark),
                           ),
                         ),
                       ),
@@ -624,6 +630,7 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
     required bool isDark,
     required int? selectedAmount,
     required int avgMinor,
+    required int benchmarkMinor,
   }) {
     final report = widget.report;
 
@@ -696,9 +703,9 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
                     : theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            if (selectedAmount != null && selectedAmount > 0 && avgMinor > 0) ...[
+            if (selectedAmount != null && selectedAmount > 0 && benchmarkMinor > 0) ...[
               const SizedBox(height: 8),
-              _buildComparisonBadge(selectedAmount, avgMinor),
+              _buildComparisonBadge(selectedAmount, benchmarkMinor),
             ],
           ],
         ),
@@ -911,17 +918,17 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
           theme: theme,
         ),
         _buildLegendItem(
-          color: AppleTokens.jadePrimary.withValues(alpha: 0.35),
+          color: AppleTokens.jadePrimary.withValues(alpha: isDark ? 0.45 : 0.38),
           label: isVi ? 'Thấp' : 'Low',
           theme: theme,
         ),
         _buildLegendItem(
-          color: AppleTokens.systemOrange.withValues(alpha: 0.65),
+          color: AppleTokens.systemOrange.withValues(alpha: isDark ? 0.70 : 0.65),
           label: isVi ? 'Trung bình' : 'Medium',
           theme: theme,
         ),
         _buildLegendItem(
-          color: AppleTokens.systemRed.withValues(alpha: 0.85),
+          color: AppleTokens.systemRed.withValues(alpha: isDark ? 0.88 : 0.85),
           label: isVi ? 'Cao' : 'High',
           theme: theme,
         ),
@@ -957,10 +964,10 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
     );
   }
 
-  /// Color gradation based on spending relative to daily average.
+  /// Color gradation based on spending relative to daily average benchmark.
   Color _resolveHeatmapColor({
     required int expense,
-    required int avgExpense,
+    required int benchmarkExpense,
     required bool isDark,
   }) {
     if (expense == 0) {
@@ -968,28 +975,28 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
           ? Colors.white.withValues(alpha: 0.06)
           : Colors.black.withValues(alpha: 0.05);
     }
-    if (avgExpense <= 0) {
-      return AppleTokens.jadePrimary.withValues(alpha: 0.4);
+    if (benchmarkExpense <= 0) {
+      return AppleTokens.jadePrimary.withValues(alpha: isDark ? 0.45 : 0.38);
     }
 
-    final ratio = expense / avgExpense;
-    if (ratio < 0.6) {
-      return AppleTokens.jadePrimary.withValues(alpha: 0.35);
-    } else if (ratio <= 1.3) {
-      return AppleTokens.systemOrange.withValues(alpha: 0.65);
+    final ratio = expense / benchmarkExpense;
+    if (ratio < 0.65) {
+      return AppleTokens.jadePrimary.withValues(alpha: isDark ? 0.45 : 0.38);
+    } else if (ratio <= 1.35) {
+      return AppleTokens.systemOrange.withValues(alpha: isDark ? 0.70 : 0.65);
     } else {
-      return AppleTokens.systemRed.withValues(alpha: 0.85);
+      return AppleTokens.systemRed.withValues(alpha: isDark ? 0.88 : 0.85);
     }
   }
 
-  Color _resolveTextColor(int expense, int avgExpense, bool isDark) {
+  Color _resolveTextColor(int expense, int benchmarkExpense, bool isDark) {
     if (expense == 0) {
       return isDark ? Colors.white54 : Colors.black45;
     }
-    if (avgExpense <= 0) return Colors.white;
+    if (benchmarkExpense <= 0) return Colors.white;
 
-    final ratio = expense / avgExpense;
-    if (ratio < 0.6) {
+    final ratio = expense / benchmarkExpense;
+    if (ratio < 0.65) {
       return isDark ? Colors.white : AppleTokens.jadeDark;
     }
     return Colors.white;
@@ -1002,6 +1009,7 @@ class _DailySpendingPulsePainter extends CustomPainter {
     required this.dailyExpenseMinor,
     required this.daysInMonth,
     required this.avgMinor,
+    required this.benchmarkMinor,
     required this.peakSpendingDay,
     required this.selectedDay,
     required this.isDark,
@@ -1010,6 +1018,7 @@ class _DailySpendingPulsePainter extends CustomPainter {
   final Map<int, int> dailyExpenseMinor;
   final int daysInMonth;
   final int avgMinor;
+  final int benchmarkMinor;
   final int peakSpendingDay;
   final int? selectedDay;
   final bool isDark;
@@ -1087,10 +1096,11 @@ class _DailySpendingPulsePainter extends CustomPainter {
         // Gradient based on spending level
         final Color topColor;
         final Color bottomColor;
-        if (expense > avgMinor * 1.4) {
+        final effectiveBenchmark = benchmarkMinor > 0 ? benchmarkMinor : avgMinor;
+        if (effectiveBenchmark > 0 && expense > effectiveBenchmark * 1.35) {
           topColor = AppleTokens.rubyExpense;
           bottomColor = const Color(0xFFFF6961);
-        } else if (expense > avgMinor) {
+        } else if (effectiveBenchmark > 0 && expense >= effectiveBenchmark * 0.65) {
           topColor = AppleTokens.systemOrange;
           bottomColor = const Color(0xFFFFCC00);
         } else {
@@ -1153,6 +1163,9 @@ class _DailySpendingPulsePainter extends CustomPainter {
     return oldDelegate.dailyExpenseMinor != dailyExpenseMinor ||
         oldDelegate.selectedDay != selectedDay ||
         oldDelegate.daysInMonth != daysInMonth ||
+        oldDelegate.avgMinor != avgMinor ||
+        oldDelegate.benchmarkMinor != benchmarkMinor ||
+        oldDelegate.peakSpendingDay != peakSpendingDay ||
         oldDelegate.isDark != isDark;
   }
 }

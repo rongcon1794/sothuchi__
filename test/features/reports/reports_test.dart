@@ -133,6 +133,39 @@ void main() {
       expect(pastMonthReport.averageDailyExpenseMinor, 200000);
     });
 
+    test('activeDailyExpenseMinor correctly benchmarks active spending days into low, medium, and high tiers', () {
+      final report = MonthlyReportData(
+        selectedMonth: DateTime(2026, 11, 1),
+        currencyCode: 'VND',
+        totalIncomeMinor: 10000000,
+        totalExpenseMinor: 920000, // 4 active days: 50k, 120k, 150k, 600k
+        categorySlices: const [],
+        sixMonthTrend: const [],
+        dailyExpenseMinor: const {
+          2: 50000,
+          5: 120000,
+          8: 150000,
+          12: 600000,
+        },
+        nowOverride: DateTime(2026, 11, 15),
+      );
+
+      // Active days = 4
+      expect(report.activeSpendingDaysCount, 4);
+      // activeDailyExpenseMinor = 920,000 / 4 = 230,000 VND
+      expect(report.activeDailyExpenseMinor, 230000);
+
+      final benchmark = report.activeDailyExpenseMinor;
+      // Day 2 (50k): 50k / 230k = 0.22 (< 0.65) -> Low (Green)
+      expect(50000 / benchmark < 0.65, isTrue);
+
+      // Day 8 (150k): 150k / 230k = 0.65 (between 0.65 and 1.35) -> Medium (Orange)
+      expect(150000 / benchmark >= 0.65 && 150000 / benchmark <= 1.35, isTrue);
+
+      // Day 12 (600k): 600k / 230k = 2.61 (> 1.35) -> High (Red)
+      expect(600000 / benchmark > 1.35, isTrue);
+    });
+
     testWidgets('renders PieChart donut, BarChart 6-month trend, and switches months', (
       tester,
     ) async {
