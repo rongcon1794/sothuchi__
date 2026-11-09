@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
+import 'package:so_thu_chi/core/theme/tokens/app_semantic_colors.dart';
 
 /// Semantic financial colors meeting WCAG AA >= 4.5:1 contrast in Light & Dark modes.
 @immutable
@@ -204,7 +205,13 @@ abstract final class AppTheme {
       scaffoldBackgroundColor: isDark
           ? (oledMode ? AppleTokens.bgOledPrimary : AppleTokens.bgDarkGrouped)
           : AppleTokens.bgLightGrouped,
-      extensions: [isDark ? FinanceColors.dark : FinanceColors.light],
+      extensions: [
+        isDark ? FinanceColors.dark : FinanceColors.light,
+        if (isDark)
+          (oledMode ? AppSemanticColors.oled : AppSemanticColors.dark)
+        else
+          AppSemanticColors.light,
+      ],
       textTheme: baseText.copyWith(
         displaySmall: baseText.displaySmall?.copyWith(
           fontWeight: FontWeight.w700,

@@ -91,6 +91,35 @@ final recentTransactionsProvider = Provider<List<TransactionEntity>>((ref) {
   return all.sublist(0, 6);
 });
 
+/// Computes totals (income, expense, net amount, transaction count)
+/// for transactions currently filtered in [filteredTransactionsProvider].
+final filteredTransactionsSummaryProvider =
+    Provider<({int income, int expense, int net, int count})>((ref) {
+  final filteredTxs = ref.watch(filteredTransactionsProvider);
+  final currency =
+      ref.watch(settingsControllerProvider).value?.currencyCode ??
+      AppCurrencies.defaultCode;
+
+  int totalIncome = 0;
+  int totalExpense = 0;
+  for (final tx in filteredTxs) {
+    if (tx.currency == currency) {
+      if (tx.type == TransactionType.income) {
+        totalIncome += tx.amount;
+      } else if (tx.type == TransactionType.expense) {
+        totalExpense += tx.amount;
+      }
+    }
+  }
+
+  return (
+    income: totalIncome,
+    expense: totalExpense,
+    net: totalIncome - totalExpense,
+    count: filteredTxs.length,
+  );
+});
+
 /// Filter state controller for [TransactionsScreen].
 class TransactionFilterController extends Notifier<TransactionFilter> {
   @override

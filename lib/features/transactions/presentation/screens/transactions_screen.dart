@@ -131,20 +131,11 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     final isLandscape = context.isLandscape;
     final isWide = context.isWideScreen;
 
-    final filteredTxs = ref.watch(filteredTransactionsProvider);
-    int totalIncome = 0;
-    int totalExpense = 0;
-    for (final tx in filteredTxs) {
-      if (tx.currency == currency) {
-        if (tx.type == TransactionType.income) {
-          totalIncome += tx.amount;
-        } else if (tx.type == TransactionType.expense) {
-          totalExpense += tx.amount;
-        }
-      }
-    }
-    final netAmount = totalIncome - totalExpense;
-    final totalCount = filteredTxs.length;
+    final summary = ref.watch(filteredTransactionsSummaryProvider);
+    final totalIncome = summary.income;
+    final totalExpense = summary.expense;
+    final netAmount = summary.net;
+    final totalCount = summary.count;
 
     final scrollBottomPadding = isWide
         ? AppleTokens.scrollBottomPaddingLandscape + 42

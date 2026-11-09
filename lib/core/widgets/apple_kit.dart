@@ -14,6 +14,7 @@ export 'package:so_thu_chi/core/widgets/apple_month_year_picker_sheet.dart';
 export 'package:so_thu_chi/core/widgets/apple_popup_menu.dart';
 export 'package:so_thu_chi/core/widgets/apple_text_field.dart';
 export 'package:so_thu_chi/core/widgets/apple_user_avatar.dart';
+export 'package:so_thu_chi/core/widgets/forms/forms.dart';
 export 'package:so_thu_chi/core/widgets/lucian_activity_ring.dart';
 export 'package:so_thu_chi/core/widgets/lucian_hold_to_delete_button.dart';
 export 'package:so_thu_chi/core/widgets/lucian_progress_bar.dart';
