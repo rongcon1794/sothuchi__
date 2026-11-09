@@ -208,515 +208,197 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 ),
               ),
             ),
-          // Responsive Search & Type Filter Bar (rendered in body, not pinned/fixed in header)
+          // Responsive Search & Type Filter Bar (merged on the same row to optimize space)
           Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: AppleTokens.maxContentWidth),
-              child: isLandscape
-                  ? Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            flex: 38,
-                            child: SizedBox(
-                              height: 32,
-                              child: TextField(
-                                controller: _searchController,
-                                onChanged: (value) => ref
-                                    .read(transactionFilterProvider.notifier)
-                                    .setSearchQuery(value),
-                                style: const TextStyle(fontSize: 12),
-                                decoration: InputDecoration(
-                                  filled: true,
-                                  fillColor: isDark
-                                      ? AppleTokens.bgDarkSecondary
-                                      : AppleTokens.bgLightSecondary,
-                                  hintText: l10n.searchTransactionsHint,
-                                  hintStyle: TextStyle(
-                                    fontSize: 11.5,
-                                    color: isDark ? Colors.white38 : Colors.black38,
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 0),
-                                  border: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.circular(AppleTokens.radiusPill),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  prefixIcon: const Icon(CupertinoIcons.search, size: 14),
-                                  prefixIconConstraints: const BoxConstraints(
-                                      minWidth: 26, minHeight: 26),
-                                  suffixIcon: filter.searchQuery.isNotEmpty
-                                      ? IconButton(
-                                          padding: EdgeInsets.zero,
-                                          iconSize: 14,
-                                          tooltip: l10n.clearFilters,
-                                          onPressed: () {
-                                            _searchController.clear();
-                                            ref
-                                                .read(transactionFilterProvider.notifier)
-                                                .setSearchQuery('');
-                                          },
-                                          icon: const Icon(
-                                            CupertinoIcons.clear_thick_circled,
-                                          ),
-                                        )
-                                      : null,
-                                ),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(16, isLandscape ? 4 : 4, 16, isLandscape ? 4 : 6),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: isLandscape ? 38 : 40,
+                      child: SizedBox(
+                        height: isLandscape ? 32 : 36,
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: (value) => ref
+                              .read(transactionFilterProvider.notifier)
+                              .setSearchQuery(value),
+                          style: TextStyle(fontSize: isLandscape ? 12 : 12.5),
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: isDark
+                                ? AppleTokens.bgDarkSecondary
+                                : AppleTokens.bgLightSecondary,
+                            hintText: l10n.searchTransactionsHint,
+                            hintStyle: TextStyle(
+                              fontSize: isLandscape ? 11.5 : 12,
+                              color: isDark ? Colors.white38 : Colors.black38,
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: isLandscape ? 10 : 12,
+                              vertical: 0,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppleTokens.radiusPill),
+                              borderSide: BorderSide.none,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppleTokens.radiusPill),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(AppleTokens.radiusPill),
+                              borderSide: const BorderSide(
+                                color: AppleTokens.jadePrimary,
+                                width: 1.5,
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            flex: 62,
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  _buildTypeChip(null, l10n.all,
-                                      CupertinoIcons.square_grid_2x2, null, true),
-                                  const SizedBox(width: 6),
-                                  _buildTypeChip(
-                                      TransactionType.expense,
-                                      l10n.expense,
-                                      CupertinoIcons.arrow_up_right,
-                                      AppleTokens.rubyExpense,
-                                      true),
-                                  const SizedBox(width: 6),
-                                  _buildTypeChip(
-                                      TransactionType.income,
-                                      l10n.income,
-                                      CupertinoIcons.arrow_down_left,
-                                      AppleTokens.emeraldIncome,
-                                      true),
-                                  const SizedBox(width: 6),
-                                  _buildTypeChip(
-                                      TransactionType.transfer,
-                                      l10n.transfer,
-                                      CupertinoIcons.arrow_right_arrow_left,
-                                      AppleTokens.cobaltTransfer,
-                                      true),
-                                  if (filter.hasActiveFilters) ...[
-                                    const SizedBox(width: 6),
-                                    ActionChip(
-                                      visualDensity: VisualDensity.compact,
-                                      materialTapTargetSize:
-                                          MaterialTapTargetSize.shrinkWrap,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(
-                                            AppleTokens.radiusPill),
-                                        side: BorderSide.none,
-                                      ),
-                                      avatar: const Icon(Icons.filter_alt_off_rounded,
-                                          size: 14),
-                                      label: Text(l10n.clearFilters,
-                                          style: const TextStyle(fontSize: 10.5)),
-                                      onPressed: () {
-                                        _searchController.clear();
-                                        ref
-                                            .read(transactionFilterProvider.notifier)
-                                            .clearAll();
-                                      },
-                                    ),
-                                  ],
-                                ],
-                              ),
+                            prefixIcon: Icon(CupertinoIcons.search, size: isLandscape ? 14 : 16),
+                            prefixIconConstraints: BoxConstraints(
+                              minWidth: isLandscape ? 26 : 30,
+                              minHeight: isLandscape ? 26 : 30,
                             ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: SizedBox(
-                                  height: 38,
-                                  child: TextField(
-                                    controller: _searchController,
-                                    onChanged: (value) => ref
-                                        .read(transactionFilterProvider.notifier)
-                                        .setSearchQuery(value),
-                                    style: const TextStyle(fontSize: 13),
-                                    decoration: InputDecoration(
-                                      filled: true,
-                                      fillColor: isDark
-                                          ? AppleTokens.bgDarkSecondary
-                                          : AppleTokens.bgLightSecondary,
-                                      hintText: l10n.searchTransactionsHint,
-                                      hintStyle: TextStyle(
-                                        fontSize: 12.5,
-                                        color: isDark ? Colors.white38 : Colors.black38,
-                                      ),
-                                      contentPadding: const EdgeInsets.symmetric(
-                                          horizontal: 12, vertical: 0),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                                        borderSide: BorderSide.none,
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                                        borderSide: BorderSide.none,
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                                        borderSide: const BorderSide(
-                                          color: AppleTokens.jadePrimary,
-                                          width: 1.5,
-                                        ),
-                                      ),
-                                      prefixIcon: const Icon(CupertinoIcons.search, size: 16),
-                                      prefixIconConstraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                                      suffixIcon: filter.searchQuery.isNotEmpty
-                                          ? IconButton(
-                                              padding: EdgeInsets.zero,
-                                              iconSize: 15,
-                                              tooltip: l10n.clearFilters,
-                                              onPressed: () {
-                                                _searchController.clear();
-                                                ref
-                                                    .read(transactionFilterProvider.notifier)
-                                                    .setSearchQuery('');
-                                              },
-                                              icon: const Icon(
-                                                CupertinoIcons.clear_thick_circled,
-                                              ),
-                                            )
-                                          : null,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              ApplePressable(
-                                onTap: _openFilterSheet,
-                                child: Container(
-                                  height: 38,
-                                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                                  decoration: BoxDecoration(
-                                    color: filter.hasActiveFilters
-                                        ? theme.colorScheme.primary.withValues(alpha: 0.14)
-                                        : (isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary),
-                                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                                    border: Border.all(
-                                      color: filter.hasActiveFilters
-                                          ? theme.colorScheme.primary.withValues(alpha: 0.35)
-                                          : Colors.transparent,
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.tune_rounded,
-                                        size: 16,
-                                        color: filter.hasActiveFilters
-                                            ? theme.colorScheme.primary
-                                            : theme.colorScheme.onSurfaceVariant,
-                                      ),
-                                      const SizedBox(width: 5),
-                                      Text(
-                                        locale.startsWith('vi') ? 'Lọc' : 'Filter',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          color: filter.hasActiveFilters
-                                              ? theme.colorScheme.primary
-                                              : theme.colorScheme.onSurfaceVariant,
-                                        ),
-                                      ),
-                                      if (filter.hasActiveFilters) ...[
-                                        const SizedBox(width: 4),
-                                        Container(
-                                          width: 6,
-                                          height: 6,
-                                          decoration: BoxDecoration(
-                                            color: theme.colorScheme.primary,
-                                            shape: BoxShape.circle,
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Row(
-                            children: [
-                              _buildTypeChip(null, l10n.all,
-                                  CupertinoIcons.square_grid_2x2, null, false),
-                              const SizedBox(width: 8),
-                              _buildTypeChip(
-                                  TransactionType.expense,
-                                  l10n.expense,
-                                  CupertinoIcons.arrow_up_right,
-                                  AppleTokens.rubyExpense,
-                                  false),
-                              const SizedBox(width: 8),
-                              _buildTypeChip(
-                                  TransactionType.income,
-                                  l10n.income,
-                                  CupertinoIcons.arrow_down_left,
-                                  AppleTokens.emeraldIncome,
-                                  false),
-                              const SizedBox(width: 8),
-                              _buildTypeChip(
-                                  TransactionType.transfer,
-                                  l10n.transfer,
-                                  CupertinoIcons.arrow_right_arrow_left,
-                                  AppleTokens.cobaltTransfer,
-                                  false),
-                              if (filter.hasActiveFilters) ...[
-                                const SizedBox(width: 8),
-                                ActionChip(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        AppleTokens.radiusPill),
-                                    side: BorderSide.none,
-                                  ),
-                                  avatar: const Icon(Icons.filter_alt_off_rounded,
-                                      size: 15),
-                                  label: Text(l10n.clearFilters, style: const TextStyle(fontSize: 11.5)),
-                                  onPressed: () {
-                                    _searchController.clear();
-                                    ref
-                                        .read(transactionFilterProvider.notifier)
-                                        .clearAll();
-                                  },
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                        if (filter.hasActiveFilters)
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 6, 16, 2),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.primary.withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-                                border: Border.all(
-                                  color: theme.colorScheme.primary.withValues(alpha: 0.2),
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.filter_list_rounded, size: 14, color: theme.colorScheme.primary),
-                                  const SizedBox(width: 6),
-                                  Expanded(
-                                    child: Text(
-                                      _getActiveFilterSummary(filter, categoriesMap, accountsMap, l10n, locale),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 11.5,
-                                        fontWeight: FontWeight.w600,
-                                        color: theme.colorScheme.primary,
-                                      ),
-                                    ),
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {
+                            suffixIcon: filter.searchQuery.isNotEmpty
+                                ? IconButton(
+                                    padding: EdgeInsets.zero,
+                                    iconSize: isLandscape ? 14 : 15,
+                                    tooltip: l10n.clearFilters,
+                                    onPressed: () {
                                       _searchController.clear();
-                                      ref.read(transactionFilterProvider.notifier).clearAll();
+                                      ref
+                                          .read(transactionFilterProvider.notifier)
+                                          .setSearchQuery('');
                                     },
-                                    child: const Icon(
-                                      CupertinoIcons.clear_circled_solid,
-                                      size: 15,
-                                      color: AppleTokens.systemRed,
+                                    icon: const Icon(
+                                      CupertinoIcons.clear_thick_circled,
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                                  )
+                                : null,
                           ),
-                      ],
+                        ),
+                      ),
                     ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      flex: isLandscape ? 62 : 60,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _buildTypeChip(
+                              null,
+                              l10n.all,
+                              CupertinoIcons.square_grid_2x2,
+                              null,
+                              isLandscape,
+                            ),
+                            const SizedBox(width: 6),
+                            _buildTypeChip(
+                              TransactionType.expense,
+                              l10n.expense,
+                              CupertinoIcons.arrow_up_right,
+                              AppleTokens.rubyExpense,
+                              isLandscape,
+                            ),
+                            const SizedBox(width: 6),
+                            _buildTypeChip(
+                              TransactionType.income,
+                              l10n.income,
+                              CupertinoIcons.arrow_down_left,
+                              AppleTokens.emeraldIncome,
+                              isLandscape,
+                            ),
+                            const SizedBox(width: 6),
+                            _buildTypeChip(
+                              TransactionType.transfer,
+                              l10n.transfer,
+                              CupertinoIcons.arrow_right_arrow_left,
+                              AppleTokens.cobaltTransfer,
+                              isLandscape,
+                            ),
+                            if (filter.hasActiveFilters) ...[
+                              const SizedBox(width: 6),
+                              ActionChip(
+                                visualDensity: VisualDensity.compact,
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      AppleTokens.radiusPill),
+                                  side: BorderSide.none,
+                                ),
+                                avatar: const Icon(Icons.filter_alt_off_rounded,
+                                    size: 14),
+                                label: Text(l10n.clearFilters,
+                                    style: TextStyle(fontSize: isLandscape ? 10.5 : 11)),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  ref
+                                      .read(transactionFilterProvider.notifier)
+                                      .clearAll();
+                                },
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
-
-          // High-Density Financial Summary Snapshot Bar
-          if (filteredTxs.isNotEmpty)
+          if (filter.hasActiveFilters)
             Padding(
-              padding: EdgeInsets.fromLTRB(16, isLandscape ? 2 : 4, 16, isLandscape ? 3 : 6),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: AppleTokens.maxContentWidth),
-                  child: AppleGlassCard(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isLandscape ? 12 : 14,
-                      vertical: isLandscape ? 6 : 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+                      border: Border.all(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                      ),
                     ),
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-                    child: isLandscape
-                        ? Row(
-                            children: [
-                              Expanded(
-                                child: _buildSummarySegment(
-                                  color: AppleTokens.emeraldIncome,
-                                  label: l10n.income,
-                                  amount: Money(minorUnits: totalIncome, currencyCode: currency)
-                                      .format(locale: locale, showPlusSign: true, masked: hideBalance),
-                                  theme: theme,
-                                  isLandscape: true,
-                                ),
-                              ),
-                              Container(
-                                width: 1,
-                                height: 20,
-                                margin: const EdgeInsets.symmetric(horizontal: 8),
-                                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.25),
-                              ),
-                              Expanded(
-                                child: _buildSummarySegment(
-                                  color: AppleTokens.rubyExpense,
-                                  label: l10n.expense,
-                                  amount: Money(minorUnits: totalExpense, currencyCode: currency)
-                                      .format(locale: locale, showMinusSign: true, masked: hideBalance),
-                                  theme: theme,
-                                  isLandscape: true,
-                                ),
-                              ),
-                              Container(
-                                width: 1,
-                                height: 20,
-                                margin: const EdgeInsets.symmetric(horizontal: 8),
-                                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.25),
-                              ),
-                              Expanded(
-                                child: _buildSummarySegment(
-                                  color: netAmount >= 0 ? AppleTokens.emeraldIncome : AppleTokens.rubyExpense,
-                                  label: l10n.netBalance,
-                                  amount: Money(minorUnits: netAmount, currencyCode: currency)
-                                      .format(locale: locale, showPlusSign: true, masked: hideBalance),
-                                  theme: theme,
-                                  isLandscape: true,
-                                ),
-                              ),
-                              Container(
-                                width: 1,
-                                height: 20,
-                                margin: const EdgeInsets.symmetric(horizontal: 10),
-                                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.25),
-                              ),
-                              Text(
-                                '$totalCount ${l10n.transactionsTitle.toLowerCase()}',
-                                style: TextStyle(
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.w600,
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                  letterSpacing: -0.2,
-                                ),
-                              ),
-                            ],
-                          )
-                        : Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        CupertinoIcons.chart_pie_fill,
-                                        size: 12,
-                                        color: theme.colorScheme.primary,
-                                      ),
-                                      const SizedBox(width: 5),
-                                      Text(
-                                        locale.startsWith('vi') ? 'Tổng kết' : 'Summary',
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w700,
-                                          color: isDark ? Colors.white70 : Colors.black87,
-                                          letterSpacing: -0.2,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: isDark
-                                          ? Colors.white.withValues(alpha: 0.08)
-                                          : AppleTokens.bgLightSecondary,
-                                      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                                    ),
-                                    child: Text(
-                                      '$totalCount ${l10n.transactionsTitle.toLowerCase()}',
-                                      style: TextStyle(
-                                        fontSize: 10.5,
-                                        fontWeight: FontWeight.w600,
-                                        color: theme.colorScheme.onSurfaceVariant,
-                                        letterSpacing: -0.2,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 7),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: _buildSummarySegment(
-                                      color: AppleTokens.emeraldIncome,
-                                      label: l10n.income,
-                                      amount: Money(minorUnits: totalIncome, currencyCode: currency)
-                                          .format(locale: locale, showPlusSign: true, masked: hideBalance),
-                                      theme: theme,
-                                      isLandscape: false,
-                                    ),
-                                  ),
-                                  Container(
-                                    width: 1,
-                                    height: 24,
-                                    margin: const EdgeInsets.symmetric(horizontal: 6),
-                                    color: theme.colorScheme.outlineVariant.withValues(alpha: 0.25),
-                                  ),
-                                  Expanded(
-                                    child: _buildSummarySegment(
-                                      color: AppleTokens.rubyExpense,
-                                      label: l10n.expense,
-                                      amount: Money(minorUnits: totalExpense, currencyCode: currency)
-                                          .format(locale: locale, showMinusSign: true, masked: hideBalance),
-                                      theme: theme,
-                                      isLandscape: false,
-                                    ),
-                                  ),
-                                  Container(
-                                    width: 1,
-                                    height: 24,
-                                    margin: const EdgeInsets.symmetric(horizontal: 6),
-                                    color: theme.colorScheme.outlineVariant.withValues(alpha: 0.25),
-                                  ),
-                                  Expanded(
-                                    child: _buildSummarySegment(
-                                      color: netAmount >= 0 ? AppleTokens.emeraldIncome : AppleTokens.rubyExpense,
-                                      label: l10n.netBalance,
-                                      amount: Money(minorUnits: netAmount, currencyCode: currency)
-                                          .format(locale: locale, showPlusSign: true, masked: hideBalance),
-                                      theme: theme,
-                                      isLandscape: false,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                    child: Row(
+                      children: [
+                        Icon(Icons.filter_list_rounded, size: 13, color: theme.colorScheme.primary),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            _getActiveFilterSummary(filter, categoriesMap, accountsMap, l10n, locale),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.primary,
+                            ),
                           ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            _searchController.clear();
+                            ref.read(transactionFilterProvider.notifier).clearAll();
+                          },
+                          child: const Icon(
+                            CupertinoIcons.clear_circled_solid,
+                            size: 14,
+                            color: AppleTokens.systemRed,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -724,7 +406,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
 
           SizedBox(height: isLandscape ? 2 : 4),
 
-          // Daily Transaction Groups (2-column adaptive on landscape, single-column on portrait)
+          // Daily Transaction Groups (with scrollable centered summary card at the top)
           Expanded(
             child: NotificationListener<UserScrollNotification>(
               onNotification: (notification) {
@@ -807,6 +489,20 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                           physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                           padding: EdgeInsets.fromLTRB(16, 2, 16, scrollBottomPadding),
                           children: [
+                            // Scrollable financial summary card with centered content at the top
+                            _buildFinancialSummaryCard(
+                              totalIncome: totalIncome,
+                              totalExpense: totalExpense,
+                              netAmount: netAmount,
+                              totalCount: totalCount,
+                              currency: currency,
+                              locale: locale,
+                              hideBalance: hideBalance,
+                              isLandscape: isLandscape,
+                              isDark: isDark,
+                              theme: theme,
+                              l10n: l10n,
+                            ),
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -871,12 +567,27 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                       child: ListView.builder(
                         physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                         padding: EdgeInsets.fromLTRB(16, 4, 16, scrollBottomPadding),
-                        itemCount: grouped.length,
-                        itemBuilder: (context, groupIndex) {
+                        itemCount: grouped.length + 1,
+                        itemBuilder: (context, index) {
+                          if (index == 0) {
+                            return _buildFinancialSummaryCard(
+                              totalIncome: totalIncome,
+                              totalExpense: totalExpense,
+                              netAmount: netAmount,
+                              totalCount: totalCount,
+                              currency: currency,
+                              locale: locale,
+                              hideBalance: hideBalance,
+                              isLandscape: isLandscape,
+                              isDark: isDark,
+                              theme: theme,
+                              l10n: l10n,
+                            );
+                          }
                           return RepaintBoundary(
                             child: _buildDayGroupCard(
                               context,
-                              grouped[groupIndex],
+                              grouped[index - 1],
                               categoriesMap,
                               accountsMap,
                               locale,
@@ -997,6 +708,106 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     );
   }
 
+  Widget _buildFinancialSummaryCard({
+    required int totalIncome,
+    required int totalExpense,
+    required int netAmount,
+    required int totalCount,
+    required String currency,
+    required String locale,
+    required bool hideBalance,
+    required bool isLandscape,
+    required bool isDark,
+    required ThemeData theme,
+    required AppLocalizations l10n,
+  }) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: isLandscape ? 8 : 10),
+      child: AppleGlassCard(
+        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+        padding: EdgeInsets.symmetric(
+          horizontal: isLandscape ? 12 : 14,
+          vertical: isLandscape ? 8 : 10,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  CupertinoIcons.chart_pie,
+                  size: isLandscape ? 11 : 12,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  l10n.filterActiveCount(totalCount).toUpperCase(),
+                  style: TextStyle(
+                    fontSize: isLandscape ? 10 : 10.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: isLandscape ? 6 : 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: _buildSummarySegment(
+                    color: AppleTokens.emeraldIncome,
+                    label: l10n.income,
+                    amount: Money(minorUnits: totalIncome, currencyCode: currency)
+                        .format(locale: locale, showPlusSign: true, masked: hideBalance),
+                    theme: theme,
+                    isLandscape: isLandscape,
+                  ),
+                ),
+                Container(
+                  width: 1,
+                  height: isLandscape ? 22 : 26,
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  color: theme.colorScheme.outlineVariant.withValues(alpha: 0.25),
+                ),
+                Expanded(
+                  child: _buildSummarySegment(
+                    color: AppleTokens.rubyExpense,
+                    label: l10n.expense,
+                    amount: Money(minorUnits: totalExpense, currencyCode: currency)
+                        .format(locale: locale, showMinusSign: true, masked: hideBalance),
+                    theme: theme,
+                    isLandscape: isLandscape,
+                  ),
+                ),
+                Container(
+                  width: 1,
+                  height: isLandscape ? 22 : 26,
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  color: theme.colorScheme.outlineVariant.withValues(alpha: 0.25),
+                ),
+                Expanded(
+                  child: _buildSummarySegment(
+                    color: netAmount >= 0 ? AppleTokens.emeraldIncome : AppleTokens.rubyExpense,
+                    label: l10n.netBalance,
+                    amount: Money(minorUnits: netAmount, currencyCode: currency)
+                        .format(locale: locale, showPlusSign: true, masked: hideBalance),
+                    theme: theme,
+                    isLandscape: isLandscape,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildSummarySegment({
     required Color color,
     required String label,
@@ -1006,10 +817,11 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
   }) {
     return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Row(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
               width: 5.5,
@@ -1025,6 +837,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: isLandscape ? 10 : 10.5,
                   fontWeight: FontWeight.w600,
@@ -1038,9 +851,10 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
         const SizedBox(height: 2),
         FittedBox(
           fit: BoxFit.scaleDown,
-          alignment: Alignment.centerLeft,
+          alignment: Alignment.center,
           child: Text(
             amount,
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: isLandscape ? 12 : 13,
               fontWeight: FontWeight.w700,
