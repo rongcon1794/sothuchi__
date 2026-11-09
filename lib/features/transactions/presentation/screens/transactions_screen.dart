@@ -225,65 +225,64 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                             ),
                           ],
                         ),
-                        padding: EdgeInsets.symmetric(horizontal: isLandscape ? 8 : 10),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(
+                        alignment: Alignment.center,
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: (value) => ref
+                              .read(transactionFilterProvider.notifier)
+                              .setSearchQuery(value),
+                          textAlignVertical: TextAlignVertical.center,
+                          style: TextStyle(
+                            fontSize: isLandscape ? 12 : 12.5,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                          decoration: InputDecoration(
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            prefixIcon: Icon(
                               CupertinoIcons.search,
                               size: isLandscape ? 14 : 16,
                               color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6C6C70),
                             ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: TextField(
-                                controller: _searchController,
-                                onChanged: (value) => ref
-                                    .read(transactionFilterProvider.notifier)
-                                    .setSearchQuery(value),
-                                textAlignVertical: TextAlignVertical.center,
-                                style: TextStyle(
-                                  fontSize: isLandscape ? 12 : 12.5,
-                                  fontWeight: FontWeight.w500,
-                                  color: isDark ? Colors.white : Colors.black87,
-                                  height: 1.25,
-                                ),
-                                decoration: InputDecoration(
-                                  isDense: true,
-                                  isCollapsed: true,
-                                  border: InputBorder.none,
-                                  enabledBorder: InputBorder.none,
-                                  focusedBorder: InputBorder.none,
-                                  hintText: l10n.searchTransactionsHint,
-                                  hintStyle: TextStyle(
-                                    fontSize: isLandscape ? 11.5 : 12,
-                                    color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF8E8E93),
-                                    fontWeight: FontWeight.w400,
-                                    height: 1.25,
-                                  ),
-                                ),
-                              ),
+                            prefixIconConstraints: BoxConstraints(
+                              minWidth: isLandscape ? 30 : 34,
+                              minHeight: isLandscape ? 32 : 36,
                             ),
-                            if (filter.searchQuery.isNotEmpty)
-                              Tooltip(
-                                message: l10n.clearFilters,
-                                child: CupertinoButton(
-                                  padding: EdgeInsets.zero,
-                                  minimumSize: Size(isLandscape ? 20 : 24, isLandscape ? 20 : 24),
-                                  onPressed: () {
-                                    _searchController.clear();
-                                    ref
-                                        .read(transactionFilterProvider.notifier)
-                                        .setSearchQuery('');
-                                  },
-                                  child: Icon(
-                                    CupertinoIcons.clear_circled_solid,
-                                    size: isLandscape ? 14 : 15,
-                                    color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF8E8E93),
-                                  ),
-                                ),
-                              ),
-                          ],
+                            suffixIcon: filter.searchQuery.isNotEmpty
+                                ? Tooltip(
+                                    message: l10n.clearFilters,
+                                    child: CupertinoButton(
+                                      padding: EdgeInsets.zero,
+                                      minimumSize: Size(isLandscape ? 24 : 28, isLandscape ? 24 : 28),
+                                      onPressed: () {
+                                        _searchController.clear();
+                                        ref
+                                            .read(transactionFilterProvider.notifier)
+                                            .setSearchQuery('');
+                                      },
+                                      child: Icon(
+                                        CupertinoIcons.clear_circled_solid,
+                                        size: isLandscape ? 14 : 15,
+                                        color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF8E8E93),
+                                      ),
+                                    ),
+                                  )
+                                : null,
+                            suffixIconConstraints: BoxConstraints(
+                              minWidth: isLandscape ? 30 : 34,
+                              minHeight: isLandscape ? 32 : 36,
+                            ),
+                            hintText: l10n.searchTransactionsHint,
+                            hintStyle: TextStyle(
+                              fontSize: isLandscape ? 11.5 : 12,
+                              color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF8E8E93),
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
                         ),
                       ),
                     ),
