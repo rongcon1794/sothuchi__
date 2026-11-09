@@ -1832,6 +1832,120 @@ abstract class AppLocalizations {
   /// **'Ghi nhận đã thanh toán'**
   String get recurringMarkPaid;
 
+  /// No description provided for @recurringMarkReceived.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ghi nhận đã nhận tiền'**
+  String get recurringMarkReceived;
+
+  /// No description provided for @recurringPayNow.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thanh toán ngay'**
+  String get recurringPayNow;
+
+  /// No description provided for @recurringReceiveNow.
+  ///
+  /// In vi, this message translates to:
+  /// **'Nhận tiền ngay'**
+  String get recurringReceiveNow;
+
+  /// No description provided for @recurringDueTodayExpense.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hạn thanh toán hôm nay'**
+  String get recurringDueTodayExpense;
+
+  /// No description provided for @recurringDueTodayIncome.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đến ngày nhận hôm nay'**
+  String get recurringDueTodayIncome;
+
+  /// No description provided for @recurringDueIncomes.
+  ///
+  /// In vi, this message translates to:
+  /// **'KỲ THU NHẬP ĐẾN NGÀY NHẬN'**
+  String get recurringDueIncomes;
+
+  /// No description provided for @recurringDueBillsSection.
+  ///
+  /// In vi, this message translates to:
+  /// **'HÓA ĐƠN ĐẾN HẠN CẦN THANH TOÁN'**
+  String get recurringDueBillsSection;
+
+  /// No description provided for @recurringMonthlyNetCashflow.
+  ///
+  /// In vi, this message translates to:
+  /// **'DÒNG TIỀN ĐỊNH KỲ / THÁNG'**
+  String get recurringMonthlyNetCashflow;
+
+  /// No description provided for @recurringEstimatedMonthlyIncome.
+  ///
+  /// In vi, this message translates to:
+  /// **'Dự kiến thu'**
+  String get recurringEstimatedMonthlyIncome;
+
+  /// No description provided for @recurringEstimatedMonthlyExpense.
+  ///
+  /// In vi, this message translates to:
+  /// **'Dự kiến chi (Hóa đơn)'**
+  String get recurringEstimatedMonthlyExpense;
+
+  /// No description provided for @recurringTabAll.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tất cả'**
+  String get recurringTabAll;
+
+  /// No description provided for @recurringTabBills.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hóa đơn & Chi trả'**
+  String get recurringTabBills;
+
+  /// No description provided for @recurringTabIncome.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thu nhập định kỳ'**
+  String get recurringTabIncome;
+
+  /// No description provided for @recurringReceiveWalletLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ví nhận tiền'**
+  String get recurringReceiveWalletLabel;
+
+  /// No description provided for @recurringCategoryIncomeLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Danh mục thu nhập'**
+  String get recurringCategoryIncomeLabel;
+
+  /// No description provided for @recurringAutoExecuteIncomeSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tự cộng tiền vào ví và tạo giao dịch thu nhập mà không cần xác nhận thủ công'**
+  String get recurringAutoExecuteIncomeSubtitle;
+
+  /// No description provided for @recurringNextIncomeDue.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ngày nhận: {date}'**
+  String recurringNextIncomeDue(String date);
+
+  /// No description provided for @recurringIncomeRecordedSuccess.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã ghi nhận nhận tiền: {title}'**
+  String recurringIncomeRecordedSuccess(String title);
+
+  /// No description provided for @recurringExpenseRecordedSuccess.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đã ghi nhận thanh toán: {title}'**
+  String recurringExpenseRecordedSuccess(String title);
+
   /// No description provided for @recurringPause.
   ///
   /// In vi, this message translates to:

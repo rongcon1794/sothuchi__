@@ -950,6 +950,70 @@ class AppLocalizationsVi extends AppLocalizations {
   String get recurringMarkPaid => 'Ghi nhận đã thanh toán';
 
   @override
+  String get recurringMarkReceived => 'Ghi nhận đã nhận tiền';
+
+  @override
+  String get recurringPayNow => 'Thanh toán ngay';
+
+  @override
+  String get recurringReceiveNow => 'Nhận tiền ngay';
+
+  @override
+  String get recurringDueTodayExpense => 'Hạn thanh toán hôm nay';
+
+  @override
+  String get recurringDueTodayIncome => 'Đến ngày nhận hôm nay';
+
+  @override
+  String get recurringDueIncomes => 'KỲ THU NHẬP ĐẾN NGÀY NHẬN';
+
+  @override
+  String get recurringDueBillsSection => 'HÓA ĐƠN ĐẾN HẠN CẦN THANH TOÁN';
+
+  @override
+  String get recurringMonthlyNetCashflow => 'DÒNG TIỀN ĐỊNH KỲ / THÁNG';
+
+  @override
+  String get recurringEstimatedMonthlyIncome => 'Dự kiến thu';
+
+  @override
+  String get recurringEstimatedMonthlyExpense => 'Dự kiến chi (Hóa đơn)';
+
+  @override
+  String get recurringTabAll => 'Tất cả';
+
+  @override
+  String get recurringTabBills => 'Hóa đơn & Chi trả';
+
+  @override
+  String get recurringTabIncome => 'Thu nhập định kỳ';
+
+  @override
+  String get recurringReceiveWalletLabel => 'Ví nhận tiền';
+
+  @override
+  String get recurringCategoryIncomeLabel => 'Danh mục thu nhập';
+
+  @override
+  String get recurringAutoExecuteIncomeSubtitle =>
+      'Tự cộng tiền vào ví và tạo giao dịch thu nhập mà không cần xác nhận thủ công';
+
+  @override
+  String recurringNextIncomeDue(String date) {
+    return 'Ngày nhận: $date';
+  }
+
+  @override
+  String recurringIncomeRecordedSuccess(String title) {
+    return 'Đã ghi nhận nhận tiền: $title';
+  }
+
+  @override
+  String recurringExpenseRecordedSuccess(String title) {
+    return 'Đã ghi nhận thanh toán: $title';
+  }
+
+  @override
   String get recurringPause => 'Tạm dừng';
 
   @override

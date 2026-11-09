@@ -360,5 +360,102 @@ void main() {
 
       expect(find.text('MẪU HÓA ĐƠN THÔNG DỤNG'), findsOneWidget);
     });
+
+    testWidgets('renders recurring income with separate due section, "Ghi nhận đã nhận tiền" action, and credits wallet', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final wallet = ((await accRepo.getAccounts()).first);
+
+      // Seed a due salary income (e.g. 25,000,000 VND)
+      await recRepo.createRecurring(
+        RecurringTransaction(
+          id: 'rec_salary',
+          title: 'Lương cố định FPT',
+          amount: 25000000,
+          type: TransactionType.income,
+          interval: RecurringInterval.monthly,
+          startDate: DateTime(2026, 11, 1),
+          nextDueDate: DateTime(2026, 11, 1), // Due today
+          accountId: wallet.id,
+          categoryId: 'default_salary',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      );
+
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pumpAndSettle();
+
+      // Verify Income Due Section Header
+      expect(find.textContaining('KỲ THU NHẬP ĐẾN NGÀY NHẬN'), findsOneWidget);
+      expect(find.text('Lương cố định FPT'), findsWidgets);
+
+      // Verify the button says "Ghi nhận đã nhận tiền" (NOT "Ghi nhận đã thanh toán")
+      final receiveButton = find.text('Ghi nhận đã nhận tiền');
+      expect(receiveButton, findsOneWidget);
+
+      // Tap to record received income
+      await tester.tap(receiveButton);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Success SnackBar shown with income-specific message
+      expect(find.textContaining('Đã ghi nhận nhận tiền: Lương cố định FPT'), findsOneWidget);
+
+      // Wallet was credited: initial 10,000,000 + 25,000,000 = 35,000,000
+      final updatedAccounts = await accRepo.getAccounts();
+      expect(updatedAccounts.first.balance, 10000000 + 25000000);
+    });
+
+    testWidgets('Tab filter switches between Tất cả, Hóa đơn & Chi trả, and Thu nhập định kỳ', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final wallet = ((await accRepo.getAccounts()).first);
+
+      await recRepo.createRecurring(
+        RecurringTransaction(
+          id: 'rec_salary_2',
+          title: 'Lương ngân hàng',
+          amount: 30000000,
+          type: TransactionType.income,
+          interval: RecurringInterval.monthly,
+          startDate: DateTime(2026, 11, 1),
+          nextDueDate: DateTime(2026, 11, 1),
+          accountId: wallet.id,
+          categoryId: 'default_salary',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      );
+
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pumpAndSettle();
+
+      // Initially on 'Tất cả' -> both rent and salary are visible
+      expect(find.text('Tiền thuê căn hộ'), findsWidgets);
+      expect(find.text('Lương ngân hàng'), findsWidgets);
+
+      // Switch to 'Hóa đơn & Chi trả'
+      await tester.tap(find.text('Hóa đơn & Chi trả'));
+      await tester.pumpAndSettle();
+
+      // Only rent is visible, salary is hidden
+      expect(find.text('Tiền thuê căn hộ'), findsWidgets);
+      expect(find.text('Lương ngân hàng'), findsNothing);
+
+      // Switch to 'Thu nhập định kỳ'
+      await tester.tap(find.text('Thu nhập định kỳ'));
+      await tester.pumpAndSettle();
+
+      // Only salary is visible, rent is hidden
+      expect(find.text('Lương ngân hàng'), findsWidgets);
+      expect(find.text('Tiền thuê căn hộ'), findsNothing);
+    });
   });
 }

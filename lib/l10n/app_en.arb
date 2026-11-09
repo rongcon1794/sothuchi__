@@ -410,6 +410,46 @@
   "recurringIntervalMonthly": "Monthly",
   "recurringIntervalYearly": "Yearly",
   "recurringMarkPaid": "Mark as Paid",
+  "recurringMarkReceived": "Mark as Received",
+  "recurringPayNow": "Pay Now",
+  "recurringReceiveNow": "Receive Now",
+  "recurringDueTodayExpense": "Payment due today",
+  "recurringDueTodayIncome": "Income due today",
+  "recurringDueIncomes": "INCOME DUE TO RECEIVE",
+  "recurringDueBillsSection": "BILLS DUE FOR PAYMENT",
+  "recurringMonthlyNetCashflow": "ESTIMATED MONTHLY CASH FLOW",
+  "recurringEstimatedMonthlyIncome": "Est. Income",
+  "recurringEstimatedMonthlyExpense": "Est. Expense (Bills)",
+  "recurringTabAll": "All",
+  "recurringTabBills": "Bills & Expenses",
+  "recurringTabIncome": "Recurring Income",
+  "recurringReceiveWalletLabel": "Receiving wallet",
+  "recurringCategoryIncomeLabel": "Income category",
+  "recurringAutoExecuteIncomeSubtitle": "Automatically credit wallet and record income transaction on schedule",
+  "recurringNextIncomeDue": "Receive on: {date}",
+  "@recurringNextIncomeDue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringIncomeRecordedSuccess": "Recorded income: {title}",
+  "@recurringIncomeRecordedSuccess": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringExpenseRecordedSuccess": "Recorded payment for: {title}",
+  "@recurringExpenseRecordedSuccess": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "recurringPause": "Pause",
   "recurringResume": "Resume",
   "recurringAutoExecute": "Auto-record on due date",

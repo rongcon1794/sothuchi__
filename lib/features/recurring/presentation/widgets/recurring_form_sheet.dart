@@ -502,7 +502,9 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
       title: _isEditing ? l10n.recurringEditTitle : l10n.recurringNewTitle,
       subtitle: _isEditing
           ? 'Cập nhật chu kỳ & thông tin gói định kỳ'
-          : 'Thiết lập hóa đơn lặp lại & nhắc nhở thanh toán',
+          : (isExpense
+              ? 'Thiết lập hóa đơn lặp lại & nhắc nhở thanh toán'
+              : 'Thiết lập nguồn thu nhập lặp lại & nhắc nhở ngày nhận tiền'),
       bottomAction: AppleButton.primary(
         color: accentColor,
         isLoading: _isSubmitting,
@@ -561,20 +563,23 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
             // 4. Bill Title & Note
             _buildSectionHeader(
               icon: CupertinoIcons.tag_fill,
-              title: l10n.recurringTitleLabel,
+              title: isExpense ? l10n.recurringTitleLabel : 'Tên khoản thu nhập',
               accentColor: accentColor,
             ),
             AppleTextField(
               controller: _titleController,
-              placeholder: 'VD: Tiền điện, Internet, Tiền nhà, Netflix...',
+              placeholder: isExpense
+                  ? 'VD: Tiền điện, Internet, Tiền nhà, Netflix...'
+                  : 'VD: Lương công ty, Cho thuê nhà, Tiền thưởng, Cổ tức...',
               clearable: true,
+              textCapitalization: TextCapitalization.sentences,
               prefixIcon: Icon(
                 CupertinoIcons.tag,
                 size: 18,
                 color: accentColor,
               ),
               validator: (v) => (v == null || v.trim().isEmpty)
-                  ? l10n.recurringTitleRequired
+                  ? (isExpense ? l10n.recurringTitleRequired : 'Vui lòng nhập tên nguồn thu nhập')
                   : null,
             ),
             const SizedBox(height: 16),
@@ -606,7 +611,7 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
             // 7. Start Date & First Due Date Selector
             _buildSectionHeader(
               icon: CupertinoIcons.calendar,
-              title: l10n.recurringStartDateLabel,
+              title: isExpense ? l10n.recurringStartDateLabel : 'Ngày nhận tiền đầu tiên',
               accentColor: accentColor,
             ),
             _buildStartDateTile(
@@ -620,7 +625,7 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
             // 8. Category Selector
             _buildSectionHeader(
               icon: CupertinoIcons.square_grid_2x2_fill,
-              title: l10n.recurringCategoryLabel,
+              title: isExpense ? l10n.recurringCategoryLabel : l10n.recurringCategoryIncomeLabel,
               accentColor: accentColor,
             ),
             _buildCategorySelector(
@@ -633,7 +638,7 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
             // 9. Wallet Selector
             _buildSectionHeader(
               icon: CupertinoIcons.creditcard_fill,
-              title: l10n.recurringWalletLabel,
+              title: isExpense ? l10n.recurringWalletLabel : l10n.recurringReceiveWalletLabel,
               accentColor: accentColor,
             ),
             _buildWalletSelector(
@@ -659,8 +664,11 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
             ),
             AppleTextField(
               controller: _noteController,
-              placeholder: 'VD: Mã thuê bao cáp quang, số tài khoản nhận...',
+              placeholder: isExpense
+                  ? 'VD: Mã thuê bao cáp quang, số hợp đồng...'
+                  : 'VD: Lương Techcombank, thưởng quý...',
               clearable: true,
+              textCapitalization: TextCapitalization.sentences,
               prefixIcon: Icon(
                 CupertinoIcons.doc_text,
                 size: 18,
@@ -1110,7 +1118,9 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      AppDateUtils.formatShortDate(_startDate, locale: locale),
+                      isExpense
+                          ? 'Hạn đầu: ${AppDateUtils.formatShortDate(_startDate, locale: locale)}'
+                          : 'Nhận đầu: ${AppDateUtils.formatShortDate(_startDate, locale: locale)}',
                       style: TextStyle(
                         fontSize: 10.5,
                         fontWeight: FontWeight.w600,
@@ -1132,13 +1142,15 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        CupertinoIcons.creditcard,
+                        isExpense ? CupertinoIcons.creditcard : CupertinoIcons.arrow_down_circle,
                         size: 11,
                         color: Color(selectedWallet.color),
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        selectedWallet.name,
+                        isExpense
+                            ? 'Trừ ví: ${selectedWallet.name}'
+                            : 'Nhận ví: ${selectedWallet.name}',
                         style: TextStyle(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w700,
@@ -1166,7 +1178,9 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      _autoExecute ? 'Tự động' : 'Thủ công',
+                      _autoExecute
+                          ? (isExpense ? 'Tự động trừ' : 'Tự động nhận')
+                          : 'Thủ công',
                       style: TextStyle(
                         fontSize: 10.5,
                         fontWeight: FontWeight.w700,
@@ -1893,7 +1907,9 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  l10n.recurringAutoExecuteSubtitle,
+                  _type == TransactionType.income
+                      ? l10n.recurringAutoExecuteIncomeSubtitle
+                      : l10n.recurringAutoExecuteSubtitle,
                   style: TextStyle(
                     fontSize: 11,
                     color: isDark ? Colors.white60 : Colors.black54,

@@ -46,6 +46,7 @@ class RecurringDetailScreen extends ConsumerWidget {
   Future<void> _handleExecute(BuildContext context, WidgetRef ref, RecurringTransaction item) async {
     final messenger = ScaffoldMessenger.of(context);
     final l10n = context.l10n;
+    final isIncome = item.type == TransactionType.income;
     unawaited(HapticFeedback.mediumImpact());
     final res = await ref.read(recurringActionControllerProvider.notifier).executeRecurring(item.id);
 
@@ -55,8 +56,12 @@ class RecurringDetailScreen extends ConsumerWidget {
         unawaited(HapticFeedback.lightImpact());
         messenger.showSnackBar(
           SnackBar(
-            content: Text(l10n.recurringRecordedSuccess(item.title)),
-            backgroundColor: AppleTokens.jadeDark,
+            content: Text(
+              isIncome
+                  ? l10n.recurringIncomeRecordedSuccess(item.title)
+                  : l10n.recurringRecordedSuccess(item.title),
+            ),
+            backgroundColor: isIncome ? AppleTokens.emeraldIncome : AppleTokens.jadeDark,
           ),
         );
       },
@@ -296,12 +301,12 @@ class RecurringDetailScreen extends ConsumerWidget {
 
                         const SizedBox(height: 20),
                         Text(
-                          isIncome ? l10n.income : l10n.expense,
+                          isIncome ? 'KHOẢN THU NHẬP ĐỊNH KỲ' : 'HÓA ĐƠN CHI TIÊU ĐỊNH KỲ',
                           style: TextStyle(
                             fontSize: 12.5,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.4,
-                            color: theme.colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                            color: isIncome ? AppleTokens.emeraldIncome : AppleTokens.rubyExpense,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -325,15 +330,20 @@ class RecurringDetailScreen extends ConsumerWidget {
                       Expanded(
                         child: FilledButton.icon(
                           style: FilledButton.styleFrom(
-                            backgroundColor: AppleTokens.jadeDark,
+                            backgroundColor: isIncome ? AppleTokens.jadeDark : AppleTokens.rubyExpense,
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
                             ),
                           ),
-                          icon: const Icon(CupertinoIcons.bolt_fill, size: 16),
+                          icon: Icon(
+                            isIncome
+                                ? CupertinoIcons.arrow_down_circle_fill
+                                : CupertinoIcons.creditcard_fill,
+                            size: 16,
+                          ),
                           label: Text(
-                            l10n.recurringMarkPaid,
+                            isIncome ? l10n.recurringMarkReceived : l10n.recurringMarkPaid,
                             style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
                           ),
                           onPressed: () => _handleExecute(context, ref, item),
@@ -379,12 +389,17 @@ class RecurringDetailScreen extends ConsumerWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Kỳ tiếp theo', style: TextStyle(color: AppleTokens.systemGray)),
+                            Text(
+                              isIncome ? 'Ngày nhận tiếp theo' : 'Kỳ thanh toán tiếp theo',
+                              style: const TextStyle(color: AppleTokens.systemGray),
+                            ),
                             Text(
                               AppDateUtils.formatFullDate(item.nextDueDate, locale: locale),
                               style: TextStyle(
                                 fontWeight: FontWeight.w700,
-                                color: item.isDue ? AppleTokens.systemOrange : null,
+                                color: item.isDue
+                                    ? (isIncome ? AppleTokens.emeraldIncome : AppleTokens.systemOrange)
+                                    : null,
                               ),
                             ),
                           ],
@@ -394,7 +409,10 @@ class RecurringDetailScreen extends ConsumerWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(l10n.recurringCategoryLabel, style: const TextStyle(color: AppleTokens.systemGray)),
+                              Text(
+                                isIncome ? l10n.recurringCategoryIncomeLabel : l10n.recurringCategoryLabel,
+                                style: const TextStyle(color: AppleTokens.systemGray),
+                              ),
                               Text(
                                 DefaultCategoryLocalization.resolveName(l10n, categoryId: category.id, fallbackName: category.name),
                                 style: const TextStyle(fontWeight: FontWeight.w600),
@@ -407,7 +425,10 @@ class RecurringDetailScreen extends ConsumerWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(l10n.recurringWalletLabel, style: const TextStyle(color: AppleTokens.systemGray)),
+                              Text(
+                                isIncome ? l10n.recurringReceiveWalletLabel : l10n.recurringWalletLabel,
+                                style: const TextStyle(color: AppleTokens.systemGray),
+                              ),
                               Text(
                                 account.name,
                                 style: const TextStyle(fontWeight: FontWeight.w600),
@@ -433,7 +454,10 @@ class RecurringDetailScreen extends ConsumerWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('Lần ghi gần nhất', style: TextStyle(color: AppleTokens.systemGray)),
+                              Text(
+                                isIncome ? 'Lần nhận gần nhất' : 'Lần thanh toán gần nhất',
+                                style: const TextStyle(color: AppleTokens.systemGray),
+                              ),
                               Text(
                                 AppDateUtils.formatFullDate(item.lastExecutedDate!, locale: locale),
                                 style: const TextStyle(fontWeight: FontWeight.w600),

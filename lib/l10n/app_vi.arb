@@ -461,6 +461,46 @@
   "recurringIntervalMonthly": "Hàng tháng",
   "recurringIntervalYearly": "Hàng năm",
   "recurringMarkPaid": "Ghi nhận đã thanh toán",
+  "recurringMarkReceived": "Ghi nhận đã nhận tiền",
+  "recurringPayNow": "Thanh toán ngay",
+  "recurringReceiveNow": "Nhận tiền ngay",
+  "recurringDueTodayExpense": "Hạn thanh toán hôm nay",
+  "recurringDueTodayIncome": "Đến ngày nhận hôm nay",
+  "recurringDueIncomes": "KỲ THU NHẬP ĐẾN NGÀY NHẬN",
+  "recurringDueBillsSection": "HÓA ĐƠN ĐẾN HẠN CẦN THANH TOÁN",
+  "recurringMonthlyNetCashflow": "DÒNG TIỀN ĐỊNH KỲ / THÁNG",
+  "recurringEstimatedMonthlyIncome": "Dự kiến thu",
+  "recurringEstimatedMonthlyExpense": "Dự kiến chi (Hóa đơn)",
+  "recurringTabAll": "Tất cả",
+  "recurringTabBills": "Hóa đơn & Chi trả",
+  "recurringTabIncome": "Thu nhập định kỳ",
+  "recurringReceiveWalletLabel": "Ví nhận tiền",
+  "recurringCategoryIncomeLabel": "Danh mục thu nhập",
+  "recurringAutoExecuteIncomeSubtitle": "Tự cộng tiền vào ví và tạo giao dịch thu nhập mà không cần xác nhận thủ công",
+  "recurringNextIncomeDue": "Ngày nhận: {date}",
+  "@recurringNextIncomeDue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringIncomeRecordedSuccess": "Đã ghi nhận nhận tiền: {title}",
+  "@recurringIncomeRecordedSuccess": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "recurringExpenseRecordedSuccess": "Đã ghi nhận thanh toán: {title}",
+  "@recurringExpenseRecordedSuccess": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "recurringPause": "Tạm dừng",
   "recurringResume": "Kích hoạt lại",
   "recurringAutoExecute": "Tự động ghi sổ khi đến hạn",

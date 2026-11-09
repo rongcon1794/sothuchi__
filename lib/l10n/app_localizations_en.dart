@@ -950,6 +950,70 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recurringMarkPaid => 'Mark as Paid';
 
   @override
+  String get recurringMarkReceived => 'Mark as Received';
+
+  @override
+  String get recurringPayNow => 'Pay Now';
+
+  @override
+  String get recurringReceiveNow => 'Receive Now';
+
+  @override
+  String get recurringDueTodayExpense => 'Payment due today';
+
+  @override
+  String get recurringDueTodayIncome => 'Income due today';
+
+  @override
+  String get recurringDueIncomes => 'INCOME DUE TO RECEIVE';
+
+  @override
+  String get recurringDueBillsSection => 'BILLS DUE FOR PAYMENT';
+
+  @override
+  String get recurringMonthlyNetCashflow => 'ESTIMATED MONTHLY CASH FLOW';
+
+  @override
+  String get recurringEstimatedMonthlyIncome => 'Est. Income';
+
+  @override
+  String get recurringEstimatedMonthlyExpense => 'Est. Expense (Bills)';
+
+  @override
+  String get recurringTabAll => 'All';
+
+  @override
+  String get recurringTabBills => 'Bills & Expenses';
+
+  @override
+  String get recurringTabIncome => 'Recurring Income';
+
+  @override
+  String get recurringReceiveWalletLabel => 'Receiving wallet';
+
+  @override
+  String get recurringCategoryIncomeLabel => 'Income category';
+
+  @override
+  String get recurringAutoExecuteIncomeSubtitle =>
+      'Automatically credit wallet and record income transaction on schedule';
+
+  @override
+  String recurringNextIncomeDue(String date) {
+    return 'Receive on: $date';
+  }
+
+  @override
+  String recurringIncomeRecordedSuccess(String title) {
+    return 'Recorded income: $title';
+  }
+
+  @override
+  String recurringExpenseRecordedSuccess(String title) {
+    return 'Recorded payment for: $title';
+  }
+
+  @override
   String get recurringPause => 'Pause';
 
   @override
