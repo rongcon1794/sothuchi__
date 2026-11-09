@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -164,9 +165,20 @@ class AppleModalSheetLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final keyboardInset = MediaQuery.of(context).viewInsets.bottom;
+    final mediaQuery = MediaQuery.of(context);
+    final keyboardInset = mediaQuery.viewInsets.bottom;
+
+    // Physical hardware notch / camera cutout / status bar insets protection
+    final topHardwareInset = math.max(
+      mediaQuery.padding.top,
+      mediaQuery.viewPadding.top,
+    );
+    // Guarantees at least 44dp clearance (standard Apple notch / status bar height)
+    // plus 10dp breathing room so the sheet card floats safely below the notch.
+    final effectiveTopMargin = math.max(topHardwareInset, 44.0) + 10.0;
 
     final sheetContent = Container(
+      margin: EdgeInsets.only(top: effectiveTopMargin),
       decoration: BoxDecoration(
         color: isDark
             ? (context.isOled
@@ -176,9 +188,16 @@ class AppleModalSheetLayout extends StatelessWidget {
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(AppleTokens.radiusHero),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.15),
+            blurRadius: 24,
+            offset: const Offset(0, -4),
+          ),
+        ],
       ),
       child: SafeArea(
-        top: true,
+        top: false,
         bottom: true,
         child: Padding(
           padding: EdgeInsets.only(bottom: keyboardInset),

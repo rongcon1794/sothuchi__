@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +8,7 @@ import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
+import 'package:so_thu_chi/core/widgets/apple_modal_sheet.dart';
 import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_controller.dart';
 import 'package:so_thu_chi/features/savings/domain/entities/savings_goal.dart';
 import 'package:so_thu_chi/features/savings/presentation/controllers/savings_goals_controller.dart';
@@ -29,6 +31,7 @@ class SavingsDepositSheet extends ConsumerStatefulWidget {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (_) => SavingsDepositSheet(goal: goal, isWithdraw: isWithdraw),
     );
@@ -143,22 +146,38 @@ class _SavingsDepositSheetState extends ConsumerState<SavingsDepositSheet> {
     }
 
     final accentColor = Color(widget.goal.color);
+    final mediaQuery = MediaQuery.of(context);
+    final topHardwareInset = math.max(
+      mediaQuery.padding.top,
+      mediaQuery.viewPadding.top,
+    );
+    final effectiveTopMargin = math.max(topHardwareInset, 44.0) + 10.0;
 
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.85,
-      ),
-      decoration: BoxDecoration(
-        color: isDark ? AppleTokens.bgDarkCard : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppleTokens.radiusSheet)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: Column(
+    return AppleEdgeSwipeToDismiss(
+      child: Container(
+        margin: EdgeInsets.only(top: effectiveTopMargin),
+        constraints: BoxConstraints(
+          maxHeight: mediaQuery.size.height * 0.85,
+        ),
+        decoration: BoxDecoration(
+          color: isDark ? AppleTokens.bgDarkCard : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(AppleTokens.radiusSheet)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.15),
+              blurRadius: 24,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          top: false,
+          bottom: true,
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: mediaQuery.viewInsets.bottom,
+            ),
+            child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               // Drag handle
@@ -379,6 +398,7 @@ class _SavingsDepositSheetState extends ConsumerState<SavingsDepositSheet> {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 }
