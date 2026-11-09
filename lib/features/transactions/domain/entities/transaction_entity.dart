@@ -41,17 +41,41 @@ abstract class TransactionFilter with _$TransactionFilter {
     TransactionType? type,
     String? categoryId,
     String? accountId,
+    @Default(<String>{}) Set<String> categoryIds,
+    @Default(<String>{}) Set<String> accountIds,
     DateTime? startDate,
     DateTime? endDate,
   }) = _TransactionFilter;
 
+  Set<String> get effectiveCategoryIds {
+    if (categoryIds.isNotEmpty) return categoryIds;
+    if (categoryId != null) return {categoryId!};
+    return const <String>{};
+  }
+
+  Set<String> get effectiveAccountIds {
+    if (accountIds.isNotEmpty) return accountIds;
+    if (accountId != null) return {accountId!};
+    return const <String>{};
+  }
+
   bool get hasActiveFilters =>
       searchQuery.trim().isNotEmpty ||
       type != null ||
-      categoryId != null ||
-      accountId != null ||
+      effectiveCategoryIds.isNotEmpty ||
+      effectiveAccountIds.isNotEmpty ||
       startDate != null ||
       endDate != null;
+
+  int get activeFiltersCount {
+    var count = 0;
+    if (searchQuery.trim().isNotEmpty) count++;
+    if (type != null) count++;
+    if (effectiveCategoryIds.isNotEmpty) count += effectiveCategoryIds.length;
+    if (effectiveAccountIds.isNotEmpty) count += effectiveAccountIds.length;
+    if (startDate != null || endDate != null) count++;
+    return count;
+  }
 }
 
 /// Group of transactions occurring on a single calendar day.

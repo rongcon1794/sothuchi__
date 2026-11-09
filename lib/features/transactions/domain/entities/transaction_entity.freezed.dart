@@ -324,7 +324,7 @@ as DateTime?,
 /// @nodoc
 mixin _$TransactionFilter {
 
- String get searchQuery; TransactionType? get type; String? get categoryId; String? get accountId; DateTime? get startDate; DateTime? get endDate;
+ String get searchQuery; TransactionType? get type; String? get categoryId; String? get accountId; Set<String> get categoryIds; Set<String> get accountIds; DateTime? get startDate; DateTime? get endDate;
 /// Create a copy of TransactionFilter
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -336,20 +336,20 @@ $TransactionFilterCopyWith<TransactionFilter> get copyWith => _$TransactionFilte
 @override
 bool operator ==(Object other) {
   final _this = this as TransactionFilter;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TransactionFilter&&(identical(other.searchQuery, _this.searchQuery) || other.searchQuery == _this.searchQuery)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.categoryId, _this.categoryId) || other.categoryId == _this.categoryId)&&(identical(other.accountId, _this.accountId) || other.accountId == _this.accountId)&&(identical(other.startDate, _this.startDate) || other.startDate == _this.startDate)&&(identical(other.endDate, _this.endDate) || other.endDate == _this.endDate));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TransactionFilter&&(identical(other.searchQuery, _this.searchQuery) || other.searchQuery == _this.searchQuery)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.categoryId, _this.categoryId) || other.categoryId == _this.categoryId)&&(identical(other.accountId, _this.accountId) || other.accountId == _this.accountId)&&const DeepCollectionEquality().equals(other.categoryIds, _this.categoryIds)&&const DeepCollectionEquality().equals(other.accountIds, _this.accountIds)&&(identical(other.startDate, _this.startDate) || other.startDate == _this.startDate)&&(identical(other.endDate, _this.endDate) || other.endDate == _this.endDate));
 }
 
 
 @override
 int get hashCode {
   final _this = this as TransactionFilter;
-  return Object.hash(runtimeType,_this.searchQuery,_this.type,_this.categoryId,_this.accountId,_this.startDate,_this.endDate);
+  return Object.hash(runtimeType,_this.searchQuery,_this.type,_this.categoryId,_this.accountId,const DeepCollectionEquality().hash(_this.categoryIds),const DeepCollectionEquality().hash(_this.accountIds),_this.startDate,_this.endDate);
 }
 
 @override
 String toString() {
   final _this = this as TransactionFilter;
-  return 'TransactionFilter(searchQuery: ${_this.searchQuery}, type: ${_this.type}, categoryId: ${_this.categoryId}, accountId: ${_this.accountId}, startDate: ${_this.startDate}, endDate: ${_this.endDate})';
+  return 'TransactionFilter(searchQuery: ${_this.searchQuery}, type: ${_this.type}, categoryId: ${_this.categoryId}, accountId: ${_this.accountId}, categoryIds: ${_this.categoryIds}, accountIds: ${_this.accountIds}, startDate: ${_this.startDate}, endDate: ${_this.endDate})';
 }
 
 
@@ -360,7 +360,7 @@ abstract mixin class $TransactionFilterCopyWith<$Res>  {
   factory $TransactionFilterCopyWith(TransactionFilter value, $Res Function(TransactionFilter) _then) = _$TransactionFilterCopyWithImpl;
 @useResult
 $Res call({
- String searchQuery, TransactionType? type, String? categoryId, String? accountId, DateTime? startDate, DateTime? endDate
+ String searchQuery, TransactionType? type, String? categoryId, String? accountId, Set<String> categoryIds, Set<String> accountIds, DateTime? startDate, DateTime? endDate
 });
 
 
@@ -377,13 +377,15 @@ class _$TransactionFilterCopyWithImpl<$Res>
 
 /// Create a copy of TransactionFilter
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? searchQuery = null,Object? type = freezed,Object? categoryId = freezed,Object? accountId = freezed,Object? startDate = freezed,Object? endDate = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? searchQuery = null,Object? type = freezed,Object? categoryId = freezed,Object? accountId = freezed,Object? categoryIds = null,Object? accountIds = null,Object? startDate = freezed,Object? endDate = freezed,}) {
   return _then(TransactionFilter(
 searchQuery: null == searchQuery ? _self.searchQuery : searchQuery // ignore: cast_nullable_to_non_nullable
 as String,type: freezed == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as TransactionType?,categoryId: freezed == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
 as String?,accountId: freezed == accountId ? _self.accountId : accountId // ignore: cast_nullable_to_non_nullable
-as String?,startDate: freezed == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
+as String?,categoryIds: null == categoryIds ? _self.categoryIds : categoryIds // ignore: cast_nullable_to_non_nullable
+as Set<String>,accountIds: null == accountIds ? _self.accountIds : accountIds // ignore: cast_nullable_to_non_nullable
+as Set<String>,startDate: freezed == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
 as DateTime?,endDate: freezed == endDate ? _self.endDate : endDate // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));
@@ -470,10 +472,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String searchQuery,  TransactionType? type,  String? categoryId,  String? accountId,  DateTime? startDate,  DateTime? endDate)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String searchQuery,  TransactionType? type,  String? categoryId,  String? accountId,  Set<String> categoryIds,  Set<String> accountIds,  DateTime? startDate,  DateTime? endDate)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TransactionFilter() when $default != null:
-return $default(_that.searchQuery,_that.type,_that.categoryId,_that.accountId,_that.startDate,_that.endDate);case _:
+return $default(_that.searchQuery,_that.type,_that.categoryId,_that.accountId,_that.categoryIds,_that.accountIds,_that.startDate,_that.endDate);case _:
   return orElse();
 
 }
@@ -491,10 +493,10 @@ return $default(_that.searchQuery,_that.type,_that.categoryId,_that.accountId,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String searchQuery,  TransactionType? type,  String? categoryId,  String? accountId,  DateTime? startDate,  DateTime? endDate)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String searchQuery,  TransactionType? type,  String? categoryId,  String? accountId,  Set<String> categoryIds,  Set<String> accountIds,  DateTime? startDate,  DateTime? endDate)  $default,) {final _that = this;
 switch (_that) {
 case _TransactionFilter():
-return $default(_that.searchQuery,_that.type,_that.categoryId,_that.accountId,_that.startDate,_that.endDate);case _:
+return $default(_that.searchQuery,_that.type,_that.categoryId,_that.accountId,_that.categoryIds,_that.accountIds,_that.startDate,_that.endDate);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -511,10 +513,10 @@ return $default(_that.searchQuery,_that.type,_that.categoryId,_that.accountId,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String searchQuery,  TransactionType? type,  String? categoryId,  String? accountId,  DateTime? startDate,  DateTime? endDate)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String searchQuery,  TransactionType? type,  String? categoryId,  String? accountId,  Set<String> categoryIds,  Set<String> accountIds,  DateTime? startDate,  DateTime? endDate)?  $default,) {final _that = this;
 switch (_that) {
 case _TransactionFilter() when $default != null:
-return $default(_that.searchQuery,_that.type,_that.categoryId,_that.accountId,_that.startDate,_that.endDate);case _:
+return $default(_that.searchQuery,_that.type,_that.categoryId,_that.accountId,_that.categoryIds,_that.accountIds,_that.startDate,_that.endDate);case _:
   return null;
 
 }
@@ -526,13 +528,27 @@ return $default(_that.searchQuery,_that.type,_that.categoryId,_that.accountId,_t
 
 
 class _TransactionFilter extends TransactionFilter {
-  const _TransactionFilter({this.searchQuery = '', this.type, this.categoryId, this.accountId, this.startDate, this.endDate}): super._();
+  const _TransactionFilter({this.searchQuery = '', this.type, this.categoryId, this.accountId,  Set<String> categoryIds = const <String>{},  Set<String> accountIds = const <String>{}, this.startDate, this.endDate}): _categoryIds = categoryIds,_accountIds = accountIds,super._();
   
 
 @override@JsonKey() final  String searchQuery;
 @override final  TransactionType? type;
 @override final  String? categoryId;
 @override final  String? accountId;
+ final  Set<String> _categoryIds;
+@override@JsonKey() Set<String> get categoryIds {
+  if (_categoryIds is EqualUnmodifiableSetView) return _categoryIds;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableSetView(_categoryIds);
+}
+
+ final  Set<String> _accountIds;
+@override@JsonKey() Set<String> get accountIds {
+  if (_accountIds is EqualUnmodifiableSetView) return _accountIds;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableSetView(_accountIds);
+}
+
 @override final  DateTime? startDate;
 @override final  DateTime? endDate;
 
@@ -546,18 +562,18 @@ _$TransactionFilterCopyWith<_TransactionFilter> get copyWith => __$TransactionFi
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TransactionFilter&&(identical(other.searchQuery, searchQuery) || other.searchQuery == searchQuery)&&(identical(other.type, type) || other.type == type)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.accountId, accountId) || other.accountId == accountId)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TransactionFilter&&(identical(other.searchQuery, searchQuery) || other.searchQuery == searchQuery)&&(identical(other.type, type) || other.type == type)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.accountId, accountId) || other.accountId == accountId)&&const DeepCollectionEquality().equals(other.categoryIds, _categoryIds)&&const DeepCollectionEquality().equals(other.accountIds, _accountIds)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,searchQuery,type,categoryId,accountId,startDate,endDate);
+    return Object.hash(runtimeType,searchQuery,type,categoryId,accountId,const DeepCollectionEquality().hash(_categoryIds),const DeepCollectionEquality().hash(_accountIds),startDate,endDate);
 }
 
 @override
 String toString() {
-    return 'TransactionFilter(searchQuery: $searchQuery, type: $type, categoryId: $categoryId, accountId: $accountId, startDate: $startDate, endDate: $endDate)';
+    return 'TransactionFilter(searchQuery: $searchQuery, type: $type, categoryId: $categoryId, accountId: $accountId, categoryIds: $categoryIds, accountIds: $accountIds, startDate: $startDate, endDate: $endDate)';
 }
 
 
@@ -568,7 +584,7 @@ abstract mixin class _$TransactionFilterCopyWith<$Res> implements $TransactionFi
   factory _$TransactionFilterCopyWith(_TransactionFilter value, $Res Function(_TransactionFilter) _then) = __$TransactionFilterCopyWithImpl;
 @override @useResult
 $Res call({
- String searchQuery, TransactionType? type, String? categoryId, String? accountId, DateTime? startDate, DateTime? endDate
+ String searchQuery, TransactionType? type, String? categoryId, String? accountId, Set<String> categoryIds, Set<String> accountIds, DateTime? startDate, DateTime? endDate
 });
 
 
@@ -585,13 +601,15 @@ class __$TransactionFilterCopyWithImpl<$Res>
 
 /// Create a copy of TransactionFilter
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? searchQuery = null,Object? type = freezed,Object? categoryId = freezed,Object? accountId = freezed,Object? startDate = freezed,Object? endDate = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? searchQuery = null,Object? type = freezed,Object? categoryId = freezed,Object? accountId = freezed,Object? categoryIds = null,Object? accountIds = null,Object? startDate = freezed,Object? endDate = freezed,}) {
   return _then(_TransactionFilter(
 searchQuery: null == searchQuery ? _self.searchQuery : searchQuery // ignore: cast_nullable_to_non_nullable
 as String,type: freezed == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as TransactionType?,categoryId: freezed == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
 as String?,accountId: freezed == accountId ? _self.accountId : accountId // ignore: cast_nullable_to_non_nullable
-as String?,startDate: freezed == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
+as String?,categoryIds: null == categoryIds ? _self._categoryIds : categoryIds // ignore: cast_nullable_to_non_nullable
+as Set<String>,accountIds: null == accountIds ? _self._accountIds : accountIds // ignore: cast_nullable_to_non_nullable
+as Set<String>,startDate: freezed == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
 as DateTime?,endDate: freezed == endDate ? _self.endDate : endDate // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));

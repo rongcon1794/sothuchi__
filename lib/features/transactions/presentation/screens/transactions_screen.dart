@@ -604,12 +604,30 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     String locale,
   ) {
     final parts = <String>[];
-    if (filter.accountId != null && accountsMap.containsKey(filter.accountId)) {
-      parts.add(accountsMap[filter.accountId]!.name);
+    final effectiveAccounts = filter.effectiveAccountIds;
+    if (effectiveAccounts.isNotEmpty) {
+      if (effectiveAccounts.length == 1) {
+        final accId = effectiveAccounts.first;
+        if (accountsMap.containsKey(accId)) {
+          parts.add(accountsMap[accId]!.name);
+        }
+      } else {
+        parts.add('${effectiveAccounts.length} ví');
+      }
     }
-    if (filter.categoryId != null && categoriesMap.containsKey(filter.categoryId)) {
-      parts.add(categoriesMap[filter.categoryId]!.name);
+
+    final effectiveCategories = filter.effectiveCategoryIds;
+    if (effectiveCategories.isNotEmpty) {
+      if (effectiveCategories.length == 1) {
+        final catId = effectiveCategories.first;
+        if (categoriesMap.containsKey(catId)) {
+          parts.add(categoriesMap[catId]!.name);
+        }
+      } else {
+        parts.add('${effectiveCategories.length} danh mục');
+      }
     }
+
     if (filter.startDate != null && filter.endDate != null) {
       parts.add(
         '${AppDateUtils.formatShortDate(filter.startDate!, locale: locale)} - ${AppDateUtils.formatShortDate(filter.endDate!, locale: locale)}',

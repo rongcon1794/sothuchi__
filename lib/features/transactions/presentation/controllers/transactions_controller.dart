@@ -134,11 +134,55 @@ class TransactionFilterController extends Notifier<TransactionFilter> {
   }
 
   void setCategory(String? categoryId) {
-    state = state.copyWith(categoryId: categoryId);
+    if (categoryId == null) {
+      state = state.copyWith(categoryId: null, categoryIds: const {});
+    } else {
+      state = state.copyWith(categoryId: null, categoryIds: {categoryId});
+    }
+  }
+
+  void toggleCategory(String categoryId) {
+    final current = Set<String>.from(state.effectiveCategoryIds);
+    if (current.contains(categoryId)) {
+      current.remove(categoryId);
+    } else {
+      current.add(categoryId);
+    }
+    state = state.copyWith(categoryId: null, categoryIds: current);
+  }
+
+  void setCategories(Set<String> ids) {
+    state = state.copyWith(categoryId: null, categoryIds: ids);
+  }
+
+  void clearCategories() {
+    state = state.copyWith(categoryId: null, categoryIds: const {});
   }
 
   void setAccount(String? accountId) {
-    state = state.copyWith(accountId: accountId);
+    if (accountId == null) {
+      state = state.copyWith(accountId: null, accountIds: const {});
+    } else {
+      state = state.copyWith(accountId: null, accountIds: {accountId});
+    }
+  }
+
+  void toggleAccount(String accountId) {
+    final current = Set<String>.from(state.effectiveAccountIds);
+    if (current.contains(accountId)) {
+      current.remove(accountId);
+    } else {
+      current.add(accountId);
+    }
+    state = state.copyWith(accountId: null, accountIds: current);
+  }
+
+  void setAccounts(Set<String> ids) {
+    state = state.copyWith(accountId: null, accountIds: ids);
+  }
+
+  void clearAccounts() {
+    state = state.copyWith(accountId: null, accountIds: const {});
   }
 
   void setDateRange(DateTime? start, DateTime? end) {
@@ -199,16 +243,19 @@ final filteredTransactionsProvider = Provider<List<TransactionEntity>>((ref) {
       ? (filter.endDate != null ? AppDateUtils.endOfDay(filter.endDate!) : null)
       : (selectedMonth != null ? AppDateUtils.endOfMonth(selectedMonth) : null);
 
+  final catIds = filter.effectiveCategoryIds;
+  final accIds = filter.effectiveAccountIds;
+
   return all.where((tx) {
     if (filter.type != null && tx.type != filter.type) {
       return false;
     }
-    if (filter.categoryId != null && tx.categoryId != filter.categoryId) {
+    if (catIds.isNotEmpty && !catIds.contains(tx.categoryId)) {
       return false;
     }
-    if (filter.accountId != null &&
-        tx.accountId != filter.accountId &&
-        tx.toAccountId != filter.accountId) {
+    if (accIds.isNotEmpty &&
+        !accIds.contains(tx.accountId) &&
+        (tx.toAccountId == null || !accIds.contains(tx.toAccountId))) {
       return false;
     }
     if (rangeStart != null && tx.date.isBefore(rangeStart)) {

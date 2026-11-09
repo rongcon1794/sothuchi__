@@ -15,6 +15,7 @@ import 'package:so_thu_chi/features/categories/data/repositories/firestore_categ
 import 'package:so_thu_chi/features/categories/domain/entities/category.dart';
 import 'package:so_thu_chi/features/transactions/data/repositories/firestore_transaction_repository.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
+import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
 import 'package:so_thu_chi/features/transactions/presentation/screens/home_dashboard_screen.dart';
 import 'package:so_thu_chi/features/transactions/presentation/screens/transaction_form_screen.dart';
 import 'package:so_thu_chi/features/transactions/presentation/screens/transactions_screen.dart';
@@ -456,6 +457,111 @@ void main() {
 
       expect(find.text('-45.000 ₫'), findsOneWidget);
       expect(find.text('05/11/2026'), findsOneWidget);
+    });
+  });
+
+  group('TransactionFilter multi-account and multi-category filtering', () {
+    test('filteredTransactionsProvider filters correctly with multiple accountIds and categoryIds', () {
+      final now = DateTime(2026, 11, 1);
+      final tx1 = TransactionEntity(
+        id: 'tx1',
+        amount: 50000,
+        currency: 'VND',
+        type: TransactionType.expense,
+        accountId: 'acc_cash',
+        categoryId: 'cat_food',
+        date: now,
+        createdAt: now,
+        updatedAt: now,
+      );
+      final tx2 = TransactionEntity(
+        id: 'tx2',
+        amount: 100000,
+        currency: 'VND',
+        type: TransactionType.expense,
+        accountId: 'acc_bank',
+        categoryId: 'cat_shopping',
+        date: now,
+        createdAt: now,
+        updatedAt: now,
+      );
+      final tx3 = TransactionEntity(
+        id: 'tx3',
+        amount: 200000,
+        currency: 'VND',
+        type: TransactionType.expense,
+        accountId: 'acc_ewallet',
+        categoryId: 'cat_bills',
+        date: now,
+        createdAt: now,
+        updatedAt: now,
+      );
+      final tx4 = TransactionEntity(
+        id: 'tx4',
+        amount: 300000,
+        currency: 'VND',
+        type: TransactionType.transfer,
+        accountId: 'acc_other',
+        toAccountId: 'acc_bank',
+        categoryId: 'cat_transfer',
+        date: now,
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          transactionsStreamProvider.overrideWithValue(
+            AsyncData<List<TransactionEntity>>([tx1, tx2, tx3, tx4]),
+          ),
+        ],
+      );
+
+      // Initial state: no filter -> all 4 txs
+      var filtered = container.read(filteredTransactionsProvider);
+      expect(filtered.length, 4);
+
+      // Filter by 2 accounts: acc_cash and acc_ewallet
+      container.read(transactionFilterProvider.notifier).setAccounts({'acc_cash', 'acc_ewallet'});
+      filtered = container.read(filteredTransactionsProvider);
+      expect(filtered.map((t) => t.id).toSet(), {'tx1', 'tx3'});
+
+      // Toggle account acc_bank in -> should now include tx1, tx2, tx3 and transfer tx4 (toAccountId: acc_bank)
+      container.read(transactionFilterProvider.notifier).toggleAccount('acc_bank');
+      filtered = container.read(filteredTransactionsProvider);
+      expect(filtered.length, 4);
+
+      // Toggle account acc_bank out
+      container.read(transactionFilterProvider.notifier).toggleAccount('acc_bank');
+      filtered = container.read(filteredTransactionsProvider);
+      expect(filtered.map((t) => t.id).toSet(), {'tx1', 'tx3'});
+
+      // Clear accounts
+      container.read(transactionFilterProvider.notifier).clearAccounts();
+      filtered = container.read(filteredTransactionsProvider);
+      expect(filtered.length, 4);
+
+      // Filter by 2 categories: cat_shopping and cat_bills
+      container.read(transactionFilterProvider.notifier).setCategories({'cat_shopping', 'cat_bills'});
+      filtered = container.read(filteredTransactionsProvider);
+      expect(filtered.map((t) => t.id).toSet(), {'tx2', 'tx3'});
+
+      // Simultaneous multi-account AND multi-category filtering:
+      // Accounts: acc_cash, acc_bank
+      // Categories: cat_shopping, cat_bills
+      // tx1: acc_cash, cat_food -> excluded because cat_food not in {cat_shopping, cat_bills}
+      // tx2: acc_bank, cat_shopping -> MATCHES both!
+      // tx3: acc_ewallet, cat_bills -> excluded because acc_ewallet not in {acc_cash, acc_bank}
+      // tx4: acc_other, cat_transfer -> excluded
+      container.read(transactionFilterProvider.notifier).setAccounts({'acc_cash', 'acc_bank'});
+      filtered = container.read(filteredTransactionsProvider);
+      expect(filtered.length, 1);
+      expect(filtered.first.id, 'tx2');
+
+      // Clear all
+      container.read(transactionFilterProvider.notifier).clearAll();
+      filtered = container.read(filteredTransactionsProvider);
+      expect(filtered.length, 4);
     });
   });
 }

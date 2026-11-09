@@ -221,32 +221,12 @@ class _TransactionFilterBottomSheetState
     var activeFilterCount = 0;
     if (filter.type != null) activeFilterCount++;
     if (filter.startDate != null || filter.endDate != null) activeFilterCount++;
-    if (filter.accountId != null) activeFilterCount++;
-    if (filter.categoryId != null) activeFilterCount++;
+    if (filter.effectiveAccountIds.isNotEmpty) activeFilterCount += filter.effectiveAccountIds.length;
+    if (filter.effectiveCategoryIds.isNotEmpty) activeFilterCount += filter.effectiveCategoryIds.length;
 
     final activePreset = _resolveActivePreset(filter.startDate, filter.endDate, selectedMonth);
     final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
     final sheetHeight = MediaQuery.of(context).size.height * (isLandscape ? 0.94 : 0.85);
-
-    Account? selectedAccount;
-    if (filter.accountId != null) {
-      for (final w in wallets) {
-        if (w.id == filter.accountId) {
-          selectedAccount = w;
-          break;
-        }
-      }
-    }
-
-    Category? selectedCategory;
-    if (filter.categoryId != null) {
-      for (final c in allCategories) {
-        if (c.id == filter.categoryId) {
-          selectedCategory = c;
-          break;
-        }
-      }
-    }
 
     return Container(
       constraints: BoxConstraints(maxHeight: sheetHeight),
@@ -460,8 +440,7 @@ class _TransactionFilterBottomSheetState
                           // 3. Menu mở rộng Ví & tài khoản
                           _ExpandableWalletMenu(
                             wallets: wallets,
-                            selectedAccountId: filter.accountId,
-                            selectedAccount: selectedAccount,
+                            selectedAccountIds: filter.effectiveAccountIds,
                             isExpanded: _isWalletExpanded,
                             locale: locale,
                             hideBalance: hideBalance,
@@ -471,11 +450,11 @@ class _TransactionFilterBottomSheetState
                                 _isWalletExpanded = !_isWalletExpanded;
                               });
                             },
-                            onSelectAccount: (accId) {
-                              ref.read(transactionFilterProvider.notifier).setAccount(accId);
-                              setState(() {
-                                _isWalletExpanded = false;
-                              });
+                            onToggleAccount: (accId) {
+                              ref.read(transactionFilterProvider.notifier).toggleAccount(accId);
+                            },
+                            onClearAccounts: () {
+                              ref.read(transactionFilterProvider.notifier).clearAccounts();
                             },
                           ),
 
@@ -489,8 +468,7 @@ class _TransactionFilterBottomSheetState
                           // 4. Menu mở rộng Danh mục thu chi
                           _ExpandableCategoryMenu(
                             categories: visibleCategories,
-                            selectedCategoryId: filter.categoryId,
-                            selectedCategory: selectedCategory,
+                            selectedCategoryIds: filter.effectiveCategoryIds,
                             isExpanded: _isCategoryExpanded,
                             searchController: _categorySearchController,
                             searchQuery: _categoryQuery,
@@ -505,11 +483,11 @@ class _TransactionFilterBottomSheetState
                                 _isCategoryExpanded = !_isCategoryExpanded;
                               });
                             },
-                            onSelectCategory: (catId) {
-                              ref.read(transactionFilterProvider.notifier).setCategory(catId);
-                              setState(() {
-                                _isCategoryExpanded = false;
-                              });
+                            onToggleCategory: (catId) {
+                              ref.read(transactionFilterProvider.notifier).toggleCategory(catId);
+                            },
+                            onClearCategories: () {
+                              ref.read(transactionFilterProvider.notifier).clearCategories();
                             },
                           ),
                         ],
@@ -823,27 +801,27 @@ class _CompactCustomDatePill extends StatelessWidget {
   }
 }
 
-/// Expandable Menu for Wallets & Accounts
+/// Expandable Menu for Wallets (Supports multi-select)
 class _ExpandableWalletMenu extends StatelessWidget {
   const _ExpandableWalletMenu({
     required this.wallets,
-    required this.selectedAccountId,
-    required this.selectedAccount,
+    required this.selectedAccountIds,
     required this.isExpanded,
     required this.locale,
     required this.hideBalance,
     required this.onToggleExpand,
-    required this.onSelectAccount,
+    required this.onToggleAccount,
+    required this.onClearAccounts,
   });
 
   final List<Account> wallets;
-  final String? selectedAccountId;
-  final Account? selectedAccount;
+  final Set<String> selectedAccountIds;
   final bool isExpanded;
   final String locale;
   final bool hideBalance;
   final VoidCallback onToggleExpand;
-  final ValueChanged<String?> onSelectAccount;
+  final ValueChanged<String> onToggleAccount;
+  final VoidCallback onClearAccounts;
 
   @override
   Widget build(BuildContext context) {
@@ -851,9 +829,20 @@ class _ExpandableWalletMenu extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final l10n = context.l10n;
 
-    final subtitle = selectedAccount != null
-        ? selectedAccount!.name
-        : l10n.filterAllWallets;
+    final singleWallet = selectedAccountIds.length == 1
+        ? wallets.where((w) => selectedAccountIds.contains(w.id)).firstOrNull
+        : null;
+
+    final String subtitle;
+    if (selectedAccountIds.isEmpty) {
+      subtitle = l10n.filterAllWallets;
+    } else if (selectedAccountIds.length == 1) {
+      subtitle = singleWallet?.name ?? l10n.filterAllWallets;
+    } else {
+      subtitle = '${selectedAccountIds.length} ví đã chọn';
+    }
+
+    final hasSelection = selectedAccountIds.isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -864,12 +853,12 @@ class _ExpandableWalletMenu extends StatelessWidget {
           child: Row(
             children: [
               AppleSquircleBadge(
-                icon: selectedAccount != null
-                    ? AppIconCatalog.resolve(selectedAccount!.icon)
-                    : CupertinoIcons.creditcard,
-                backgroundColor: selectedAccount != null
+                icon: singleWallet != null
+                    ? AppIconCatalog.resolve(singleWallet.icon)
+                    : (hasSelection ? CupertinoIcons.creditcard_fill : CupertinoIcons.creditcard),
+                backgroundColor: singleWallet != null
                     ? AppIconCatalog.contrastSafeColor(
-                        Color(selectedAccount!.color),
+                        Color(singleWallet.color),
                         theme.brightness,
                       )
                     : theme.colorScheme.primary,
@@ -898,8 +887,8 @@ class _ExpandableWalletMenu extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 12.5,
-                        fontWeight: selectedAccount != null ? FontWeight.w700 : FontWeight.w500,
-                        color: selectedAccount != null
+                        fontWeight: hasSelection ? FontWeight.w700 : FontWeight.w500,
+                        color: hasSelection
                             ? theme.colorScheme.primary
                             : (isDark ? Colors.white : Colors.black87),
                       ),
@@ -907,11 +896,11 @@ class _ExpandableWalletMenu extends StatelessWidget {
                   ],
                 ),
               ),
-              if (selectedAccount != null) ...[
+              if (hasSelection) ...[
                 GestureDetector(
                   onTap: () {
                     HapticFeedback.lightImpact();
-                    onSelectAccount(null);
+                    onClearAccounts();
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
@@ -937,7 +926,9 @@ class _ExpandableWalletMenu extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      '${wallets.length} ví',
+                      hasSelection
+                          ? '${selectedAccountIds.length}/${wallets.length} ví'
+                          : '${wallets.length} ví',
                       style: TextStyle(
                         fontSize: 11,
                         color: isDark ? Colors.white54 : Colors.black54,
@@ -985,14 +976,14 @@ class _ExpandableWalletMenu extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
                 child: Column(
                   children: [
-                    // Item 0: All Wallets
+                    // Item 0: All Wallets (Clears specific selections)
                     _buildMenuItem(
                       context: context,
-                      isSelected: selectedAccountId == null,
+                      isSelected: selectedAccountIds.isEmpty,
                       leading: Icon(
                         CupertinoIcons.creditcard,
                         size: 15,
-                        color: selectedAccountId == null
+                        color: selectedAccountIds.isEmpty
                             ? theme.colorScheme.primary
                             : (isDark ? const Color(0xFF8E8E93) : const Color(0xFF6C6C70)),
                       ),
@@ -1000,7 +991,7 @@ class _ExpandableWalletMenu extends StatelessWidget {
                       subtitle: '${wallets.length} ${l10n.walletsTitle.toLowerCase()}',
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        onSelectAccount(null);
+                        onClearAccounts();
                       },
                     ),
                     for (final wallet in wallets) ...[
@@ -1010,7 +1001,7 @@ class _ExpandableWalletMenu extends StatelessWidget {
                       ),
                       _buildMenuItem(
                         context: context,
-                        isSelected: selectedAccountId == wallet.id,
+                        isSelected: selectedAccountIds.contains(wallet.id),
                         leading: AppleSquircleBadge(
                           icon: AppIconCatalog.resolve(wallet.icon),
                           backgroundColor: AppIconCatalog.contrastSafeColor(
@@ -1027,7 +1018,7 @@ class _ExpandableWalletMenu extends StatelessWidget {
                             : wallet.balanceMoney.format(locale: locale),
                         onTap: () {
                           HapticFeedback.selectionClick();
-                          onSelectAccount(wallet.id);
+                          onToggleAccount(wallet.id);
                         },
                       ),
                     ],
@@ -1092,12 +1083,28 @@ class _ExpandableWalletMenu extends StatelessWidget {
                 ],
               ),
             ),
-            if (isSelected)
-              Icon(
-                CupertinoIcons.checkmark_alt,
-                size: 15,
-                color: theme.colorScheme.primary,
+            Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                color: isSelected ? theme.colorScheme.primary : Colors.transparent,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected
+                      ? theme.colorScheme.primary
+                      : (isDark ? const Color(0xFF545458) : const Color(0xFFC7C7CC)),
+                  width: 1.5,
+                ),
               ),
+              alignment: Alignment.center,
+              child: isSelected
+                  ? const Icon(
+                      CupertinoIcons.checkmark,
+                      size: 12,
+                      color: Colors.white,
+                    )
+                  : null,
+            ),
           ],
         ),
       ),
@@ -1105,29 +1112,29 @@ class _ExpandableWalletMenu extends StatelessWidget {
   }
 }
 
-/// Expandable Menu for Categories
+/// Expandable Menu for Categories (Supports multi-select)
 class _ExpandableCategoryMenu extends StatelessWidget {
   const _ExpandableCategoryMenu({
     required this.categories,
-    required this.selectedCategoryId,
-    required this.selectedCategory,
+    required this.selectedCategoryIds,
     required this.isExpanded,
     required this.searchController,
     required this.searchQuery,
     required this.onSearchChanged,
     required this.onToggleExpand,
-    required this.onSelectCategory,
+    required this.onToggleCategory,
+    required this.onClearCategories,
   });
 
   final List<Category> categories;
-  final String? selectedCategoryId;
-  final Category? selectedCategory;
+  final Set<String> selectedCategoryIds;
   final bool isExpanded;
   final TextEditingController searchController;
   final String searchQuery;
   final ValueChanged<String> onSearchChanged;
   final VoidCallback onToggleExpand;
-  final ValueChanged<String?> onSelectCategory;
+  final ValueChanged<String> onToggleCategory;
+  final VoidCallback onClearCategories;
 
   @override
   Widget build(BuildContext context) {
@@ -1135,15 +1142,24 @@ class _ExpandableCategoryMenu extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final l10n = context.l10n;
 
-    final resolvedCatName = selectedCategory != null
-        ? DefaultCategoryLocalization.resolveName(
-            l10n,
-            categoryId: selectedCategory!.id,
-            fallbackName: selectedCategory!.name,
-          )
+    final singleCat = selectedCategoryIds.length == 1
+        ? categories.where((c) => selectedCategoryIds.contains(c.id)).firstOrNull
         : null;
 
-    final subtitle = resolvedCatName ?? l10n.filterAllCategories;
+    final String subtitle;
+    if (selectedCategoryIds.isEmpty) {
+      subtitle = l10n.filterAllCategories;
+    } else if (selectedCategoryIds.length == 1 && singleCat != null) {
+      subtitle = DefaultCategoryLocalization.resolveName(
+        l10n,
+        categoryId: singleCat.id,
+        fallbackName: singleCat.name,
+      );
+    } else {
+      subtitle = '${selectedCategoryIds.length} danh mục đã chọn';
+    }
+
+    final hasSelection = selectedCategoryIds.isNotEmpty;
 
     final filteredCategories = categories.where((c) {
       if (searchQuery.isEmpty) return true;
@@ -1164,12 +1180,12 @@ class _ExpandableCategoryMenu extends StatelessWidget {
           child: Row(
             children: [
               AppleSquircleBadge(
-                icon: selectedCategory != null
-                    ? AppIconCatalog.resolve(selectedCategory!.icon)
-                    : CupertinoIcons.square_grid_2x2,
-                backgroundColor: selectedCategory != null
+                icon: singleCat != null
+                    ? AppIconCatalog.resolve(singleCat.icon)
+                    : (hasSelection ? CupertinoIcons.square_grid_2x2_fill : CupertinoIcons.square_grid_2x2),
+                backgroundColor: singleCat != null
                     ? AppIconCatalog.contrastSafeColor(
-                        Color(selectedCategory!.color),
+                        Color(singleCat.color),
                         theme.brightness,
                       )
                     : theme.colorScheme.primary,
@@ -1198,8 +1214,8 @@ class _ExpandableCategoryMenu extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 12.5,
-                        fontWeight: selectedCategory != null ? FontWeight.w700 : FontWeight.w500,
-                        color: selectedCategory != null
+                        fontWeight: hasSelection ? FontWeight.w700 : FontWeight.w500,
+                        color: hasSelection
                             ? theme.colorScheme.primary
                             : (isDark ? Colors.white : Colors.black87),
                       ),
@@ -1207,11 +1223,11 @@ class _ExpandableCategoryMenu extends StatelessWidget {
                   ],
                 ),
               ),
-              if (selectedCategory != null) ...[
+              if (hasSelection) ...[
                 GestureDetector(
                   onTap: () {
                     HapticFeedback.lightImpact();
-                    onSelectCategory(null);
+                    onClearCategories();
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
@@ -1237,7 +1253,9 @@ class _ExpandableCategoryMenu extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      '${categories.length} mục',
+                      hasSelection
+                          ? '${selectedCategoryIds.length}/${categories.length} mục'
+                          : '${categories.length} mục',
                       style: TextStyle(
                         fontSize: 11,
                         color: isDark ? Colors.white54 : Colors.black54,
@@ -1316,7 +1334,7 @@ class _ExpandableCategoryMenu extends StatelessWidget {
                         ),
                         itemBuilder: (context, index) {
                           if (index == 0) {
-                            final isAllSelected = selectedCategoryId == null;
+                            final isAllSelected = selectedCategoryIds.isEmpty;
                             return _buildCategoryMenuItem(
                               context: context,
                               isSelected: isAllSelected,
@@ -1331,13 +1349,13 @@ class _ExpandableCategoryMenu extends StatelessWidget {
                               subtitle: '${categories.length} danh mục',
                               onTap: () {
                                 HapticFeedback.selectionClick();
-                                onSelectCategory(null);
+                                onClearCategories();
                               },
                             );
                           }
 
                           final cat = filteredCategories[index - 1];
-                          final isSelected = selectedCategoryId == cat.id;
+                          final isSelected = selectedCategoryIds.contains(cat.id);
                           final catName = DefaultCategoryLocalization.resolveName(
                             l10n,
                             categoryId: cat.id,
@@ -1363,7 +1381,7 @@ class _ExpandableCategoryMenu extends StatelessWidget {
                                 : l10n.income,
                             onTap: () {
                               HapticFeedback.selectionClick();
-                              onSelectCategory(cat.id);
+                              onToggleCategory(cat.id);
                             },
                           );
                         },
@@ -1430,12 +1448,28 @@ class _ExpandableCategoryMenu extends StatelessWidget {
                 ],
               ),
             ),
-            if (isSelected)
-              Icon(
-                CupertinoIcons.checkmark_alt,
-                size: 15,
-                color: theme.colorScheme.primary,
+            Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                color: isSelected ? theme.colorScheme.primary : Colors.transparent,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected
+                      ? theme.colorScheme.primary
+                      : (isDark ? const Color(0xFF545458) : const Color(0xFFC7C7CC)),
+                  width: 1.5,
+                ),
               ),
+              alignment: Alignment.center,
+              child: isSelected
+                  ? const Icon(
+                      CupertinoIcons.checkmark,
+                      size: 12,
+                      color: Colors.white,
+                    )
+                  : null,
+            ),
           ],
         ),
       ),
