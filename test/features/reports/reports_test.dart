@@ -12,6 +12,7 @@ import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
 import 'package:so_thu_chi/features/categories/data/datasources/default_categories_catalog.dart';
 import 'package:so_thu_chi/features/categories/data/repositories/firestore_category_repository.dart';
 import 'package:so_thu_chi/features/reports/data/repositories/reports_repository_impl.dart';
+import 'package:so_thu_chi/features/reports/domain/entities/monthly_report.dart';
 import 'package:so_thu_chi/features/reports/presentation/screens/reports_screen.dart';
 import 'package:so_thu_chi/features/transactions/data/repositories/firestore_transaction_repository.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
@@ -94,6 +95,42 @@ void main() {
       expect(report.peakSpendingDay, 10);
       expect(report.peakSpendingAmountMinor, 4000000);
       expect(report.activeSpendingDaysCount, 1);
+    });
+
+    test('calculates average daily spending based on elapsed days so far instead of entire month when month is ongoing', () {
+      // 1. Current month (November 2026, 30 days total), simulated on day 10
+      final novCurrent = DateTime(2026, 11, 1);
+      final currentMonthReport = MonthlyReportData(
+        selectedMonth: novCurrent,
+        currencyCode: 'VND',
+        totalIncomeMinor: 10000000,
+        totalExpenseMinor: 5000000, // 5,000,000 VND spent so far
+        categorySlices: const [],
+        sixMonthTrend: const [],
+        nowOverride: DateTime(2026, 11, 10), // Day 10
+      );
+
+      expect(currentMonthReport.daysInMonth, 30);
+      expect(currentMonthReport.elapsedDaysInMonth, 10);
+      // 5,000,000 / 10 days = 500,000 VND/day (NOT 5,000,000 / 30 = 166,666 VND/day)
+      expect(currentMonthReport.averageDailyExpenseMinor, 500000);
+
+      // 2. Past month (October 2026, 31 days total), viewed in November 2026
+      final octPast = DateTime(2026, 10, 1);
+      final pastMonthReport = MonthlyReportData(
+        selectedMonth: octPast,
+        currencyCode: 'VND',
+        totalIncomeMinor: 10000000,
+        totalExpenseMinor: 6200000,
+        categorySlices: const [],
+        sixMonthTrend: const [],
+        nowOverride: DateTime(2026, 11, 10),
+      );
+
+      expect(pastMonthReport.daysInMonth, 31);
+      expect(pastMonthReport.elapsedDaysInMonth, 31);
+      // Full month has passed: 6,200,000 / 31 = 200,000 VND/day
+      expect(pastMonthReport.averageDailyExpenseMinor, 200000);
     });
 
     testWidgets('renders PieChart donut, BarChart 6-month trend, and switches months', (

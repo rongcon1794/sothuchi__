@@ -66,7 +66,10 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
         ? (report.dailyExpenseMinor[_selectedDay!] ?? 0)
         : null;
 
-    final frugalDaysCount = totalDays - report.activeSpendingDaysCount;
+    final frugalDaysCount = math.max(
+      0,
+      report.elapsedDaysInMonth - report.activeSpendingDaysCount,
+    );
 
     return AppleGlassCard(
       padding: const EdgeInsets.all(16),
@@ -745,10 +748,10 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
           _buildStatRow(
             theme,
             'Chi tiêu TB/ngày:',
-            Money(minorUnits: avgMinor, currencyCode: report.currencyCode).format(
+            '${Money(minorUnits: avgMinor, currencyCode: report.currencyCode).format(
               locale: widget.locale,
               masked: widget.hideBalance,
-            ),
+            )}${report.elapsedDaysInMonth < report.daysInMonth ? ' (${report.elapsedDaysInMonth} ngày đã qua)' : ''}',
           ),
           const SizedBox(height: 4),
           _buildStatRow(
@@ -762,7 +765,9 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
           _buildStatRow(
             theme,
             'Số ngày phát sinh chi:',
-            '${report.activeSpendingDaysCount} / ${report.daysInMonth} ngày',
+            report.elapsedDaysInMonth < report.daysInMonth
+                ? '${report.activeSpendingDaysCount} / ${report.elapsedDaysInMonth} ngày'
+                : '${report.activeSpendingDaysCount} / ${report.daysInMonth} ngày',
           ),
         ],
       ),

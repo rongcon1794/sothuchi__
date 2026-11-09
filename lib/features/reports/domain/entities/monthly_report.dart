@@ -59,6 +59,7 @@ class MonthlyReportData {
     required this.categorySlices,
     required this.sixMonthTrend,
     this.dailyExpenseMinor = const {},
+    this.nowOverride,
   });
 
   final DateTime selectedMonth;
@@ -68,6 +69,7 @@ class MonthlyReportData {
   final List<CategorySpendSlice> categorySlices;
   final List<MonthlyTrendBar> sixMonthTrend;
   final Map<int, int> dailyExpenseMinor;
+  final DateTime? nowOverride;
 
   int get netMinor => totalIncomeMinor - totalExpenseMinor;
 
@@ -92,9 +94,32 @@ class MonthlyReportData {
     return nextMonth.subtract(const Duration(days: 1)).day;
   }
 
+  /// Total days elapsed in the selected calendar month so far.
+  /// - Past month: all days in that month have passed ([daysInMonth]).
+  /// - Current month: days passed up to today (`now.day.clamp(1, daysInMonth)`),
+  ///   ensuring that average spending reflects only the days that have passed so far.
+  /// - Future month: [daysInMonth].
+  int get elapsedDaysInMonth {
+    final now = nowOverride ?? DateTime.now();
+    final isCurrentMonth =
+        selectedMonth.year == now.year && selectedMonth.month == now.month;
+    final isPastMonth = selectedMonth.year < now.year ||
+        (selectedMonth.year == now.year && selectedMonth.month < now.month);
+
+    if (isPastMonth) {
+      return daysInMonth;
+    } else if (isCurrentMonth) {
+      return now.day.clamp(1, daysInMonth);
+    } else {
+      return daysInMonth;
+    }
+  }
+
   /// Average daily expense minor units.
+  /// Calculated based on elapsed days so far in the month, rather than
+  /// diluting the average across the entire month when the month is ongoing.
   int get averageDailyExpenseMinor {
-    final days = daysInMonth;
+    final days = elapsedDaysInMonth;
     return days > 0 ? totalExpenseMinor ~/ days : 0;
   }
 
