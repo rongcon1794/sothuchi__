@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:so_thu_chi/core/errors/result.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
+import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/data/firebase/firebase_providers.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/accounts/data/repositories/firestore_account_repository.dart';
@@ -17,6 +18,7 @@ import 'package:so_thu_chi/features/categories/data/repositories/firestore_categ
 import 'package:so_thu_chi/features/categories/domain/entities/category.dart';
 import 'package:so_thu_chi/features/categories/presentation/screens/category_detail_screen.dart';
 import 'package:so_thu_chi/features/categories/presentation/screens/categories_screen.dart';
+import 'package:so_thu_chi/features/categories/presentation/widgets/category_form_sheet.dart';
 import 'package:so_thu_chi/features/transactions/data/repositories/firestore_transaction_repository.dart';
 import 'package:so_thu_chi/features/transactions/presentation/widgets/dashboard_mini_cards.dart';
 import 'package:so_thu_chi/features/transactions/presentation/widgets/dashboard_quick_action_bar.dart';
@@ -467,6 +469,134 @@ void main() {
 
       // Save button exists
       expect(find.text('Lưu'), findsOneWidget);
+    });
+
+    testWidgets('CategoriesScreen renders hero overview, filters by search, and switches tabs', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(800, 1400));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      SharedPreferences.setMockInitialValues({'onboarding_completed': true});
+      final prefs = await SharedPreferences.getInstance();
+      final firestore = FakeFirebaseFirestore();
+      final accRepo = FirestoreAccountRepository(firestore: firestore, uid: 'u1');
+      final catRepo = FirestoreCategoryRepository(firestore: firestore, uid: 'u1');
+      await catRepo.seedDefaultCategoriesIfNeeded();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            accountRepositoryProvider.overrideWithValue(accRepo),
+            categoryRepositoryProvider.overrideWithValue(catRepo),
+          ],
+          child: MaterialApp(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: AppTheme.light(),
+            home: const CategoriesScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Check Hero Overview
+      expect(find.text('TỔNG QUAN PHÂN LOẠI'), findsOneWidget);
+      expect(find.text('13 danh mục khả dụng'), findsOneWidget);
+      expect(find.text('9 Khoản chi'), findsOneWidget);
+      expect(find.text('4 Khoản thu'), findsOneWidget);
+
+      // Default tab is Expense, check "Ăn uống" is visible
+      expect(find.text('Ăn uống'), findsOneWidget);
+
+      // Search for "Di chuyển"
+      final searchField = find.byType(TextField);
+      expect(searchField, findsOneWidget);
+      await tester.enterText(searchField, 'Di chuyển');
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(ApplePressable, 'Di chuyển'), findsOneWidget);
+      expect(find.text('Ăn uống'), findsNothing);
+
+      // Clear search
+      await tester.enterText(searchField, '');
+      await tester.pumpAndSettle();
+      expect(find.text('Ăn uống'), findsOneWidget);
+
+      // Switch to Income tab
+      await tester.tap(find.text('Thu nhập'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Lương'), findsOneWidget);
+      expect(find.text('Thưởng'), findsOneWidget);
+      expect(find.text('Ăn uống'), findsNothing);
+    });
+
+    testWidgets('CategoryFormSheet renders live preview, suggestions templates, and saves new category', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(800, 1400));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      SharedPreferences.setMockInitialValues({'onboarding_completed': true});
+      final prefs = await SharedPreferences.getInstance();
+      final firestore = FakeFirebaseFirestore();
+      final accRepo = FirestoreAccountRepository(firestore: firestore, uid: 'u1');
+      final catRepo = FirestoreCategoryRepository(firestore: firestore, uid: 'u1');
+
+      Category? createdCategory;
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            accountRepositoryProvider.overrideWithValue(accRepo),
+            categoryRepositoryProvider.overrideWithValue(catRepo),
+          ],
+          child: MaterialApp(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: AppTheme.light(),
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => ElevatedButton(
+                  onPressed: () async {
+                    createdCategory = await CategoryFormSheet.show(
+                      context,
+                      initialType: CategoryType.expense,
+                    );
+                  },
+                  child: const Text('Open Category Sheet'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Open Category Sheet'));
+      await tester.pumpAndSettle();
+
+      // Check header and live preview
+      expect(find.text('Thêm danh mục'), findsOneWidget);
+      expect(find.text('XEM TRƯỚC HIỂN THỊ'), findsOneWidget);
+      expect(find.text('MẪU DANH MỤC GỢI Ý'), findsOneWidget);
+
+      // Tap on "Cà phê & Đồ uống" template chip
+      expect(find.text('Cà phê & Đồ uống'), findsOneWidget);
+      await tester.tap(find.text('Cà phê & Đồ uống'));
+      await tester.pumpAndSettle();
+
+      // Live preview should now display "Cà phê & Đồ uống"
+      expect(find.text('Cà phê & Đồ uống'), findsAtLeastNWidgets(1));
+
+      // Tap Save button
+      await tester.tap(find.text('Lưu'));
+      await tester.pumpAndSettle();
+
+      expect(createdCategory, isNotNull);
+      expect(createdCategory?.name, 'Cà phê & Đồ uống');
+      expect(createdCategory?.type, CategoryType.expense);
     });
   });
 }

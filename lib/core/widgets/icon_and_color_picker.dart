@@ -70,7 +70,7 @@ class IconAndColorPicker extends StatelessWidget {
                   child: Center(
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 220),
-                      curve: Curves.easeOutBack,
+                      curve: Curves.easeOutCubic,
                       width: isSelected ? 38 : 32,
                       height: isSelected ? 38 : 32,
                       decoration: BoxDecoration(
@@ -125,7 +125,7 @@ class IconAndColorPicker extends StatelessWidget {
                 onTap: () => onIconChanged(key),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 220),
-                  curve: Curves.easeOutBack,
+                  curve: Curves.easeOutCubic,
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
