@@ -312,125 +312,6 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     }
   }
 
-  Widget _buildQuickWalletSelector({
-    required List<Account> wallets,
-    required String? selectedWalletId,
-    required String locale,
-    required ValueChanged<String> onSelect,
-  }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isOled = context.isOled;
-
-    return SizedBox(
-      height: 38,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        itemCount: wallets.length + 1,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
-          if (index == wallets.length) {
-            // Quick Add Wallet Chip
-            return ApplePressable(
-              scaleDown: 0.94,
-              onTap: () {
-                unawaited(HapticFeedback.lightImpact());
-                _createNewWallet();
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: isOled
-                      ? AppleTokens.bgOledSecondary
-                      : (isDark
-                          ? AppleTokens.bgDarkSecondary
-                          : AppleTokens.bgLightCard),
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                  border: Border.all(
-                    color: AppleTokens.systemBlue.withValues(alpha: 0.45),
-                    width: AppleTokens.hairline,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(CupertinoIcons.plus, size: 13, color: AppleTokens.systemBlue),
-                    const SizedBox(width: 4),
-                    Text(
-                      locale.startsWith('vi') ? 'Thêm ví' : context.l10n.addWallet,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppleTokens.systemBlue,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-
-          final w = wallets[index];
-          final isSelected = w.id == selectedWalletId;
-          final color = AppIconCatalog.contrastSafeColor(
-            Color(w.color),
-            Theme.of(context).brightness,
-          );
-          return ApplePressable(
-            scaleDown: 0.94,
-            onTap: () {
-              unawaited(HapticFeedback.selectionClick());
-              onSelect(w.id);
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? color.withValues(alpha: 0.18)
-                    : (isOled
-                        ? AppleTokens.bgOledSecondary
-                        : (isDark
-                            ? AppleTokens.bgDarkSecondary
-                            : AppleTokens.bgLightCard)),
-                borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                border: Border.all(
-                  color: isSelected ? color : AppleTokens.borderLight.withValues(alpha: 0.4),
-                  width: isSelected ? 1.5 : AppleTokens.hairline,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(AppIconCatalog.resolve(w.icon), size: 14, color: color),
-                  const SizedBox(width: 6),
-                  Text(
-                    w.name,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                      color: isSelected ? color : null,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    w.balanceMoney.format(locale: locale),
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      fontFeatures: AppTheme.tabularFigures,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   Future<void> _openCreateCategorySheet(BuildContext context) async {
     final catType = _type == TransactionType.income
         ? CategoryType.income
@@ -1023,16 +904,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                     ],
                   ],
 
-                  // 3. Wallet Selection Section & Quick Wallet Chips
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: _buildQuickWalletSelector(
-                      wallets: walletsForDropdown,
-                      selectedWalletId: _accountId,
-                      locale: locale,
-                      onSelect: (id) => setState(() => _accountId = id),
-                    ),
-                  ),
+                  // 3. Wallet Selection Section
                   AppleListGroup(
                     header: l10n.walletsTitle,
                     margin: const EdgeInsets.only(bottom: 20),

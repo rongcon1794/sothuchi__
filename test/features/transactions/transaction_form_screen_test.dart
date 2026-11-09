@@ -288,28 +288,43 @@ void main() {
       expect(find.byIcon(CupertinoIcons.xmark_circle_fill), findsNothing);
     });
 
-    testWidgets('quick-selects wallet via chips', (tester) async {
+    testWidgets('selects wallet via wallet picker sheet', (tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pumpAndSettle();
 
-      // Quick wallet chip selects Techcombank directly
-      final techcombankChip = find.text('Techcombank');
-      expect(techcombankChip, findsOneWidget);
-      await tester.tap(techcombankChip);
+      // Tap on wallet tile ('Ví & Tài khoản')
+      await tester.tap(find.text('Ví & Tài khoản'));
+      await tester.pumpAndSettle();
+
+      // Tap Techcombank in picker sheet
+      await tester.tap(
+        find.descendant(
+          of: find.byType(TransactionWalletPickerSheet),
+          matching: find.text('Techcombank'),
+        ),
+      );
       await tester.pumpAndSettle();
 
       // Verify Techcombank is selected
       expect(find.textContaining('Techcombank'), findsWidgets);
     });
 
-    testWidgets('shows Thêm ví chip and tapping it opens WalletFormSheet', (tester) async {
+    testWidgets('opens WalletFormSheet to add new wallet from wallet picker sheet', (tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pumpAndSettle();
 
-      final addWalletChip = find.text('Thêm ví');
-      expect(addWalletChip, findsOneWidget);
+      // Tap on wallet tile ('Ví & Tài khoản')
+      await tester.tap(find.text('Ví & Tài khoản'));
+      await tester.pumpAndSettle();
 
-      await tester.tap(addWalletChip);
+      // Tap 'Thêm ví' in picker sheet
+      final addWalletBtn = find.descendant(
+        of: find.byType(TransactionWalletPickerSheet),
+        matching: find.text('Thêm ví'),
+      );
+      expect(addWalletBtn, findsOneWidget);
+
+      await tester.tap(addWalletBtn);
       await tester.pumpAndSettle();
 
       // WalletFormSheet is opened
