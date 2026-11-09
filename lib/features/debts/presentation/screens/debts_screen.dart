@@ -442,8 +442,10 @@ class _DebtCard extends ConsumerWidget {
               ),
 
               // Options Popover Menu
-              PopupMenuButton<String>(
-                icon: const Icon(CupertinoIcons.ellipsis_circle, size: 20),
+              ApplePopupMenuButton<String>(
+                icon: CupertinoIcons.ellipsis_circle,
+                iconSize: 18,
+                tooltip: l10n.moreOptions,
                 onSelected: (val) {
                   if (val == 'edit') {
                     DebtFormSheet.show(context, initialDebt: debt);
@@ -452,25 +454,16 @@ class _DebtCard extends ConsumerWidget {
                   }
                 },
                 itemBuilder: (_) => [
-                  PopupMenuItem(
+                  ApplePopupMenuItem(
                     value: 'edit',
-                    child: Row(
-                      children: [
-                        const Icon(CupertinoIcons.pencil, size: 16),
-                        const SizedBox(width: 8),
-                        Text(l10n.debtEdit),
-                      ],
-                    ),
+                    icon: CupertinoIcons.pencil,
+                    title: l10n.debtEdit,
                   ),
-                  PopupMenuItem(
+                  ApplePopupMenuItem(
                     value: 'delete',
-                    child: Row(
-                      children: [
-                        const Icon(CupertinoIcons.trash, size: 16, color: AppleTokens.systemRed),
-                        const SizedBox(width: 8),
-                        Text(l10n.debtDelete, style: const TextStyle(color: AppleTokens.systemRed)),
-                      ],
-                    ),
+                    icon: CupertinoIcons.trash,
+                    title: l10n.debtDelete,
+                    isDestructive: true,
                   ),
                 ],
               ),

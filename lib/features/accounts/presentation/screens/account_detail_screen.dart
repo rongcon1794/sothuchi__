@@ -190,7 +190,7 @@ class AccountDetailScreen extends ConsumerWidget {
                 icon: const Icon(CupertinoIcons.pencil, size: 20),
                 onPressed: () => WalletFormSheet.show(context, existing: account),
               ),
-              PopupMenuButton<String>(
+              ApplePopupMenuButton<String>(
                 tooltip: l10n.moreOptions,
                 onSelected: (val) {
                   if (val == 'edit') {
@@ -202,38 +202,23 @@ class AccountDetailScreen extends ConsumerWidget {
                   }
                 },
                 itemBuilder: (_) => [
-                  PopupMenuItem(
+                  ApplePopupMenuItem(
                     value: 'edit',
-                    child: Row(
-                      children: [
-                        const Icon(CupertinoIcons.pencil, size: 18),
-                        const SizedBox(width: 8),
-                        Text(l10n.edit),
-                      ],
-                    ),
+                    icon: CupertinoIcons.pencil,
+                    title: l10n.edit,
                   ),
-                  PopupMenuItem(
+                  ApplePopupMenuItem(
                     value: 'archive',
-                    child: Row(
-                      children: [
-                        Icon(
-                          account.archived ? CupertinoIcons.arrow_counterclockwise : CupertinoIcons.archivebox,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(account.archived ? l10n.unarchiveWallet : l10n.archiveWallet),
-                      ],
-                    ),
+                    icon: account.archived
+                        ? CupertinoIcons.arrow_counterclockwise
+                        : CupertinoIcons.archivebox,
+                    title: account.archived ? l10n.unarchiveWallet : l10n.archiveWallet,
                   ),
-                  PopupMenuItem(
+                  ApplePopupMenuItem(
                     value: 'delete',
-                    child: Row(
-                      children: [
-                        const Icon(CupertinoIcons.trash, color: AppleTokens.systemRed, size: 18),
-                        const SizedBox(width: 8),
-                        Text(l10n.delete, style: const TextStyle(color: AppleTokens.systemRed)),
-                      ],
-                    ),
+                    icon: CupertinoIcons.trash,
+                    title: l10n.delete,
+                    isDestructive: true,
                   ),
                 ],
               ),

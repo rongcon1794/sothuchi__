@@ -172,5 +172,58 @@ void main() {
       expect(theme.scaffoldBackgroundColor, equals(AppleTokens.bgOledPrimary));
       expect(theme.scaffoldBackgroundColor, equals(const Color(0xFF000000)));
     });
+
+    testWidgets('ApplePopupMenuButton renders 3-dots trigger, opens menu, and handles selection', (tester) async {
+      String? selectedVal;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light(),
+          home: Scaffold(
+            body: Center(
+              child: ApplePopupMenuButton<String>(
+                tooltip: 'Tùy chọn',
+                onSelected: (val) => selectedVal = val,
+                itemBuilder: (ctx) => [
+                  ApplePopupMenuItem(
+                    value: 'edit',
+                    icon: CupertinoIcons.pencil,
+                    title: 'Chỉnh sửa',
+                  ),
+                  ApplePopupMenuItem(
+                    value: 'delete',
+                    icon: CupertinoIcons.trash,
+                    title: 'Xóa mục',
+                    isDestructive: true,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Find 3-dots trigger
+      final trigger = find.byType(ApplePopupMenuButton<String>);
+      expect(trigger, findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.ellipsis), findsOneWidget);
+
+      // Tap trigger to open menu
+      await tester.tap(trigger);
+      await tester.pumpAndSettle();
+
+      // Menu items displayed
+      expect(find.text('Chỉnh sửa'), findsOneWidget);
+      expect(find.text('Xóa mục'), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.pencil), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.trash), findsOneWidget);
+
+      // Tap item 'edit'
+      await tester.tap(find.text('Chỉnh sửa'));
+      await tester.pumpAndSettle();
+
+      expect(selectedVal, 'edit');
+    });
   });
 }

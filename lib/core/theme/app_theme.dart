@@ -342,6 +342,31 @@ abstract final class AppTheme {
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
+      popupMenuTheme: PopupMenuThemeData(
+        elevation: 10,
+        shadowColor: Colors.black.withValues(alpha: isDark ? 0.6 : 0.18),
+        surfaceTintColor: Colors.transparent,
+        color: isDark
+            ? (oledMode ? AppleTokens.bgOledCard : AppleTokens.bgDarkCard)
+            : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+          side: BorderSide(
+            color: isDark
+                ? (oledMode
+                    ? AppleTokens.bgOledBorder
+                    : AppleTokens.separatorDark)
+                : AppleTokens.separatorLight,
+            width: AppleTokens.hairline,
+          ),
+        ),
+        textStyle: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: isDark ? Colors.white : Colors.black87,
+        ),
+        position: PopupMenuPosition.under,
+      ),
       dividerTheme: DividerThemeData(
         space: 1,
         thickness: 1,

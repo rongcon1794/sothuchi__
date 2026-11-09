@@ -181,7 +181,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                                   ),
                                 )
                               : null,
-                          trailing: PopupMenuButton<String>(
+                          trailing: ApplePopupMenuButton<String>(
                             tooltip: l10n.moreOptions,
                             onSelected: (value) {
                               if (value == 'edit') {
@@ -191,11 +191,17 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                               }
                             },
                             itemBuilder: (ctx) => [
-                              PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
+                              ApplePopupMenuItem(
+                                value: 'edit',
+                                icon: Icons.edit_outlined,
+                                title: l10n.edit,
+                              ),
                               if (!cat.isDefault)
-                                PopupMenuItem(
+                                ApplePopupMenuItem(
                                   value: 'delete',
-                                  child: Text(l10n.delete),
+                                  icon: Icons.delete_outline_rounded,
+                                  title: l10n.delete,
+                                  isDestructive: true,
                                 ),
                             ],
                           ),

@@ -442,10 +442,8 @@ class _RecurringTransactionsScreenState
                                       : AppleTokens.rubyExpense,
                                 ),
                               ),
-                              PopupMenuButton<String>(
+                              ApplePopupMenuButton<String>(
                                 tooltip: l10n.moreOptions,
-                                padding: EdgeInsets.zero,
-                                icon: const Icon(CupertinoIcons.ellipsis, size: 16, color: AppleTokens.systemGray),
                                 onSelected: (action) {
                                   if (action == 'edit') {
                                     RecurringFormSheet.show(context, existing: item);
@@ -456,9 +454,22 @@ class _RecurringTransactionsScreenState
                                   }
                                 },
                                 itemBuilder: (ctx) => [
-                                  PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
-                                  PopupMenuItem(value: 'pause', child: Text(l10n.recurringPause)),
-                                  PopupMenuItem(value: 'delete', child: Text(l10n.recurringDelete, style: const TextStyle(color: AppleTokens.systemRed))),
+                                  ApplePopupMenuItem(
+                                    value: 'edit',
+                                    icon: CupertinoIcons.pencil,
+                                    title: l10n.edit,
+                                  ),
+                                  ApplePopupMenuItem(
+                                    value: 'pause',
+                                    icon: CupertinoIcons.pause_fill,
+                                    title: l10n.recurringPause,
+                                  ),
+                                  ApplePopupMenuItem(
+                                    value: 'delete',
+                                    icon: CupertinoIcons.trash,
+                                    title: l10n.recurringDelete,
+                                    isDestructive: true,
+                                  ),
                                 ],
                               ),
                             ],

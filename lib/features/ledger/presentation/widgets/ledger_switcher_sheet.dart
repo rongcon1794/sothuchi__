@@ -333,11 +333,10 @@ class _LedgerItemCard extends StatelessWidget {
             else
               const Icon(CupertinoIcons.circle, color: AppleTokens.systemGray, size: 22),
             const SizedBox(width: 4),
-            PopupMenuButton<String>(
-              icon: const Icon(CupertinoIcons.ellipsis_vertical, color: AppleTokens.systemGray, size: 18),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              tooltip: l10n.edit,
+            ApplePopupMenuButton<String>(
+              icon: CupertinoIcons.ellipsis_vertical,
+              iconSize: 18,
+              tooltip: l10n.moreOptions,
               onSelected: (val) {
                 if (val == 'edit') {
                   onEdit();
@@ -346,26 +345,17 @@ class _LedgerItemCard extends StatelessWidget {
                 }
               },
               itemBuilder: (ctx) => [
-                PopupMenuItem(
+                ApplePopupMenuItem(
                   value: 'edit',
-                  child: Row(
-                    children: [
-                      const Icon(CupertinoIcons.pencil, size: 18),
-                      const SizedBox(width: 8),
-                      Text(l10n.edit),
-                    ],
-                  ),
+                  icon: CupertinoIcons.pencil,
+                  title: l10n.edit,
                 ),
                 if (onDelete != null)
-                  PopupMenuItem(
+                  ApplePopupMenuItem(
                     value: 'delete',
-                    child: Row(
-                      children: [
-                        const Icon(CupertinoIcons.trash, color: AppleTokens.rubyExpense, size: 18),
-                        const SizedBox(width: 8),
-                        Text(l10n.ledgerDelete, style: const TextStyle(color: AppleTokens.rubyExpense)),
-                      ],
-                    ),
+                    icon: CupertinoIcons.trash,
+                    title: l10n.ledgerDelete,
+                    isDestructive: true,
                   ),
               ],
             ),

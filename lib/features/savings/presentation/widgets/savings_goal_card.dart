@@ -157,8 +157,8 @@ class SavingsGoalCard extends ConsumerWidget {
                     ],
                   ),
                 ),
-              PopupMenuButton<String>(
-                icon: const Icon(CupertinoIcons.ellipsis, size: 18, color: AppleTokens.systemGray),
+              ApplePopupMenuButton<String>(
+                tooltip: l10n.moreOptions,
                 onSelected: (val) {
                   if (val == 'deposit') {
                     SavingsDepositSheet.show(context, goal: goal, isWithdraw: false);
@@ -171,45 +171,26 @@ class SavingsGoalCard extends ConsumerWidget {
                   }
                 },
                 itemBuilder: (ctx) => [
-                  PopupMenuItem(
+                  ApplePopupMenuItem(
                     value: 'deposit',
-                    child: Row(
-                      children: [
-                        const Icon(CupertinoIcons.plus_circle, size: 18),
-                        const SizedBox(width: 8),
-                        Text(l10n.savingsDeposit),
-                      ],
-                    ),
+                    icon: CupertinoIcons.plus_circle,
+                    title: l10n.savingsDeposit,
                   ),
-                  PopupMenuItem(
+                  ApplePopupMenuItem(
                     value: 'withdraw',
-                    child: Row(
-                      children: [
-                        const Icon(CupertinoIcons.minus_circle, size: 18),
-                        const SizedBox(width: 8),
-                        Text(l10n.savingsWithdraw),
-                      ],
-                    ),
+                    icon: CupertinoIcons.minus_circle,
+                    title: l10n.savingsWithdraw,
                   ),
-                  PopupMenuItem(
+                  ApplePopupMenuItem(
                     value: 'edit',
-                    child: Row(
-                      children: [
-                        const Icon(CupertinoIcons.pencil, size: 18),
-                        const SizedBox(width: 8),
-                        Text(l10n.edit),
-                      ],
-                    ),
+                    icon: CupertinoIcons.pencil,
+                    title: l10n.edit,
                   ),
-                  PopupMenuItem(
+                  ApplePopupMenuItem(
                     value: 'delete',
-                    child: Row(
-                      children: [
-                        const Icon(CupertinoIcons.trash, color: AppleTokens.rubyExpense, size: 18),
-                        const SizedBox(width: 8),
-                        Text(l10n.savingsDeleteGoal, style: const TextStyle(color: AppleTokens.rubyExpense)),
-                      ],
-                    ),
+                    icon: CupertinoIcons.trash,
+                    title: l10n.savingsDeleteGoal,
+                    isDestructive: true,
                   ),
                 ],
               ),

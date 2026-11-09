@@ -190,37 +190,23 @@ class BudgetCategoryCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                PopupMenuButton<String>(
+                ApplePopupMenuButton<String>(
                   tooltip: l10n.moreOptions,
-                  icon: Icon(
-                    Icons.more_vert_rounded,
-                    color: scheme.onSurfaceVariant,
-                    size: 20,
-                  ),
                   onSelected: (value) {
                     if (value == 'edit') onEdit();
                     if (value == 'delete') onDelete();
                   },
                   itemBuilder: (context) => [
-                    PopupMenuItem(
+                    ApplePopupMenuItem(
                       value: 'edit',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.edit_outlined, size: 18),
-                          const SizedBox(width: 8),
-                          Text(l10n.edit),
-                        ],
-                      ),
+                      icon: CupertinoIcons.pencil,
+                      title: l10n.edit,
                     ),
-                    PopupMenuItem(
+                    ApplePopupMenuItem(
                       value: 'delete',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.delete_outline_rounded, size: 18, color: AppleTokens.systemRed),
-                          const SizedBox(width: 8),
-                          Text(l10n.delete, style: const TextStyle(color: AppleTokens.systemRed)),
-                        ],
-                      ),
+                      icon: CupertinoIcons.trash,
+                      title: l10n.delete,
+                      isDestructive: true,
                     ),
                   ],
                 ),

@@ -746,12 +746,8 @@ class _LedgersManagementScreenState
                         LedgerFormSheet.show(context, existing: item);
                       },
                     ),
-                    PopupMenuButton<String>(
-                      icon: const Icon(
-                        CupertinoIcons.ellipsis,
-                        color: AppleTokens.systemGray,
-                        size: 18,
-                      ),
+                    ApplePopupMenuButton<String>(
+                      tooltip: l10n.moreOptions,
                       onSelected: (val) {
                         if (val == 'select') {
                           _switchLedger(context, item);
@@ -763,45 +759,23 @@ class _LedgersManagementScreenState
                       },
                       itemBuilder: (ctx) => [
                         if (!isActive)
-                          PopupMenuItem(
+                          ApplePopupMenuItem(
                             value: 'select',
-                            child: Row(
-                              children: [
-                                const Icon(CupertinoIcons.check_mark, size: 18),
-                                const SizedBox(width: 8),
-                                Text(l10n.ledgerSelectActive),
-                              ],
-                            ),
+                            icon: CupertinoIcons.check_mark,
+                            title: l10n.ledgerSelectActive,
                           ),
-                        PopupMenuItem(
+                        ApplePopupMenuItem(
                           value: 'edit',
-                          child: Row(
-                            children: [
-                              const Icon(CupertinoIcons.pencil, size: 18),
-                              const SizedBox(width: 8),
-                              Text(l10n.edit),
-                            ],
-                          ),
+                          icon: CupertinoIcons.pencil,
+                          title: l10n.edit,
                         ),
                         if (!item.isDefault &&
                             item.id != LedgerBook.defaultPersonalId)
-                          PopupMenuItem(
+                          ApplePopupMenuItem(
                             value: 'delete',
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  CupertinoIcons.trash,
-                                  color: AppleTokens.rubyExpense,
-                                  size: 18,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  l10n.ledgerDelete,
-                                  style: const TextStyle(
-                                      color: AppleTokens.rubyExpense),
-                                ),
-                              ],
-                            ),
+                            icon: CupertinoIcons.trash,
+                            title: l10n.ledgerDelete,
+                            isDestructive: true,
                           ),
                       ],
                     ),

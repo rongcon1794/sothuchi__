@@ -489,21 +489,26 @@ class _WalletTile extends StatelessWidget {
                 const SizedBox(width: 8),
                 Flexible(flex: 0, child: balanceWidget),
               ],
-              PopupMenuButton<String>(
+              ApplePopupMenuButton<String>(
                 tooltip: l10n.moreOptions,
                 onSelected: (value) {
                   if (value == 'edit') onEdit();
                   if (value == 'archive') onToggleArchive();
                 },
                 itemBuilder: (ctx) => [
-                  PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
-                  PopupMenuItem(
+                  ApplePopupMenuItem(
+                    value: 'edit',
+                    icon: CupertinoIcons.pencil,
+                    title: l10n.edit,
+                  ),
+                  ApplePopupMenuItem(
                     value: 'archive',
-                    child: Text(
-                      account.archived
-                          ? l10n.unarchiveWallet
-                          : l10n.archiveWallet,
-                    ),
+                    icon: account.archived
+                        ? CupertinoIcons.arrow_counterclockwise
+                        : CupertinoIcons.archivebox,
+                    title: account.archived
+                        ? l10n.unarchiveWallet
+                        : l10n.archiveWallet,
                   ),
                 ],
               ),
