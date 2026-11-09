@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -174,6 +175,29 @@ class _RouterRefreshNotifier extends ChangeNotifier {
   }
 }
 
+/// Creates a platform-adaptive route transition:
+/// - iOS & macOS: [CupertinoPage] enabling native edge swipe-to-back gesture detector & parallax.
+/// - Android & other platforms: [MaterialPage] supporting predictive back and standard transitions.
+Page<dynamic> adaptivePage({
+  required BuildContext context,
+  required GoRouterState state,
+  required Widget child,
+}) {
+  final platform = Theme.of(context).platform;
+  if (platform == TargetPlatform.iOS || platform == TargetPlatform.macOS) {
+    return CupertinoPage<void>(
+      key: state.pageKey,
+      name: state.name,
+      child: child,
+    );
+  }
+  return MaterialPage<void>(
+    key: state.pageKey,
+    name: state.name,
+    child: child,
+  );
+}
+
 final goRouterProvider = Provider<GoRouter>((ref) {
   final refreshNotifier = _RouterRefreshNotifier(ref);
   ref.onDispose(refreshNotifier.dispose);
@@ -290,11 +314,19 @@ final goRouterProvider = Provider<GoRouter>((ref) {
                 routes: [
                   GoRoute(
                     path: 'privacy',
-                    builder: (context, _) => screens.privacyBuilder(context),
+                    pageBuilder: (context, state) => adaptivePage(
+                      context: context,
+                      state: state,
+                      child: screens.privacyBuilder(context),
+                    ),
                   ),
                   GoRoute(
                     path: 'about',
-                    builder: (context, _) => screens.aboutBuilder(context),
+                    pageBuilder: (context, state) => adaptivePage(
+                      context: context,
+                      state: state,
+                      child: screens.aboutBuilder(context),
+                    ),
                   ),
                 ],
               ),
@@ -304,63 +336,123 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: AppRoutes.transactionNew,
-        builder: screens.transactionFormBuilder,
+        pageBuilder: (context, state) => adaptivePage(
+          context: context,
+          state: state,
+          child: screens.transactionFormBuilder(context, state),
+        ),
       ),
       GoRoute(
         path: '/transactions/:id',
-        builder: screens.transactionDetailBuilder,
+        pageBuilder: (context, state) => adaptivePage(
+          context: context,
+          state: state,
+          child: screens.transactionDetailBuilder(context, state),
+        ),
       ),
       GoRoute(
         path: '/transactions/:id/edit',
-        builder: screens.transactionFormBuilder,
+        pageBuilder: (context, state) => adaptivePage(
+          context: context,
+          state: state,
+          child: screens.transactionFormBuilder(context, state),
+        ),
       ),
       GoRoute(
         path: AppRoutes.accounts,
-        builder: (context, _) => screens.accountsBuilder(context),
+        pageBuilder: (context, state) => adaptivePage(
+          context: context,
+          state: state,
+          child: screens.accountsBuilder(context),
+        ),
       ),
       GoRoute(
         path: '/accounts/:id',
-        builder: screens.accountDetailBuilder,
+        pageBuilder: (context, state) => adaptivePage(
+          context: context,
+          state: state,
+          child: screens.accountDetailBuilder(context, state),
+        ),
       ),
       GoRoute(
         path: AppRoutes.categories,
-        builder: (context, _) => screens.categoriesBuilder(context),
+        pageBuilder: (context, state) => adaptivePage(
+          context: context,
+          state: state,
+          child: screens.categoriesBuilder(context),
+        ),
       ),
       GoRoute(
         path: '/categories/:id',
-        builder: screens.categoryDetailBuilder,
+        pageBuilder: (context, state) => adaptivePage(
+          context: context,
+          state: state,
+          child: screens.categoryDetailBuilder(context, state),
+        ),
       ),
       GoRoute(
         path: '/budgets/:id',
-        builder: screens.budgetDetailBuilder,
+        pageBuilder: (context, state) => adaptivePage(
+          context: context,
+          state: state,
+          child: screens.budgetDetailBuilder(context, state),
+        ),
       ),
       GoRoute(
         path: AppRoutes.debts,
-        builder: (context, _) => screens.debtsBuilder(context),
+        pageBuilder: (context, state) => adaptivePage(
+          context: context,
+          state: state,
+          child: screens.debtsBuilder(context),
+        ),
       ),
       GoRoute(
         path: '/debts/:id',
-        builder: screens.debtDetailBuilder,
+        pageBuilder: (context, state) => adaptivePage(
+          context: context,
+          state: state,
+          child: screens.debtDetailBuilder(context, state),
+        ),
       ),
       GoRoute(
         path: AppRoutes.recurring,
-        builder: (context, _) => screens.recurringBuilder(context),
+        pageBuilder: (context, state) => adaptivePage(
+          context: context,
+          state: state,
+          child: screens.recurringBuilder(context),
+        ),
       ),
       GoRoute(
         path: '/recurring/:id',
-        builder: screens.recurringDetailBuilder,
+        pageBuilder: (context, state) => adaptivePage(
+          context: context,
+          state: state,
+          child: screens.recurringDetailBuilder(context, state),
+        ),
       ),
       GoRoute(
         path: AppRoutes.savings,
-        builder: (context, _) => screens.savingsBuilder(context),
+        pageBuilder: (context, state) => adaptivePage(
+          context: context,
+          state: state,
+          child: screens.savingsBuilder(context),
+        ),
       ),
       GoRoute(
         path: '/savings/:id',
-        builder: screens.savingsDetailBuilder,
+        pageBuilder: (context, state) => adaptivePage(
+          context: context,
+          state: state,
+          child: screens.savingsDetailBuilder(context, state),
+        ),
       ),
       GoRoute(
         path: AppRoutes.ledgers,
-        builder: (context, _) => screens.ledgersBuilder(context),
+        pageBuilder: (context, state) => adaptivePage(
+          context: context,
+          state: state,
+          child: screens.ledgersBuilder(context),
+        ),
       ),
     ],
   );
