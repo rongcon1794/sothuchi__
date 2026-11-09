@@ -728,11 +728,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
           const SizedBox(width: 8),
         ],
       ),
-      body: AppleEdgeSwipeToDismiss(
-        onDismiss: () => context.pop(),
-        child: SafeArea(
-          top: false,
-          bottom: false,
+      body: SafeArea(
+        top: false,
+        bottom: false,
           child: NotificationListener<UserScrollNotification>(
             onNotification: (notification) {
               if (notification.direction == ScrollDirection.reverse) {
@@ -970,7 +968,6 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             ),
           ),
         ),
-      ),
       floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
       floatingActionButton: AppleAdaptiveExpandableFab(
         heroTag: 'categories_add_fab',

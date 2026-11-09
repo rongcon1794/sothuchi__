@@ -38,7 +38,7 @@ class _AppleEdgeSwipeToDismissState extends State<AppleEdgeSwipeToDismiss> {
   bool _hasTriggered = false;
 
   void _triggerDismiss() {
-    if (_hasTriggered) return;
+    if (_hasTriggered || !mounted) return;
     _hasTriggered = true;
     _isLeftEdge = false;
     _isRightEdge = false;
@@ -47,7 +47,7 @@ class _AppleEdgeSwipeToDismissState extends State<AppleEdgeSwipeToDismiss> {
     unawaited(HapticFeedback.lightImpact());
     if (widget.onDismiss != null) {
       widget.onDismiss!();
-    } else if (mounted) {
+    } else if (mounted && Navigator.of(context).canPop()) {
       Navigator.of(context).maybePop();
     }
   }
