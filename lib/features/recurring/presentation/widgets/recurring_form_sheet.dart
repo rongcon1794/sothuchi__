@@ -532,25 +532,13 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
             ),
             const SizedBox(height: 16),
 
-            // 2. Sliding Segmented Type Pill (Chi tiêu vs Thu nhập) - Synchronized with App Standard
-            TransactionTypeSegmentedPill(
-              selected: _type,
-              allowedTypes: const [
-                TransactionType.expense,
-                TransactionType.income,
-              ],
-              onChanged: (newType) {
-                if (_type != newType) {
-                  setState(() {
-                    _type = newType;
-                    final targetCats =
-                        newType == TransactionType.income ? incomeCats : expenseCats;
-                    if (targetCats.isNotEmpty) {
-                      _categoryId = targetCats.first.id;
-                    }
-                  });
-                }
-              },
+            // 2. High-Clarity Type Selector Tab Cards (Chi tiêu vs Thu nhập)
+            _buildTypeTabSelector(
+              context: context,
+              isDark: isDark,
+              l10n: l10n,
+              expenseCats: expenseCats,
+              incomeCats: incomeCats,
             ),
             const SizedBox(height: 16),
 
@@ -732,6 +720,223 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
           ),
           ?trailing,
         ],
+      ),
+    );
+  }
+
+  Widget _buildTypeTabSelector({
+    required BuildContext context,
+    required bool isDark,
+    required AppLocalizations l10n,
+    required List<Category> expenseCats,
+    required List<Category> incomeCats,
+  }) {
+    final isExpense = _type == TransactionType.expense;
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.04)
+            : Colors.black.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+        border: Border.all(
+          color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
+          width: AppleTokens.hairline,
+        ),
+      ),
+      padding: const EdgeInsets.all(4),
+      child: Row(
+        children: [
+          // 1. Khoản chi (Expense) Tab Card
+          Expanded(
+            child: _buildTypeCard(
+              type: TransactionType.expense,
+              label: l10n.expense,
+              subtitle: 'Hóa đơn & dịch vụ',
+              icon: CupertinoIcons.arrow_up_right,
+              accentColor: AppleTokens.rubyExpense,
+              isSelected: isExpense,
+              isDark: isDark,
+              onTap: () {
+                if (_type != TransactionType.expense) {
+                  unawaited(HapticFeedback.selectionClick());
+                  setState(() {
+                    _type = TransactionType.expense;
+                    if (expenseCats.isNotEmpty) {
+                      _categoryId = expenseCats.first.id;
+                    }
+                  });
+                }
+              },
+            ),
+          ),
+          const SizedBox(width: 6),
+
+          // 2. Thu nhập (Income) Tab Card
+          Expanded(
+            child: _buildTypeCard(
+              type: TransactionType.income,
+              label: l10n.income,
+              subtitle: 'Lương & thu nhập',
+              icon: CupertinoIcons.arrow_down_left,
+              accentColor: AppleTokens.jadePrimary,
+              isSelected: !isExpense,
+              isDark: isDark,
+              onTap: () {
+                if (_type != TransactionType.income) {
+                  unawaited(HapticFeedback.selectionClick());
+                  setState(() {
+                    _type = TransactionType.income;
+                    if (incomeCats.isNotEmpty) {
+                      _categoryId = incomeCats.first.id;
+                    }
+                  });
+                }
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTypeCard({
+    required TransactionType type,
+    required String label,
+    required String subtitle,
+    required IconData icon,
+    required Color accentColor,
+    required bool isSelected,
+    required bool isDark,
+    required VoidCallback onTap,
+  }) {
+    return ApplePressable(
+      onTap: onTap,
+      scaleDown: 0.97,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 240),
+        curve: Curves.easeOutCubic,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? (isDark
+                  ? accentColor.withValues(alpha: 0.18)
+                  : Colors.white)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+          border: Border.all(
+            color: isSelected
+                ? (isDark
+                    ? accentColor.withValues(alpha: 0.55)
+                    : accentColor.withValues(alpha: 0.35))
+                : Colors.transparent,
+            width: isSelected ? 1.5 : 0,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: isDark
+                        ? accentColor.withValues(alpha: 0.25)
+                        : Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                  if (!isDark)
+                    BoxShadow(
+                      color: accentColor.withValues(alpha: 0.12),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                ]
+              : null,
+        ),
+        child: Row(
+          children: [
+            // Squircle Icon Badge
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 240),
+              curve: Curves.easeOutCubic,
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? accentColor
+                    : (isDark
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : Colors.black.withValues(alpha: 0.05)),
+                borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: accentColor.withValues(alpha: 0.35),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Icon(
+                icon,
+                size: 16,
+                color: isSelected
+                    ? Colors.white
+                    : (isDark ? Colors.white54 : Colors.black45),
+              ),
+            ),
+            const SizedBox(width: 8),
+
+            // Text Info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                            letterSpacing: -0.2,
+                            color: isSelected
+                                ? (isDark ? Colors.white : accentColor)
+                                : (isDark ? Colors.white70 : Colors.black87),
+                          ),
+                        ),
+                      ),
+                      if (isSelected) ...[
+                        const SizedBox(width: 4),
+                        Icon(
+                          CupertinoIcons.checkmark_circle_fill,
+                          size: 13,
+                          color: accentColor,
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w500,
+                      color: isSelected
+                          ? (isDark
+                              ? accentColor.withValues(alpha: 0.9)
+                              : accentColor.withValues(alpha: 0.85))
+                          : (isDark ? Colors.white38 : Colors.black38),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

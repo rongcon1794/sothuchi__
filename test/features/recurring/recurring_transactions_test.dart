@@ -318,5 +318,42 @@ void main() {
       final updatedRent = items.firstWhere((i) => i.id == 'rec_rent');
       expect(updatedRent.amount, 1000000);
     });
+
+    testWidgets('RecurringFormSheet tab selector switches between Chi tiêu and Thu nhập clearly', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pumpAndSettle();
+
+      // Open RecurringFormSheet via FAB
+      final fab = find.byType(AppleAdaptiveExpandableFab);
+      await tester.tap(fab);
+      await tester.pumpAndSettle();
+
+      // Verify Chi tiêu and Thu nhập tab labels & subtitles exist
+      expect(find.text('Chi tiêu'), findsOneWidget);
+      expect(find.text('Hóa đơn & dịch vụ'), findsOneWidget);
+      expect(find.text('Thu nhập'), findsOneWidget);
+      expect(find.text('Lương & thu nhập'), findsOneWidget);
+
+      // Initially on expense -> shows expense template carousel
+      expect(find.text('MẪU HÓA ĐƠN THÔNG DỤNG'), findsOneWidget);
+
+      // Tap 'Thu nhập' tab
+      await tester.tap(find.text('Thu nhập'));
+      await tester.pumpAndSettle();
+
+      // Now shows income template carousel
+      expect(find.text('MẪU THU NHẬP THÔNG DỤNG'), findsOneWidget);
+
+      // Tap 'Chi tiêu' tab to switch back
+      await tester.tap(find.text('Chi tiêu'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('MẪU HÓA ĐƠN THÔNG DỤNG'), findsOneWidget);
+    });
   });
 }
