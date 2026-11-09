@@ -47,6 +47,10 @@ class SavingsGoalDetailScreen extends ConsumerWidget {
         return CupertinoIcons.star_fill;
       case 'bag':
         return CupertinoIcons.bag;
+      case 'book':
+        return CupertinoIcons.book_fill;
+      case 'music':
+        return CupertinoIcons.music_note_2;
       case 'piggy_bank':
       default:
         return CupertinoIcons.cube_box;

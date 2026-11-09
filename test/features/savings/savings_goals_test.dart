@@ -11,6 +11,7 @@ import 'package:so_thu_chi/features/categories/data/repositories/firestore_categ
 import 'package:so_thu_chi/features/savings/data/repositories/firestore_savings_goal_repository.dart';
 import 'package:so_thu_chi/features/savings/domain/entities/savings_goal.dart';
 import 'package:so_thu_chi/features/savings/presentation/screens/savings_goals_screen.dart';
+import 'package:so_thu_chi/features/savings/presentation/widgets/savings_goal_form_sheet.dart';
 import 'package:so_thu_chi/features/transactions/data/repositories/firestore_transaction_repository.dart';
 import 'package:so_thu_chi/l10n/app_localizations.dart';
 
@@ -244,6 +245,136 @@ void main() {
       // Wallet debited and goal updated
       final accounts = await accRepo.getAccounts();
       expect(accounts.first.balance, 50000000 - 500000);
+    });
+
+    testWidgets('SavingsGoalFormSheet renders Apple HIG redesign, inspiration chips, and creates goal', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pumpAndSettle();
+
+      // Tap FAB to open SavingsGoalFormSheet
+      final addFab = find.byTooltip('Mục tiêu mới');
+      expect(addFab, findsOneWidget);
+      await tester.tap(addFab);
+      await tester.pumpAndSettle();
+
+      // Verify header and redesigned Apple sections
+      expect(find.text('Tạo mục tiêu tiết kiệm mới'), findsOneWidget);
+      expect(find.text('GỢI Ý MỤC TIÊU THỊNH HÀNH'), findsOneWidget);
+      expect(find.text('SỐ TIỀN CẦN ĐẠT ĐƯỢC'), findsWidgets);
+      expect(find.text('HẠN HOÀN THÀNH (DEADLINE)'), findsWidgets);
+      expect(find.text('VÍ LIÊN KẾT (TÙY CHỌN)'), findsOneWidget);
+      expect(find.text('MÀU SẮC & BIỂU TƯỢNG NHẬN DIỆN'), findsOneWidget);
+
+      // Verify inspiration chips exist
+      expect(find.text('Quỹ khẩn cấp 6 tháng'), findsOneWidget);
+      expect(find.text('Chuyến du lịch mơ ước'), findsOneWidget);
+
+      // Tap inspiration chip
+      await tester.tap(find.text('Chuyến du lịch mơ ước'));
+      await tester.pumpAndSettle();
+
+      // Verify title field is populated
+      expect(find.text('Chuyến du lịch mơ ước'), findsWidgets);
+
+      // Tap quick amount preset
+      expect(find.text('5 triệu'), findsOneWidget);
+      await tester.tap(find.text('5 triệu'));
+      await tester.pumpAndSettle();
+
+      // Verify formatted amount
+      expect(find.text('5.000.000'), findsOneWidget);
+
+      // Verify smart pace insight is calculated and displayed
+      expect(find.text('NHỊP ĐỘ TÍCH LŨY THÔNG MINH'), findsOneWidget);
+
+      // Submit creation
+      await tester.tap(find.text('Mục tiêu mới').last);
+      await tester.pumpAndSettle();
+
+      // Verify new goal was created
+      final goals = await savingsRepo.watchSavingsGoals().first;
+      expect(goals.any((g) => g.title == 'Chuyến du lịch mơ ước' && g.targetAmount == 5000000), isTrue);
+    });
+
+    testWidgets('SavingsGoalFormSheet in edit mode pre-populates existing goal and updates properly', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final existingGoal = SavingsGoal(
+        id: 'goal_macbook',
+        title: 'MacBook Pro M4',
+        targetAmount: 40000000,
+        currentAmount: 10000000,
+        deadline: DateTime.now().add(const Duration(days: 90)),
+        icon: 'laptop',
+        color: 0xFF007AFF,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            accountRepositoryProvider.overrideWithValue(accRepo),
+            categoryRepositoryProvider.overrideWithValue(catRepo),
+            transactionRepositoryProvider.overrideWithValue(txRepo),
+            savingsGoalRepositoryProvider.overrideWithValue(savingsRepo),
+          ],
+          child: MaterialApp(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: AppTheme.light(),
+            home: Scaffold(
+              body: Builder(
+                builder: (context) {
+                  return ElevatedButton(
+                    onPressed: () {
+                      SavingsGoalFormSheet.show(context, existing: existingGoal);
+                    },
+                    child: const Text('Mở sửa mục tiêu'),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Open Edit Sheet
+      await tester.tap(find.text('Mở sửa mục tiêu'));
+      await tester.pumpAndSettle();
+
+      // Verify edit sheet title & pre-populated values
+      expect(find.text('Sửa mục tiêu tiết kiệm'), findsOneWidget);
+      expect(find.text('MacBook Pro M4'), findsWidgets);
+      expect(find.text('40.000.000'), findsOneWidget);
+
+      // Verify inspiration chips are hidden in edit mode
+      expect(find.text('GỢI Ý MỤC TIÊU THỊNH HÀNH'), findsNothing);
+
+      // Tap preset 10 triệu
+      expect(find.text('10 triệu'), findsWidgets);
+      await tester.tap(find.text('10 triệu'));
+      await tester.pumpAndSettle();
+
+      // Tap Save
+      await tester.tap(find.text('Lưu').last);
+      await tester.pumpAndSettle();
+
+      // Verify updated in repo
+      final goals = await savingsRepo.watchSavingsGoals().first;
+      final updated = goals.firstWhere((g) => g.id == 'goal_macbook');
+      expect(updated.targetAmount, 10000000);
     });
   });
 }
