@@ -182,6 +182,114 @@ class InitialSetupController extends Notifier<AsyncValue<void>> {
     }
   }
 
+  /// Completes the 2-step onboarding wizard for a new user:
+  /// 1. Creates primary ledger & seeds default categories.
+  /// 2. Creates the user's first wallet (Account) and sets it as default wallet.
+  /// 3. Optionally creates an overall monthly budget (if [monthlyBudgetAmount] > 0).
+  /// 4. Marks initial setup completed in settings.
+  Future<Result<void>> completeInitialOnboarding({
+    required String walletName,
+    required AccountType walletType,
+    required int initialBalance,
+    required String icon,
+    required int color,
+    required String currency,
+    int? monthlyBudgetAmount,
+    int budgetAlertThreshold = 80,
+    String? uid,
+  }) async {
+    state = const AsyncLoading();
+    try {
+      final accRepo = ref.read(accountRepositoryProvider);
+      final ledgerRepo = ref.read(ledgerRepositoryProvider);
+      final catRepo = ref.read(categoryRepositoryProvider);
+      final budgetRepo = ref.read(budgetRepositoryProvider);
+
+      // 1. Seed categories
+      await catRepo.seedDefaultCategoriesIfNeeded();
+
+      // 2. Ensure Personal & Family ledgers
+      final now = DateTime.now();
+      final personalLedger = LedgerBook(
+        id: LedgerBook.defaultPersonalId,
+        name: 'Sổ Cá Nhân',
+        type: LedgerType.personal,
+        icon: 'person',
+        color: 0xFF00A86B,
+        currency: currency,
+        isDefault: true,
+        createdAt: now,
+        updatedAt: now,
+      );
+      await ledgerRepo.createLedger(personalLedger);
+      ref.read(activeLedgerIdProvider.notifier).selectLedger(personalLedger.id);
+
+      final familyLedger = LedgerBook(
+        id: 'default_family',
+        name: 'Sổ Gia Đình',
+        type: LedgerType.family,
+        icon: 'family',
+        color: 0xFF007AFF,
+        currency: currency,
+        isDefault: false,
+        createdAt: now,
+        updatedAt: now,
+      );
+      await ledgerRepo.createLedger(familyLedger);
+
+      // 3. Create the user's first wallet
+      final resolvedName = walletName.trim().isEmpty ? 'Tiền mặt' : walletName.trim();
+      final createdWalletRes = await accRepo.createAccount(
+        name: resolvedName,
+        type: walletType,
+        initialBalance: initialBalance,
+        currency: currency,
+        icon: icon,
+        color: color,
+        ledgerId: personalLedger.id,
+      );
+
+      final createdWallet = createdWalletRes.valueOrNull;
+      if (createdWallet != null) {
+        await ref
+            .read(settingsControllerProvider.notifier)
+            .setDefaultWalletId(createdWallet.id);
+      } else {
+        await accRepo.ensureDefaultWallet(
+          currency: currency,
+          ledgerId: personalLedger.id,
+        );
+        await ref
+            .read(settingsControllerProvider.notifier)
+            .setDefaultWalletId('default_cash_wallet_${personalLedger.id}');
+      }
+
+      // 4. Create initial monthly budget if user specified one
+      if (monthlyBudgetAmount != null && monthlyBudgetAmount > 0) {
+        final monthStart = DateTime(now.year, now.month, 1);
+        await budgetRepo.upsertMonthlyBudget(
+          categoryId: null, // overall monthly budget
+          amount: monthlyBudgetAmount,
+          currency: currency,
+          monthStart: monthStart,
+          alertThreshold: budgetAlertThreshold,
+          ledgerId: personalLedger.id,
+        );
+      }
+
+      // 5. Complete initial setup
+      await ref
+          .read(settingsControllerProvider.notifier)
+          .completeInitialSetup(uid: uid);
+
+      state = const AsyncData(null);
+      return const Success(null);
+    } catch (e, st) {
+      state = AsyncError(e, st);
+      return Failure(UnexpectedException(e.toString()));
+    }
+  }
+
   Future<Result<void>> skipAndFinish({
     String? uid,
     String currency = AppCurrencies.defaultCode,

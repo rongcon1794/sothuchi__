@@ -166,12 +166,12 @@ void main() {
         await tester.tap(find.text('Đăng nhập với Google'));
         await tester.pumpAndSettle();
 
-        // First-time user setup wizard ("Thiết lập ban đầu")
-        expect(find.text('Thiết lập ban đầu'), findsOneWidget);
-        expect(find.text('Áp dụng đề xuất & Bắt đầu ngay'), findsOneWidget);
+        // First-time user setup wizard ("Tạo ví tiền đầu tiên")
+        expect(find.text('Tạo ví tiền đầu tiên'), findsWidgets);
+        expect(find.text('Bỏ qua'), findsOneWidget);
 
-        // Apply quick defaults & start
-        await tester.tap(find.text('Áp dụng đề xuất & Bắt đầu ngay'));
+        // Apply quick defaults & finish setup
+        await tester.tap(find.text('Bỏ qua'));
         await tester.pumpAndSettle();
 
         expect(find.text('Tổng quan'), findsWidgets);

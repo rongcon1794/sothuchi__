@@ -111,89 +111,137 @@ void main() {
     );
   }
 
-  group('InitialSetupScreen Tests', () {
-    testWidgets('renders all setup sections, presets, and actions', (tester) async {
+  group('InitialSetupScreen Onboarding Flow Tests', () {
+    testWidgets('renders Step 1 (Tạo ví tiền đầu tiên) with suggestions and preview', (tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pumpAndSettle();
 
-      // Verify Header
-      expect(find.text('Thiết lập ban đầu'), findsOneWidget);
-      expect(find.text('Chào mừng bạn đến với Sổ Thu Chi!'), findsOneWidget);
-
-      // Verify Quick Preset Card
-      expect(find.text('Thiết lập đề xuất (1 chạm)'), findsOneWidget);
-      expect(find.text('Áp dụng đề xuất & Bắt đầu ngay'), findsOneWidget);
-
-      // Verify Section 1: Ledgers
-      expect(find.text('Sổ thu chi đầu tiên'), findsOneWidget);
-      expect(find.text('Sổ Cá Nhân'), findsWidgets);
-      expect(find.text('Sổ Gia Đình'), findsWidgets);
-      expect(find.text('Sổ Kinh Doanh'), findsWidgets);
-      expect(find.text('Sổ Du Lịch / Dự Án'), findsWidgets);
-
-      // Verify Section 2: Wallets
-      expect(find.text('Các ví giao dịch ban đầu'), findsOneWidget);
-      expect(find.text('Tiền mặt'), findsWidgets);
-      expect(find.text('Tài khoản Ngân hàng'), findsWidgets);
-      expect(find.text('Ví MoMo'), findsWidgets);
-      expect(find.text('Sổ Tiết kiệm'), findsWidgets);
-
-      // Verify Actions
-      expect(find.text('Hoàn tất & Bắt đầu sử dụng'), findsOneWidget);
-      expect(find.text('Bỏ qua & Sử dụng cấu hình cơ bản'), findsOneWidget);
+      // Verify Step 1 elements
+      expect(find.text('Bước 1 / 2 • Tạo ví tiền đầu tiên'), findsOneWidget);
+      expect(find.text('Tạo ví tiền đầu tiên'), findsWidgets);
+      expect(find.text('Gợi ý nhanh'), findsOneWidget);
+      expect(find.text('Techcombank'), findsOneWidget);
+      expect(find.text('MB Bank'), findsOneWidget);
+      expect(find.text('Ví MoMo'), findsOneWidget);
+      expect(find.text('Tiếp tục: Thiết lập ngân sách'), findsOneWidget);
     });
 
-    testWidgets('switching ledger preset updates name textfield', (tester) async {
+    testWidgets('tapping template chip updates wallet name', (tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pumpAndSettle();
 
-      // Ensure visible and tap Sổ Kinh Doanh chip
-      final kinhDoanhFinder = find.text('Sổ Kinh Doanh').first;
-      await tester.ensureVisible(kinhDoanhFinder);
-      await tester.tap(kinhDoanhFinder);
+      await tester.tap(find.text('Techcombank'));
       await tester.pumpAndSettle();
 
       final textFinder = find.byWidgetPredicate(
-        (w) => w is TextField && w.controller?.text == 'Sổ Kinh Doanh',
+        (w) => w is TextField && w.controller?.text == 'Techcombank',
       );
       expect(textFinder, findsOneWidget);
     });
 
-    testWidgets('quick preset setup creates ledger, wallets, and completes setup', (tester) async {
+    testWidgets('completing step 1 transitions to Step 2 (Thiết lập ngân sách)', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pumpAndSettle();
+
+      // Tap Next to step 2
+      final nextFinder = find.text('Tiếp tục: Thiết lập ngân sách');
+      await tester.ensureVisible(nextFinder);
+      await tester.tap(nextFinder);
+      await tester.pumpAndSettle();
+
+      // Verify Step 2 elements
+      expect(find.text('Bước 2 / 2 • Thiết lập ngân sách'), findsOneWidget);
+      expect(find.text('Thiết lập ngân sách tháng'), findsOneWidget);
+      expect(find.text('Kiểm soát chi tiêu thông minh'), findsOneWidget);
+      expect(find.text('Hạn mức chi tiêu tháng này'), findsOneWidget);
+      expect(find.text('Hoàn tất & Bắt đầu sử dụng'), findsOneWidget);
+      expect(find.text('Để sau (Bỏ qua bước này)'), findsOneWidget);
+    });
+
+    testWidgets('completing step 2 creates wallet and budget', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
       final container = createContainer();
       await tester.pumpWidget(buildTestWidget(container: container));
       await tester.pumpAndSettle();
 
-      // Tap Quick Recommendation
-      await tester.tap(find.text('Áp dụng đề xuất & Bắt đầu ngay'));
+      // Go to Step 2
+      final nextFinder = find.text('Tiếp tục: Thiết lập ngân sách');
+      await tester.ensureVisible(nextFinder);
+      await tester.tap(nextFinder);
       await tester.pumpAndSettle();
 
-      // Verify accounts created in repo
+      // Tap Hoàn tất & Bắt đầu sử dụng
+      final finishFinder = find.text('Hoàn tất & Bắt đầu sử dụng');
+      await tester.ensureVisible(finishFinder);
+      await tester.tap(finishFinder);
+      await tester.pumpAndSettle();
+
+      // Verify wallet created
       final accounts = await accRepo.getAccounts();
       expect(accounts.any((a) => a.name == 'Tiền mặt' && a.balance == 500000), isTrue);
-      expect(accounts.any((a) => a.name == 'Tài khoản Ngân hàng' && a.balance == 5000000), isTrue);
 
-      // Verify default wallet saved
-      final defaultWalletId = prefs.getString('default_wallet_id');
-      expect(defaultWalletId, isNotNull);
+      // Verify budget created
+      final budgets = await budgetRepo.getBudgets();
+      expect(budgets.any((b) => b.isOverall && b.amount == 5000000), isTrue);
 
       // Verify settings updated
       final settings = container.read(settingsControllerProvider).value;
       expect(settings?.initialSetupCompleted, isTrue);
     });
 
-    testWidgets('skip action creates fallback cash wallet and marks complete', (tester) async {
+    testWidgets('skipping budget in step 2 creates wallet without budget', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
       final container = createContainer();
       await tester.pumpWidget(buildTestWidget(container: container));
       await tester.pumpAndSettle();
 
-      // Tap skip in appbar
-      await tester.tap(find.text('Bỏ qua').first);
+      // Go to Step 2
+      final nextFinder = find.text('Tiếp tục: Thiết lập ngân sách');
+      await tester.ensureVisible(nextFinder);
+      await tester.tap(nextFinder);
       await tester.pumpAndSettle();
 
-      // Verify fallback cash wallet ensured
+      // Tap Để sau (Bỏ qua bước này)
+      final skipBudgetFinder = find.text('Để sau (Bỏ qua bước này)');
+      await tester.ensureVisible(skipBudgetFinder);
+      await tester.tap(skipBudgetFinder);
+      await tester.pumpAndSettle();
+
+      // Verify wallet created
       final accounts = await accRepo.getAccounts();
       expect(accounts.isNotEmpty, isTrue);
+
+      // Verify no budget created
+      final budgets = await budgetRepo.getBudgets();
+      expect(budgets.isEmpty, isTrue);
+
+      // Verify settings updated
+      final settings = container.read(settingsControllerProvider).value;
+      expect(settings?.initialSetupCompleted, isTrue);
+    });
+
+    testWidgets('skip in Step 1 appbar applies quick defaults and finishes', (tester) async {
+      final container = createContainer();
+      await tester.pumpWidget(buildTestWidget(container: container));
+      await tester.pumpAndSettle();
+
+      // Tap Bỏ qua in appbar
+      await tester.tap(find.text('Bỏ qua'));
+      await tester.pumpAndSettle();
+
+      // Verify default accounts created
+      final accounts = await accRepo.getAccounts();
+      expect(accounts.any((a) => a.name == 'Tiền mặt' && a.balance == 500000), isTrue);
 
       // Verify settings updated
       final settings = container.read(settingsControllerProvider).value;

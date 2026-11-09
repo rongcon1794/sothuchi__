@@ -6,57 +6,27 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
+import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
-import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_controller.dart';
 import 'package:so_thu_chi/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:so_thu_chi/features/auth/presentation/controllers/initial_setup_controller.dart';
-import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
-import 'package:so_thu_chi/features/ledger/presentation/controllers/ledgers_controller.dart';
 
-class _LedgerPresetItem {
-  const _LedgerPresetItem({
-    required this.id,
+class _WalletQuickTemplate {
+  const _WalletQuickTemplate({
     required this.name,
     required this.type,
     required this.icon,
     required this.color,
-    required this.subtitle,
   });
 
-  final String id;
   final String name;
-  final LedgerType type;
-  final String icon;
-  final int color;
-  final String subtitle;
-}
-
-class _WalletConfigItem {
-  _WalletConfigItem({
-    required this.key,
-    required this.defaultName,
-    required this.type,
-    required this.icon,
-    required this.color,
-    this.enabled = true,
-    int initialMinorUnits = 0,
-    required this.nameController,
-    required this.balanceController,
-  }) : initialAmount = initialMinorUnits;
-
-  final String key;
-  final String defaultName;
   final AccountType type;
   final String icon;
   final int color;
-  bool enabled;
-  int initialAmount;
-  final TextEditingController nameController;
-  final TextEditingController balanceController;
 }
 
 class InitialSetupScreen extends ConsumerStatefulWidget {
@@ -67,116 +37,101 @@ class InitialSetupScreen extends ConsumerStatefulWidget {
 }
 
 class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
-  static const List<_LedgerPresetItem> _ledgerPresets = [
-    _LedgerPresetItem(
-      id: LedgerBook.defaultPersonalId,
-      name: 'Sổ Cá Nhân',
-      type: LedgerType.personal,
-      icon: 'person',
+  static const List<_WalletQuickTemplate> _quickTemplates = [
+    _WalletQuickTemplate(
+      name: 'Tiền mặt',
+      type: AccountType.cash,
+      icon: 'cash',
       color: 0xFF00A86B,
-      subtitle: 'Chi tiêu sinh hoạt cá nhân hàng ngày',
     ),
-    _LedgerPresetItem(
-      id: 'default_family',
-      name: 'Sổ Gia Đình',
-      type: LedgerType.family,
-      icon: 'family',
-      color: 0xFF007AFF,
-      subtitle: 'Quản lý sinh hoạt, chợ búa chung cho cả nhà',
+    _WalletQuickTemplate(
+      name: 'Techcombank',
+      type: AccountType.bank,
+      icon: 'bank',
+      color: 0xFFE50914,
     ),
-    _LedgerPresetItem(
-      id: 'default_business',
-      name: 'Sổ Kinh Doanh',
-      type: LedgerType.business,
-      icon: 'business',
-      color: 0xFF8E44AD,
-      subtitle: 'Doanh thu, tiền hàng và chi phí bán hàng',
+    _WalletQuickTemplate(
+      name: 'Vietcombank',
+      type: AccountType.bank,
+      icon: 'bank',
+      color: 0xFF008848,
     ),
-    _LedgerPresetItem(
-      id: 'default_project',
-      name: 'Sổ Du Lịch / Dự Án',
-      type: LedgerType.custom,
-      icon: 'flight',
-      color: 0xFFFF9500,
-      subtitle: 'Theo dõi chi phí theo chuyến đi hoặc dự án',
+    _WalletQuickTemplate(
+      name: 'MB Bank',
+      type: AccountType.bank,
+      icon: 'bank',
+      color: 0xFF1428A0,
+    ),
+    _WalletQuickTemplate(
+      name: 'Ví MoMo',
+      type: AccountType.ewallet,
+      icon: 'ewallet',
+      color: 0xFFA259FF,
+    ),
+    _WalletQuickTemplate(
+      name: 'ZaloPay',
+      type: AccountType.ewallet,
+      icon: 'ewallet',
+      color: 0xFF008FE5,
     ),
   ];
 
-  late final TextEditingController _customLedgerNameController;
-  late final List<_WalletConfigItem> _wallets;
+  static const List<int> _paletteColors = [
+    0xFF00A86B, // Emerald Green
+    0xFF007AFF, // Apple Blue
+    0xFF8E44AD, // Royal Purple
+    0xFFFF9500, // Amber Orange
+    0xFFFF3B30, // Coral Red
+    0xFF00C7BE, // Teal
+  ];
 
-  int _selectedLedgerPresetIndex = 0;
-  String _selectedCurrency = AppCurrencies.defaultCode;
-  String _defaultWalletKey = 'cash';
-  bool _isSaving = false;
+  static const List<String> _selectableIcons = [
+    'cash',
+    'bank',
+    'ewallet',
+    'card',
+    'savings',
+    'wallet',
+  ];
+
+  late final PageController _pageController;
+  int _currentStep = 0; // 0 = Tạo ví, 1 = Thiết lập ngân sách
   bool _isCheckingExistingData = true;
+  bool _isSaving = false;
+
+  // Step 1: Wallet Fields
+  late final TextEditingController _walletNameController;
+  late final TextEditingController _walletBalanceController;
+  AccountType _walletType = AccountType.cash;
+  int _walletBalance = 500000;
+  String _walletIcon = 'cash';
+  int _walletColor = 0xFF00A86B;
+  final String _selectedCurrency = AppCurrencies.defaultCode;
+
+  // Step 2: Budget Fields
+  late final TextEditingController _budgetController;
+  int _budgetAmount = 5000000;
+  int _budgetAlertThreshold = 80;
 
   @override
   void initState() {
     super.initState();
-    _customLedgerNameController = TextEditingController(
-      text: _ledgerPresets[0].name,
-    );
+    _pageController = PageController();
+    _walletNameController = TextEditingController(text: 'Tiền mặt');
+    _walletBalanceController = TextEditingController(text: '500.000');
+    _budgetController = TextEditingController(text: '5.000.000');
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkAndRestoreIfExisting();
     });
-
-    _wallets = [
-      _WalletConfigItem(
-        key: 'cash',
-        defaultName: 'Tiền mặt',
-        type: AccountType.cash,
-        icon: 'cash',
-        color: 0xFF00A86B,
-        enabled: true,
-        initialMinorUnits: 500000,
-        nameController: TextEditingController(text: 'Tiền mặt'),
-        balanceController: TextEditingController(text: '500.000'),
-      ),
-      _WalletConfigItem(
-        key: 'bank',
-        defaultName: 'Tài khoản Ngân hàng',
-        type: AccountType.bank,
-        icon: 'bank',
-        color: 0xFF007AFF,
-        enabled: true,
-        initialMinorUnits: 5000000,
-        nameController: TextEditingController(text: 'Tài khoản Ngân hàng'),
-        balanceController: TextEditingController(text: '5.000.000'),
-      ),
-      _WalletConfigItem(
-        key: 'ewallet',
-        defaultName: 'Ví MoMo',
-        type: AccountType.ewallet,
-        icon: 'ewallet',
-        color: 0xFFA259FF,
-        enabled: false,
-        initialMinorUnits: 200000,
-        nameController: TextEditingController(text: 'Ví MoMo'),
-        balanceController: TextEditingController(text: '200.000'),
-      ),
-      _WalletConfigItem(
-        key: 'savings',
-        defaultName: 'Sổ Tiết kiệm',
-        type: AccountType.bank,
-        icon: 'savings',
-        color: 0xFF10B981,
-        enabled: false,
-        initialMinorUnits: 10000000,
-        nameController: TextEditingController(text: 'Sổ Tiết kiệm'),
-        balanceController: TextEditingController(text: '10.000.000'),
-      ),
-    ];
   }
 
   @override
   void dispose() {
-    _customLedgerNameController.dispose();
-    for (final w in _wallets) {
-      w.nameController.dispose();
-      w.balanceController.dispose();
-    }
+    _pageController.dispose();
+    _walletNameController.dispose();
+    _walletBalanceController.dispose();
+    _budgetController.dispose();
     super.dispose();
   }
 
@@ -187,7 +142,9 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
           .read(initialSetupControllerProvider.notifier)
           .checkAndRestoreIfExisting(user.uid);
       if (restored && mounted) {
-        context.go(AppRoutes.home);
+        try {
+          context.go(AppRoutes.home);
+        } catch (_) {}
         return;
       }
     }
@@ -196,97 +153,94 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
     }
   }
 
-  Future<void> _applyQuickDefaults() async {
-    unawaited(HapticFeedback.mediumImpact());
-    setState(() => _isSaving = true);
-    final user = ref.read(currentUserProvider);
-    final res = await ref
-        .read(initialSetupControllerProvider.notifier)
-        .applyQuickDefaults(uid: user?.uid);
-    if (!mounted) return;
-    if (res.isFailure) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi: ${res.errorOrNull}')),
-      );
-    }
-    setState(() => _isSaving = false);
-  }
-
-  Future<void> _skipAndFinish() async {
+  void _onTemplateSelected(_WalletQuickTemplate template) {
     unawaited(HapticFeedback.selectionClick());
-    setState(() => _isSaving = true);
-    final user = ref.read(currentUserProvider);
-    final res = await ref
-        .read(initialSetupControllerProvider.notifier)
-        .skipAndFinish(uid: user?.uid, currency: _selectedCurrency);
-    if (!mounted) return;
-    if (res.isFailure) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi: ${res.errorOrNull}')),
-      );
-    }
-    setState(() => _isSaving = false);
+    setState(() {
+      _walletNameController.text = template.name;
+      _walletType = template.type;
+      _walletIcon = template.icon;
+      _walletColor = template.color;
+    });
   }
 
-  Future<void> _saveAndFinish() async {
+  void _setInitialBalancePreset(int amount) {
+    unawaited(HapticFeedback.selectionClick());
+    setState(() {
+      _walletBalance = amount;
+      _walletBalanceController.text = Money(
+        minorUnits: amount,
+        currencyCode: _selectedCurrency,
+      ).toInputString();
+    });
+  }
+
+  void _setBudgetPreset(int amount) {
+    unawaited(HapticFeedback.selectionClick());
+    setState(() {
+      _budgetAmount = amount;
+      _budgetController.text = Money(
+        minorUnits: amount,
+        currencyCode: _selectedCurrency,
+      ).toInputString();
+    });
+  }
+
+  void _goToStep2() {
+    unawaited(HapticFeedback.lightImpact());
+    if (_walletNameController.text.trim().isEmpty) {
+      _walletNameController.text = 'Tiền mặt';
+    }
+    setState(() => _currentStep = 1);
+    _pageController.animateToPage(
+      1,
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeInOutCubic,
+    );
+  }
+
+  void _goBackToStep1() {
+    unawaited(HapticFeedback.lightImpact());
+    setState(() => _currentStep = 0);
+    _pageController.animateToPage(
+      0,
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeInOutCubic,
+    );
+  }
+
+  Future<void> _completeSetup({bool includeBudget = true}) async {
     if (_isSaving) return;
     unawaited(HapticFeedback.mediumImpact());
     setState(() => _isSaving = true);
 
     try {
       final user = ref.read(currentUserProvider);
-      final preset = _ledgerPresets[_selectedLedgerPresetIndex];
-      final ledgerName = _customLedgerNameController.text.trim().isEmpty
-          ? preset.name
-          : _customLedgerNameController.text.trim();
-
-      final primaryLedger = LedgerBook(
-        id: preset.id,
-        name: ledgerName,
-        type: preset.type,
-        icon: preset.icon,
-        color: preset.color,
-        currency: _selectedCurrency,
-        isDefault: true,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-
-      final enabledWallets = <InitialSetupWalletDraft>[];
-      for (final item in _wallets) {
-        if (!item.enabled) continue;
-        final parsedMoney = Money.tryParse(
-          item.balanceController.text,
-          currencyCode: _selectedCurrency,
-        );
-        final initialBal = parsedMoney?.minorUnits ?? 0;
-        final walletName = item.nameController.text.trim().isEmpty
-            ? item.defaultName
-            : item.nameController.text.trim();
-
-        enabledWallets.add(
-          InitialSetupWalletDraft(
-            key: item.key,
-            name: walletName,
-            type: item.type,
-            initialBalance: initialBal,
-            icon: item.icon,
-            color: item.color,
-          ),
-        );
-      }
+      final walletName = _walletNameController.text.trim().isEmpty
+          ? 'Tiền mặt'
+          : _walletNameController.text.trim();
 
       final res = await ref
           .read(initialSetupControllerProvider.notifier)
-          .completeCustomSetup(
-            primaryLedger: primaryLedger,
-            enabledWallets: enabledWallets,
-            defaultWalletKey: _defaultWalletKey,
+          .completeInitialOnboarding(
+            walletName: walletName,
+            walletType: _walletType,
+            initialBalance: _walletBalance,
+            icon: _walletIcon,
+            color: _walletColor,
+            currency: _selectedCurrency,
+            monthlyBudgetAmount: includeBudget && _budgetAmount > 0
+                ? _budgetAmount
+                : null,
+            budgetAlertThreshold: _budgetAlertThreshold,
             uid: user?.uid,
           );
 
       if (!mounted) return;
-      if (res.isFailure) {
+      if (res.isSuccess) {
+        try {
+          context.go(AppRoutes.home);
+        } catch (_) {}
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Lỗi: ${res.errorOrNull}')),
         );
@@ -304,12 +258,31 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
     }
   }
 
+  Future<void> _skipAndUseDefaults() async {
+    if (_isSaving) return;
+    unawaited(HapticFeedback.mediumImpact());
+    setState(() => _isSaving = true);
+    final user = ref.read(currentUserProvider);
+    final res = await ref
+        .read(initialSetupControllerProvider.notifier)
+        .applyQuickDefaults(uid: user?.uid);
+    if (!mounted) return;
+    if (res.isSuccess) {
+      try {
+        context.go(AppRoutes.home);
+      } catch (_) {}
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi: ${res.errorOrNull}')),
+      );
+      setState(() => _isSaving = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-    final currencyInfo = AppCurrencies.byCode(_selectedCurrency);
 
     if (_isCheckingExistingData) {
       return Scaffold(
@@ -321,7 +294,7 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
               const CupertinoActivityIndicator(radius: 14),
               const SizedBox(height: 16),
               Text(
-                'Đang kiểm tra và khôi phục dữ liệu...',
+                'Đang kiểm tra dữ liệu tài khoản...',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -334,602 +307,800 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
       );
     }
 
-    // Check if user already has cloud ledgers or accounts
-    final cloudLedgers = ref.watch(ledgersStreamProvider).value ?? const [];
-    final cloudAccounts = ref.watch(accountsStreamProvider).value ?? const [];
-    final hasExistingData = cloudLedgers.length > 2 ||
-        cloudAccounts.any((a) => !a.archived && a.balance != 0);
-
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
-          'Thiết lập ban đầu',
-          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17),
-        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: _currentStep == 1
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                onPressed: _isSaving ? null : _goBackToStep1,
+                tooltip: 'Quay lại ví',
+              )
+            : null,
+        title: _buildStepIndicator(),
         centerTitle: true,
         actions: [
-          TextButton(
-            onPressed: _isSaving ? null : _skipAndFinish,
-            child: Text(
-              'Bỏ qua',
-              style: TextStyle(
-                color: scheme.primary,
-                fontWeight: FontWeight.w600,
+          if (_currentStep == 0)
+            TextButton(
+              onPressed: _isSaving ? null : _skipAndUseDefaults,
+              child: Text(
+                'Bỏ qua',
+                style: TextStyle(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-          ),
           const SizedBox(width: 8),
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Hero Section
-              Center(
-                child: Column(
-                  children: [
-                    Container(
-                      width: 72,
-                      height: 72,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            LucianTokens.resolveMint(isDark),
-                            scheme.primary,
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                        boxShadow: [
-                          BoxShadow(
-                            color: LucianTokens.resolveMint(isDark).withValues(alpha: 0.35),
-                            blurRadius: 18,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.account_balance_wallet_rounded,
-                        color: Colors.white,
-                        size: 36,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      'Chào mừng bạn đến với Sổ Thu Chi!',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Tạo sổ thu chi đầu tiên và các ví tiền giao dịch để bắt đầu quản lý tài chính chuẩn xác.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 13.5,
-                        color: scheme.onSurface.withValues(alpha: 0.7),
-                        height: 1.35,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Existing Data Notification Banner (if any)
-              if (hasExistingData) ...[
-                AppleGlassCard(
-                  padding: const EdgeInsets.all(16),
-                  borderColor: LucianTokens.resolveMint(isDark).withValues(alpha: 0.5),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: LucianTokens.resolveMint(isDark).withValues(alpha: 0.15),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.cloud_done_rounded,
-                          color: LucianTokens.resolveMint(isDark),
-                          size: 22,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Đã tìm thấy dữ liệu trên đám mây',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 13.5,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Tài khoản của bạn đã có ${cloudAccounts.length} ví. Bạn có thể tiếp tục với dữ liệu cũ ngay.',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: scheme.onSurface.withValues(alpha: 0.7),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      AppleButton.secondary(
-                        height: 36,
-                        isFullWidth: false,
-                        label: 'Dùng dữ liệu cũ',
-                        onPressed: _skipAndFinish,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-
-              // Quick Preset Card
-              AppleGlassCard(
-                padding: const EdgeInsets.all(16),
-                borderColor: scheme.primary.withValues(alpha: 0.35),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: scheme.primary.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                          ),
-                          child: Icon(
-                            Icons.auto_awesome_rounded,
-                            size: 16,
-                            color: scheme.primary,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Expanded(
-                          child: Text(
-                            'Thiết lập đề xuất (1 chạm)',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Tự động tạo Sổ Cá Nhân (mặc định), Ví Tiền mặt (500.000đ), Tài khoản Ngân hàng (5.000.000đ) và toàn bộ danh mục thu chi thông dụng.',
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        color: scheme.onSurface.withValues(alpha: 0.7),
-                        height: 1.35,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    AppleButton.primary(
-                      height: 42,
-                      label: 'Áp dụng đề xuất & Bắt đầu ngay',
-                      icon: const Icon(Icons.flash_on_rounded, size: 18),
-                      isLoading: _isSaving,
-                      onPressed: _applyQuickDefaults,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Section 1: Ledger Setup
-              _buildSectionHeader(
-                step: '1',
-                title: 'Sổ thu chi đầu tiên',
-                description: 'Chọn loại sổ bạn muốn dùng để ghi nhận các khoản thu chi.',
-              ),
-              const SizedBox(height: 10),
-
-              // Ledger Presets Grid
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  childAspectRatio: 1.45,
-                ),
-                itemCount: _ledgerPresets.length,
-                itemBuilder: (context, index) {
-                  final item = _ledgerPresets[index];
-                  final isSelected = _selectedLedgerPresetIndex == index;
-                  return ApplePressable(
-                    onTap: () {
-                      HapticFeedback.selectionClick();
-                      setState(() {
-                        _selectedLedgerPresetIndex = index;
-                        _customLedgerNameController.text = item.name;
-                      });
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? Color(item.color).withValues(alpha: isDark ? 0.25 : 0.12)
-                            : (isDark
-                                ? Colors.white.withValues(alpha: 0.05)
-                                : Colors.black.withValues(alpha: 0.03)),
-                        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                        border: Border.all(
-                          color: isSelected
-                              ? Color(item.color)
-                              : (isDark
-                                  ? Colors.white.withValues(alpha: 0.1)
-                                  : Colors.black.withValues(alpha: 0.08)),
-                          width: isSelected ? 2 : 1,
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                width: 32,
-                                height: 32,
-                                decoration: BoxDecoration(
-                                  color: Color(item.color),
-                                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                                ),
-                                child: Icon(
-                                  _getLedgerIcon(item.icon),
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                              ),
-                              if (isSelected)
-                                Icon(
-                                  Icons.check_circle_rounded,
-                                  color: Color(item.color),
-                                  size: 20,
-                                ),
-                            ],
-                          ),
-                          const Spacer(),
-                          Text(
-                            item.name,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            item.subtitle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 10.5,
-                              color: scheme.onSurface.withValues(alpha: 0.6),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 12),
-
-              // Customize Ledger Name & Currency
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: AppleTextField(
-                      controller: _customLedgerNameController,
-                      label: 'Tên sổ thu chi',
-                      placeholder: 'Nhập tên sổ mong muốn',
-                      prefixIcon: const Icon(Icons.edit_note_rounded, size: 20),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    flex: 2,
-                    child: DropdownButtonFormField<String>(
-                      initialValue: _selectedCurrency,
-                      decoration: const InputDecoration(
-                        labelText: 'Tiền tệ',
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                      ),
-                      items: AppCurrencies.supported.map((c) {
-                        return DropdownMenuItem<String>(
-                          value: c.code,
-                          child: Text('${c.code} (${c.symbol})'),
-                        );
-                      }).toList(),
-                      onChanged: (val) {
-                        if (val != null) {
-                          setState(() => _selectedCurrency = val);
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 28),
-
-              // Section 2: Initial Wallets Setup
-              _buildSectionHeader(
-                step: '2',
-                title: 'Các ví giao dịch ban đầu',
-                description: 'Bật các ví tiền bạn đang sử dụng và nhập số dư ban đầu.',
-              ),
-              const SizedBox(height: 12),
-
-              // Wallets List
-              Column(
-                children: _wallets.map((wallet) {
-                  final isDefault = wallet.key == _defaultWalletKey && wallet.enabled;
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: wallet.enabled ? 0.08 : 0.03)
-                          : Colors.black.withValues(alpha: wallet.enabled ? 0.04 : 0.015),
-                      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                      border: Border.all(
-                        color: wallet.enabled
-                            ? (isDefault
-                                ? scheme.primary
-                                : (isDark
-                                    ? Colors.white.withValues(alpha: 0.15)
-                                    : Colors.black.withValues(alpha: 0.1)))
-                            : Colors.transparent,
-                        width: isDefault ? 2 : 1,
-                      ),
-                    ),
-                    padding: const EdgeInsets.all(14),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Checkbox.adaptive(
-                              value: wallet.enabled,
-                              activeColor: Color(wallet.color),
-                              onChanged: (val) {
-                                setState(() {
-                                  wallet.enabled = val ?? false;
-                                  // If disabled default wallet, re-point to first enabled
-                                  if (!wallet.enabled && _defaultWalletKey == wallet.key) {
-                                    final firstActive = _wallets.where((w) => w.enabled).firstOrNull;
-                                    _defaultWalletKey = firstActive?.key ?? 'cash';
-                                  }
-                                });
-                              },
-                            ),
-                            Container(
-                              width: 36,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                color: Color(wallet.color),
-                                borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                              ),
-                              child: Icon(
-                                _getWalletIcon(wallet.icon),
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    wallet.defaultName,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 14,
-                                      color: wallet.enabled
-                                          ? null
-                                          : scheme.onSurface.withValues(alpha: 0.4),
-                                    ),
-                                  ),
-                                  if (isDefault) ...[
-                                    const SizedBox(height: 2),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                                      decoration: BoxDecoration(
-                                        color: scheme.primary.withValues(alpha: 0.15),
-                                        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                                      ),
-                                      child: Text(
-                                        'Ví giao dịch mặc định',
-                                        style: TextStyle(
-                                          fontSize: 10.5,
-                                          fontWeight: FontWeight.w700,
-                                          color: scheme.primary,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                            if (wallet.enabled && !isDefault)
-                              TextButton(
-                                onPressed: () {
-                                  HapticFeedback.selectionClick();
-                                  setState(() => _defaultWalletKey = wallet.key);
-                                },
-                                style: TextButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  minimumSize: Size.zero,
-                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                child: Text(
-                                  'Đặt làm mặc định',
-                                  style: TextStyle(
-                                    fontSize: 11.5,
-                                    color: scheme.primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                        if (wallet.enabled) ...[
-                          const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Expanded(
-                                flex: 3,
-                                child: AppleTextField(
-                                  controller: wallet.nameController,
-                                  label: 'Tên ví',
-                                  placeholder: wallet.defaultName,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                flex: 4,
-                                child: AppleTextField(
-                                  controller: wallet.balanceController,
-                                  label: 'Số dư ban đầu',
-                                  placeholder: '0',
-                                  suffix: Text(
-                                    currencyInfo.symbol,
-                                    style: const TextStyle(fontWeight: FontWeight.w700),
-                                  ),
-                                  keyboardType: TextInputType.number,
-                                  inputFormatters: [
-                                    MoneyInputFormatter(currencyCode: _selectedCurrency),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 24),
-
-              // Bottom Actions
-              AppleButton.primary(
-                label: 'Hoàn tất & Bắt đầu sử dụng',
-                icon: const Icon(Icons.arrow_forward_rounded, size: 20),
-                isLoading: _isSaving,
-                onPressed: _saveAndFinish,
-              ),
-              const SizedBox(height: 10),
-              Center(
-                child: TextButton(
-                  onPressed: _isSaving ? null : _skipAndFinish,
-                  child: Text(
-                    'Bỏ qua & Sử dụng cấu hình cơ bản',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: scheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
+        child: PageView(
+          controller: _pageController,
+          physics: const NeverScrollableScrollPhysics(),
+          children: [
+            _buildStep1WalletView(),
+            _buildStep2BudgetView(),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildSectionHeader({
-    required String step,
-    required String title,
-    required String description,
-  }) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildStepIndicator() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Row(
-          children: [
-            Container(
-              width: 22,
-              height: 22,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: scheme.primary,
-                shape: BoxShape.circle,
-              ),
-              child: Text(
-                step,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              title,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.2,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Text(
-          description,
-          style: TextStyle(
-            fontSize: 12.5,
-            color: scheme.onSurface.withValues(alpha: 0.65),
-          ),
+        _buildStepSegment(isActive: true, isCurrent: _currentStep == 0),
+        const SizedBox(width: 6),
+        _buildStepSegment(
+          isActive: _currentStep >= 1,
+          isCurrent: _currentStep == 1,
         ),
       ],
     );
   }
 
-  IconData _getLedgerIcon(String iconKey) {
-    return switch (iconKey) {
-      'person' => Icons.person_rounded,
-      'family' => Icons.people_rounded,
-      'business' => Icons.storefront_rounded,
-      'flight' => Icons.flight_takeoff_rounded,
-      _ => Icons.book_rounded,
-    };
+  Widget _buildStepSegment({
+    required bool isActive,
+    required bool isCurrent,
+  }) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      width: isCurrent ? 28 : 16,
+      height: 4,
+      decoration: BoxDecoration(
+        color: isActive
+            ? primary
+            : Theme.of(context).dividerColor.withValues(alpha: 0.25),
+        borderRadius: BorderRadius.circular(2),
+      ),
+    );
   }
 
-  IconData _getWalletIcon(String iconKey) {
-    return switch (iconKey) {
-      'cash' => Icons.payments_rounded,
-      'bank' => Icons.account_balance_rounded,
-      'ewallet' => Icons.phone_android_rounded,
-      'savings' => Icons.savings_rounded,
-      _ => Icons.wallet_rounded,
+  // -------------------------------------------------------------
+  // STEP 1: TẠO VÍ TIỀN ĐẦU TIÊN
+  // -------------------------------------------------------------
+  Widget _buildStep1WalletView() {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Step Badge & Title
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: scheme.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+            ),
+            child: Text(
+              'Bước 1 / 2 • Tạo ví tiền đầu tiên',
+              style: TextStyle(
+                color: scheme.primary,
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Tạo ví tiền đầu tiên',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Bắt đầu ghi chép chi tiêu bằng cách thêm ví hoặc tài khoản chính bạn đang sử dụng.',
+            style: TextStyle(
+              fontSize: 13.5,
+              color: scheme.onSurface.withValues(alpha: 0.65),
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Live Wallet Preview Card
+          _buildWalletPreviewCard(isDark),
+          const SizedBox(height: 20),
+
+          // Quick templates
+          Text(
+            'Gợi ý nhanh',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: scheme.onSurface.withValues(alpha: 0.7),
+            ),
+          ),
+          const SizedBox(height: 8),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: _quickTemplates.map((template) {
+                final isSelected =
+                    _walletNameController.text == template.name &&
+                    _walletType == template.type;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: FilterChip(
+                    label: Text(template.name),
+                    selected: isSelected,
+                    onSelected: (_) => _onTemplateSelected(template),
+                    avatar: Icon(
+                      AppIconCatalog.resolve(template.icon),
+                      size: 16,
+                      color: Color(template.color),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Wallet Name
+          AppleTextField(
+            controller: _walletNameController,
+            label: 'Tên ví',
+            placeholder: 'Ví dụ: Tiền mặt, Techcombank, MoMo...',
+            clearable: true,
+            onChanged: (_) => setState(() {}),
+          ),
+          const SizedBox(height: 14),
+
+          // Wallet Type
+          Text(
+            'Loại ví',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: scheme.onSurface.withValues(alpha: 0.7),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              _buildTypeChip('Tiền mặt', AccountType.cash, 'cash'),
+              const SizedBox(width: 8),
+              _buildTypeChip('Ngân hàng', AccountType.bank, 'bank'),
+              const SizedBox(width: 8),
+              _buildTypeChip('Ví điện tử', AccountType.ewallet, 'ewallet'),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // Initial Balance
+          AppleTextField(
+            controller: _walletBalanceController,
+            label: 'Số dư ban đầu',
+            placeholder: '0',
+            keyboardType: TextInputType.number,
+            inputFormatters: [
+              MoneyInputFormatter(currencyCode: _selectedCurrency),
+            ],
+            suffix: Text(
+              AppCurrencies.byCode(_selectedCurrency).symbol,
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+            onChanged: (text) {
+              final parsed = Money.tryParse(
+                text,
+                currencyCode: _selectedCurrency,
+              );
+              setState(() {
+                _walletBalance = parsed?.minorUnits ?? 0;
+              });
+            },
+          ),
+          const SizedBox(height: 8),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildBalancePresetChip(0, '0 ₫'),
+                _buildBalancePresetChip(500000, '500.000 ₫'),
+                _buildBalancePresetChip(1000000, '1.000.000 ₫'),
+                _buildBalancePresetChip(2000000, '2.000.000 ₫'),
+                _buildBalancePresetChip(5000000, '5.000.000 ₫'),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Color & Icon Picker
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Màu sắc',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: scheme.onSurface.withValues(alpha: 0.7),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      children: _paletteColors.map((c) {
+                        final isSelected = _walletColor == c;
+                        return GestureDetector(
+                          onTap: () {
+                            unawaited(HapticFeedback.selectionClick());
+                            setState(() => _walletColor = c);
+                          },
+                          child: Container(
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              color: Color(c),
+                              shape: BoxShape.circle,
+                              border: isSelected
+                                  ? Border.all(
+                                      color: scheme.onSurface,
+                                      width: 2.5,
+                                    )
+                                  : null,
+                            ),
+                            child: isSelected
+                                ? const Icon(
+                                    Icons.check_rounded,
+                                    size: 16,
+                                    color: Colors.white,
+                                  )
+                                : null,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Biểu tượng',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: scheme.onSurface.withValues(alpha: 0.7),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      children: _selectableIcons.map((iconKey) {
+                        final isSelected = _walletIcon == iconKey;
+                        return GestureDetector(
+                          onTap: () {
+                            unawaited(HapticFeedback.selectionClick());
+                            setState(() => _walletIcon = iconKey);
+                          },
+                          child: Container(
+                            width: 32,
+                            height: 32,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? scheme.primary.withValues(alpha: 0.2)
+                                  : scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                              border: isSelected
+                                  ? Border.all(color: scheme.primary, width: 1.5)
+                                  : null,
+                            ),
+                            child: Icon(
+                              AppIconCatalog.resolve(iconKey),
+                              size: 18,
+                              color: isSelected ? scheme.primary : scheme.onSurface,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 28),
+
+          // Continue Button to Step 2
+          AppleButton.primary(
+            label: 'Tiếp tục: Thiết lập ngân sách',
+            icon: const Icon(Icons.arrow_forward_rounded, size: 20),
+            onPressed: _goToStep2,
+          ),
+          const SizedBox(height: 10),
+          Center(
+            child: TextButton(
+              onPressed: _isSaving ? null : _skipAndUseDefaults,
+              child: Text(
+                'Bỏ qua & Sử dụng cấu hình cơ bản',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: scheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWalletPreviewCard(bool isDark) {
+    final currencyInfo = AppCurrencies.byCode(_selectedCurrency);
+    final walletName = _walletNameController.text.trim().isEmpty
+        ? 'Tên ví'
+        : _walletNameController.text.trim();
+    final balanceText = Money(
+      minorUnits: _walletBalance,
+      currencyCode: _selectedCurrency,
+    ).format();
+
+    final typeLabel = switch (_walletType) {
+      AccountType.cash => 'Tiền mặt',
+      AccountType.bank => 'Tài khoản Ngân hàng',
+      AccountType.ewallet => 'Ví điện tử',
+      _ => 'Tài khoản',
     };
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color(_walletColor),
+            Color(_walletColor).withValues(alpha: 0.8),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+        boxShadow: [
+          BoxShadow(
+            color: Color(_walletColor).withValues(alpha: 0.35),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.25),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  AppIconCatalog.resolve(_walletIcon),
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                ),
+                child: Text(
+                  typeLabel,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          Text(
+            walletName,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.2,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                balanceText,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                currencyInfo.code,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.75),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTypeChip(String label, AccountType type, String iconKey) {
+    final isSelected = _walletType == type;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          unawaited(HapticFeedback.selectionClick());
+          setState(() {
+            _walletType = type;
+            _walletIcon = iconKey;
+          });
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: isSelected
+                ? scheme.primary
+                : scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+            border: Border.all(
+              color: isSelected
+                  ? scheme.primary
+                  : theme.dividerColor.withValues(alpha: 0.15),
+            ),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.white : scheme.onSurface,
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+              fontSize: 12.5,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBalancePresetChip(int amount, String label) {
+    final isSelected = _walletBalance == amount;
+    return Padding(
+      padding: const EdgeInsets.only(right: 6),
+      child: ActionChip(
+        label: Text(label),
+        onPressed: () => _setInitialBalancePreset(amount),
+        backgroundColor: isSelected
+            ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
+            : null,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+        ),
+      ),
+    );
+  }
+
+  // -------------------------------------------------------------
+  // STEP 2: THIẾT LẬP NGÂN SÁCH
+  // -------------------------------------------------------------
+  Widget _buildStep2BudgetView() {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Step Badge & Title
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: LucianTokens.resolveMint(isDark).withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+            ),
+            child: Text(
+              'Bước 2 / 2 • Thiết lập ngân sách',
+              style: TextStyle(
+                color: LucianTokens.resolveMint(isDark),
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Thiết lập ngân sách tháng',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Đặt hạn mức chi tiêu hàng tháng để ứng dụng nhắc nhở và giữ nhịp chi an toàn mỗi ngày.',
+            style: TextStyle(
+              fontSize: 13.5,
+              color: scheme.onSurface.withValues(alpha: 0.65),
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Educational Value Card
+          AppleGlassCard(
+            padding: const EdgeInsets.all(16),
+            borderColor: LucianTokens.resolveMint(isDark).withValues(alpha: 0.4),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: LucianTokens.resolveMint(isDark).withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.insights_rounded,
+                    color: LucianTokens.resolveMint(isDark),
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Kiểm soát chi tiêu thông minh',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '• Tính toán số tiền an toàn bạn có thể tiêu mỗi ngày\n'
+                        '• Cảnh báo tức thì khi chi tiêu chạm $_budgetAlertThreshold% hạn mức\n'
+                        '• Tránh tình trạng thâm hụt trước khi hết tháng',
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          color: scheme.onSurface.withValues(alpha: 0.75),
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Monthly Limit Input
+          AppleTextField(
+            controller: _budgetController,
+            label: 'Hạn mức chi tiêu tháng này',
+            placeholder: '5.000.000',
+            keyboardType: TextInputType.number,
+            inputFormatters: [
+              MoneyInputFormatter(currencyCode: _selectedCurrency),
+            ],
+            suffix: Text(
+              AppCurrencies.byCode(_selectedCurrency).symbol,
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+            onChanged: (text) {
+              final parsed = Money.tryParse(
+                text,
+                currencyCode: _selectedCurrency,
+              );
+              setState(() {
+                _budgetAmount = parsed?.minorUnits ?? 0;
+              });
+            },
+          ),
+          const SizedBox(height: 8),
+
+          // Quick Presets
+          Text(
+            'Mức ngân sách phổ biến',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: scheme.onSurface.withValues(alpha: 0.7),
+            ),
+          ),
+          const SizedBox(height: 8),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildBudgetPresetChip(3000000, '3 triệu (Tiết kiệm)'),
+                _buildBudgetPresetChip(5000000, '5 triệu (Cơ bản)'),
+                _buildBudgetPresetChip(10000000, '10 triệu (Tiêu chuẩn)'),
+                _buildBudgetPresetChip(15000000, '15 triệu (Thoải mái)'),
+                _buildBudgetPresetChip(20000000, '20 triệu'),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Alert Threshold
+          Text(
+            'Ngưỡng phát tín hiệu cảnh báo',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: scheme.onSurface.withValues(alpha: 0.7),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              _buildThresholdChip(70, '70%'),
+              const SizedBox(width: 8),
+              _buildThresholdChip(80, '80% (Khuyên dùng)'),
+              const SizedBox(width: 8),
+              _buildThresholdChip(90, '90%'),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Ứng dụng sẽ đổi màu cảnh báo trên biểu đồ khi tổng chi tiêu trong tháng chạm $_budgetAlertThreshold% ngân sách.',
+            style: TextStyle(
+              fontSize: 12,
+              color: scheme.onSurface.withValues(alpha: 0.55),
+            ),
+          ),
+          const SizedBox(height: 32),
+
+          // Action: Complete with Budget
+          AppleButton.primary(
+            label: 'Hoàn tất & Bắt đầu sử dụng',
+            icon: const Icon(Icons.check_circle_rounded, size: 20),
+            isLoading: _isSaving,
+            onPressed: () => _completeSetup(includeBudget: true),
+          ),
+          const SizedBox(height: 10),
+
+          // Action: Skip Budget
+          Center(
+            child: TextButton(
+              onPressed: _isSaving ? null : () => _completeSetup(includeBudget: false),
+              child: Text(
+                'Để sau (Bỏ qua bước này)',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: scheme.onSurface.withValues(alpha: 0.65),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBudgetPresetChip(int amount, String label) {
+    final isSelected = _budgetAmount == amount;
+    return Padding(
+      padding: const EdgeInsets.only(right: 6),
+      child: ActionChip(
+        label: Text(label),
+        onPressed: () => _setBudgetPreset(amount),
+        backgroundColor: isSelected
+            ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
+            : null,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThresholdChip(int threshold, String label) {
+    final isSelected = _budgetAlertThreshold == threshold;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          unawaited(HapticFeedback.selectionClick());
+          setState(() => _budgetAlertThreshold = threshold);
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: isSelected
+                ? scheme.primary
+                : scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+            border: Border.all(
+              color: isSelected
+                  ? scheme.primary
+                  : theme.dividerColor.withValues(alpha: 0.15),
+            ),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: isSelected ? Colors.white : scheme.onSurface,
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+              fontSize: 12,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
