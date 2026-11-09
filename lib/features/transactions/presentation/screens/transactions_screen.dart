@@ -332,56 +332,121 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
-                          child: TextField(
-                            controller: _searchController,
-                            onChanged: (value) => ref
-                                .read(transactionFilterProvider.notifier)
-                                .setSearchQuery(value),
-                            decoration: InputDecoration(
-                              filled: true,
-                              fillColor: isDark
-                                  ? AppleTokens.bgDarkSecondary
-                                  : AppleTokens.bgLightSecondary,
-                              hintText: l10n.searchTransactionsHint,
-                              contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 12),
-                              border: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.circular(AppleTokens.radiusPill),
-                                borderSide: BorderSide.none,
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.circular(AppleTokens.radiusPill),
-                                borderSide: BorderSide.none,
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.circular(AppleTokens.radiusPill),
-                                borderSide: const BorderSide(
-                                  color: AppleTokens.jadePrimary,
-                                  width: 1.5,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: SizedBox(
+                                  height: 38,
+                                  child: TextField(
+                                    controller: _searchController,
+                                    onChanged: (value) => ref
+                                        .read(transactionFilterProvider.notifier)
+                                        .setSearchQuery(value),
+                                    style: const TextStyle(fontSize: 13),
+                                    decoration: InputDecoration(
+                                      filled: true,
+                                      fillColor: isDark
+                                          ? AppleTokens.bgDarkSecondary
+                                          : AppleTokens.bgLightSecondary,
+                                      hintText: l10n.searchTransactionsHint,
+                                      hintStyle: TextStyle(
+                                        fontSize: 12.5,
+                                        color: isDark ? Colors.white38 : Colors.black38,
+                                      ),
+                                      contentPadding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 0),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                                        borderSide: const BorderSide(
+                                          color: AppleTokens.jadePrimary,
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                      prefixIcon: const Icon(CupertinoIcons.search, size: 16),
+                                      prefixIconConstraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                      suffixIcon: filter.searchQuery.isNotEmpty
+                                          ? IconButton(
+                                              padding: EdgeInsets.zero,
+                                              iconSize: 15,
+                                              tooltip: l10n.clearFilters,
+                                              onPressed: () {
+                                                _searchController.clear();
+                                                ref
+                                                    .read(transactionFilterProvider.notifier)
+                                                    .setSearchQuery('');
+                                              },
+                                              icon: const Icon(
+                                                CupertinoIcons.clear_thick_circled,
+                                              ),
+                                            )
+                                          : null,
+                                    ),
+                                  ),
                                 ),
                               ),
-                              prefixIcon:
-                                  const Icon(CupertinoIcons.search, size: 20),
-                              suffixIcon: filter.searchQuery.isNotEmpty
-                                  ? IconButton(
-                                      tooltip: l10n.clearFilters,
-                                      onPressed: () {
-                                        _searchController.clear();
-                                        ref
-                                            .read(
-                                                transactionFilterProvider.notifier)
-                                            .setSearchQuery('');
-                                      },
-                                      icon: const Icon(
-                                        CupertinoIcons.clear_thick_circled,
-                                        size: 18,
+                              const SizedBox(width: 8),
+                              ApplePressable(
+                                onTap: _openFilterSheet,
+                                child: Container(
+                                  height: 38,
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  decoration: BoxDecoration(
+                                    color: filter.hasActiveFilters
+                                        ? theme.colorScheme.primary.withValues(alpha: 0.14)
+                                        : (isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary),
+                                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                                    border: Border.all(
+                                      color: filter.hasActiveFilters
+                                          ? theme.colorScheme.primary.withValues(alpha: 0.35)
+                                          : Colors.transparent,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.tune_rounded,
+                                        size: 16,
+                                        color: filter.hasActiveFilters
+                                            ? theme.colorScheme.primary
+                                            : theme.colorScheme.onSurfaceVariant,
                                       ),
-                                    )
-                                  : null,
-                            ),
+                                      const SizedBox(width: 5),
+                                      Text(
+                                        locale.startsWith('vi') ? 'Lọc' : 'Filter',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: filter.hasActiveFilters
+                                              ? theme.colorScheme.primary
+                                              : theme.colorScheme.onSurfaceVariant,
+                                        ),
+                                      ),
+                                      if (filter.hasActiveFilters) ...[
+                                        const SizedBox(width: 4),
+                                        Container(
+                                          width: 6,
+                                          height: 6,
+                                          decoration: BoxDecoration(
+                                            color: theme.colorScheme.primary,
+                                            shape: BoxShape.circle,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         SingleChildScrollView(
@@ -421,8 +486,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                                     side: BorderSide.none,
                                   ),
                                   avatar: const Icon(Icons.filter_alt_off_rounded,
-                                      size: 16),
-                                  label: Text(l10n.clearFilters),
+                                      size: 15),
+                                  label: Text(l10n.clearFilters, style: const TextStyle(fontSize: 11.5)),
                                   onPressed: () {
                                     _searchController.clear();
                                     ref
@@ -434,6 +499,49 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                             ],
                           ),
                         ),
+                        if (filter.hasActiveFilters)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 6, 16, 2),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+                                border: Border.all(
+                                  color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.filter_list_rounded, size: 14, color: theme.colorScheme.primary),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      _getActiveFilterSummary(filter, categoriesMap, accountsMap, l10n, locale),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 11.5,
+                                        fontWeight: FontWeight.w600,
+                                        color: theme.colorScheme.primary,
+                                      ),
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      _searchController.clear();
+                                      ref.read(transactionFilterProvider.notifier).clearAll();
+                                    },
+                                    child: const Icon(
+                                      CupertinoIcons.clear_circled_solid,
+                                      size: 15,
+                                      color: AppleTokens.systemRed,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                       ],
                     ),
             ),
@@ -804,6 +912,29 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     );
   }
 
+  String _getActiveFilterSummary(
+    TransactionFilter filter,
+    Map<String, Category> categoriesMap,
+    Map<String, Account> accountsMap,
+    AppLocalizations l10n,
+    String locale,
+  ) {
+    final parts = <String>[];
+    if (filter.accountId != null && accountsMap.containsKey(filter.accountId)) {
+      parts.add(accountsMap[filter.accountId]!.name);
+    }
+    if (filter.categoryId != null && categoriesMap.containsKey(filter.categoryId)) {
+      parts.add(categoriesMap[filter.categoryId]!.name);
+    }
+    if (filter.startDate != null && filter.endDate != null) {
+      parts.add(
+        '${AppDateUtils.formatShortDate(filter.startDate!, locale: locale)} - ${AppDateUtils.formatShortDate(filter.endDate!, locale: locale)}',
+      );
+    }
+    if (parts.isEmpty) return l10n.filterActiveCount(1);
+    return parts.join(' · ');
+  }
+
   Widget _buildTypeChip(
     TransactionType? type,
     String label,
@@ -813,26 +944,47 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
   ) {
     final filter = ref.watch(transactionFilterProvider);
     final isSelected = filter.type == type;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final selectedBg = iconColor != null
+        ? iconColor.withValues(alpha: isDark ? 0.22 : 0.14)
+        : theme.colorScheme.primary.withValues(alpha: isDark ? 0.22 : 0.14);
+    final selectedBorder = iconColor != null
+        ? iconColor.withValues(alpha: 0.45)
+        : theme.colorScheme.primary.withValues(alpha: 0.45);
 
     return FilterChip(
       showCheckmark: false,
-      visualDensity: isLandscape ? VisualDensity.compact : VisualDensity.standard,
-      padding: EdgeInsets.symmetric(horizontal: isLandscape ? 6 : 8),
-      materialTapTargetSize: isLandscape ? MaterialTapTargetSize.shrinkWrap : null,
+      visualDensity: isLandscape ? VisualDensity.compact : VisualDensity.compact,
+      padding: EdgeInsets.symmetric(horizontal: isLandscape ? 6 : 8, vertical: 0),
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      backgroundColor: isDark
+          ? AppleTokens.bgDarkSecondary.withValues(alpha: 0.6)
+          : AppleTokens.bgLightSecondary.withValues(alpha: 0.8),
+      selectedColor: selectedBg,
       avatar: Icon(
         icon,
         size: isLandscape ? 13 : 14,
-        color: iconColor,
+        color: isSelected
+            ? (iconColor ?? theme.colorScheme.primary)
+            : (isDark ? Colors.white70 : Colors.black54),
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-        side: BorderSide.none,
+        side: BorderSide(
+          color: isSelected ? selectedBorder : Colors.transparent,
+          width: 1,
+        ),
       ),
       label: Text(
         label,
         style: TextStyle(
           fontSize: isLandscape ? 11 : 12,
-          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+          color: isSelected
+              ? (iconColor ?? theme.colorScheme.primary)
+              : (isDark ? Colors.white : Colors.black87),
         ),
       ),
       selected: isSelected,
