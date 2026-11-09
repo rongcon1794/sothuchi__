@@ -37,28 +37,60 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingNext => 'Next';
 
   @override
+  String get onboardingPrev => 'Back';
+
+  @override
   String get onboardingStart => 'Get Started';
 
   @override
-  String get onboarding1Title => 'Log expenses in 3 seconds';
+  String get onboarding1Tag => 'LOGGING & MULTI-WALLET';
+
+  @override
+  String get onboarding1Title => 'Lightning Entry & Multi-Wallet';
 
   @override
   String get onboarding1Subtitle =>
-      'Track every income, expense, and wallet transfer with exact integer precision and crystal-clear formatting.';
+      'Log income and expenses in 3 seconds with smart keypads and AI receipt scanning. Track cash, banks, and e-wallets effortlessly.';
 
   @override
-  String get onboarding2Title => 'Multi-wallet & proactive budgets';
+  String get onboarding2Tag => 'SMART BUDGETS';
+
+  @override
+  String get onboarding2Title => 'Budgets & Spending Control';
 
   @override
   String get onboarding2Subtitle =>
-      'Manage cash, bank accounts, and e-wallets with early threshold warnings before overspending.';
+      'Set category spending limits. Monitor safe daily spending pace and receive timely alerts before overspending.';
 
   @override
-  String get onboarding3Title => 'Offline-ready, instant cloud sync';
+  String get onboarding3Tag => 'GOALS & RECURRING BILLS';
+
+  @override
+  String get onboarding3Title => 'Savings Goals & Recurring Bills';
 
   @override
   String get onboarding3Subtitle =>
-      'Record transactions without internet. Your data stays private and syncs automatically once back online.';
+      'Build savings pots for your dreams. Manage utility bills and subscriptions with automated due date reminders.';
+
+  @override
+  String get onboarding4Tag => 'FINANCIAL ANALYTICS';
+
+  @override
+  String get onboarding4Title => 'Visual Reports & Deep Analytics';
+
+  @override
+  String get onboarding4Subtitle =>
+      'Explore spending breakdown charts, track net cashflow trends, and easily export statements to Excel and PDF.';
+
+  @override
+  String get onboarding5Tag => 'SECURITY & CLOUD SYNC';
+
+  @override
+  String get onboarding5Title => 'Private Security & Instant Cloud Sync';
+
+  @override
+  String get onboarding5Subtitle =>
+      'Protect your finances with Face ID, fingerprint, and PIN. Enjoy full 100% offline capability with automated cloud backup.';
 
   @override
   String get signInTitle => 'Welcome to So Thu Chi';

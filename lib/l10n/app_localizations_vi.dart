@@ -37,28 +37,60 @@ class AppLocalizationsVi extends AppLocalizations {
   String get onboardingNext => 'Tiếp tục';
 
   @override
+  String get onboardingPrev => 'Quay lại';
+
+  @override
   String get onboardingStart => 'Bắt đầu ngay';
+
+  @override
+  String get onboarding1Tag => 'GHI CHÉP & ĐA VÍ';
 
   @override
   String get onboarding1Title => 'Ghi chép thu chi trong 3 giây';
 
   @override
   String get onboarding1Subtitle =>
-      'Theo dõi mọi khoản thu nhập, chi tiêu và chuyển khoản với định dạng tiền Việt rõ ràng, chính xác đến từng đồng.';
+      'Nhập thu chi trong 3 giây với bàn phím thông minh và quét hóa đơn AI. Theo dõi tiền mặt, tài khoản ngân hàng và ví điện tử trực quan.';
 
   @override
-  String get onboarding2Title => 'Quản lý đa ví & ngân sách chủ động';
+  String get onboarding2Tag => 'NGÂN SÁCH THÔNG MINH';
+
+  @override
+  String get onboarding2Title => 'Ngân sách & Kiểm soát chi tiêu';
 
   @override
   String get onboarding2Subtitle =>
-      'Quản lý tiền mặt, tài khoản ngân hàng, ví điện tử và nhận cảnh báo sớm trước khi vượt ngân sách tháng.';
+      'Thiết lập hạn mức theo từng danh mục. Theo dõi nhịp chi an toàn mỗi ngày và nhận cảnh báo kịp thời trước khi vượt ngân sách.';
 
   @override
-  String get onboarding3Title => 'Làm việc ngoại tuyến, đồng bộ tức thì';
+  String get onboarding3Tag => 'MỤC TIÊU & HÓA ĐƠN';
+
+  @override
+  String get onboarding3Title => 'Mục tiêu tiết kiệm & Hóa đơn định kỳ';
 
   @override
   String get onboarding3Subtitle =>
-      'Ghi chép ngay cả khi không có mạng. Dữ liệu được bảo mật riêng tư và tự động đồng bộ lên đám mây khi kết nối lại.';
+      'Tạo hũ tích lũy cho những ước mơ lớn. Quản lý hóa đơn điện, nước, dịch vụ định kỳ và tự động nhắc nhở khi đến hạn.';
+
+  @override
+  String get onboarding4Tag => 'BÁO CÁO TÀI CHÍNH';
+
+  @override
+  String get onboarding4Title => 'Báo cáo trực quan & Phân tích chuyên sâu';
+
+  @override
+  String get onboarding4Subtitle =>
+      'Khám phá cơ cấu chi tiêu qua biểu đồ sắc nét, nắm bắt xu hướng dòng tiền ròng và xuất báo cáo Excel, PDF tiện lợi.';
+
+  @override
+  String get onboarding5Tag => 'BẢO MẬT & ĐỒNG BỘ';
+
+  @override
+  String get onboarding5Title => 'Bảo mật riêng tư & Đồng bộ đám mây';
+
+  @override
+  String get onboarding5Subtitle =>
+      'Khóa an toàn bằng Face ID, vân tay và mã PIN. Sử dụng mượt mà 100% ngoại tuyến và tự động sao lưu tức thì khi có mạng.';
 
   @override
   String get signInTitle => 'Chào mừng đến với Sổ Thu Chi';

@@ -152,11 +152,23 @@ abstract class AppLocalizations {
   /// **'Tiếp tục'**
   String get onboardingNext;
 
+  /// No description provided for @onboardingPrev.
+  ///
+  /// In vi, this message translates to:
+  /// **'Quay lại'**
+  String get onboardingPrev;
+
   /// No description provided for @onboardingStart.
   ///
   /// In vi, this message translates to:
   /// **'Bắt đầu ngay'**
   String get onboardingStart;
+
+  /// No description provided for @onboarding1Tag.
+  ///
+  /// In vi, this message translates to:
+  /// **'GHI CHÉP & ĐA VÍ'**
+  String get onboarding1Tag;
 
   /// No description provided for @onboarding1Title.
   ///
@@ -167,32 +179,80 @@ abstract class AppLocalizations {
   /// No description provided for @onboarding1Subtitle.
   ///
   /// In vi, this message translates to:
-  /// **'Theo dõi mọi khoản thu nhập, chi tiêu và chuyển khoản với định dạng tiền Việt rõ ràng, chính xác đến từng đồng.'**
+  /// **'Nhập thu chi trong 3 giây với bàn phím thông minh và quét hóa đơn AI. Theo dõi tiền mặt, tài khoản ngân hàng và ví điện tử trực quan.'**
   String get onboarding1Subtitle;
+
+  /// No description provided for @onboarding2Tag.
+  ///
+  /// In vi, this message translates to:
+  /// **'NGÂN SÁCH THÔNG MINH'**
+  String get onboarding2Tag;
 
   /// No description provided for @onboarding2Title.
   ///
   /// In vi, this message translates to:
-  /// **'Quản lý đa ví & ngân sách chủ động'**
+  /// **'Ngân sách & Kiểm soát chi tiêu'**
   String get onboarding2Title;
 
   /// No description provided for @onboarding2Subtitle.
   ///
   /// In vi, this message translates to:
-  /// **'Quản lý tiền mặt, tài khoản ngân hàng, ví điện tử và nhận cảnh báo sớm trước khi vượt ngân sách tháng.'**
+  /// **'Thiết lập hạn mức theo từng danh mục. Theo dõi nhịp chi an toàn mỗi ngày và nhận cảnh báo kịp thời trước khi vượt ngân sách.'**
   String get onboarding2Subtitle;
+
+  /// No description provided for @onboarding3Tag.
+  ///
+  /// In vi, this message translates to:
+  /// **'MỤC TIÊU & HÓA ĐƠN'**
+  String get onboarding3Tag;
 
   /// No description provided for @onboarding3Title.
   ///
   /// In vi, this message translates to:
-  /// **'Làm việc ngoại tuyến, đồng bộ tức thì'**
+  /// **'Mục tiêu tiết kiệm & Hóa đơn định kỳ'**
   String get onboarding3Title;
 
   /// No description provided for @onboarding3Subtitle.
   ///
   /// In vi, this message translates to:
-  /// **'Ghi chép ngay cả khi không có mạng. Dữ liệu được bảo mật riêng tư và tự động đồng bộ lên đám mây khi kết nối lại.'**
+  /// **'Tạo hũ tích lũy cho những ước mơ lớn. Quản lý hóa đơn điện, nước, dịch vụ định kỳ và tự động nhắc nhở khi đến hạn.'**
   String get onboarding3Subtitle;
+
+  /// No description provided for @onboarding4Tag.
+  ///
+  /// In vi, this message translates to:
+  /// **'BÁO CÁO TÀI CHÍNH'**
+  String get onboarding4Tag;
+
+  /// No description provided for @onboarding4Title.
+  ///
+  /// In vi, this message translates to:
+  /// **'Báo cáo trực quan & Phân tích chuyên sâu'**
+  String get onboarding4Title;
+
+  /// No description provided for @onboarding4Subtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Khám phá cơ cấu chi tiêu qua biểu đồ sắc nét, nắm bắt xu hướng dòng tiền ròng và xuất báo cáo Excel, PDF tiện lợi.'**
+  String get onboarding4Subtitle;
+
+  /// No description provided for @onboarding5Tag.
+  ///
+  /// In vi, this message translates to:
+  /// **'BẢO MẬT & ĐỒNG BỘ'**
+  String get onboarding5Tag;
+
+  /// No description provided for @onboarding5Title.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bảo mật riêng tư & Đồng bộ đám mây'**
+  String get onboarding5Title;
+
+  /// No description provided for @onboarding5Subtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Khóa an toàn bằng Face ID, vân tay và mã PIN. Sử dụng mượt mà 100% ngoại tuyến và tự động sao lưu tức thì khi có mạng.'**
+  String get onboarding5Subtitle;
 
   /// No description provided for @signInTitle.
   ///
