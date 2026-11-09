@@ -180,6 +180,11 @@ void main() {
       // Due bill title
       expect(find.text('Tiền thuê căn hộ'), findsWidgets);
 
+      // Verify badges matching preview card design: Frequency, Wallet, Mode
+      expect(find.text('Hàng tháng'), findsWidgets);
+      expect(find.text('Ví chính'), findsWidgets);
+      expect(find.text('Thủ công'), findsWidgets);
+
       // Action button "Ghi nhận đã thanh toán"
       expect(find.text('Ghi nhận đã thanh toán'), findsOneWidget);
 

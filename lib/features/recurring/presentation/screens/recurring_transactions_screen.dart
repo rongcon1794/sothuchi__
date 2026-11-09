@@ -9,11 +9,14 @@ import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
+import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/date_formatter.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/core/widgets/empty_state_view.dart';
+import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
+import 'package:so_thu_chi/features/categories/domain/entities/category.dart';
 import 'package:so_thu_chi/features/categories/presentation/controllers/categories_controller.dart';
 import 'package:so_thu_chi/features/recurring/domain/entities/recurring_transaction.dart';
 import 'package:so_thu_chi/features/recurring/presentation/controllers/recurring_controller.dart';
@@ -285,71 +288,18 @@ class _RecurringTransactionsScreenState
                 for (final item in dueList)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12),
-                    child: ApplePressable(
-                      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                      onTap: () => context.push(AppRoutes.recurringDetail(item.id)),
-                      child: AppleGlassCard(
-                        borderColor: AppleTokens.systemOrange.withValues(alpha: 0.4),
-                        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                AppleSquircleBadge(
-                                  icon: categoriesMap[item.categoryId] != null
-                                      ? AppIconCatalog.resolve(categoriesMap[item.categoryId]!.icon)
-                                      : CupertinoIcons.tag,
-                                  backgroundColor: categoriesMap[item.categoryId] != null
-                                      ? Color(categoriesMap[item.categoryId]!.color)
-                                      : AppleTokens.systemOrange,
-                                  size: 40,
-                                  iconSize: 20,
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        item.title,
-                                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        '${l10n.recurringNextDue(AppDateUtils.formatDayHeader(item.nextDueDate, locale: locale, todayLabel: l10n.today, yesterdayLabel: l10n.yesterday))} • ${accountsMap[item.accountId]?.name ?? ''}',
-                                        style: const TextStyle(fontSize: 12, color: AppleTokens.systemGray),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Text(
-                                  item.money.format(locale: locale, masked: hideBalance),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 16,
-                                    color: AppleTokens.rubyExpense,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            SizedBox(
-                              width: double.infinity,
-                              child: FilledButton.icon(
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: AppleTokens.jadePrimary,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppleTokens.radiusPill)),
-                                  padding: const EdgeInsets.symmetric(vertical: 10),
-                                ),
-                                onPressed: () => _handleExecute(item),
-                                icon: const Icon(CupertinoIcons.checkmark_alt, size: 16),
-                                label: Text(l10n.recurringMarkPaid, style: const TextStyle(fontWeight: FontWeight.bold)),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    child: _buildRecurringCard(
+                      context: context,
+                      ref: ref,
+                      item: item,
+                      categoriesMap: categoriesMap,
+                      accountsMap: accountsMap,
+                      isDark: isDark,
+                      theme: theme,
+                      l10n: l10n,
+                      locale: locale,
+                      hideBalance: hideBalance,
+                      onExecute: () => _handleExecute(item),
                     ),
                   ),
                 const SizedBox(height: 16),
@@ -371,112 +321,27 @@ class _RecurringTransactionsScreenState
               if (activeItems.isEmpty)
                 Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Center(child: Text(l10n.emptyTransactionsTitle, style: const TextStyle(color: AppleTokens.systemGray))),
+                  child: Center(
+                    child: Text(
+                      l10n.emptyTransactionsTitle,
+                      style: const TextStyle(color: AppleTokens.systemGray),
+                    ),
+                  ),
                 ),
               for (final item in activeItems)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: ApplePressable(
-                    onTap: () => context.push(AppRoutes.recurringDetail(item.id)),
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                    child: AppleGlassCard(
-                      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                      child: Row(
-                        children: [
-                          AppleSquircleBadge(
-                            icon: categoriesMap[item.categoryId] != null
-                                ? AppIconCatalog.resolve(categoriesMap[item.categoryId]!.icon)
-                                : CupertinoIcons.repeat,
-                            backgroundColor: categoriesMap[item.categoryId] != null
-                                ? Color(categoriesMap[item.categoryId]!.color)
-                                : AppleTokens.systemBlue,
-                            size: 42,
-                            iconSize: 20,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item.title,
-                                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-                                ),
-                                const SizedBox(height: 2),
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text(
-                                        _intervalLabel(item.interval, l10n),
-                                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppleTokens.systemBlue),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Expanded(
-                                      child: Text(
-                                        l10n.recurringNextDue(AppDateUtils.formatDayHeader(item.nextDueDate, locale: locale, todayLabel: l10n.today, yesterdayLabel: l10n.yesterday)),
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(fontSize: 12, color: AppleTokens.systemGray),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                item.money.format(locale: locale, masked: hideBalance),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 15,
-                                  color: item.type == TransactionType.income
-                                      ? AppleTokens.emeraldIncome
-                                      : AppleTokens.rubyExpense,
-                                ),
-                              ),
-                              ApplePopupMenuButton<String>(
-                                tooltip: l10n.moreOptions,
-                                onSelected: (action) {
-                                  if (action == 'edit') {
-                                    RecurringFormSheet.show(context, existing: item);
-                                  } else if (action == 'pause') {
-                                    ref.read(recurringActionControllerProvider.notifier).togglePause(item.id, true);
-                                  } else if (action == 'delete') {
-                                    _confirmDelete(item);
-                                  }
-                                },
-                                itemBuilder: (ctx) => [
-                                  ApplePopupMenuItem(
-                                    value: 'edit',
-                                    icon: CupertinoIcons.pencil,
-                                    title: l10n.edit,
-                                  ),
-                                  ApplePopupMenuItem(
-                                    value: 'pause',
-                                    icon: CupertinoIcons.pause_fill,
-                                    title: l10n.recurringPause,
-                                  ),
-                                  ApplePopupMenuItem(
-                                    value: 'delete',
-                                    icon: CupertinoIcons.trash,
-                                    title: l10n.recurringDelete,
-                                    isDestructive: true,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _buildRecurringCard(
+                    context: context,
+                    ref: ref,
+                    item: item,
+                    categoriesMap: categoriesMap,
+                    accountsMap: accountsMap,
+                    isDark: isDark,
+                    theme: theme,
+                    l10n: l10n,
+                    locale: locale,
+                    hideBalance: hideBalance,
                   ),
                 ),
 
@@ -497,43 +362,19 @@ class _RecurringTransactionsScreenState
                 ),
                 for (final item in pausedItems)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: ApplePressable(
-                      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                      onTap: () => context.push(AppRoutes.recurringDetail(item.id)),
-                      child: AppleGlassCard(
-                        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                        child: Row(
-                          children: [
-                            const Opacity(
-                              opacity: 0.5,
-                              child: AppleSquircleBadge(
-                                icon: CupertinoIcons.pause_fill,
-                                backgroundColor: AppleTokens.systemGray,
-                                size: 40,
-                                iconSize: 18,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    item.title,
-                                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: AppleTokens.systemGray),
-                                  ),
-                                  Text(l10n.recurringPause, style: const TextStyle(fontSize: 12, color: AppleTokens.systemGray)),
-                                ],
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () => ref.read(recurringActionControllerProvider.notifier).togglePause(item.id, false),
-                              child: Text(l10n.recurringResume),
-                            ),
-                          ],
-                        ),
-                      ),
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _buildRecurringCard(
+                      context: context,
+                      ref: ref,
+                      item: item,
+                      categoriesMap: categoriesMap,
+                      accountsMap: accountsMap,
+                      isDark: isDark,
+                      theme: theme,
+                      l10n: l10n,
+                      locale: locale,
+                      hideBalance: hideBalance,
+                      isPaused: true,
                     ),
                   ),
               ],
@@ -547,4 +388,404 @@ class _RecurringTransactionsScreenState
     ),
   );
 }
+
+  Widget _buildRecurringCard({
+    required BuildContext context,
+    required WidgetRef ref,
+    required RecurringTransaction item,
+    required Map<String, Category> categoriesMap,
+    required Map<String, Account> accountsMap,
+    required bool isDark,
+    required ThemeData theme,
+    required AppLocalizations l10n,
+    required String locale,
+    required bool hideBalance,
+    bool isPaused = false,
+    VoidCallback? onExecute,
+  }) {
+    final isExpense = item.type == TransactionType.expense;
+    final accentColor = isExpense ? AppleTokens.rubyExpense : AppleTokens.jadePrimary;
+    final category = categoriesMap[item.categoryId];
+    final wallet = accountsMap[item.accountId];
+    final categoryColor = category != null ? Color(category.color) : accentColor;
+
+    return ApplePressable(
+      onTap: () => context.push(AppRoutes.recurringDetail(item.id)),
+      borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 200),
+        opacity: isPaused ? 0.75 : 1.0,
+        child: AppleGlassCard(
+          borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+          borderColor: item.isDue && !isPaused
+              ? AppleTokens.systemOrange.withValues(alpha: isDark ? 0.6 : 0.45)
+              : accentColor.withValues(alpha: isDark ? 0.35 : 0.25),
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Top Row: Category Squircle Badge + Title/Amount + Popup Menu
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Category Icon Badge with Gradient & Glow
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          (isPaused ? AppleTokens.systemGray : categoryColor)
+                              .withValues(alpha: isDark ? 0.95 : 0.9),
+                          (isPaused ? AppleTokens.systemGray : categoryColor)
+                              .withValues(alpha: isDark ? 0.75 : 0.7),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                      boxShadow: [
+                        BoxShadow(
+                          color: (isPaused ? AppleTokens.systemGray : categoryColor)
+                              .withValues(alpha: isDark ? 0.35 : 0.25),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      category != null
+                          ? AppIconCatalog.resolve(category.icon)
+                          : (isExpense
+                              ? CupertinoIcons.arrow_up_right
+                              : CupertinoIcons.arrow_down_left),
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+
+                  // Title + Amount + Optional Note
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.title,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.2,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          '${isExpense ? '-' : '+'}${item.money.format(locale: locale, masked: hideBalance)}',
+                          style: TextStyle(
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.w800,
+                            color: isPaused ? AppleTokens.systemGray : accentColor,
+                            fontFeatures: AppTheme.tabularFigures,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                        if (item.note.trim().isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            '“${item.note.trim()}”',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontStyle: FontStyle.italic,
+                              color: isDark ? Colors.white60 : Colors.black54,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+
+                  // Actions: ApplePopupMenuButton
+                  ApplePopupMenuButton<String>(
+                    tooltip: l10n.moreOptions,
+                    onSelected: (action) {
+                      if (action == 'edit') {
+                        RecurringFormSheet.show(context, existing: item);
+                      } else if (action == 'pause') {
+                        ref
+                            .read(recurringActionControllerProvider.notifier)
+                            .togglePause(item.id, !item.isPaused);
+                      } else if (action == 'delete') {
+                        _confirmDelete(item);
+                      }
+                    },
+                    itemBuilder: (ctx) => [
+                      ApplePopupMenuItem(
+                        value: 'edit',
+                        icon: CupertinoIcons.pencil,
+                        title: l10n.edit,
+                      ),
+                      ApplePopupMenuItem(
+                        value: 'pause',
+                        icon: item.isPaused
+                            ? CupertinoIcons.play_fill
+                            : CupertinoIcons.pause_fill,
+                        title: item.isPaused
+                            ? l10n.recurringResume
+                            : l10n.recurringPause,
+                      ),
+                      ApplePopupMenuItem(
+                        value: 'delete',
+                        icon: CupertinoIcons.trash,
+                        title: l10n.recurringDelete,
+                        isDestructive: true,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+
+              // Badges Wrap: Frequency + Next Due Date + Wallet + Auto Mode
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  // 1. Frequency badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: accentColor.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          CupertinoIcons.repeat,
+                          size: 11,
+                          color: accentColor,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          _intervalLabel(item.interval, l10n),
+                          style: TextStyle(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w700,
+                            color: accentColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // 2. Next Due badge (with orange alert if due today)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: item.isDue && !isPaused
+                          ? AppleTokens.systemOrange.withValues(alpha: 0.16)
+                          : (isDark
+                              ? Colors.white.withValues(alpha: 0.07)
+                              : Colors.black.withValues(alpha: 0.04)),
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          item.isDue && !isPaused
+                              ? CupertinoIcons.exclamationmark_circle_fill
+                              : CupertinoIcons.calendar,
+                          size: 11,
+                          color: item.isDue && !isPaused
+                              ? AppleTokens.systemOrange
+                              : (isDark ? Colors.white70 : Colors.black54),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          item.isDue && !isPaused
+                              ? 'Đến hạn hôm nay'
+                              : l10n.recurringNextDue(AppDateUtils.formatDayHeader(
+                                  item.nextDueDate,
+                                  locale: locale,
+                                  todayLabel: l10n.today,
+                                  yesterdayLabel: l10n.yesterday,
+                                )),
+                          style: TextStyle(
+                            fontSize: 10.5,
+                            fontWeight: item.isDue && !isPaused
+                                ? FontWeight.w700
+                                : FontWeight.w600,
+                            color: item.isDue && !isPaused
+                                ? AppleTokens.systemOrange
+                                : (isDark ? Colors.white70 : Colors.black54),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // 3. Wallet badge
+                  if (wallet != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Color(wallet.color).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            CupertinoIcons.creditcard,
+                            size: 11,
+                            color: Color(wallet.color),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            wallet.name,
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w700,
+                              color: Color(wallet.color),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  // 4. Auto Mode badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: (item.autoExecute
+                              ? AppleTokens.systemGreen
+                              : AppleTokens.systemGray)
+                          .withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          item.autoExecute
+                              ? CupertinoIcons.bolt_fill
+                              : CupertinoIcons.hand_draw,
+                          size: 11,
+                          color: item.autoExecute
+                              ? AppleTokens.systemGreen
+                              : AppleTokens.systemGray,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          item.autoExecute ? 'Tự động' : 'Thủ công',
+                          style: TextStyle(
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w700,
+                            color: item.autoExecute
+                                ? AppleTokens.systemGreen
+                                : AppleTokens.systemGray,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // 5. If Paused badge
+                  if (isPaused)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: AppleTokens.systemGray.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            CupertinoIcons.pause_fill,
+                            size: 11,
+                            color: AppleTokens.systemGray,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            l10n.recurringPause,
+                            style: const TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w700,
+                              color: AppleTokens.systemGray,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+
+              // Bottom Action Button: If Due -> Mark Paid
+              if (onExecute != null) ...[
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: AppleButton.primary(
+                    color: AppleTokens.jadePrimary,
+                    label: l10n.recurringMarkPaid,
+                    icon: const Icon(CupertinoIcons.checkmark_alt, size: 16),
+                    onPressed: onExecute,
+                  ),
+                ),
+              ],
+
+              // Quick Action Button: If Paused -> Quick Resume
+              if (isPaused) ...[
+                const SizedBox(height: 10),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ApplePressable(
+                    onTap: () => ref
+                        .read(recurringActionControllerProvider.notifier)
+                        .togglePause(item.id, false),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: AppleTokens.jadePrimary.withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                        border: Border.all(
+                          color: AppleTokens.jadePrimary.withValues(alpha: 0.3),
+                          width: 1.0,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            CupertinoIcons.play_fill,
+                            size: 11,
+                            color: AppleTokens.jadePrimary,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            l10n.recurringResume,
+                            style: const TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w700,
+                              color: AppleTokens.jadePrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
