@@ -346,8 +346,21 @@ void main() {
         expect(find.text('Tháng này'), findsOneWidget);
         expect(find.text('30 ngày qua'), findsOneWidget);
 
-        // Verify wallet card & apply button
+        // Tap to expand wallet menu and verify wallet item
+        await tester.tap(find.text('VÍ & TÀI KHOẢN'));
+        await tester.pumpAndSettle();
         expect(find.text('Ví tiền mặt'), findsWidgets);
+
+        // Tap to select wallet and verify menu collapses
+        await tester.tap(find.text('Ví tiền mặt').first);
+        await tester.pumpAndSettle();
+
+        // Tap to expand category menu and verify category items
+        await tester.tap(find.text('DANH MỤC THU CHI'));
+        await tester.pumpAndSettle();
+        expect(find.text('Tất cả danh mục'), findsWidgets);
+
+        // Verify apply button exists
         expect(find.text('Áp dụng bộ lọc'), findsOneWidget);
 
         // Tap Apply button to dismiss bottom sheet

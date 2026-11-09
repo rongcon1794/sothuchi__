@@ -2969,7 +2969,7 @@ abstract class AppLocalizations {
   /// No description provided for @filterDateAll.
   ///
   /// In vi, this message translates to:
-  /// **'Toàn thời gian'**
+  /// **'Tất cả'**
   String get filterDateAll;
 
   /// No description provided for @filterDateThisMonth.
