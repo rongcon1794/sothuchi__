@@ -132,14 +132,14 @@ class _AppleTextFieldState extends State<AppleTextField> {
         (isDark
             ? (context.isOled
                 ? AppleTokens.bgOledSecondary
-                : AppleTokens.bgDarkSecondary)
-            : AppleTokens.bgLightSecondary);
+                : const Color(0xFF2C2C2E))
+            : Colors.white);
 
     final borderColor = _isFocused
-        ? primary.withValues(alpha: 0.8)
+        ? primary.withValues(alpha: 0.85)
         : (isDark
-            ? Colors.white.withValues(alpha: 0.1)
-            : Colors.black.withValues(alpha: 0.08));
+            ? const Color(0xFF38383A)
+            : const Color(0xFFD1D1D6));
 
     Widget? suffixWidget = widget.suffix ?? widget.suffixIcon;
     if (widget.clearable && _showClear && !widget.readOnly) {
@@ -214,11 +214,11 @@ class _AppleTextFieldState extends State<AppleTextField> {
             const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         border: OutlineInputBorder(
           borderRadius: radius,
-          borderSide: BorderSide(color: borderColor, width: AppleTokens.hairline),
+          borderSide: BorderSide(color: borderColor, width: 1.0),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: radius,
-          borderSide: BorderSide(color: borderColor, width: AppleTokens.hairline),
+          borderSide: BorderSide(color: borderColor, width: 1.0),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: radius,

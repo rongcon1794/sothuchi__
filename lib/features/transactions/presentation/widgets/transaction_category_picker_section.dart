@@ -455,9 +455,20 @@ class _TransactionCategoryPickerSheetState
               // Search Bar
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                child: CupertinoSearchTextField(
-                  placeholder: l10n.txCategorySearchPlaceholder,
-                  onChanged: (val) => setState(() => _searchQuery = val),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF38383A) : const Color(0xFFD1D1D6),
+                      width: 1.0,
+                    ),
+                  ),
+                  child: CupertinoSearchTextField(
+                    placeholder: l10n.txCategorySearchPlaceholder,
+                    backgroundColor: Colors.transparent,
+                    onChanged: (val) => setState(() => _searchQuery = val),
+                  ),
                 ),
               ),
 

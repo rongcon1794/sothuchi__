@@ -217,85 +217,106 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: SizedBox(
+                      child: Container(
                         height: isLandscape ? 32 : 36,
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
+                          borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF38383A) : const Color(0xFFD1D1D6),
+                            width: 1.0,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+                              blurRadius: 4,
+                              offset: const Offset(0, 1),
+                            ),
+                          ],
+                        ),
                         child: TextField(
                           controller: _searchController,
                           onChanged: (value) => ref
                               .read(transactionFilterProvider.notifier)
                               .setSearchQuery(value),
-                          style: TextStyle(fontSize: isLandscape ? 12 : 12.5),
+                          style: TextStyle(
+                            fontSize: isLandscape ? 12 : 12.5,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white : Colors.black87,
+                          ),
+                          textAlignVertical: TextAlignVertical.center,
                           decoration: InputDecoration(
-                            filled: true,
-                            fillColor: isDark
-                                ? AppleTokens.bgDarkSecondary
-                                : AppleTokens.bgLightSecondary,
+                            isDense: true,
+                            filled: false,
                             hintText: l10n.searchTransactionsHint,
                             hintStyle: TextStyle(
                               fontSize: isLandscape ? 11.5 : 12,
-                              color: isDark ? Colors.white38 : Colors.black38,
+                              color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF8E8E93),
+                              fontWeight: FontWeight.w400,
                             ),
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: isLandscape ? 10 : 12,
-                              vertical: 0,
+                            contentPadding: EdgeInsets.only(
+                              right: isLandscape ? 8 : 10,
                             ),
-                            border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.circular(AppleTokens.radiusPill),
-                              borderSide: BorderSide.none,
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            prefixIcon: Icon(
+                              CupertinoIcons.search,
+                              size: isLandscape ? 14 : 16,
+                              color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6C6C70),
                             ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.circular(AppleTokens.radiusPill),
-                              borderSide: BorderSide.none,
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.circular(AppleTokens.radiusPill),
-                              borderSide: const BorderSide(
-                                color: AppleTokens.jadePrimary,
-                                width: 1.5,
-                              ),
-                            ),
-                            prefixIcon: Icon(CupertinoIcons.search, size: isLandscape ? 14 : 16),
                             prefixIconConstraints: BoxConstraints(
-                              minWidth: isLandscape ? 26 : 30,
+                              minWidth: isLandscape ? 28 : 32,
                               minHeight: isLandscape ? 26 : 30,
                             ),
                             suffixIcon: filter.searchQuery.isNotEmpty
-                                ? IconButton(
-                                    padding: EdgeInsets.zero,
-                                    iconSize: isLandscape ? 14 : 15,
-                                    tooltip: l10n.clearFilters,
-                                    onPressed: () {
-                                      _searchController.clear();
-                                      ref
-                                          .read(transactionFilterProvider.notifier)
-                                          .setSearchQuery('');
-                                    },
-                                    icon: const Icon(
-                                      CupertinoIcons.clear_thick_circled,
+                                ? Tooltip(
+                                    message: l10n.clearFilters,
+                                    child: CupertinoButton(
+                                      padding: EdgeInsets.zero,
+                                      minimumSize: Size(isLandscape ? 22 : 26, isLandscape ? 22 : 26),
+                                      onPressed: () {
+                                        _searchController.clear();
+                                        ref
+                                            .read(transactionFilterProvider.notifier)
+                                            .setSearchQuery('');
+                                      },
+                                      child: Icon(
+                                        CupertinoIcons.clear_circled_solid,
+                                        size: isLandscape ? 14 : 15,
+                                        color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF8E8E93),
+                                      ),
                                     ),
                                   )
                                 : null,
+                            suffixIconConstraints: BoxConstraints(
+                              minWidth: isLandscape ? 24 : 28,
+                              minHeight: isLandscape ? 24 : 28,
+                            ),
                           ),
                         ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Container(
+                      height: isLandscape ? 32 : 36,
                       padding: const EdgeInsets.all(2),
                       decoration: BoxDecoration(
-                        color: isDark
-                            ? AppleTokens.bgDarkSecondary.withValues(alpha: 0.7)
-                            : AppleTokens.bgLightSecondary.withValues(alpha: 0.85),
+                        color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
                         borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                         border: Border.all(
                           color: isDark
-                              ? const Color(0xFF2C2C2E)
-                              : AppleTokens.borderLight,
-                          width: AppleTokens.hairline,
+                              ? const Color(0xFF38383A)
+                              : const Color(0xFFD1D1D6),
+                          width: 1.0,
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,

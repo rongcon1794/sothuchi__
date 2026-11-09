@@ -268,19 +268,29 @@ abstract final class AppTheme {
         fillColor: isDark
             ? (oledMode
                 ? AppleTokens.bgOledSecondary
-                : AppleTokens.bgDarkSecondary)
-            : AppleTokens.bgLightSecondary.withValues(alpha: 0.7),
+                : const Color(0xFF2C2C2E))
+            : Colors.white,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
-          vertical: 14,
+          vertical: 13,
+        ),
+        hintStyle: TextStyle(
+          color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF8E8E93),
+          fontSize: 14,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-          borderSide: BorderSide.none,
+          borderSide: BorderSide(
+            color: isDark ? const Color(0xFF38383A) : const Color(0xFFD1D1D6),
+            width: 1.0,
+          ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-          borderSide: BorderSide.none,
+          borderSide: BorderSide(
+            color: isDark ? const Color(0xFF38383A) : const Color(0xFFD1D1D6),
+            width: 1.0,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
@@ -288,7 +298,11 @@ abstract final class AppTheme {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-          borderSide: BorderSide(color: colorScheme.error),
+          borderSide: BorderSide(color: colorScheme.error, width: 1.2),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+          borderSide: BorderSide(color: colorScheme.error, width: 1.5),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
