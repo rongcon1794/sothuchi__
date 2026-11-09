@@ -439,61 +439,173 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
           // High-Density Financial Summary Snapshot Bar
           if (filteredTxs.isNotEmpty)
             Padding(
-              padding: EdgeInsets.fromLTRB(16, isLandscape ? 2 : 6, 16, isLandscape ? 4 : 6),
+              padding: EdgeInsets.fromLTRB(16, isLandscape ? 2 : 4, 16, isLandscape ? 3 : 6),
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: AppleTokens.maxContentWidth),
                   child: AppleGlassCard(
                     padding: EdgeInsets.symmetric(
-                      horizontal: isLandscape ? 10 : 14,
-                      vertical: isLandscape ? 3 : 6,
+                      horizontal: isLandscape ? 12 : 14,
+                      vertical: isLandscape ? 6 : 8,
                     ),
                     borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Flexible(
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                _buildMetricPill(
+                    child: isLandscape
+                        ? Row(
+                            children: [
+                              Expanded(
+                                child: _buildSummarySegment(
                                   color: AppleTokens.emeraldIncome,
                                   label: l10n.income,
-                                  amount: '+${Money(minorUnits: totalIncome, currencyCode: currency).format(locale: locale, masked: hideBalance)}',
-                                  isLandscape: isLandscape,
+                                  amount: Money(minorUnits: totalIncome, currencyCode: currency)
+                                      .format(locale: locale, showPlusSign: true, masked: hideBalance),
+                                  theme: theme,
+                                  isLandscape: true,
                                 ),
-                                SizedBox(width: isLandscape ? 10 : 14),
-                                _buildMetricPill(
+                              ),
+                              Container(
+                                width: 1,
+                                height: 20,
+                                margin: const EdgeInsets.symmetric(horizontal: 8),
+                                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.25),
+                              ),
+                              Expanded(
+                                child: _buildSummarySegment(
                                   color: AppleTokens.rubyExpense,
                                   label: l10n.expense,
-                                  amount: '-${Money(minorUnits: totalExpense, currencyCode: currency).format(locale: locale, masked: hideBalance)}',
-                                  isLandscape: isLandscape,
+                                  amount: Money(minorUnits: totalExpense, currencyCode: currency)
+                                      .format(locale: locale, showMinusSign: true, masked: hideBalance),
+                                  theme: theme,
+                                  isLandscape: true,
                                 ),
-                                SizedBox(width: isLandscape ? 10 : 14),
-                                _buildMetricPill(
+                              ),
+                              Container(
+                                width: 1,
+                                height: 20,
+                                margin: const EdgeInsets.symmetric(horizontal: 8),
+                                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.25),
+                              ),
+                              Expanded(
+                                child: _buildSummarySegment(
                                   color: netAmount >= 0 ? AppleTokens.emeraldIncome : AppleTokens.rubyExpense,
-                                  label: 'Ròng',
-                                  amount: '${netAmount >= 0 ? '+' : ''}${Money(minorUnits: netAmount, currencyCode: currency).format(locale: locale, masked: hideBalance)}',
-                                  isLandscape: isLandscape,
+                                  label: l10n.netBalance,
+                                  amount: Money(minorUnits: netAmount, currencyCode: currency)
+                                      .format(locale: locale, showPlusSign: true, masked: hideBalance),
+                                  theme: theme,
+                                  isLandscape: true,
                                 ),
-                              ],
-                            ),
+                              ),
+                              Container(
+                                width: 1,
+                                height: 20,
+                                margin: const EdgeInsets.symmetric(horizontal: 10),
+                                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.25),
+                              ),
+                              Text(
+                                '$totalCount ${l10n.transactionsTitle.toLowerCase()}',
+                                style: TextStyle(
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                  letterSpacing: -0.2,
+                                ),
+                              ),
+                            ],
+                          )
+                        : Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        CupertinoIcons.chart_pie_fill,
+                                        size: 12,
+                                        color: theme.colorScheme.primary,
+                                      ),
+                                      const SizedBox(width: 5),
+                                      Text(
+                                        locale.startsWith('vi') ? 'Tổng kết' : 'Summary',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700,
+                                          color: isDark ? Colors.white70 : Colors.black87,
+                                          letterSpacing: -0.2,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: isDark
+                                          ? Colors.white.withValues(alpha: 0.08)
+                                          : AppleTokens.bgLightSecondary,
+                                      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                                    ),
+                                    child: Text(
+                                      '$totalCount ${l10n.transactionsTitle.toLowerCase()}',
+                                      style: TextStyle(
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w600,
+                                        color: theme.colorScheme.onSurfaceVariant,
+                                        letterSpacing: -0.2,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 7),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildSummarySegment(
+                                      color: AppleTokens.emeraldIncome,
+                                      label: l10n.income,
+                                      amount: Money(minorUnits: totalIncome, currencyCode: currency)
+                                          .format(locale: locale, showPlusSign: true, masked: hideBalance),
+                                      theme: theme,
+                                      isLandscape: false,
+                                    ),
+                                  ),
+                                  Container(
+                                    width: 1,
+                                    height: 24,
+                                    margin: const EdgeInsets.symmetric(horizontal: 6),
+                                    color: theme.colorScheme.outlineVariant.withValues(alpha: 0.25),
+                                  ),
+                                  Expanded(
+                                    child: _buildSummarySegment(
+                                      color: AppleTokens.rubyExpense,
+                                      label: l10n.expense,
+                                      amount: Money(minorUnits: totalExpense, currencyCode: currency)
+                                          .format(locale: locale, showMinusSign: true, masked: hideBalance),
+                                      theme: theme,
+                                      isLandscape: false,
+                                    ),
+                                  ),
+                                  Container(
+                                    width: 1,
+                                    height: 24,
+                                    margin: const EdgeInsets.symmetric(horizontal: 6),
+                                    color: theme.colorScheme.outlineVariant.withValues(alpha: 0.25),
+                                  ),
+                                  Expanded(
+                                    child: _buildSummarySegment(
+                                      color: netAmount >= 0 ? AppleTokens.emeraldIncome : AppleTokens.rubyExpense,
+                                      label: l10n.netBalance,
+                                      amount: Money(minorUnits: netAmount, currencyCode: currency)
+                                          .format(locale: locale, showPlusSign: true, masked: hideBalance),
+                                      theme: theme,
+                                      isLandscape: false,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '$totalCount ${l10n.transactionsTitle.toLowerCase()}',
-                          style: TextStyle(
-                            fontSize: isLandscape ? 10.5 : 11.5,
-                            fontWeight: FontWeight.w600,
-                            color: theme.colorScheme.onSurfaceVariant,
-                            letterSpacing: -0.2,
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
                 ),
               ),
@@ -729,39 +841,57 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     );
   }
 
-  Widget _buildMetricPill({
+  Widget _buildSummarySegment({
     required Color color,
     required String label,
     required String amount,
+    required ThemeData theme,
     required bool isLandscape,
   }) {
-    return Row(
+    return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: isLandscape ? 6 : 7,
-          height: isLandscape ? 6 : 7,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 5.5,
+              height: 5.5,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: isLandscape ? 10 : 10.5,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurfaceVariant,
+                  letterSpacing: -0.2,
+                ),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 4),
-        Text(
-          '$label: ',
-          style: TextStyle(
-            fontSize: isLandscape ? 10.5 : 11.5,
-            color: color,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        Text(
-          amount,
-          style: TextStyle(
-            fontSize: isLandscape ? 10.5 : 11.5,
-            color: color,
-            fontWeight: FontWeight.w700,
-            fontFeatures: AppTheme.tabularFigures,
+        const SizedBox(height: 2),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            amount,
+            style: TextStyle(
+              fontSize: isLandscape ? 12 : 13,
+              fontWeight: FontWeight.w700,
+              color: color,
+              fontFeatures: AppTheme.tabularFigures,
+              letterSpacing: -0.3,
+            ),
           ),
         ),
       ],
