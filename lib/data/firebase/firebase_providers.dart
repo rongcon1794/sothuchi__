@@ -34,7 +34,7 @@ Future<FirebaseBootstrapState> bootstrapFirebase() async {
     }
     FirebaseFirestore.instance.settings = const Settings(
       persistenceEnabled: true,
-      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+      cacheSizeBytes: 104857600, // 100 MB cache limit to prevent unbounded SQLite bloat & freeze
     );
     return const FirebaseBootstrapState.configured();
   } catch (error) {

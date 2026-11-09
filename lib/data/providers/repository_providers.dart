@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:so_thu_chi/data/firebase/firebase_providers.dart';
 import 'package:so_thu_chi/features/accounts/data/repositories/firestore_account_repository.dart';
@@ -82,6 +83,13 @@ final userBootstrapCallbackProvider = Provider<UserBootstrapCallback?>((ref) {
     final firestore = ref.read(firestoreProvider);
     final settingsRepo = ref.read(settingsRepositoryProvider);
 
+    // Fast-path: If setup is already completed, exit immediately.
+    // Avoids heavy Firestore queries & JSON deserialization on app wake-up.
+    final currentSettings = await settingsRepo.loadSettings();
+    if (currentSettings.initialSetupCompleted) {
+      return;
+    }
+
     if (user.isDemoUser || firestore == null) {
       final catRepo = ref.read(inMemoryCategoryRepoProvider);
       await catRepo.seedDefaultCategoriesIfNeeded();
@@ -107,50 +115,55 @@ final userBootstrapCallbackProvider = Provider<UserBootstrapCallback?>((ref) {
       );
       await catRepo.seedDefaultCategoriesIfNeeded();
 
-      final ledgerRepo = FirestoreLedgerRepository(
-        firestore: firestore,
-        currentUserIdGetter: () => user.uid,
-      );
-      final accRepo = FirestoreAccountRepository(
-        firestore: firestore,
-        uid: user.uid,
-      );
-      final txRepo = FirestoreTransactionRepository(
-        firestore: firestore,
-        uid: user.uid,
-      );
+      final userDoc = firestore.collection('users').doc(user.uid);
 
-      final ledgers = await ledgerRepo.getLedgers();
-      final accounts = await accRepo.getAccounts();
-      final txs = await txRepo.getTransactions();
+      // Query with limit and in parallel to avoid downloading entire database
+      QuerySnapshot<Map<String, dynamic>> txSnap;
+      QuerySnapshot<Map<String, dynamic>> accSnap;
+      QuerySnapshot<Map<String, dynamic>> ledgerSnap;
 
-      final hasTransactions = txs.isNotEmpty;
-      final hasCustomAccounts = accounts.any((a) =>
-          a.id != 'default_cash_wallet' &&
-          !a.id.startsWith('default_cash_wallet_'));
-      final hasAccountWithBalance = accounts.any((a) => a.balance != 0);
-      final hasCustomLedgers = ledgers.any((l) =>
-          l.id != LedgerBook.defaultPersonalId &&
-          l.id != 'default_family');
+      try {
+        final results = await Future.wait([
+          userDoc.collection('transactions').limit(1).get(),
+          userDoc.collection('accounts').limit(5).get(),
+          userDoc.collection('ledgers').limit(5).get(),
+        ]).timeout(const Duration(seconds: 4));
+        txSnap = results[0];
+        accSnap = results[1];
+        ledgerSnap = results[2];
+      } catch (_) {
+        return;
+      }
 
-      final hasMultipleAccounts = accounts.length > 1;
-      final hasMultipleLedgers = ledgers.length > 2;
+      final hasTransactions = txSnap.docs.isNotEmpty;
+      final hasCustomAccounts = accSnap.docs.any((d) {
+        final id = d.id;
+        final data = d.data();
+        final balance = (data['balance'] as num?)?.toInt() ?? 0;
+        return (id != 'default_cash_wallet' &&
+                !id.startsWith('default_cash_wallet_')) ||
+            balance != 0;
+      });
+      final hasMultipleAccounts = accSnap.docs.length > 1;
+      final hasCustomLedgers = ledgerSnap.docs.any((d) =>
+          d.id != LedgerBook.defaultPersonalId &&
+          d.id != 'default_family');
+      final hasMultipleLedgers = ledgerSnap.docs.length > 2;
 
       final hasExistingData = hasTransactions ||
           hasCustomAccounts ||
-          hasAccountWithBalance ||
-          hasCustomLedgers ||
           hasMultipleAccounts ||
+          hasCustomLedgers ||
           hasMultipleLedgers;
 
       if (hasExistingData) {
         // User has existing data on Firebase -> restore setup state
         await settingsRepo.setInitialSetupCompleted(true, uid: user.uid);
 
-        if (accounts.isNotEmpty) {
+        if (accSnap.docs.isNotEmpty) {
           final settings = await settingsRepo.loadSettings();
           if (settings.defaultWalletId == null || settings.defaultWalletId!.isEmpty) {
-            await settingsRepo.setDefaultWalletId(accounts.first.id);
+            await settingsRepo.setDefaultWalletId(accSnap.docs.first.id);
           }
         }
       }

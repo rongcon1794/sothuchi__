@@ -56,8 +56,27 @@ class FirebaseAuthRepository implements AuthRepository {
           }
           return;
         }
+
+        // Fast-path: When resuming after idle/sleep, Firebase Auth triggers a token refresh
+        // for the active user. If the UID is identical, do NOT re-emit or re-run user bootstrapping
+        // (which causes massive UI freeze from redundant full collection scans).
+        final isSameUser = _currentUser != null &&
+            !_currentUser!.isDemoUser &&
+            _currentUser!.uid == fbUser.uid;
+
+        if (isSameUser) {
+          unawaited(_ensureUserProfileDocument(fbUser));
+          return;
+        }
+
+        // Fast initial emission so UI doesn't freeze waiting for network
+        final initialUser = _mapFirebaseUser(fbUser);
+        _emit(initialUser);
+
         final synced = await _ensureUserProfileDocument(fbUser);
-        _emit(synced);
+        if (_currentUser?.uid == synced.uid) {
+          _emit(synced);
+        }
         if (onUserSignedIn != null) {
           unawaited(onUserSignedIn!(synced));
         }
@@ -271,7 +290,28 @@ class FirebaseAuthRepository implements AuthRepository {
 
     try {
       final docRef = db.collection('users').doc(fbUser.uid);
-      final snapshot = await docRef.get();
+      DocumentSnapshot<Map<String, dynamic>>? snapshot;
+
+      // 1. Try local cache first for sub-millisecond response on resume
+      try {
+        snapshot = await docRef
+            .get(const GetOptions(source: Source.cache))
+            .timeout(const Duration(milliseconds: 300));
+      } catch (_) {
+        // Cache miss or test environment
+      }
+
+      // 2. Fallback to server with a tight timeout to prevent app hanging indefinitely
+      if (snapshot == null || !snapshot.exists || snapshot.data() == null) {
+        try {
+          snapshot = await docRef
+              .get()
+              .timeout(const Duration(seconds: 3));
+        } catch (_) {
+          return fallback;
+        }
+      }
+
       if (snapshot.exists && snapshot.data() != null) {
         final existingDto = UserProfileDto.fromJson({
           ...snapshot.data()!,
@@ -284,7 +324,11 @@ class FirebaseAuthRepository implements AuthRepository {
           updatedAt: now,
           deletedAt: null,
         );
-        await docRef.set(refreshed.toJson(), SetOptions(merge: true));
+        unawaited(
+          docRef
+              .set(refreshed.toJson(), SetOptions(merge: true))
+              .catchError((_) {}),
+        );
         return refreshed.toDomain();
       }
 
@@ -298,7 +342,9 @@ class FirebaseAuthRepository implements AuthRepository {
         createdAt: now,
         updatedAt: now,
       );
-      await docRef.set(dto.toJson());
+      unawaited(
+        docRef.set(dto.toJson()).catchError((_) {}),
+      );
       return dto.toDomain();
     } catch (_) {
       return fallback;

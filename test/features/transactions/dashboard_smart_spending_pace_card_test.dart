@@ -48,14 +48,14 @@ void main() {
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             theme: AppTheme.light(),
-            home: Scaffold(
+            home: const Scaffold(
               body: DashboardSmartSpendingPaceCard(
-                monthSummary: const MonthlyCashflowSummary(
+                monthSummary: MonthlyCashflowSummary(
                   income: Money(minorUnits: 25000000, currencyCode: 'VND'),
                   expense: Money(minorUnits: spentAmount, currencyCode: 'VND'),
                   net: Money(minorUnits: 25000000 - spentAmount, currencyCode: 'VND'),
                 ),
-                totalBalance: const Money(minorUnits: 50000000, currencyCode: 'VND'),
+                totalBalance: Money(minorUnits: 50000000, currencyCode: 'VND'),
                 locale: 'vi',
                 hideBalance: false,
               ),
@@ -102,14 +102,14 @@ void main() {
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             theme: AppTheme.light(),
-            home: Scaffold(
+            home: const Scaffold(
               body: DashboardSmartSpendingPaceCard(
-                monthSummary: const MonthlyCashflowSummary(
+                monthSummary: MonthlyCashflowSummary(
                   income: Money(minorUnits: 0, currencyCode: 'VND'),
                   expense: Money(minorUnits: spentAmount, currencyCode: 'VND'),
                   net: Money(minorUnits: -spentAmount, currencyCode: 'VND'),
                 ),
-                totalBalance: const Money(minorUnits: 80000000, currencyCode: 'VND'),
+                totalBalance: Money(minorUnits: 80000000, currencyCode: 'VND'),
                 locale: 'vi',
                 hideBalance: false,
               ),
@@ -146,14 +146,14 @@ void main() {
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             theme: AppTheme.light(),
-            home: Scaffold(
+            home: const Scaffold(
               body: DashboardSmartSpendingPaceCard(
-                monthSummary: const MonthlyCashflowSummary(
+                monthSummary: MonthlyCashflowSummary(
                   income: Money(minorUnits: incomeAmount, currencyCode: 'VND'),
                   expense: Money(minorUnits: spentAmount, currencyCode: 'VND'),
                   net: Money(minorUnits: incomeAmount - spentAmount, currencyCode: 'VND'),
                 ),
-                totalBalance: const Money(minorUnits: 30000000, currencyCode: 'VND'),
+                totalBalance: Money(minorUnits: 30000000, currencyCode: 'VND'),
                 locale: 'vi',
                 hideBalance: false,
               ),

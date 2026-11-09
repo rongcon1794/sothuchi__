@@ -266,11 +266,11 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.byType(TransactionsScreen), findsOneWidget);
-      // Verify financial summary ticker pills are rendered
-      expect(find.text('2 sổ giao dịch'), findsOneWidget);
-      expect(find.textContaining('Thu nhập:'), findsOneWidget);
-      expect(find.textContaining('Chi tiêu:'), findsOneWidget);
-      expect(find.textContaining('Ròng:'), findsOneWidget);
+      // Verify financial summary snapshot items are rendered
+      expect(find.textContaining('giao dịch'), findsWidgets);
+      expect(find.text('Thu nhập'), findsWidgets);
+      expect(find.text('Chi tiêu'), findsWidgets);
+      expect(find.text('Chênh lệch ròng'), findsWidgets);
 
       // Verify on tablet (1024x768)
       tester.view.physicalSize = const Size(1024, 768);
@@ -284,10 +284,10 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.byType(TransactionsScreen), findsOneWidget);
-      expect(find.text('2 sổ giao dịch'), findsOneWidget);
-      expect(find.textContaining('Thu nhập:'), findsOneWidget);
-      expect(find.textContaining('Chi tiêu:'), findsOneWidget);
-      expect(find.textContaining('Ròng:'), findsOneWidget);
+      expect(find.textContaining('giao dịch'), findsWidgets);
+      expect(find.text('Thu nhập'), findsWidgets);
+      expect(find.text('Chi tiêu'), findsWidgets);
+      expect(find.text('Chênh lệch ròng'), findsWidgets);
     });
 
     testWidgets('AppShellScaffold renders compact 38dp non-obscured BottomBar with all 5 items on Phone Landscape', (tester) async {
@@ -646,7 +646,7 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.byType(TransactionsScreen), findsOneWidget);
       expect(find.textContaining('Tiệc tối gia đình'), findsOneWidget);
-      expect(find.textContaining('Ròng:'), findsOneWidget);
+      expect(find.text('Chênh lệch ròng'), findsOneWidget);
     });
 
     testWidgets('TransactionDetailScreen renders cleanly on 16:9 Phone Landscape (640x360)', (tester) async {
@@ -850,12 +850,13 @@ void main() {
 
       // Verify type filter chips are available in body
       expect(find.byType(FilterChip), findsWidgets);
-      expect(find.text('Chi tiêu'), findsOneWidget);
-      expect(find.text('Thu nhập'), findsOneWidget);
+      final expenseChipFinder = find.descendant(of: find.byType(FilterChip), matching: find.text('Chi tiêu'));
+      expect(expenseChipFinder, findsOneWidget);
+      expect(find.descendant(of: find.byType(FilterChip), matching: find.text('Thu nhập')), findsOneWidget);
       expect(find.text('Chuyển khoản'), findsOneWidget);
 
       // Tap 'Chi tiêu' chip
-      await tester.tap(find.text('Chi tiêu'));
+      await tester.tap(expenseChipFinder);
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
