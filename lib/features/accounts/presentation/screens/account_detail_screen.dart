@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -189,11 +189,6 @@ class AccountDetailScreen extends ConsumerWidget {
               style: const TextStyle(fontWeight: FontWeight.w700),
             ),
             actions: [
-              IconButton(
-                tooltip: l10n.edit,
-                icon: const Icon(CupertinoIcons.pencil, size: 20),
-                onPressed: () => WalletFormSheet.show(context, existing: account),
-              ),
               ApplePopupMenuButton<String>(
                 tooltip: l10n.moreOptions,
                 onSelected: (val) async {
