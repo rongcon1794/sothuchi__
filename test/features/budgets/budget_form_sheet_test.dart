@@ -122,6 +122,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap 90% preset chip
+      await tester.ensureVisible(find.text('90%'));
       await tester.tap(find.text('90%'));
       await tester.pumpAndSettle();
 
