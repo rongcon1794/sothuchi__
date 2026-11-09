@@ -244,15 +244,15 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
     required Color accentColor,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 6),
       child: Row(
         children: [
-          Icon(icon, size: 14, color: accentColor),
+          Icon(icon, size: 13, color: accentColor),
           const SizedBox(width: 6),
           Text(
             title.toUpperCase(),
             style: TextStyle(
-              fontSize: 11.5,
+              fontSize: 11,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.5,
               color: accentColor,
@@ -419,7 +419,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      isLent ? l10n.debtTypeLent.toUpperCase() : l10n.debtTypeBorrowed.toUpperCase(),
+                      isLent ? l10n.debtLent.toUpperCase() : l10n.debtBorrowed.toUpperCase(),
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
@@ -439,23 +439,27 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
           Text(
             l10n.amount.toUpperCase(),
             style: TextStyle(
-              fontSize: 10.5,
+              fontSize: 10,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.5,
               color: isDark ? Colors.white54 : Colors.black45,
             ),
           ),
           const SizedBox(height: 2),
-          Text(
-            formattedAmount,
-            style: theme.textTheme.headlineMedium?.copyWith(
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.4,
-              fontFeatures: AppTheme.tabularFigures,
-              color: rawAmount > 0
-                  ? (isDark ? Colors.white : const Color(0xFF1C1C1E))
-                  : (isDark ? Colors.white30 : Colors.black26),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              formattedAmount,
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.4,
+                fontFeatures: AppTheme.tabularFigures,
+                color: rawAmount > 0
+                    ? (isDark ? Colors.white : const Color(0xFF1C1C1E))
+                    : (isDark ? Colors.white30 : Colors.black26),
+              ),
             ),
           ),
 
@@ -480,14 +484,14 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                   children: [
                     Icon(
                       CupertinoIcons.calendar,
-                      size: 12,
+                      size: 11,
                       color: _dueDate != null ? accentColor : (isDark ? Colors.white54 : Colors.black45),
                     ),
                     const SizedBox(width: 4),
                     Text(
                       _dueDate != null
-                          ? 'Hạn: ${AppDateUtils.formatVnDate(_dueDate!)}'
-                          : 'Chưa hẹn ngày',
+                          ? 'Hạn: ${AppDateUtils.formatShortDate(_dueDate!, locale: locale)}'
+                          : 'Chưa hẹn hạn',
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
@@ -513,16 +517,21 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                     children: [
                       Icon(
                         CupertinoIcons.creditcard_fill,
-                        size: 12,
+                        size: 11,
                         color: Color(selectedWallet.color),
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        selectedWallet.name,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: Color(selectedWallet.color),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 120),
+                        child: Text(
+                          selectedWallet.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: Color(selectedWallet.color),
+                          ),
                         ),
                       ),
                     ],
@@ -547,7 +556,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                       ),
                       const SizedBox(width: 4),
                       ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 160),
+                        constraints: const BoxConstraints(maxWidth: 140),
                         child: Text(
                           _noteController.text.trim(),
                           maxLines: 1,
@@ -590,10 +599,10 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
     return AppleModalSheetLayout(
       title: _isEditing ? l10n.debtEditTitle : l10n.debtNewTitle,
       subtitle: _isEditing
-          ? 'Cập nhật số tiền, kỳ hạn và đối tác ghi nợ'
+          ? 'Cập nhật thông tin nợ'
           : (isLent
-              ? 'Ghi nhận số tiền bạn đã cho người khác vay'
-              : 'Ghi nhận số tiền bạn đã mượn từ người khác'),
+              ? 'Ghi nhận khoản cho vay'
+              : 'Ghi nhận khoản đi vay'),
       bottomAction: AppleButton.primary(
         label: _isEditing ? l10n.save : l10n.debtSubmitNew,
         color: accentColor,
@@ -616,20 +625,20 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
               l10n: l10n,
               selectedWallet: selectedWallet,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
             // 2. Segmented Type Tab: Cho vay vs Đi vay
             LucianSlidingPillTabs<DebtType>(
               items: [
                 LucianTabItem(
                   value: DebtType.lent,
-                  label: l10n.debtTypeLent,
+                  label: l10n.debtLent,
                   icon: CupertinoIcons.arrow_up_right,
                   activeColor: AppleTokens.emeraldIncome,
                 ),
                 LucianTabItem(
                   value: DebtType.borrowed,
-                  label: l10n.debtTypeBorrowed,
+                  label: l10n.debtBorrowed,
                   icon: CupertinoIcons.arrow_down_left,
                   activeColor: AppleTokens.systemOrange,
                 ),
@@ -640,12 +649,12 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                 setState(() => _selectedType = type);
               },
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 14),
 
             // 3. Person & Contact Information Section
             _buildSectionHeader(
               icon: CupertinoIcons.person_2_fill,
-              title: isLent ? 'Người vay tiền' : 'Chủ nợ',
+              title: isLent ? 'Người vay' : 'Chủ nợ',
               accentColor: accentColor,
             ),
 
@@ -668,7 +677,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                 return null;
               },
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
 
             // Quick relationship tags
             SingleChildScrollView(
@@ -682,7 +691,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                       child: ApplePressable(
                         onTap: () => _selectRelationship(tag),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                           decoration: BoxDecoration(
                             color: isDark
                                 ? Colors.white.withValues(alpha: 0.06)
@@ -698,7 +707,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                           child: Text(
                             tag,
                             style: TextStyle(
-                              fontSize: 11.5,
+                              fontSize: 11,
                               fontWeight: FontWeight.w600,
                               color: isDark ? Colors.white70 : Colors.black87,
                             ),
@@ -709,14 +718,14 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
             // Phone number
             AppleTextField(
               controller: _phoneController,
               keyboardType: TextInputType.phone,
               label: l10n.debtPhoneNumber,
-              placeholder: 'VD: 0912 345 678 (Tùy chọn)',
+              placeholder: 'VD: 0912 345 678',
               clearable: true,
               prefixIcon: Icon(
                 CupertinoIcons.phone_fill,
@@ -724,12 +733,12 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                 color: accentColor,
               ),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 14),
 
             // 4. Amount Section
             _buildSectionHeader(
               icon: CupertinoIcons.money_dollar_circle_fill,
-              title: 'Số tiền ghi nợ',
+              title: 'Số tiền',
               accentColor: accentColor,
             ),
 
@@ -752,7 +761,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                 return null;
               },
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
 
             // Quick Amount Pills (+ Presets and +000 adder)
             SingleChildScrollView(
@@ -766,7 +775,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                       child: ApplePressable(
                         onTap: () => _addAmount(delta),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4.5),
                           decoration: BoxDecoration(
                             color: isDark
                                 ? AppleTokens.bgDarkSecondary
@@ -781,7 +790,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                           ),
                           child: Text(
                             '+${delta >= 1000000 ? '${delta ~/ 1000000}tr' : '${delta ~/ 1000}k'}',
-                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 11.5),
                           ),
                         ),
                       ),
@@ -792,7 +801,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                     child: ApplePressable(
                       onTap: _appendTripleZeros,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4.5),
                         decoration: BoxDecoration(
                           color: accentColor.withValues(alpha: isDark ? 0.25 : 0.12),
                           borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
@@ -805,7 +814,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                           '+000',
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
-                            fontSize: 12,
+                            fontSize: 11.5,
                             color: accentColor,
                           ),
                         ),
@@ -815,7 +824,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                 ],
               ),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 14),
 
             // 5. Due Date Section
             _buildSectionHeader(
@@ -880,7 +889,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                             width: AppleTokens.hairline,
                           ),
                         ),
-                        child: const Text('Cuối tháng này', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600)),
+                        child: const Text('Cuối tháng', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600)),
                       ),
                     ),
                   ),
@@ -911,7 +920,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
             ApplePressable(
               onTap: _pickDueDate,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(
                   color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
                   borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
@@ -926,7 +935,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                   children: [
                     Icon(
                       CupertinoIcons.calendar,
-                      size: 18,
+                      size: 17,
                       color: _dueDate != null ? accentColor : theme.colorScheme.onSurfaceVariant,
                     ),
                     const SizedBox(width: 10),
@@ -937,22 +946,26 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                         children: [
                           Text(
                             _dueDate != null
-                                ? l10n.debtDueDate(AppDateUtils.formatVnDate(_dueDate!))
-                                : 'Chưa hẹn ngày thanh toán (Tùy chọn)',
+                                ? 'Hạn trả: ${AppDateUtils.formatShortDate(_dueDate!, locale: locale)}'
+                                : 'Chưa hẹn hạn trả (Tùy chọn)',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: _dueDate != null ? theme.colorScheme.onSurface : theme.colorScheme.onSurfaceVariant,
                               fontWeight: _dueDate != null ? FontWeight.w700 : FontWeight.normal,
-                              fontSize: 13.5,
+                              fontSize: 13,
                             ),
                           ),
                           if (_dueDate != null) ...[
                             const SizedBox(height: 2),
                             Text(
                               _dueDate!.isAfter(DateTime.now())
-                                  ? 'Còn ${_dueDate!.difference(DateTime.now()).inDays + 1} ngày nữa'
+                                  ? 'Còn ${_dueDate!.difference(DateTime.now()).inDays + 1} ngày'
                                   : 'Đã đến hoặc quá hạn',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                fontSize: 11.5,
+                                fontSize: 11,
                                 color: _dueDate!.isAfter(DateTime.now())
                                     ? AppleTokens.systemGreen
                                     : AppleTokens.rubyExpense,
@@ -966,26 +979,26 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                     if (_dueDate != null)
                       CupertinoButton(
                         padding: EdgeInsets.zero,
-                        minimumSize: const Size(28, 28),
+                        minimumSize: const Size(26, 26),
                         onPressed: () {
                           unawaited(HapticFeedback.selectionClick());
                           setState(() => _dueDate = null);
                         },
-                        child: const Icon(CupertinoIcons.clear_circled_solid, size: 18, color: AppleTokens.systemGray),
+                        child: const Icon(CupertinoIcons.clear_circled_solid, size: 17, color: AppleTokens.systemGray),
                       )
                     else
-                      const Icon(CupertinoIcons.chevron_right, size: 14, color: AppleTokens.systemGray),
+                      const Icon(CupertinoIcons.chevron_right, size: 13, color: AppleTokens.systemGray),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 14),
 
             // 6. Linked Wallet Selection
             if (activeAccounts.isNotEmpty) ...[
               _buildSectionHeader(
                 icon: CupertinoIcons.creditcard_fill,
-                title: '${l10n.walletsTitle} (${l10n.all.toLowerCase()})',
+                title: 'Ví tiền liên kết',
                 accentColor: accentColor,
               ),
               SingleChildScrollView(
@@ -1005,7 +1018,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                           },
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                             decoration: BoxDecoration(
                               color: _selectedAccountId == acc.id
                                   ? accentColor.withValues(alpha: isDark ? 0.22 : 0.12)
@@ -1035,18 +1048,25 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text(
-                                      acc.name,
-                                      style: TextStyle(
-                                        fontWeight: _selectedAccountId == acc.id ? FontWeight.w700 : FontWeight.w500,
-                                        color: _selectedAccountId == acc.id
-                                            ? accentColor
-                                            : theme.colorScheme.onSurface,
-                                        fontSize: 12.5,
+                                    ConstrainedBox(
+                                      constraints: const BoxConstraints(maxWidth: 120),
+                                      child: Text(
+                                        acc.name,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontWeight: _selectedAccountId == acc.id ? FontWeight.w700 : FontWeight.w500,
+                                          color: _selectedAccountId == acc.id
+                                              ? accentColor
+                                              : theme.colorScheme.onSurface,
+                                          fontSize: 12,
+                                        ),
                                       ),
                                     ),
                                     Text(
                                       Money(minorUnits: acc.balance, currencyCode: acc.currency).format(locale: locale),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         fontSize: 10.5,
                                         color: isDark ? Colors.white54 : Colors.black45,
@@ -1063,19 +1083,19 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                   ],
                 ),
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 14),
             ],
 
             // 7. Note Section
             _buildSectionHeader(
               icon: CupertinoIcons.doc_text_fill,
-              title: l10n.note,
+              title: 'Ghi chú',
               accentColor: accentColor,
             ),
             AppleTextField(
               controller: _noteController,
               label: l10n.note,
-              placeholder: l10n.noteHint,
+              placeholder: 'Nhập ghi chú hoặc lý do...',
               maxLines: 2,
               clearable: true,
               prefixIcon: Icon(
@@ -1084,7 +1104,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                 color: accentColor,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
           ],
         ),
       ),

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
+import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/date_formatter.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
@@ -14,6 +15,7 @@ import 'package:so_thu_chi/features/debts/presentation/controllers/debts_control
 import 'package:so_thu_chi/features/debts/presentation/widgets/debt_form_sheet.dart';
 import 'package:so_thu_chi/features/debts/presentation/widgets/debt_repayment_sheet.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
 
 class DebtsScreen extends ConsumerStatefulWidget {
   const DebtsScreen({super.key});
@@ -351,266 +353,443 @@ class _DebtCard extends ConsumerWidget {
     final isDark = theme.brightness == Brightness.dark;
     final l10n = context.l10n;
     final locale = Localizations.localeOf(context).languageCode;
+    final accountsMap = ref.watch(accountsMapProvider);
+    final wallet = debt.accountId != null ? accountsMap[debt.accountId!] : null;
 
     final isLent = debt.type == DebtType.lent;
     final accentColor = debt.isSettled
         ? AppleTokens.systemGray
-        : (isLent ? AppleTokens.systemGreen : AppleTokens.systemOrange);
+        : (isLent ? AppleTokens.emeraldIncome : AppleTokens.systemOrange);
 
     final initials = debt.personName.trim().isNotEmpty
-        ? debt.personName.trim().split(' ').map((e) => e.isNotEmpty ? e[0] : '').take(2).join().toUpperCase()
+        ? debt.personName
+            .trim()
+            .split(' ')
+            .map((e) => e.isNotEmpty ? e[0] : '')
+            .take(2)
+            .join()
+            .toUpperCase()
         : '?';
 
     return ApplePressable(
-      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+      borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
       onTap: () => context.push(AppRoutes.debtDetail(debt.id)),
-      child: AppleGlassCard(
-        padding: const EdgeInsets.all(16),
-        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-        borderColor: debt.isOverdue
-            ? AppleTokens.systemRed.withValues(alpha: 0.5)
-            : (isDark ? AppleTokens.bgDarkSecondary : AppleTokens.borderLight),
-        child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              // Person Initials Squircle Avatar
-              Container(
-                width: 42,
-                height: 42,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: accentColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-                ),
-                child: Text(
-                  initials,
-                  style: TextStyle(
-                    color: accentColor,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 16,
-                  ),
-                ),
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 200),
+        opacity: debt.isSettled ? 0.72 : 1.0,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isDark
+                  ? [
+                      accentColor.withValues(alpha: 0.22),
+                      accentColor.withValues(alpha: 0.08),
+                      AppleTokens.bgDarkCard,
+                    ]
+                  : [
+                      accentColor.withValues(alpha: 0.14),
+                      accentColor.withValues(alpha: 0.05),
+                      Colors.white,
+                    ],
+            ),
+            borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+            border: Border.all(
+              color: debt.isOverdue
+                  ? AppleTokens.systemRed.withValues(alpha: isDark ? 0.6 : 0.45)
+                  : accentColor.withValues(alpha: isDark ? 0.40 : 0.25),
+              width: 1.2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: accentColor.withValues(alpha: isDark ? 0.15 : 0.08),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
               ),
-              const SizedBox(width: 12),
-
-              // Person Name & Meta
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            debt.personName,
-                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
-                            overflow: TextOverflow.ellipsis,
-                          ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Header Row: Avatar, Name & Subtitle, Type Badge, Popup Menu
+              Row(
+                children: [
+                  // 44x44 Squircle Avatar Badge
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          accentColor,
+                          accentColor.withValues(alpha: 0.75),
+                        ],
+                      ),
+                      borderRadius:
+                          BorderRadius.circular(AppleTokens.radiusControl),
+                      boxShadow: [
+                        BoxShadow(
+                          color: accentColor.withValues(alpha: 0.35),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
-                        const SizedBox(width: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: accentColor.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                          ),
-                          child: Text(
-                            isLent ? l10n.debtLent : l10n.debtBorrowed,
-                            style: TextStyle(
-                              color: accentColor,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 10.5,
+                      ],
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      initials,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+
+                  // Person Name & Contact / Status
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                debt.personName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                ),
+                              ),
                             ),
+                            const SizedBox(width: 6),
+                            // Type Badge Pill: CHO VAY / ĐI VAY / ĐÃ XONG
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 7, vertical: 2.5),
+                              decoration: BoxDecoration(
+                                color: accentColor
+                                    .withValues(alpha: isDark ? 0.28 : 0.15),
+                                borderRadius: BorderRadius.circular(
+                                    AppleTokens.radiusPill),
+                                border: Border.all(
+                                  color: accentColor.withValues(alpha: 0.4),
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: Text(
+                                debt.isSettled
+                                    ? l10n.debtFilterSettled.toUpperCase()
+                                    : (isLent
+                                        ? l10n.debtLent.toUpperCase()
+                                        : l10n.debtBorrowed.toUpperCase()),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.3,
+                                  color: accentColor,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          debt.phoneNumber?.isNotEmpty == true
+                              ? debt.phoneNumber!
+                              : (isLent ? 'Khoản cho vay' : 'Khoản đi vay'),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.white60 : Colors.black54,
                           ),
                         ),
                       ],
                     ),
-                    if (debt.phoneNumber != null && debt.phoneNumber!.isNotEmpty) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        debt.phoneNumber!,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
+                  ),
+
+                  const SizedBox(width: 4),
+
+                  // Options Popover Menu
+                  ApplePopupMenuButton<String>(
+                    icon: CupertinoIcons.ellipsis_circle,
+                    iconSize: 18,
+                    tooltip: l10n.moreOptions,
+                    onSelected: (val) {
+                      if (val == 'edit') {
+                        DebtFormSheet.show(context, initialDebt: debt);
+                      } else if (val == 'delete') {
+                        _confirmDelete(context, ref);
+                      }
+                    },
+                    itemBuilder: (_) => [
+                      ApplePopupMenuItem(
+                        value: 'edit',
+                        icon: CupertinoIcons.pencil,
+                        title: l10n.debtEdit,
+                      ),
+                      ApplePopupMenuItem(
+                        value: 'delete',
+                        icon: CupertinoIcons.trash,
+                        title: l10n.debtDelete,
+                        isDestructive: true,
                       ),
                     ],
-                  ],
-                ),
-              ),
-
-              // Options Popover Menu
-              ApplePopupMenuButton<String>(
-                icon: CupertinoIcons.ellipsis_circle,
-                iconSize: 18,
-                tooltip: l10n.moreOptions,
-                onSelected: (val) {
-                  if (val == 'edit') {
-                    DebtFormSheet.show(context, initialDebt: debt);
-                  } else if (val == 'delete') {
-                    _confirmDelete(context, ref);
-                  }
-                },
-                itemBuilder: (_) => [
-                  ApplePopupMenuItem(
-                    value: 'edit',
-                    icon: CupertinoIcons.pencil,
-                    title: l10n.debtEdit,
-                  ),
-                  ApplePopupMenuItem(
-                    value: 'delete',
-                    icon: CupertinoIcons.trash,
-                    title: l10n.debtDelete,
-                    isDestructive: true,
                   ),
                 ],
               ),
-            ],
-          ),
 
-          const SizedBox(height: 14),
+              const SizedBox(height: 12),
 
-          // Amounts & Status
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                debt.isSettled ? l10n.debtFilterSettled : '${l10n.debtRemaining}:',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Flexible(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerRight,
-                  child: Text(
-                    debt.remainingMoney.format(locale: locale),
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: accentColor,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 6),
-
-          // Repayment Progress Bar
-          LucianProgressBar(
-            value: debt.progress,
-            height: 7,
-            activeColor: accentColor,
-            showGlow: debt.isSettled,
-          ),
-
-          const SizedBox(height: 6),
-
-          // Total & Due Date Info
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  '${l10n.amount}: ${debt.totalMoney.format(locale: locale)}',
-                  style: TextStyle(fontSize: 11.5, color: theme.colorScheme.onSurfaceVariant),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(width: 8),
-              if (debt.dueDate != null)
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      debt.isOverdue ? CupertinoIcons.exclamationmark_circle_fill : CupertinoIcons.calendar,
-                      size: 12,
-                      color: debt.isOverdue ? AppleTokens.systemRed : theme.colorScheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      debt.isOverdue
-                          ? 'Quá hạn: ${AppDateUtils.formatVnDate(debt.dueDate!)}'
-                          : l10n.debtDueDate(AppDateUtils.formatVnDate(debt.dueDate!)),
+              // Amount Row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Expanded(
+                    child: Text(
+                      debt.isSettled
+                          ? 'ĐÃ TẤT TOÁN XONG'
+                          : (debt.remainingAmount < debt.amount
+                              ? 'CÒN LẠI (${(debt.progress * 100).toInt()}% ĐÃ TRẢ)'
+                              : l10n.amount.toUpperCase()),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: debt.isOverdue ? FontWeight.w700 : FontWeight.normal,
-                        color: debt.isOverdue ? AppleTokens.systemRed : theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-            ],
-          ),
-
-          if (debt.note.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text(
-              '${l10n.note}: ${debt.note}',
-              style: TextStyle(
-                fontSize: 12,
-                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.9),
-                fontStyle: FontStyle.italic,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-
-          // Quick Repay Button if not yet settled
-          if (!debt.isSettled) ...[
-            const SizedBox(height: 12),
-            ApplePressable(
-              onTap: () {
-                HapticFeedback.lightImpact();
-                DebtRepaymentSheet.show(context, debt);
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: accentColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                  border: Border.all(
-                    color: accentColor.withValues(alpha: 0.3),
-                    width: AppleTokens.hairline,
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      isLent ? CupertinoIcons.arrow_down_circle_fill : CupertinoIcons.arrow_up_circle_fill,
-                      size: 15,
-                      color: accentColor,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      isLent ? l10n.debtCollect : l10n.debtRepay,
-                      style: TextStyle(
-                        color: accentColor,
+                        fontSize: 10.5,
                         fontWeight: FontWeight.w700,
-                        fontSize: 13,
+                        letterSpacing: 0.5,
+                        color: isDark ? Colors.white54 : Colors.black45,
+                      ),
+                    ),
+                  ),
+                  if (debt.remainingAmount < debt.amount && !debt.isSettled) ...[
+                    const SizedBox(width: 8),
+                    Text(
+                      'Tổng: ${debt.totalMoney.format(locale: locale)}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isDark ? Colors.white54 : Colors.black45,
+                        fontFeatures: AppTheme.tabularFigures,
                       ),
                     ),
                   ],
+                ],
+              ),
+              const SizedBox(height: 3),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  debt.remainingMoney.format(locale: locale),
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.4,
+                    fontFeatures: AppTheme.tabularFigures,
+                    color: debt.isSettled
+                        ? AppleTokens.systemGray
+                        : (isDark ? Colors.white : const Color(0xFF1C1C1E)),
+                  ),
                 ),
               ),
-            ),
-          ],
-        ],
+
+              // Repayment Progress Bar (only if partial payment made)
+              if (debt.progress > 0 && !debt.isSettled) ...[
+                const SizedBox(height: 6),
+                LucianProgressBar(
+                  value: debt.progress,
+                  height: 6,
+                  activeColor: accentColor,
+                  showGlow: false,
+                ),
+              ],
+
+              const SizedBox(height: 10),
+
+              // Metadata Pills Wrap (Due date, Wallet, Note snippet)
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  // Due Date Chip
+                  if (debt.dueDate != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: debt.isOverdue
+                            ? AppleTokens.systemRed.withValues(alpha: 0.16)
+                            : (isDark
+                                ? Colors.white.withValues(alpha: 0.08)
+                                : Colors.black.withValues(alpha: 0.04)),
+                        borderRadius:
+                            BorderRadius.circular(AppleTokens.radiusPill),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            debt.isOverdue
+                                ? CupertinoIcons.exclamationmark_circle_fill
+                                : CupertinoIcons.calendar,
+                            size: 11,
+                            color: debt.isOverdue
+                                ? AppleTokens.systemRed
+                                : (isDark ? Colors.white70 : Colors.black54),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            debt.isOverdue
+                                ? 'Quá hạn: ${AppDateUtils.formatShortDate(debt.dueDate!, locale: locale)}'
+                                : 'Hạn: ${AppDateUtils.formatShortDate(debt.dueDate!, locale: locale)}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: debt.isOverdue
+                                  ? FontWeight.w700
+                                  : FontWeight.w600,
+                              color: debt.isOverdue
+                                  ? AppleTokens.systemRed
+                                  : (isDark ? Colors.white70 : Colors.black54),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  // Wallet Chip
+                  if (wallet != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Color(wallet.color).withValues(alpha: 0.15),
+                        borderRadius:
+                            BorderRadius.circular(AppleTokens.radiusPill),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            CupertinoIcons.creditcard_fill,
+                            size: 11,
+                            color: Color(wallet.color),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            wallet.name,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: Color(wallet.color),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  // Note Snippet Chip
+                  if (debt.note.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.07)
+                            : Colors.black.withValues(alpha: 0.04),
+                        borderRadius:
+                            BorderRadius.circular(AppleTokens.radiusPill),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            CupertinoIcons.doc_text,
+                            size: 11,
+                            color: isDark ? Colors.white54 : Colors.black45,
+                          ),
+                          const SizedBox(width: 4),
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 160),
+                            child: Text(
+                              debt.note,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontStyle: FontStyle.italic,
+                                color: isDark ? Colors.white70 : Colors.black87,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+
+              // Quick Repay Button if not yet settled
+              if (!debt.isSettled) ...[
+                const SizedBox(height: 12),
+                ApplePressable(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    DebtRepaymentSheet.show(context, debt);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 9),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color:
+                          accentColor.withValues(alpha: isDark ? 0.22 : 0.14),
+                      borderRadius:
+                          BorderRadius.circular(AppleTokens.radiusPill),
+                      border: Border.all(
+                        color: accentColor.withValues(alpha: 0.4),
+                        width: 1.0,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          isLent
+                              ? CupertinoIcons.arrow_down_circle_fill
+                              : CupertinoIcons.arrow_up_circle_fill,
+                          size: 15,
+                          color: accentColor,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          isLent ? l10n.debtCollect : l10n.debtRepay,
+                          style: TextStyle(
+                            color: accentColor,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
-    ),
     );
   }
 
