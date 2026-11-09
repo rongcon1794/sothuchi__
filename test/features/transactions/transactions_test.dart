@@ -1,4 +1,5 @@
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -226,12 +227,14 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // Verify FilterChips highlight without checkmark at the start
-        final chips = tester.widgetList<FilterChip>(find.byType(FilterChip));
-        expect(chips, isNotEmpty);
-        for (final chip in chips) {
-          expect(chip.showCheckmark, isFalse);
-        }
+        // Verify quick type filter icon buttons exist with appropriate tooltips and icons
+        expect(find.byTooltip('Tất cả'), findsOneWidget);
+        final expenseBtn = find.byTooltip('Chi tiêu');
+        expect(expenseBtn, findsOneWidget);
+        expect(find.byTooltip('Thu nhập'), findsOneWidget);
+        expect(find.byTooltip('Chuyển khoản'), findsOneWidget);
+        expect(find.byIcon(CupertinoIcons.arrow_up_right), findsOneWidget);
+        expect(find.byIcon(CupertinoIcons.arrow_down_left), findsOneWidget);
 
         expect(find.textContaining('Phở bò tái lăn'), findsOneWidget);
         expect(find.textContaining('Lương tháng 11'), findsOneWidget);

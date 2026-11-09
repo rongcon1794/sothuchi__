@@ -3025,6 +3025,54 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Áp dụng bộ lọc'**
   String get filterApply;
+
+  /// No description provided for @transactionCountTotal.
+  ///
+  /// In vi, this message translates to:
+  /// **'{count} giao dịch'**
+  String transactionCountTotal(int count);
+
+  /// No description provided for @filterReset.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đặt lại'**
+  String get filterReset;
+
+  /// No description provided for @filterSelectedCount.
+  ///
+  /// In vi, this message translates to:
+  /// **'{count} đang chọn'**
+  String filterSelectedCount(int count);
+
+  /// No description provided for @filterCustomDate.
+  ///
+  /// In vi, this message translates to:
+  /// **'Khoảng ngày tuỳ chọn'**
+  String get filterCustomDate;
+
+  /// No description provided for @quickFilterTooltipAll.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tất cả loại giao dịch'**
+  String get quickFilterTooltipAll;
+
+  /// No description provided for @quickFilterTooltipExpense.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chỉ lọc chi tiêu'**
+  String get quickFilterTooltipExpense;
+
+  /// No description provided for @quickFilterTooltipIncome.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chỉ lọc thu nhập'**
+  String get quickFilterTooltipIncome;
+
+  /// No description provided for @quickFilterTooltipTransfer.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chỉ lọc chuyển khoản'**
+  String get quickFilterTooltipTransfer;
 }
 
 class _AppLocalizationsDelegate

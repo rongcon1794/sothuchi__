@@ -217,7 +217,6 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 child: Row(
                   children: [
                     Expanded(
-                      flex: isLandscape ? 38 : 40,
                       child: SizedBox(
                         height: isLandscape ? 32 : 36,
                         child: TextField(
@@ -284,70 +283,100 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Expanded(
-                      flex: isLandscape ? 62 : 60,
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        physics: const BouncingScrollPhysics(),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _buildTypeChip(
-                              null,
-                              l10n.all,
-                              CupertinoIcons.square_grid_2x2,
-                              null,
-                              isLandscape,
-                            ),
-                            const SizedBox(width: 6),
-                            _buildTypeChip(
-                              TransactionType.expense,
-                              l10n.expense,
-                              CupertinoIcons.arrow_up_right,
-                              AppleTokens.rubyExpense,
-                              isLandscape,
-                            ),
-                            const SizedBox(width: 6),
-                            _buildTypeChip(
-                              TransactionType.income,
-                              l10n.income,
-                              CupertinoIcons.arrow_down_left,
-                              AppleTokens.emeraldIncome,
-                              isLandscape,
-                            ),
-                            const SizedBox(width: 6),
-                            _buildTypeChip(
-                              TransactionType.transfer,
-                              l10n.transfer,
-                              CupertinoIcons.arrow_right_arrow_left,
-                              AppleTokens.cobaltTransfer,
-                              isLandscape,
-                            ),
-                            if (filter.hasActiveFilters) ...[
-                              const SizedBox(width: 6),
-                              ActionChip(
-                                visualDensity: VisualDensity.compact,
-                                materialTapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      AppleTokens.radiusPill),
-                                  side: BorderSide.none,
-                                ),
-                                avatar: const Icon(Icons.filter_alt_off_rounded,
-                                    size: 14),
-                                label: Text(l10n.clearFilters,
-                                    style: TextStyle(fontSize: isLandscape ? 10.5 : 11)),
-                                onPressed: () {
-                                  _searchController.clear();
-                                  ref
-                                      .read(transactionFilterProvider.notifier)
-                                      .clearAll();
-                                },
-                              ),
-                            ],
-                          ],
+                    Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppleTokens.bgDarkSecondary.withValues(alpha: 0.7)
+                            : AppleTokens.bgLightSecondary.withValues(alpha: 0.85),
+                        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                        border: Border.all(
+                          color: isDark
+                              ? const Color(0xFF2C2C2E)
+                              : AppleTokens.borderLight,
+                          width: AppleTokens.hairline,
                         ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildTypeIconButton(
+                            type: null,
+                            tooltip: l10n.all,
+                            icon: CupertinoIcons.square_grid_2x2,
+                            iconColor: null,
+                            isLandscape: isLandscape,
+                            theme: theme,
+                            isDark: isDark,
+                            filter: filter,
+                          ),
+                          const SizedBox(width: 2),
+                          _buildTypeIconButton(
+                            type: TransactionType.expense,
+                            tooltip: l10n.expense,
+                            icon: CupertinoIcons.arrow_up_right,
+                            iconColor: AppleTokens.rubyExpense,
+                            isLandscape: isLandscape,
+                            theme: theme,
+                            isDark: isDark,
+                            filter: filter,
+                          ),
+                          const SizedBox(width: 2),
+                          _buildTypeIconButton(
+                            type: TransactionType.income,
+                            tooltip: l10n.income,
+                            icon: CupertinoIcons.arrow_down_left,
+                            iconColor: AppleTokens.emeraldIncome,
+                            isLandscape: isLandscape,
+                            theme: theme,
+                            isDark: isDark,
+                            filter: filter,
+                          ),
+                          const SizedBox(width: 2),
+                          _buildTypeIconButton(
+                            type: TransactionType.transfer,
+                            tooltip: l10n.transfer,
+                            icon: CupertinoIcons.arrow_right_arrow_left,
+                            iconColor: AppleTokens.cobaltTransfer,
+                            isLandscape: isLandscape,
+                            theme: theme,
+                            isDark: isDark,
+                            filter: filter,
+                          ),
+                          if (filter.hasActiveFilters) ...[
+                            const SizedBox(width: 3),
+                            Container(
+                              width: 1,
+                              height: isLandscape ? 16 : 20,
+                              color: isDark ? const Color(0xFF3A3A3C) : const Color(0xFFD1D1D6),
+                            ),
+                            const SizedBox(width: 3),
+                            Tooltip(
+                              message: l10n.clearFilters,
+                              child: ApplePressable(
+                                onTap: () {
+                                  HapticFeedback.lightImpact();
+                                  _searchController.clear();
+                                  ref.read(transactionFilterProvider.notifier).clearAll();
+                                },
+                                child: Container(
+                                  width: isLandscape ? 28 : 32,
+                                  height: isLandscape ? 28 : 32,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: AppleTokens.systemRed.withValues(alpha: isDark ? 0.2 : 0.1),
+                                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                                  ),
+                                  child: const Icon(
+                                    Icons.filter_alt_off_rounded,
+                                    size: 14,
+                                    color: AppleTokens.systemRed,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                   ],
@@ -646,65 +675,67 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     return parts.join(' · ');
   }
 
-  Widget _buildTypeChip(
-    TransactionType? type,
-    String label,
-    IconData icon,
-    Color? iconColor,
-    bool isLandscape,
-  ) {
-    final filter = ref.watch(transactionFilterProvider);
+  Widget _buildTypeIconButton({
+    required TransactionType? type,
+    required String tooltip,
+    required IconData icon,
+    required Color? iconColor,
+    required bool isLandscape,
+    required ThemeData theme,
+    required bool isDark,
+    required TransactionFilter filter,
+  }) {
     final isSelected = filter.type == type;
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final activeColor = iconColor ?? theme.colorScheme.primary;
+    final size = isLandscape ? 28.0 : 32.0;
+    final iconSize = isLandscape ? 13.5 : 15.0;
 
-    final selectedBg = iconColor != null
-        ? iconColor.withValues(alpha: isDark ? 0.22 : 0.14)
-        : theme.colorScheme.primary.withValues(alpha: isDark ? 0.22 : 0.14);
-    final selectedBorder = iconColor != null
-        ? iconColor.withValues(alpha: 0.45)
-        : theme.colorScheme.primary.withValues(alpha: 0.45);
-
-    return FilterChip(
-      showCheckmark: false,
-      visualDensity: isLandscape ? VisualDensity.compact : VisualDensity.compact,
-      padding: EdgeInsets.symmetric(horizontal: isLandscape ? 6 : 8, vertical: 0),
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      backgroundColor: isDark
-          ? AppleTokens.bgDarkSecondary.withValues(alpha: 0.6)
-          : AppleTokens.bgLightSecondary.withValues(alpha: 0.8),
-      selectedColor: selectedBg,
-      avatar: Icon(
-        icon,
-        size: isLandscape ? 13 : 14,
-        color: isSelected
-            ? (iconColor ?? theme.colorScheme.primary)
-            : (isDark ? Colors.white70 : Colors.black54),
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-        side: BorderSide(
-          color: isSelected ? selectedBorder : Colors.transparent,
-          width: 1,
+    return Tooltip(
+      message: tooltip,
+      waitDuration: const Duration(milliseconds: 300),
+      child: ApplePressable(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          ref
+              .read(transactionFilterProvider.notifier)
+              .setType(isSelected ? null : type);
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutCubic,
+          width: size,
+          height: size,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: isSelected
+                ? activeColor.withValues(alpha: isDark ? 0.30 : 0.16)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+            border: Border.all(
+              color: isSelected
+                  ? activeColor.withValues(alpha: 0.55)
+                  : Colors.transparent,
+              width: 1,
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: activeColor.withValues(alpha: isDark ? 0.25 : 0.12),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Icon(
+            icon,
+            size: iconSize,
+            color: isSelected
+                ? activeColor
+                : (isDark ? Colors.white60 : Colors.black54),
+          ),
         ),
       ),
-      label: Text(
-        label,
-        style: TextStyle(
-          fontSize: isLandscape ? 11 : 12,
-          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-          color: isSelected
-              ? (iconColor ?? theme.colorScheme.primary)
-              : (isDark ? Colors.white : Colors.black87),
-        ),
-      ),
-      selected: isSelected,
-      onSelected: (sel) {
-        HapticFeedback.selectionClick();
-        ref
-            .read(transactionFilterProvider.notifier)
-            .setType(type == null ? null : (sel ? type : null));
-      },
     );
   }
 
@@ -743,7 +774,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                 ),
                 const SizedBox(width: 5),
                 Text(
-                  l10n.filterActiveCount(totalCount).toUpperCase(),
+                  l10n.transactionCountTotal(totalCount).toUpperCase(),
                   style: TextStyle(
                     fontSize: isLandscape ? 10 : 10.5,
                     fontWeight: FontWeight.w700,

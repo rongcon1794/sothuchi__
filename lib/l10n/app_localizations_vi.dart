@@ -1590,4 +1590,32 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get filterApply => 'Áp dụng bộ lọc';
+
+  @override
+  String transactionCountTotal(int count) {
+    return '$count giao dịch';
+  }
+
+  @override
+  String get filterReset => 'Đặt lại';
+
+  @override
+  String filterSelectedCount(int count) {
+    return '$count đang chọn';
+  }
+
+  @override
+  String get filterCustomDate => 'Khoảng ngày tuỳ chọn';
+
+  @override
+  String get quickFilterTooltipAll => 'Tất cả loại giao dịch';
+
+  @override
+  String get quickFilterTooltipExpense => 'Chỉ lọc chi tiêu';
+
+  @override
+  String get quickFilterTooltipIncome => 'Chỉ lọc thu nhập';
+
+  @override
+  String get quickFilterTooltipTransfer => 'Chỉ lọc chuyển khoản';
 }

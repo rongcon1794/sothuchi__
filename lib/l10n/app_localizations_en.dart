@@ -1589,4 +1589,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get filterApply => 'Apply filter';
+
+  @override
+  String transactionCountTotal(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions',
+      one: '1 transaction',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get filterReset => 'Reset';
+
+  @override
+  String filterSelectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get filterCustomDate => 'Custom date range';
+
+  @override
+  String get quickFilterTooltipAll => 'All transaction types';
+
+  @override
+  String get quickFilterTooltipExpense => 'Filter expenses only';
+
+  @override
+  String get quickFilterTooltipIncome => 'Filter incomes only';
+
+  @override
+  String get quickFilterTooltipTransfer => 'Filter transfers only';
 }

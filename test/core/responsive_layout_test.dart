@@ -1,4 +1,5 @@
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -849,15 +850,15 @@ void main() {
       expect(find.descendant(of: appBarFinder, matching: find.text('Sổ giao dịch')), findsOneWidget);
       expect(find.descendant(of: appBarFinder, matching: find.byType(TextField)), findsNothing);
 
-      // Verify type filter chips are available in body
-      expect(find.byType(FilterChip), findsWidgets);
-      final expenseChipFinder = find.descendant(of: find.byType(FilterChip), matching: find.text('Chi tiêu'));
-      expect(expenseChipFinder, findsOneWidget);
-      expect(find.descendant(of: find.byType(FilterChip), matching: find.text('Thu nhập')), findsOneWidget);
-      expect(find.text('Chuyển khoản'), findsOneWidget);
+      // Verify quick type filter icon buttons are available in body
+      final expenseButtonFinder = find.byTooltip('Chi tiêu');
+      expect(expenseButtonFinder, findsOneWidget);
+      expect(find.byTooltip('Thu nhập'), findsOneWidget);
+      expect(find.byTooltip('Chuyển khoản'), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.arrow_up_right), findsOneWidget);
 
-      // Tap 'Chi tiêu' chip
-      await tester.tap(expenseChipFinder);
+      // Tap 'Chi tiêu' button
+      await tester.tap(expenseButtonFinder);
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });

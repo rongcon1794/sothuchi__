@@ -741,5 +741,27 @@
   "filterAllCategories": "All categories",
   "filterAllWallets": "All wallets",
   "filterTransactionType": "Transaction type",
-  "filterApply": "Apply filter"
+  "filterApply": "Apply filter",
+  "transactionCountTotal": "{count, plural, =1{1 transaction} other{{count} transactions}}",
+  "@transactionCountTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filterReset": "Reset",
+  "filterSelectedCount": "{count} selected",
+  "@filterSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filterCustomDate": "Custom date range",
+  "quickFilterTooltipAll": "All transaction types",
+  "quickFilterTooltipExpense": "Filter expenses only",
+  "quickFilterTooltipIncome": "Filter incomes only",
+  "quickFilterTooltipTransfer": "Filter transfers only"
 }

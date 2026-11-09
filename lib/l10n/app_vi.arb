@@ -792,5 +792,27 @@
   "filterAllCategories": "Tất cả danh mục",
   "filterAllWallets": "Tất cả ví",
   "filterTransactionType": "Loại giao dịch",
-  "filterApply": "Áp dụng bộ lọc"
+  "filterApply": "Áp dụng bộ lọc",
+  "transactionCountTotal": "{count} giao dịch",
+  "@transactionCountTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filterReset": "Đặt lại",
+  "filterSelectedCount": "{count} đang chọn",
+  "@filterSelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filterCustomDate": "Khoảng ngày tuỳ chọn",
+  "quickFilterTooltipAll": "Tất cả loại giao dịch",
+  "quickFilterTooltipExpense": "Chỉ lọc chi tiêu",
+  "quickFilterTooltipIncome": "Chỉ lọc thu nhập",
+  "quickFilterTooltipTransfer": "Chỉ lọc chuyển khoản"
 }

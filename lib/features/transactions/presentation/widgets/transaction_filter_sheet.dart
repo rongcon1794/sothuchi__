@@ -96,20 +96,18 @@ class TransactionFilterBottomSheet extends ConsumerWidget {
       context: context,
       firstDate: DateTime(2018),
       lastDate: DateTime(now.year + 5, 12, 31),
-      initialDateRange:
-          filter.startDate != null && filter.endDate != null
-              ? DateTimeRange(
-                  start: filter.startDate!,
-                  end: filter.endDate!,
-                )
-              : null,
+      initialDateRange: filter.startDate != null && filter.endDate != null
+          ? DateTimeRange(
+              start: filter.startDate!,
+              end: filter.endDate!,
+            )
+          : null,
       builder: (ctx, child) {
         return Theme(
           data: theme.copyWith(
             colorScheme: theme.colorScheme.copyWith(
               primary: theme.colorScheme.primary,
-              surface:
-                  isDark ? AppleTokens.bgDarkCard : AppleTokens.bgLightCard,
+              surface: isDark ? AppleTokens.bgDarkCard : AppleTokens.bgLightCard,
             ),
           ),
           child: child!,
@@ -127,29 +125,52 @@ class TransactionFilterBottomSheet extends ConsumerWidget {
     required BuildContext context,
     required IconData icon,
     required String title,
+    String? subtitle,
   }) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Row(
-      children: [
-        Icon(
-          icon,
-          size: 15,
-          color: theme.colorScheme.primary,
-        ),
-        const SizedBox(width: 6),
-        Text(
-          title.toUpperCase(),
-          style: theme.textTheme.labelSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: isDark
-                ? const Color(0xFF8E8E93)
-                : const Color(0xFF6C6C70),
-            letterSpacing: 0.5,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Container(
+            width: 22,
+            height: 22,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.20 : 0.12),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Icon(
+              icon,
+              size: 13,
+              color: theme.colorScheme.primary,
+            ),
           ),
-        ),
-      ],
+          const SizedBox(width: 8),
+          Text(
+            title.toUpperCase(),
+            style: theme.textTheme.labelSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: isDark ? const Color(0xFF98989D) : const Color(0xFF6C6C70),
+              letterSpacing: 0.6,
+              fontSize: 11.5,
+            ),
+          ),
+          if (subtitle != null) ...[
+            const Spacer(),
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: isDark ? Colors.white38 : Colors.black38,
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 
@@ -192,9 +213,7 @@ class TransactionFilterBottomSheet extends ConsumerWidget {
       constraints: BoxConstraints(maxHeight: sheetHeight),
       decoration: BoxDecoration(
         color: isDark
-            ? (context.isOled
-                ? AppleTokens.bgOledCard
-                : AppleTokens.bgDarkPrimary)
+            ? (context.isOled ? AppleTokens.bgOledCard : AppleTokens.bgDarkPrimary)
             : AppleTokens.bgLightPrimary,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(AppleTokens.radiusHero),
@@ -213,16 +232,14 @@ class TransactionFilterBottomSheet extends ConsumerWidget {
                 width: 36,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF3A3A3C)
-                      : const Color(0xFFD1D1D6),
+                  color: isDark ? const Color(0xFF3A3A3C) : const Color(0xFFD1D1D6),
                   borderRadius: BorderRadius.circular(2.5),
                 ),
               ),
             ),
             const SizedBox(height: 12),
 
-            // Sheet Header
+            // Sheet Header with Title, Badge, Reset and Close
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
@@ -232,6 +249,7 @@ class TransactionFilterBottomSheet extends ConsumerWidget {
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w700,
                       letterSpacing: -0.3,
+                      fontSize: 20,
                     ),
                   ),
                   if (activeFilterCount > 0) ...[
@@ -239,21 +257,37 @@ class TransactionFilterBottomSheet extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
-                        vertical: 2,
+                        vertical: 3,
                       ),
                       decoration: BoxDecoration(
-                        color:
-                            theme.colorScheme.primary.withValues(alpha: 0.15),
-                        borderRadius:
-                            BorderRadius.circular(AppleTokens.radiusPill),
-                      ),
-                      child: Text(
-                        '$activeFilterCount',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: theme.colorScheme.primary,
+                        color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.22 : 0.12),
+                        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                        border: Border.all(
+                          color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                          width: AppleTokens.hairline,
                         ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            l10n.filterSelectedCount(activeFilterCount),
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -261,16 +295,16 @@ class TransactionFilterBottomSheet extends ConsumerWidget {
                   if (filter.hasActiveFilters)
                     CupertinoButton(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
-                      minimumSize: const Size(40, 32),
+                      minimumSize: const Size(44, 32),
                       onPressed: () {
                         HapticFeedback.lightImpact();
                         ref.read(transactionFilterProvider.notifier).clearAll();
                       },
                       child: Text(
-                        l10n.clearFilters,
+                        l10n.filterReset,
                         style: const TextStyle(
                           fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                           color: AppleTokens.systemRed,
                         ),
                       ),
@@ -283,17 +317,13 @@ class TransactionFilterBottomSheet extends ConsumerWidget {
                       width: 30,
                       height: 30,
                       decoration: BoxDecoration(
-                        color: isDark
-                            ? const Color(0xFF2C2C2E)
-                            : const Color(0xFFE5E5EA),
+                        color: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE5E5EA),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         CupertinoIcons.xmark,
                         size: 14,
-                        color: isDark
-                            ? const Color(0xFF8E8E93)
-                            : const Color(0xFF6C6C70),
+                        color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6C6C70),
                       ),
                     ),
                   ),
@@ -304,12 +334,10 @@ class TransactionFilterBottomSheet extends ConsumerWidget {
 
             Divider(
               height: AppleTokens.hairline,
-              color: isDark
-                  ? AppleTokens.separatorDark
-                  : AppleTokens.separatorLight,
+              color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
             ),
 
-            // Scrollable Content
+            // Scrollable Filter Sections
             Flexible(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
@@ -323,13 +351,10 @@ class TransactionFilterBottomSheet extends ConsumerWidget {
                       icon: CupertinoIcons.arrow_up_arrow_down_circle,
                       title: l10n.filterTransactionType,
                     ),
-                    const SizedBox(height: 10),
                     _TypeSegmentSelector(
                       selectedType: filter.type,
                       onChanged: (newType) {
-                        ref
-                            .read(transactionFilterProvider.notifier)
-                            .setType(newType);
+                        ref.read(transactionFilterProvider.notifier).setType(newType);
                       },
                     ),
                     const SizedBox(height: 22),
@@ -340,7 +365,6 @@ class TransactionFilterBottomSheet extends ConsumerWidget {
                       icon: CupertinoIcons.calendar,
                       title: l10n.dateRange,
                     ),
-                    const SizedBox(height: 10),
                     _DatePresetChips(
                       activePreset: activePreset,
                       onSelectPreset: (preset) {
@@ -354,6 +378,10 @@ class TransactionFilterBottomSheet extends ConsumerWidget {
                       endDate: filter.endDate,
                       locale: locale,
                       onTap: () => _pickCustomDateRange(context, ref, filter),
+                      onClear: () {
+                        HapticFeedback.lightImpact();
+                        ref.read(transactionFilterProvider.notifier).setDateRange(null, null);
+                      },
                     ),
                     const SizedBox(height: 22),
 
@@ -362,15 +390,13 @@ class TransactionFilterBottomSheet extends ConsumerWidget {
                       context: context,
                       icon: CupertinoIcons.creditcard,
                       title: l10n.walletsTitle,
+                      subtitle: '${wallets.length} ví',
                     ),
-                    const SizedBox(height: 10),
                     _WalletFilterList(
                       wallets: wallets,
                       selectedAccountId: filter.accountId,
                       onSelectAccount: (accId) {
-                        ref
-                            .read(transactionFilterProvider.notifier)
-                            .setAccount(accId);
+                        ref.read(transactionFilterProvider.notifier).setAccount(accId);
                       },
                       locale: locale,
                       hideBalance: hideBalance,
@@ -382,15 +408,19 @@ class TransactionFilterBottomSheet extends ConsumerWidget {
                       context: context,
                       icon: CupertinoIcons.square_grid_2x2,
                       title: l10n.categoriesTitle,
+                      subtitle: filter.type != null
+                          ? (filter.type == TransactionType.expense
+                              ? 'Danh mục chi tiêu'
+                              : (filter.type == TransactionType.income
+                                  ? 'Danh mục thu nhập'
+                                  : null))
+                          : null,
                     ),
-                    const SizedBox(height: 10),
                     _CategoryFilterChips(
                       categories: visibleCategories,
                       selectedCategoryId: filter.categoryId,
                       onSelectCategory: (catId) {
-                        ref
-                            .read(transactionFilterProvider.notifier)
-                            .setCategory(catId);
+                        ref.read(transactionFilterProvider.notifier).setCategory(catId);
                       },
                     ),
                   ],
@@ -401,12 +431,10 @@ class TransactionFilterBottomSheet extends ConsumerWidget {
             // Sticky Bottom Action Bar
             Divider(
               height: AppleTokens.hairline,
-              color: isDark
-                  ? AppleTokens.separatorDark
-                  : AppleTokens.separatorLight,
+              color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
               child: AppleButton.primary(
                 label: l10n.filterApply,
                 color: theme.colorScheme.primary,
@@ -457,13 +485,13 @@ class _TypeSegmentSelector extends StatelessWidget {
       (
         TransactionType.expense,
         l10n.expense,
-        CupertinoIcons.arrow_down_right,
+        CupertinoIcons.arrow_up_right,
         AppleTokens.systemRed,
       ),
       (
         TransactionType.income,
         l10n.income,
-        CupertinoIcons.arrow_up_left,
+        CupertinoIcons.arrow_down_left,
         AppleTokens.systemGreen,
       ),
       (
@@ -477,9 +505,7 @@ class _TypeSegmentSelector extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: isDark
-            ? AppleTokens.bgDarkSecondary
-            : AppleTokens.bgLightSecondary,
+        color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
         borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
         border: Border.all(
           color: isDark ? const Color(0xFF2C2C2E) : AppleTokens.borderLight,
@@ -506,11 +532,16 @@ class _TypeSegmentSelector extends StatelessWidget {
                       ? (isDark ? AppleTokens.bgDarkCard : Colors.white)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                  border: isSelected
+                      ? Border.all(
+                          color: tintColor.withValues(alpha: isDark ? 0.45 : 0.35),
+                          width: 1,
+                        )
+                      : null,
                   boxShadow: isSelected
                       ? [
                           BoxShadow(
-                            color: Colors.black
-                                .withValues(alpha: isDark ? 0.3 : 0.08),
+                            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
                             blurRadius: 4,
                             offset: const Offset(0, 1),
                           ),
@@ -526,9 +557,7 @@ class _TypeSegmentSelector extends StatelessWidget {
                       size: 13,
                       color: isSelected
                           ? tintColor
-                          : (isDark
-                              ? const Color(0xFF8E8E93)
-                              : const Color(0xFF6C6C70)),
+                          : (isDark ? const Color(0xFF8E8E93) : const Color(0xFF6C6C70)),
                     ),
                     const SizedBox(width: 4),
                     Flexible(
@@ -538,13 +567,10 @@ class _TypeSegmentSelector extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 12,
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.w400,
+                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                           color: isSelected
                               ? (isDark ? Colors.white : Colors.black87)
-                              : (isDark
-                                  ? const Color(0xFF8E8E93)
-                                  : const Color(0xFF6C6C70)),
+                              : (isDark ? const Color(0xFF8E8E93) : const Color(0xFF6C6C70)),
                         ),
                       ),
                     ),
@@ -595,22 +621,16 @@ class _DatePresetChips extends StatelessWidget {
               onTap: () => onSelectPreset(preset),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? theme.colorScheme.primary
-                          .withValues(alpha: isDark ? 0.25 : 0.12)
-                      : (isDark
-                          ? AppleTokens.bgDarkSecondary
-                          : AppleTokens.bgLightSecondary),
+                      ? theme.colorScheme.primary.withValues(alpha: isDark ? 0.25 : 0.12)
+                      : (isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary),
                   borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                   border: Border.all(
                     color: isSelected
                         ? theme.colorScheme.primary
-                        : (isDark
-                            ? const Color(0xFF2C2C2E)
-                            : AppleTokens.borderLight),
+                        : (isDark ? const Color(0xFF2C2C2E) : AppleTokens.borderLight),
                     width: isSelected ? 1.5 : AppleTokens.hairline,
                   ),
                 ),
@@ -639,12 +659,14 @@ class _CustomDateRangeTile extends StatelessWidget {
     required this.endDate,
     required this.locale,
     required this.onTap,
+    this.onClear,
   });
 
   final DateTime? startDate;
   final DateTime? endDate;
   final String locale;
   final VoidCallback onTap;
+  final VoidCallback? onClear;
 
   @override
   Widget build(BuildContext context) {
@@ -658,13 +680,11 @@ class _CustomDateRangeTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: isDark
-              ? AppleTokens.bgDarkSecondary
-              : AppleTokens.bgLightSecondary,
+          color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
           borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
           border: Border.all(
             color: hasCustomRange
-                ? theme.colorScheme.primary.withValues(alpha: 0.5)
+                ? theme.colorScheme.primary.withValues(alpha: 0.55)
                 : (isDark ? const Color(0xFF2C2C2E) : AppleTokens.borderLight),
             width: hasCustomRange ? 1.5 : AppleTokens.hairline,
           ),
@@ -672,15 +692,15 @@ class _CustomDateRangeTile extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 34,
-              height: 34,
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
+                color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.22 : 0.14),
+                borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
               ),
               child: Icon(
                 CupertinoIcons.calendar_badge_plus,
-                size: 18,
+                size: 19,
                 color: theme.colorScheme.primary,
               ),
             ),
@@ -691,35 +711,43 @@ class _CustomDateRangeTile extends StatelessWidget {
                 children: [
                   Text(
                     hasCustomRange
-                        ? '${AppDateUtils.formatShortDate(startDate!, locale: locale)} Ă¢â‚¬â€œ ${AppDateUtils.formatShortDate(endDate!, locale: locale)}'
+                        ? '${AppDateUtils.formatShortDate(startDate!, locale: locale)} – ${AppDateUtils.formatShortDate(endDate!, locale: locale)}'
                         : l10n.selectDateRange,
                     style: TextStyle(
                       fontSize: 13.5,
-                      fontWeight:
-                          hasCustomRange ? FontWeight.w600 : FontWeight.w500,
+                      fontWeight: hasCustomRange ? FontWeight.w700 : FontWeight.w500,
                       color: isDark ? Colors.white : Colors.black87,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    hasCustomRange ? l10n.dateRange : l10n.selectDateRange,
+                    hasCustomRange ? l10n.dateRange : l10n.filterCustomDate,
                     style: TextStyle(
                       fontSize: 11,
-                      color: isDark
-                          ? const Color(0xFF8E8E93)
-                          : const Color(0xFF6C6C70),
+                      color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6C6C70),
                     ),
                   ),
                 ],
               ),
             ),
-            Icon(
-              CupertinoIcons.chevron_forward,
-              size: 15,
-              color: isDark
-                  ? const Color(0xFF8E8E93)
-                  : const Color(0xFF6C6C70),
-            ),
+            if (hasCustomRange && onClear != null)
+              GestureDetector(
+                onTap: onClear,
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: Icon(
+                    CupertinoIcons.clear_circled_solid,
+                    size: 17,
+                    color: isDark ? Colors.white38 : Colors.black38,
+                  ),
+                ),
+              )
+            else
+              Icon(
+                CupertinoIcons.chevron_forward,
+                size: 15,
+                color: isDark ? const Color(0xFF8E8E93) : const Color(0xFF6C6C70),
+              ),
           ],
         ),
       ),
@@ -795,7 +823,7 @@ class _WalletFilterList extends StatelessWidget {
               ),
               title: wallet.name,
               subtitle: hideBalance
-                  ? 'Ă¢â‚¬Â¢Ă¢â‚¬Â¢Ă¢â‚¬Â¢Ă¢â‚¬Â¢Ă¢â‚¬Â¢Ă¢â‚¬Â¢'
+                  ? '••••••'
                   : wallet.balanceMoney.format(locale: locale),
               onTap: () => onSelectAccount(
                 selectedAccountId == wallet.id ? null : wallet.id,
@@ -823,24 +851,28 @@ class _WalletFilterList extends StatelessWidget {
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          width: 136,
+          width: 140,
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: isSelected
-                ? theme.colorScheme.primary
-                    .withValues(alpha: isDark ? 0.22 : 0.10)
-                : (isDark
-                    ? AppleTokens.bgDarkSecondary
-                    : AppleTokens.bgLightSecondary),
+                ? theme.colorScheme.primary.withValues(alpha: isDark ? 0.22 : 0.10)
+                : (isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary),
             borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
             border: Border.all(
               color: isSelected
                   ? theme.colorScheme.primary
-                  : (isDark
-                      ? const Color(0xFF2C2C2E)
-                      : AppleTokens.borderLight),
+                  : (isDark ? const Color(0xFF2C2C2E) : AppleTokens.borderLight),
               width: isSelected ? 1.5 : AppleTokens.hairline,
             ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.25 : 0.10),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ]
+                : null,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -850,6 +882,12 @@ class _WalletFilterList extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   iconWidget,
+                  if (isSelected)
+                    Icon(
+                      CupertinoIcons.checkmark_circle_fill,
+                      size: 16,
+                      color: theme.colorScheme.primary,
+                    ),
                 ],
               ),
               const SizedBox(height: 8),
@@ -859,7 +897,7 @@ class _WalletFilterList extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 12.5,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   color: isDark ? Colors.white : Colors.black87,
                 ),
               ),
@@ -870,9 +908,10 @@ class _WalletFilterList extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 10.5,
-                  color: isDark
-                      ? const Color(0xFF8E8E93)
-                      : const Color(0xFF6C6C70),
+                  fontWeight: FontWeight.w500,
+                  color: isSelected
+                      ? theme.colorScheme.primary
+                      : (isDark ? const Color(0xFF8E8E93) : const Color(0xFF6C6C70)),
                 ),
               ),
             ],
@@ -972,20 +1011,24 @@ class _CategoryFilterChips extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(6, 5, 12, 5),
         decoration: BoxDecoration(
           color: isSelected
-              ? theme.colorScheme.primary
-                  .withValues(alpha: isDark ? 0.22 : 0.10)
-              : (isDark
-                  ? AppleTokens.bgDarkSecondary
-                  : AppleTokens.bgLightSecondary),
+              ? theme.colorScheme.primary.withValues(alpha: isDark ? 0.22 : 0.10)
+              : (isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary),
           borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
           border: Border.all(
             color: isSelected
                 ? theme.colorScheme.primary
-                : (isDark
-                    ? const Color(0xFF2C2C2E)
-                    : AppleTokens.borderLight),
+                : (isDark ? const Color(0xFF2C2C2E) : AppleTokens.borderLight),
             width: isSelected ? 1.5 : AppleTokens.hairline,
           ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.20 : 0.08),
+                    blurRadius: 3,
+                    offset: const Offset(0, 1),
+                  ),
+                ]
+              : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -1004,10 +1047,17 @@ class _CategoryFilterChips extends StatelessWidget {
                 ),
               ),
             ),
+            if (isSelected) ...[
+              const SizedBox(width: 4),
+              Icon(
+                CupertinoIcons.checkmark_alt,
+                size: 13,
+                color: theme.colorScheme.primary,
+              ),
+            ],
           ],
         ),
       ),
     );
   }
 }
-
