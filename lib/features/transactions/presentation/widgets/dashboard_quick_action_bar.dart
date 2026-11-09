@@ -40,6 +40,8 @@ class DashboardQuickActionBar extends ConsumerWidget {
       builder: (ctx) => TransactionWalletPickerSheet(
         wallets: activeWallets,
         selectedId: null,
+        defaultWalletId:
+            ref.read(settingsControllerProvider).value?.defaultWalletId,
         locale: locale,
         title: locale.startsWith('vi')
             ? 'Chi tiết ví & tài khoản'

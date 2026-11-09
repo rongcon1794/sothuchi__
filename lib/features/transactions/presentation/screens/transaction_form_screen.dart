@@ -278,6 +278,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       builder: (ctx) => TransactionWalletPickerSheet(
         wallets: wallets,
         selectedId: selectedId,
+        defaultWalletId:
+            ref.read(settingsControllerProvider).value?.defaultWalletId,
         locale: locale,
         title: isDestination
             ? (locale.startsWith('vi') ? 'Chọn ví nhận tiền' : l10n.txDestWallet)

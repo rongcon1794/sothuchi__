@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+﻿import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -309,6 +309,64 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
+  Future<void> _showDefaultWalletPicker(
+    BuildContext context,
+    List<Account> wallets,
+    String? currentDefaultId,
+  ) async {
+    if (wallets.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Chưa có ví tiền nào để chọn')),
+      );
+      return;
+    }
+    await AppleModalSheetLayout.show<void>(
+      context: context,
+      builder: (ctx) => AppleModalSheetLayout(
+        title: 'Chọn ví mặc định',
+        subtitle: 'Ví sẽ tự động được chọn khi thêm giao dịch mới',
+        child: Column(
+          children: wallets.map((w) {
+            final isSelected = w.id == currentDefaultId;
+            final color = Color(w.color);
+            return ListTile(
+              leading: AppleSquircleBadge(
+                icon: AppIconCatalog.resolve(w.icon),
+                backgroundColor: color,
+                size: 36,
+                iconSize: 18,
+              ),
+              title: Text(
+                w.name,
+                style: TextStyle(
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                ),
+              ),
+              subtitle: Text(w.balanceMoney.format()),
+              trailing: isSelected
+                  ? const Icon(Icons.check_circle_rounded, color: Color(0xFFFFB800))
+                  : null,
+              onTap: () async {
+                unawaited(HapticFeedback.selectionClick());
+                await ref
+                    .read(settingsControllerProvider.notifier)
+                    .setDefaultWalletId(w.id);
+                if (ctx.mounted) Navigator.of(ctx).pop();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Đã chọn "${w.name}" làm ví mặc định chi tiêu'),
+                    ),
+                  );
+                }
+              },
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -466,6 +524,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ],
                 ),
                 onTap: () => context.push(AppRoutes.accounts),
+              ),
+              ListTile(
+                leading: const AppleSquircleBadge(
+                  icon: Icons.star_rounded,
+                  backgroundColor: Color(0xFFFFB800),
+                ),
+                title: const Text(
+                  'Ví mặc định chi tiêu',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                  activeWallets
+                          .where((w) => w.id == settings.defaultWalletId)
+                          .firstOrNull
+                          ?.name ??
+                      (activeWallets.isNotEmpty ? 'Chưa thiết lập' : 'Chưa có ví'),
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                onTap: () => _showDefaultWalletPicker(
+                  context,
+                  activeWallets,
+                  settings.defaultWalletId,
+                ),
               ),
               ListTile(
                 leading: const AppleSquircleBadge(

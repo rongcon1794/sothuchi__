@@ -83,6 +83,22 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
     );
   }
 
+  Future<void> _handleSetDefaultWallet(
+    BuildContext context,
+    Account account,
+  ) async {
+    unawaited(HapticFeedback.mediumImpact());
+    final res = await ref
+        .read(settingsControllerProvider.notifier)
+        .setDefaultWalletId(account.id);
+    if (!context.mounted) return;
+    if (res.isSuccess) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Đã chọn "${account.name}" làm ví mặc định chi tiêu')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -293,6 +309,8 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                       typeLabel: _typeLabel(l10n, account.type),
                       locale: locale,
                       hideBalance: hideBalance,
+                      isDefault: account.id == settings?.defaultWalletId,
+                      onSetDefault: () => _handleSetDefaultWallet(context, account),
                       onTap: () =>
                           context.push(AppRoutes.accountDetail(account.id)),
                       onEdit: () => _openWalletForm(context, existing: account),
@@ -342,6 +360,8 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                                       typeLabel: _typeLabel(l10n, account.type),
                                       locale: locale,
                                       hideBalance: hideBalance,
+                                      isDefault: account.id == settings?.defaultWalletId,
+                                      onSetDefault: () => _handleSetDefaultWallet(context, account),
                                       onTap: () => context.push(
                                         AppRoutes.accountDetail(account.id),
                                       ),
@@ -842,6 +862,8 @@ class _WalletTile extends StatelessWidget {
     required this.onTap,
     required this.onEdit,
     required this.onToggleArchive,
+    this.isDefault = false,
+    this.onSetDefault,
   });
 
   final Account account;
@@ -851,6 +873,8 @@ class _WalletTile extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onEdit;
   final VoidCallback onToggleArchive;
+  final bool isDefault;
+  final VoidCallback? onSetDefault;
 
   @override
   Widget build(BuildContext context) {
@@ -966,6 +990,39 @@ class _WalletTile extends StatelessWidget {
                                   ),
                                 ),
                               ),
+                              if (isDefault) ...[
+                                const SizedBox(width: 5),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFFB800).withValues(alpha: 0.18),
+                                    borderRadius:
+                                        BorderRadius.circular(AppleTokens.radiusPill),
+                                    border: Border.all(
+                                      color: const Color(0xFFFFB800).withValues(alpha: 0.6),
+                                      width: 0.8,
+                                    ),
+                                  ),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.star_rounded, size: 10, color: Color(0xFFFFB800)),
+                                      SizedBox(width: 2),
+                                      Text(
+                                        'Mặc định',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w700,
+                                          color: Color(0xFFFFB800),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ],
@@ -999,8 +1056,15 @@ class _WalletTile extends StatelessWidget {
                       onSelected: (value) {
                         if (value == 'edit') onEdit();
                         if (value == 'archive') onToggleArchive();
+                        if (value == 'set_default') onSetDefault?.call();
                       },
                       itemBuilder: (ctx) => [
+                        if (!isDefault && onSetDefault != null)
+                          ApplePopupMenuItem(
+                            value: 'set_default',
+                            icon: CupertinoIcons.star_fill,
+                            title: 'Đặt làm ví mặc định',
+                          ),
                         ApplePopupMenuItem(
                           value: 'edit',
                           icon: CupertinoIcons.pencil,

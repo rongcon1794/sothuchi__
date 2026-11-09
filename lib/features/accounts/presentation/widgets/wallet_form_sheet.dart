@@ -134,6 +134,7 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
   late String _icon;
   late int _color;
   late String _currency;
+  late bool _isDefault;
 
   @override
   void initState() {
@@ -158,6 +159,11 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
     _type = existing?.type ?? AccountType.cash;
     _icon = existing?.icon ?? _type.defaultIconKey;
     _color = existing?.color ?? AppIconCatalog.palette.first;
+
+    final currentDefault = settings?.defaultWalletId;
+    _isDefault = existing != null
+        ? currentDefault == existing.id
+        : (currentDefault == null || currentDefault.isEmpty);
 
     _nameController.addListener(_onFieldChanged);
     _balanceController.addListener(_onFieldChanged);
@@ -215,9 +221,24 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
 
     if (!mounted) return;
     result.fold(
-      onSuccess: (acc) {
+      onSuccess: (acc) async {
         unawaited(HapticFeedback.lightImpact());
-        Navigator.of(context).pop(acc);
+        if (_isDefault) {
+          await ref
+              .read(settingsControllerProvider.notifier)
+              .setDefaultWalletId(acc.id);
+        } else {
+          final currentDefault =
+              ref.read(settingsControllerProvider).value?.defaultWalletId;
+          if (currentDefault == acc.id) {
+            await ref
+                .read(settingsControllerProvider.notifier)
+                .setDefaultWalletId(null);
+          }
+        }
+        if (mounted) {
+          Navigator.of(context).pop(acc);
+        }
       },
       onFailure: (err) {
         ScaffoldMessenger.of(
@@ -347,6 +368,70 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
               accentColor: walletColor,
             ),
             _buildColorSelector(isDark: isDark),
+            const SizedBox(height: 18),
+
+            // 8. Default Wallet Setting (Đặt làm ví mặc định)
+            _buildSectionHeader(
+              icon: CupertinoIcons.star_fill,
+              title: 'Cài đặt ví',
+              accentColor: walletColor,
+            ),
+            AppleGlassCard(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              borderColor: _isDefault
+                  ? const Color(0xFFFFB800).withValues(alpha: 0.5)
+                  : null,
+              child: Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: _isDefault
+                          ? const Color(0xFFFFB800).withValues(alpha: 0.2)
+                          : AppleTokens.systemGray.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      _isDefault ? Icons.star_rounded : Icons.star_outline_rounded,
+                      color: _isDefault ? const Color(0xFFFFB800) : AppleTokens.systemGray,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Đặt làm ví mặc định',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14.5,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Tự động chọn ví này khi thêm giao dịch mới',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isDark ? Colors.white60 : Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Switch.adaptive(
+                    value: _isDefault,
+                    activeColor: walletColor,
+                    onChanged: (val) {
+                      unawaited(HapticFeedback.selectionClick());
+                      setState(() => _isDefault = val);
+                    },
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(height: 18),
           ],
         ),
@@ -534,29 +619,68 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.25),
-                          borderRadius:
-                              BorderRadius.circular(AppleTokens.radiusPill),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.25),
-                            width: 0.8,
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.25),
+                              borderRadius:
+                                  BorderRadius.circular(AppleTokens.radiusPill),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.25),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Text(
+                              _typeLabel(l10n, _type).toUpperCase(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.4,
+                              ),
+                            ),
                           ),
-                        ),
-                        child: Text(
-                          _typeLabel(l10n, _type).toUpperCase(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.4,
-                          ),
-                        ),
+                          if (_isDefault) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFB800).withValues(alpha: 0.25),
+                                borderRadius:
+                                    BorderRadius.circular(AppleTokens.radiusPill),
+                                border: Border.all(
+                                  color: const Color(0xFFFFDF7A).withValues(alpha: 0.6),
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.star_rounded, size: 12, color: Color(0xFFFFDF7A)),
+                                  SizedBox(width: 3),
+                                  Text(
+                                    'MẶC ĐỊNH',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0.3,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                       Text(
                         _currency,

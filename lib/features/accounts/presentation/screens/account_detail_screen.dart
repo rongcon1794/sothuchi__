@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -168,6 +168,10 @@ class AccountDetailScreen extends ConsumerWidget {
         final expenseMoney = Money(minorUnits: totalExpenseMinor, currencyCode: account.currency);
         final netMoney = Money(minorUnits: totalIncomeMinor - totalExpenseMinor, currencyCode: account.currency);
 
+        final isDefault = ref.watch(
+          settingsControllerProvider.select((s) => s.value?.defaultWalletId == account.id),
+        );
+
         return Scaffold(
           backgroundColor: theme.scaffoldBackgroundColor,
           appBar: AppBar(
@@ -192,9 +196,17 @@ class AccountDetailScreen extends ConsumerWidget {
               ),
               ApplePopupMenuButton<String>(
                 tooltip: l10n.moreOptions,
-                onSelected: (val) {
+                onSelected: (val) async {
                   if (val == 'edit') {
                     WalletFormSheet.show(context, existing: account);
+                  } else if (val == 'set_default') {
+                    unawaited(HapticFeedback.mediumImpact());
+                    await ref.read(settingsControllerProvider.notifier).setDefaultWalletId(account.id);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Đã chọn "${account.name}" làm ví mặc định chi tiêu')),
+                      );
+                    }
                   } else if (val == 'archive') {
                     _handleToggleArchive(context, ref, account);
                   } else if (val == 'delete') {
@@ -202,6 +214,12 @@ class AccountDetailScreen extends ConsumerWidget {
                   }
                 },
                 itemBuilder: (_) => [
+                  if (!isDefault)
+                    ApplePopupMenuItem(
+                      value: 'set_default',
+                      icon: CupertinoIcons.star_fill,
+                      title: 'Đặt làm ví mặc định',
+                    ),
                   ApplePopupMenuItem(
                     value: 'edit',
                     icon: CupertinoIcons.pencil,
@@ -303,6 +321,35 @@ class AccountDetailScreen extends ConsumerWidget {
                                           child: Text(
                                             l10n.archivedWallets,
                                             style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600),
+                                          ),
+                                        ),
+                                      ],
+                                      if (isDefault) ...[
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFFFB800).withValues(alpha: 0.25),
+                                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                                            border: Border.all(
+                                              color: const Color(0xFFFFB800).withValues(alpha: 0.6),
+                                              width: 0.8,
+                                            ),
+                                          ),
+                                          child: const Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(Icons.star_rounded, size: 12, color: Color(0xFFFFB800)),
+                                              SizedBox(width: 3),
+                                              Text(
+                                                'Ví mặc định',
+                                                style: TextStyle(
+                                                  fontSize: 10.5,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: Color(0xFFFFB800),
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ],

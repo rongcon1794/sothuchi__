@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+﻿import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
@@ -15,6 +15,7 @@ class TransactionWalletPickerSheet extends StatelessWidget {
     required this.locale,
     required this.title,
     this.onCreateNew,
+    this.defaultWalletId,
   });
 
   final List<Account> wallets;
@@ -22,6 +23,7 @@ class TransactionWalletPickerSheet extends StatelessWidget {
   final String locale;
   final String title;
   final VoidCallback? onCreateNew;
+  final String? defaultWalletId;
 
   @override
   Widget build(BuildContext context) {
@@ -205,14 +207,57 @@ class TransactionWalletPickerSheet extends StatelessWidget {
                               size: 40,
                               iconSize: 20,
                             ),
-                            title: Text(
-                              wallet.name,
-                              style: TextStyle(
-                                fontWeight: isSelected
-                                    ? FontWeight.w700
-                                    : FontWeight.w600,
-                                fontSize: 16,
-                              ),
+                            title: Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    wallet.name,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontWeight: isSelected
+                                          ? FontWeight.w700
+                                          : FontWeight.w600,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                                if (wallet.id == defaultWalletId) ...[
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFFFB800)
+                                          .withValues(alpha: 0.18),
+                                      borderRadius: BorderRadius.circular(
+                                          AppleTokens.radiusPill),
+                                      border: Border.all(
+                                        color: const Color(0xFFFFB800)
+                                            .withValues(alpha: 0.6),
+                                        width: 0.8,
+                                      ),
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.star_rounded,
+                                            size: 10, color: Color(0xFFFFB800)),
+                                        SizedBox(width: 2),
+                                        Text(
+                                          'Mặc định',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w700,
+                                            color: Color(0xFFFFB800),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
                             subtitle: Text(
                               wallet.balanceMoney.format(locale: locale),
