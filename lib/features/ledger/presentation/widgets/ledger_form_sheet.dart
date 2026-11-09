@@ -9,6 +9,68 @@ import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
 import 'package:so_thu_chi/features/ledger/presentation/controllers/ledgers_controller.dart';
+import 'package:so_thu_chi/l10n/app_localizations.dart';
+
+class _LedgerTemplate {
+  const _LedgerTemplate({
+    required this.name,
+    required this.type,
+    required this.icon,
+    required this.color,
+    required this.subtitle,
+  });
+
+  final String name;
+  final LedgerType type;
+  final String icon;
+  final int color;
+  final String subtitle;
+}
+
+const _kLedgerTemplates = [
+  _LedgerTemplate(
+    name: 'Sổ Gia Đình',
+    type: LedgerType.family,
+    icon: 'family',
+    color: 0xFF007AFF,
+    subtitle: 'Sinh hoạt chung & con cái',
+  ),
+  _LedgerTemplate(
+    name: 'Kinh Doanh & Dự Án',
+    type: LedgerType.business,
+    icon: 'briefcase',
+    color: 0xFF5856D6,
+    subtitle: 'Bán hàng, dòng tiền dự án',
+  ),
+  _LedgerTemplate(
+    name: 'Quỹ Du Lịch & Nghỉ Dưỡng',
+    type: LedgerType.custom,
+    icon: 'airplane',
+    color: 0xFFFF9500,
+    subtitle: 'Đi chơi, du lịch, dã ngoại',
+  ),
+  _LedgerTemplate(
+    name: 'Đầu Tư & Tích Lũy',
+    type: LedgerType.custom,
+    icon: 'chart',
+    color: 0xFF00A86B,
+    subtitle: 'Chứng khoán, vàng, tài sản',
+  ),
+  _LedgerTemplate(
+    name: 'Học Tập & Con Cái',
+    type: LedgerType.family,
+    icon: 'school',
+    color: 0xFF30B0C7,
+    subtitle: 'Học phí, sách vở, khóa học',
+  ),
+  _LedgerTemplate(
+    name: 'Xây Sửa & Mua Sắm Nhà',
+    type: LedgerType.custom,
+    icon: 'home',
+    color: 0xFFFA5050,
+    subtitle: 'Sửa nhà, mua sắm nội thất',
+  ),
+];
 
 class LedgerFormSheet extends ConsumerStatefulWidget {
   const LedgerFormSheet({super.key, this.existing});
@@ -42,16 +104,25 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
     ('briefcase', CupertinoIcons.briefcase_fill, 'Công việc'),
     ('wallet', CupertinoIcons.creditcard_fill, 'Quỹ riêng'),
     ('star', CupertinoIcons.star_fill, 'Đặc biệt'),
+    ('airplane', CupertinoIcons.airplane, 'Du lịch'),
+    ('cart', CupertinoIcons.cart_fill, 'Mua sắm'),
+    ('home', CupertinoIcons.house_fill, 'Nhà cửa'),
+    ('school', CupertinoIcons.book_fill, 'Học tập'),
+    ('chart', CupertinoIcons.chart_bar_alt_fill, 'Đầu tư'),
+    ('heart', CupertinoIcons.heart_fill, 'Sức khỏe'),
   ];
 
   static const _availableColors = [
     0xFF00A86B, // Jade Green
     0xFF007AFF, // iOS Blue
     0xFF5856D6, // Indigo
-    0xFFFF9500, // Orange
-    0xFFFFCC00, // Amber
-    0xFAF55050, // Ruby / Red
     0xFFAF52DE, // Purple
+    0xFFFF9500, // Orange
+    0xFFFFCC00, // Amber / Gold
+    0xFFFA5050, // Ruby Red
+    0xFF30B0C7, // Teal
+    0xFF34C759, // Mint
+    0xFFFF2D55, // Rose Pink
   ];
 
   @override
@@ -64,12 +135,38 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
       _selectedIcon = item.icon;
       _selectedColor = item.color;
     }
+    _nameController.addListener(_onNameChanged);
+  }
+
+  void _onNameChanged() {
+    setState(() {});
   }
 
   @override
   void dispose() {
+    _nameController.removeListener(_onNameChanged);
     _nameController.dispose();
     super.dispose();
+  }
+
+  IconData _resolveIcon(String iconKey) {
+    for (final opt in _availableIcons) {
+      if (opt.$1 == iconKey) return opt.$2;
+    }
+    return CupertinoIcons.book_fill;
+  }
+
+  String _typeLabel(LedgerType type, AppLocalizations l10n) {
+    switch (type) {
+      case LedgerType.personal:
+        return l10n.ledgerPersonal;
+      case LedgerType.family:
+        return l10n.ledgerFamily;
+      case LedgerType.business:
+        return l10n.ledgerBusiness;
+      case LedgerType.custom:
+        return l10n.ledgerCustom;
+    }
   }
 
   Future<void> _submit() async {
@@ -153,11 +250,12 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final l10n = context.l10n;
+    final accentColor = Color(_selectedColor);
 
     return AppleModalSheetLayout(
       title: _isEditing ? l10n.ledgerEditTitle : l10n.ledgerNewTitle,
       bottomAction: AppleButton.primary(
-        color: Color(_selectedColor),
+        color: accentColor,
         label: _isEditing ? l10n.ledgerConfirmUpdate : l10n.ledgerConfirmCreate,
         onPressed: _submit,
       ),
@@ -167,123 +265,647 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Name input
+            // 1. Interactive Apple Ledger Book Live Preview Card
+            _buildLivePreviewCard(
+              isDark: isDark,
+              accentColor: accentColor,
+              l10n: l10n,
+            ),
+            const SizedBox(height: 18),
+
+            // 2. Popular Templates Carousel (only in create mode)
+            if (!_isEditing) ...[
+              _buildSectionHeader(
+                icon: CupertinoIcons.sparkles,
+                title: 'Mẫu sổ thu chi phổ biến',
+                accentColor: accentColor,
+              ),
+              _buildTemplatesCarousel(isDark: isDark),
+              const SizedBox(height: 18),
+            ],
+
+            // 3. Visual Ledger Type Selector
+            _buildSectionHeader(
+              icon: CupertinoIcons.tag_fill,
+              title: l10n.ledgerType,
+              accentColor: accentColor,
+            ),
+            _buildTypeSelector(
+              isDark: isDark,
+              l10n: l10n,
+              accentColor: accentColor,
+            ),
+            const SizedBox(height: 18),
+
+            // 4. Ledger Name Input
+            _buildSectionHeader(
+              icon: CupertinoIcons.pencil,
+              title: l10n.ledgerName,
+              accentColor: accentColor,
+            ),
             AppleTextField(
               controller: _nameController,
               label: l10n.ledgerName,
               placeholder: l10n.ledgerNameHint,
-              prefixIcon: const Icon(CupertinoIcons.book, size: 18),
-              validator: (v) => (v == null || v.trim().isEmpty) ? l10n.ledgerNameRequired : null,
+              prefixIcon: Icon(CupertinoIcons.book, size: 18, color: accentColor),
+              clearable: true,
+              validator: (v) =>
+                  (v == null || v.trim().isEmpty) ? l10n.ledgerNameRequired : null,
             ),
-                      const SizedBox(height: 16),
+            const SizedBox(height: 18),
 
-                      // Type selector
-                      DropdownButtonFormField<LedgerType>(
-                        initialValue: _type,
-                        decoration: InputDecoration(
-                          labelText: l10n.ledgerType,
-                          prefixIcon: const Icon(CupertinoIcons.tag),
+            // 5. Curated Icon Collection
+            _buildSectionHeader(
+              icon: CupertinoIcons.app_badge_fill,
+              title: l10n.ledgerIcon,
+              accentColor: accentColor,
+            ),
+            _buildIconSelector(
+              isDark: isDark,
+              accentColor: accentColor,
+            ),
+            const SizedBox(height: 18),
+
+            // 6. Curated Color Palette
+            _buildSectionHeader(
+              icon: CupertinoIcons.paintbrush_fill,
+              title: l10n.ledgerColor,
+              accentColor: accentColor,
+            ),
+            _buildColorSelector(isDark: isDark),
+            const SizedBox(height: 20),
+
+            // 7. Delete Button (if editing non-default)
+            if (_isEditing &&
+                !widget.existing!.isDefault &&
+                widget.existing!.id != LedgerBook.defaultPersonalId) ...[
+              AppleButton.destructive(
+                label: l10n.ledgerDelete,
+                icon: const Icon(CupertinoIcons.trash, size: 18),
+                onPressed: _delete,
+              ),
+              const SizedBox(height: 12),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader({
+    required IconData icon,
+    required String title,
+    String? subtitle,
+    Color? accentColor,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 13,
+            color: accentColor ?? AppleTokens.systemGray,
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                    color: accentColor ?? AppleTokens.systemGray,
+                  ),
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 1),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 10.5,
+                      color: AppleTokens.systemGray,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLivePreviewCard({
+    required bool isDark,
+    required Color accentColor,
+    required AppLocalizations l10n,
+  }) {
+    final title = _nameController.text.trim().isNotEmpty
+        ? _nameController.text.trim()
+        : l10n.ledgerNameHint;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            accentColor,
+            Color.lerp(accentColor, Colors.black, isDark ? 0.45 : 0.3)!,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+        boxShadow: [
+          BoxShadow(
+            color: accentColor.withValues(alpha: isDark ? 0.45 : 0.28),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+        child: Stack(
+          children: [
+            // Left Book Spine Ribbon
+            Positioned(
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: 8,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.22),
+                  border: Border(
+                    right: BorderSide(
+                      color: Colors.black.withValues(alpha: 0.15),
+                      width: 1,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // Book Stitching Accent Line
+            Positioned(
+              left: 13,
+              top: 0,
+              bottom: 0,
+              width: 1,
+              child: Container(
+                color: Colors.white.withValues(alpha: 0.2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(26, 18, 18, 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Squircle Badge with Book Icon
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.35),
+                            width: 1.5,
+                          ),
                         ),
-                        items: [
-                          DropdownMenuItem(value: LedgerType.personal, child: Text(l10n.ledgerPersonal)),
-                          DropdownMenuItem(value: LedgerType.family, child: Text(l10n.ledgerFamily)),
-                          DropdownMenuItem(value: LedgerType.business, child: Text(l10n.ledgerBusiness)),
-                          DropdownMenuItem(value: LedgerType.custom, child: Text(l10n.ledgerCustom)),
+                        child: Icon(
+                          _resolveIcon(_selectedIcon),
+                          color: Colors.white,
+                          size: 26,
+                        ),
+                      ),
+                      // Badges on top right (Type + Default tag)
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.25),
+                              borderRadius:
+                                  BorderRadius.circular(AppleTokens.radiusPill),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.3),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Text(
+                              _typeLabel(_type, l10n),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          if (widget.existing?.isDefault == true) ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppleTokens.systemYellow.withValues(alpha: 0.9),
+                                borderRadius:
+                                    BorderRadius.circular(AppleTokens.radiusPill),
+                              ),
+                              child: const Text(
+                                'MẶC ĐỊNH',
+                                style: TextStyle(
+                                  color: Colors.black87,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
-                        onChanged: (val) {
-                          if (val != null) setState(() => _type = val);
-                        },
                       ),
-                      const SizedBox(height: 16),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.4,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Độc lập dữ liệu tài chính • Tiền tệ ${widget.existing?.currency ?? AppCurrencies.defaultCode}',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.82),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-                      // Icon selector
-                      Text(l10n.ledgerIcon, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppleTokens.systemGray)),
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        height: 52,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: _availableIcons.length,
-                          separatorBuilder: (_, _) => const SizedBox(width: 10),
-                          itemBuilder: (context, index) {
-                            final item = _availableIcons[index];
-                            final isSelected = _selectedIcon == item.$1;
-                            return GestureDetector(
-                              onTap: () {
-                                HapticFeedback.selectionClick();
-                                setState(() => _selectedIcon = item.$1);
-                              },
-                              child: Container(
-                                width: 50,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  color: isSelected ? Color(_selectedColor) : (isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary),
-                                  borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-                                  border: isSelected ? Border.all(color: Colors.white, width: 2) : null,
-                                ),
-                                child: Icon(
-                                  item.$2,
-                                  color: isSelected ? Colors.white : (isDark ? Colors.white70 : Colors.black87),
-                                  size: 22,
-                                ),
-                              ),
-                            );
-                          },
+  Widget _buildTemplatesCarousel({required bool isDark}) {
+    return SizedBox(
+      height: 72,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        itemCount: _kLedgerTemplates.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
+        itemBuilder: (context, index) {
+          final tpl = _kLedgerTemplates[index];
+          final tplColor = Color(tpl.color);
+          return ApplePressable(
+            onTap: () {
+              unawaited(HapticFeedback.mediumImpact());
+              setState(() {
+                _nameController.text = tpl.name;
+                _type = tpl.type;
+                _selectedIcon = tpl.icon;
+                _selectedColor = tpl.color;
+              });
+            },
+            borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? AppleTokens.bgDarkSecondary
+                    : AppleTokens.bgLightSecondary,
+                borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                border: Border.all(
+                  color: tplColor.withValues(alpha: 0.35),
+                  width: 1.0,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: tplColor.withValues(alpha: 0.16),
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+                    ),
+                    child: Icon(
+                      _resolveIcon(tpl.icon),
+                      color: tplColor,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        tpl.name,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 2),
+                      Text(
+                        tpl.subtitle,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: isDark ? Colors.white54 : Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 
-                      // Color selector
-                      Text(l10n.ledgerColor, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppleTokens.systemGray)),
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        height: 44,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: _availableColors.length,
-                          separatorBuilder: (_, _) => const SizedBox(width: 10),
-                          itemBuilder: (context, index) {
-                            final colorVal = _availableColors[index];
-                            final isSelected = _selectedColor == colorVal;
-                            return GestureDetector(
-                              onTap: () {
-                                HapticFeedback.selectionClick();
-                                setState(() => _selectedColor = colorVal);
-                              },
-                              child: Container(
-                                width: 42,
-                                height: 42,
-                                decoration: BoxDecoration(
-                                  color: Color(colorVal),
-                                  shape: BoxShape.circle,
-                                  border: isSelected
-                                      ? Border.all(color: isDark ? Colors.white : Colors.black, width: 3)
-                                      : null,
-                                ),
-                                child: isSelected
-                                    ? const Icon(CupertinoIcons.checkmark, color: Colors.white, size: 20)
-                                    : null,
-                              ),
-                            );
-                          },
+  Widget _buildTypeSelector({
+    required bool isDark,
+    required AppLocalizations l10n,
+    required Color accentColor,
+  }) {
+    final types = [
+      (
+        type: LedgerType.personal,
+        title: l10n.ledgerPersonal,
+        desc: 'Thu chi cá nhân',
+        icon: CupertinoIcons.person_crop_circle_fill,
+      ),
+      (
+        type: LedgerType.family,
+        title: l10n.ledgerFamily,
+        desc: 'Sinh hoạt chung',
+        icon: CupertinoIcons.person_3_fill,
+      ),
+      (
+        type: LedgerType.business,
+        title: l10n.ledgerBusiness,
+        desc: 'Kinh doanh & dự án',
+        icon: CupertinoIcons.briefcase_fill,
+      ),
+      (
+        type: LedgerType.custom,
+        title: l10n.ledgerCustom,
+        desc: 'Quỹ riêng & sự kiện',
+        icon: CupertinoIcons.star_fill,
+      ),
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cardWidth = (constraints.maxWidth - 10) / 2;
+        return Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: types.map((item) {
+            final isSelected = _type == item.type;
+            return SizedBox(
+              width: cardWidth,
+              child: ApplePressable(
+                onTap: () {
+                  unawaited(HapticFeedback.selectionClick());
+                  setState(() => _type = item.type);
+                },
+                borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? accentColor.withValues(alpha: isDark ? 0.22 : 0.12)
+                        : (isDark
+                            ? AppleTokens.bgDarkSecondary
+                            : AppleTokens.bgLightSecondary),
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                    border: Border.all(
+                      color: isSelected
+                          ? accentColor
+                          : (isDark
+                              ? AppleTokens.separatorDark
+                              : AppleTokens.separatorLight),
+                      width: isSelected ? 1.5 : 1.0,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? accentColor
+                              : (isDark ? Colors.white12 : Colors.black12),
+                          borderRadius:
+                              BorderRadius.circular(AppleTokens.radiusControl),
+                        ),
+                        child: Icon(
+                          item.icon,
+                          size: 16,
+                          color: isSelected
+                              ? Colors.white
+                              : (isDark ? Colors.white70 : Colors.black87),
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      if (_isEditing &&
-                          !widget.existing!.isDefault &&
-                          widget.existing!.id != LedgerBook.defaultPersonalId) ...[
-                        const SizedBox(height: 8),
-                        AppleButton.destructive(
-                          label: l10n.ledgerDelete,
-                          icon: const Icon(CupertinoIcons.trash, size: 18),
-                          onPressed: _delete,
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              item.title,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: isSelected
+                                    ? FontWeight.w700
+                                    : FontWeight.w600,
+                                color: isSelected
+                                    ? (isDark ? Colors.white : accentColor)
+                                    : (isDark ? Colors.white : Colors.black87),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              item.desc,
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                color: isDark ? Colors.white54 : Colors.black54,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                      ],
+                      ),
                     ],
                   ),
                 ),
-              );
-            }
-          }
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
 
+  Widget _buildIconSelector({
+    required bool isDark,
+    required Color accentColor,
+  }) {
+    return SizedBox(
+      height: 72,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        itemCount: _availableIcons.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
+        itemBuilder: (context, index) {
+          final item = _availableIcons[index];
+          final isSelected = _selectedIcon == item.$1;
+          return ApplePressable(
+            onTap: () {
+              unawaited(HapticFeedback.selectionClick());
+              setState(() => _selectedIcon = item.$1);
+            },
+            borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? accentColor
+                        : (isDark
+                            ? AppleTokens.bgDarkSecondary
+                            : AppleTokens.bgLightSecondary),
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                    border: Border.all(
+                      color: isSelected
+                          ? Colors.white
+                          : (isDark
+                              ? AppleTokens.separatorDark
+                              : AppleTokens.separatorLight),
+                      width: isSelected ? 2 : 1,
+                    ),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: accentColor.withValues(alpha: 0.4),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Icon(
+                    item.$2,
+                    color: isSelected
+                        ? Colors.white
+                        : (isDark ? Colors.white70 : Colors.black87),
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  item.$3,
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    color: isSelected
+                        ? (isDark ? Colors.white : accentColor)
+                        : (isDark ? Colors.white60 : Colors.black54),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildColorSelector({required bool isDark}) {
+    return SizedBox(
+      height: 46,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        itemCount: _availableColors.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 12),
+        itemBuilder: (context, index) {
+          final colorVal = _availableColors[index];
+          final isSelected = _selectedColor == colorVal;
+          final color = Color(colorVal);
+          return ApplePressable(
+            onTap: () {
+              unawaited(HapticFeedback.selectionClick());
+              setState(() => _selectedColor = colorVal);
+            },
+            borderRadius: BorderRadius.circular(23),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected
+                      ? (isDark ? Colors.white : Colors.black87)
+                      : Colors.transparent,
+                  width: 3,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withValues(alpha: isSelected ? 0.45 : 0.2),
+                    blurRadius: isSelected ? 8 : 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: isSelected
+                  ? const Icon(CupertinoIcons.checkmark,
+                      color: Colors.white, size: 20)
+                  : null,
+            ),
+          );
+        },
+      ),
+    );
+  }
+}

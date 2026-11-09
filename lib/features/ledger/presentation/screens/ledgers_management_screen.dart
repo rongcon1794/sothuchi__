@@ -37,6 +37,18 @@ class _LedgersManagementScreenState
         return CupertinoIcons.creditcard_fill;
       case 'star':
         return CupertinoIcons.star_fill;
+      case 'airplane':
+        return CupertinoIcons.airplane;
+      case 'cart':
+        return CupertinoIcons.cart_fill;
+      case 'home':
+        return CupertinoIcons.house_fill;
+      case 'school':
+        return CupertinoIcons.book_fill;
+      case 'chart':
+        return CupertinoIcons.chart_bar_alt_fill;
+      case 'heart':
+        return CupertinoIcons.heart_fill;
       case 'person':
       default:
         return CupertinoIcons.person_crop_circle_fill;
@@ -54,6 +66,26 @@ class _LedgersManagementScreenState
       case LedgerType.custom:
         return l10n.ledgerCustom;
     }
+  }
+
+  void _switchLedger(BuildContext context, LedgerBook item) {
+    unawaited(HapticFeedback.mediumImpact());
+    ref.read(ledgersActionControllerProvider.notifier).switchLedger(item.id);
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(CupertinoIcons.checkmark_alt_circle_fill,
+                color: Colors.white, size: 20),
+            const SizedBox(width: 8),
+            Expanded(child: Text('Đã chuyển sang sổ: ${item.name}')),
+          ],
+        ),
+        backgroundColor: AppleTokens.jadeDark,
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   Future<void> _confirmDelete(BuildContext context, LedgerBook ledger) async {
@@ -79,7 +111,26 @@ class _LedgersManagementScreenState
 
     if (confirmed == true && context.mounted) {
       unawaited(HapticFeedback.mediumImpact());
-      await ref.read(ledgersActionControllerProvider.notifier).deleteLedger(ledger.id);
+      final res = await ref
+          .read(ledgersActionControllerProvider.notifier)
+          .deleteLedger(ledger.id);
+      if (context.mounted) {
+        res.fold(
+          onSuccess: (_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Đã xóa sổ: ${ledger.name}'),
+                backgroundColor: AppleTokens.rubyExpense,
+              ),
+            );
+          },
+          onFailure: (err) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(context.localizeError(err))),
+            );
+          },
+        );
+      }
     }
   }
 
@@ -104,7 +155,10 @@ class _LedgersManagementScreenState
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         toolbarHeight: appBarHeight,
-        title: Text(l10n.ledgersTitle, style: const TextStyle(fontWeight: FontWeight.w700)),
+        title: Text(
+          l10n.ledgersTitle,
+          style: const TextStyle(fontWeight: FontWeight.w700),
+        ),
         centerTitle: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -131,227 +185,633 @@ class _LedgersManagementScreenState
         top: false,
         bottom: false,
         child: ledgersAsync.when(
-        loading: () => const Center(child: CupertinoActivityIndicator()),
-        error: (err, _) => Center(child: Text('Lỗi: $err')),
-        data: (ledgers) {
-          return NotificationListener<UserScrollNotification>(
-            onNotification: (notification) {
-              if (notification.direction == ScrollDirection.reverse) {
-                if (_isFabVisible) {
-                  setState(() {
-                    _isFabVisible = false;
-                    _isFabExpanded = false;
-                  });
+          loading: () => const Center(child: CupertinoActivityIndicator()),
+          error: (err, _) => Center(child: Text('Lỗi: $err')),
+          data: (ledgers) {
+            final activeLedger = ledgers.firstWhere(
+              (l) => l.id == activeId,
+              orElse: () =>
+                  ledgers.isNotEmpty ? ledgers.first : LedgerBook.defaultPersonal(),
+            );
+
+            return NotificationListener<UserScrollNotification>(
+              onNotification: (notification) {
+                if (notification.direction == ScrollDirection.reverse) {
+                  if (_isFabVisible) {
+                    setState(() {
+                      _isFabVisible = false;
+                      _isFabExpanded = false;
+                    });
+                  }
+                } else if (notification.direction == ScrollDirection.forward) {
+                  if (!_isFabVisible) {
+                    setState(() => _isFabVisible = true);
+                  }
+                } else if (notification.metrics.pixels <= 30) {
+                  if (!_isFabVisible || !_isFabExpanded) {
+                    setState(() {
+                      _isFabVisible = true;
+                      _isFabExpanded = true;
+                    });
+                  }
                 }
-              } else if (notification.direction == ScrollDirection.forward) {
-                if (!_isFabVisible) {
-                  setState(() => _isFabVisible = true);
-                }
-              } else if (notification.metrics.pixels <= 30) {
-                if (!_isFabVisible || !_isFabExpanded) {
-                  setState(() {
-                    _isFabVisible = true;
-                    _isFabExpanded = true;
-                  });
-                }
-              }
-              return false;
-            },
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: AppleTokens.maxContentWidth),
-                child: ListView(
-                  padding: EdgeInsets.fromLTRB(16, 8, 16, scrollBottomPadding),
-                  children: [
-                // Info Card
-                AppleGlassCard(
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
-                  padding: const EdgeInsets.all(16),
-                  gradient: LinearGradient(
-                    colors: isDark
-                        ? const [Color(0xFF0F2636), Color(0xFF08151E)]
-                        : const [Color(0xFFE0F2FE), Color(0xFFEFF6FF)],
+                return false;
+              },
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: AppleTokens.maxContentWidth,
                   ),
-                  borderColor: AppleTokens.systemBlue.withValues(alpha: 0.3),
-                  child: Row(
+                  child: ListView(
+                    physics: const BouncingScrollPhysics(),
+                    padding:
+                        EdgeInsets.fromLTRB(16, 8, 16, scrollBottomPadding),
                     children: [
-                      const AppleSquircleBadge(
-                        icon: CupertinoIcons.layers_alt_fill,
-                        backgroundColor: AppleTokens.systemBlue,
-                        size: 42,
-                        iconSize: 22,
+                      // 1. Active Ledger Showcase Hero Card
+                      _buildActiveLedgerShowcase(
+                        context: context,
+                        ledger: activeLedger,
+                        isDark: isDark,
+                        l10n: l10n,
                       ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      const SizedBox(height: 16),
+
+                      // 2. Metrics Bar Strip
+                      _buildMetricsBar(
+                        ledgersCount: ledgers.length,
+                        activeTypeLabel: _typeLabel(activeLedger.type, l10n),
+                        currency: activeLedger.currency,
+                        isDark: isDark,
+                      ),
+                      const SizedBox(height: 22),
+
+                      // 3. Section Header: All Ledgers
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 4, vertical: 6),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              l10n.ledgersTitle.toUpperCase(),
+                              l10n.ledgerSwitcherTitle.toUpperCase(),
                               style: const TextStyle(
-                                fontSize: 11,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w700,
-                                color: AppleTokens.systemBlue,
-                                letterSpacing: 0.5,
+                                color: AppleTokens.systemGray,
+                                letterSpacing: 0.6,
                               ),
                             ),
-                            const SizedBox(height: 3),
-                            Text(
-                              l10n.ledgerSwitcherSubtitle,
-                              style: const TextStyle(fontSize: 12),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? AppleTokens.bgDarkSecondary
+                                    : AppleTokens.bgLightSecondary,
+                                borderRadius: BorderRadius.circular(
+                                    AppleTokens.radiusPill),
+                              ),
+                              child: Text(
+                                '${ledgers.length} sổ',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppleTokens.systemGray,
+                                ),
+                              ),
                             ),
                           ],
                         ),
                       ),
+                      const SizedBox(height: 6),
+
+                      // 4. Ledger Books List
+                      for (final item in ledgers) ...[
+                        _buildLedgerCard(
+                          context: context,
+                          item: item,
+                          isActive: item.id == activeId,
+                          isDark: isDark,
+                          l10n: l10n,
+                        ),
+                        const SizedBox(height: 12),
+                      ],
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
 
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-                  child: Text(
-                    l10n.ledgerSwitcherTitle.toUpperCase(),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppleTokens.systemGray,
-                      letterSpacing: 0.5,
+  Widget _buildActiveLedgerShowcase({
+    required BuildContext context,
+    required LedgerBook ledger,
+    required bool isDark,
+    required AppLocalizations l10n,
+  }) {
+    final bookColor = Color(ledger.color);
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            bookColor,
+            Color.lerp(bookColor, Colors.black, isDark ? 0.45 : 0.3)!,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+        boxShadow: [
+          BoxShadow(
+            color: bookColor.withValues(alpha: isDark ? 0.45 : 0.3),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+        child: Stack(
+          children: [
+            // Left Book Spine Ribbon
+            Positioned(
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: 8,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.22),
+                  border: Border(
+                    right: BorderSide(
+                      color: Colors.black.withValues(alpha: 0.15),
+                      width: 1,
                     ),
                   ),
                 ),
-                for (final item in ledgers) ...[
-                  AppleGlassCard(
-                    padding: EdgeInsets.zero,
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                    borderColor: item.id == activeId
-                        ? Color(item.color).withValues(alpha: 0.5)
-                        : null,
-                    child: ApplePressable(
-                      onTap: () {
+              ),
+            ),
+            // Stitching Line
+            Positioned(
+              left: 14,
+              top: 0,
+              bottom: 0,
+              width: 1,
+              child: Container(
+                color: Colors.white.withValues(alpha: 0.2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(26, 18, 18, 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.35),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Icon(
+                          _resolveIcon(ledger.icon),
+                          color: Colors.white,
+                          size: 26,
+                        ),
+                      ),
+                      // Active Pill & Edit
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppleTokens.jadeDark.withValues(alpha: 0.9),
+                              borderRadius:
+                                  BorderRadius.circular(AppleTokens.radiusPill),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.15),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 1),
+                                ),
+                              ],
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  CupertinoIcons.circle_fill,
+                                  color: Colors.white,
+                                  size: 7,
+                                ),
+                                SizedBox(width: 5),
+                                Text(
+                                  'ĐANG HOẠT ĐỘNG',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.4,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          CupertinoButton(
+                            padding: EdgeInsets.zero,
+                            minimumSize: const Size(32, 32),
+                            onPressed: () {
+                              unawaited(HapticFeedback.lightImpact());
+                              LedgerFormSheet.show(context, existing: ledger);
+                            },
+                            child: Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.22),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                CupertinoIcons.pencil,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    ledger.name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.4,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Toàn bộ ví tiền, thu chi và báo cáo hiện tại được lưu riêng trong sổ này.',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.85),
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w500,
+                      height: 1.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMetricsBar({
+    required int ledgersCount,
+    required String activeTypeLabel,
+    required String currency,
+    required bool isDark,
+  }) {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildMetricTile(
+            icon: CupertinoIcons.book_fill,
+            color: AppleTokens.systemBlue,
+            title: '$ledgersCount Sổ',
+            label: 'Tổng số sổ',
+            isDark: isDark,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _buildMetricTile(
+            icon: CupertinoIcons.tag_fill,
+            color: AppleTokens.systemIndigo,
+            title: activeTypeLabel,
+            label: 'Loại hiện tại',
+            isDark: isDark,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _buildMetricTile(
+            icon: CupertinoIcons.money_dollar_circle_fill,
+            color: AppleTokens.jadePrimary,
+            title: currency,
+            label: 'Tiền tệ hạch toán',
+            isDark: isDark,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMetricTile({
+    required IconData icon,
+    required Color color,
+    required String title,
+    required String label,
+    required bool isDark,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: isDark
+            ? AppleTokens.bgDarkSecondary
+            : AppleTokens.bgLightSecondary,
+        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+        border: Border.all(
+          color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
+          width: 0.8,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 14, color: color),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 10.5,
+                    color: AppleTokens.systemGray,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLedgerCard({
+    required BuildContext context,
+    required LedgerBook item,
+    required bool isActive,
+    required bool isDark,
+    required AppLocalizations l10n,
+  }) {
+    final cardColor = Color(item.color);
+
+    return AppleGlassCard(
+      padding: EdgeInsets.zero,
+      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+      borderColor: isActive ? cardColor.withValues(alpha: 0.55) : null,
+      child: ApplePressable(
+        onTap: () {
+          if (!isActive) {
+            _switchLedger(context, item);
+          } else {
+            unawaited(HapticFeedback.lightImpact());
+            LedgerFormSheet.show(context, existing: item);
+          }
+        },
+        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+          child: Stack(
+            children: [
+              // Colored Left Spine Strip
+              Positioned(
+                left: 0,
+                top: 0,
+                bottom: 0,
+                width: 6,
+                child: Container(color: cardColor),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(18, 14, 12, 14),
+                child: Row(
+                  children: [
+                    // Squircle Badge
+                    AppleSquircleBadge(
+                      icon: _resolveIcon(item.icon),
+                      backgroundColor: cardColor,
+                      size: 46,
+                      iconSize: 24,
+                    ),
+                    const SizedBox(width: 14),
+                    // Name & Tags
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  item.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 16,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              if (isActive) ...[
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppleTokens.jadePrimary
+                                        .withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(4),
+                                    border: Border.all(
+                                      color: AppleTokens.jadePrimary
+                                          .withValues(alpha: 0.4),
+                                      width: 0.8,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    l10n.ledgerActiveBadge,
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppleTokens.jadePrimary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                              if (item.isDefault) ...[
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? Colors.white12
+                                        : Colors.black.withValues(alpha: 0.06),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: const Text(
+                                    'Mặc định',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppleTokens.systemGray,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            _typeLabel(item.type, l10n),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppleTokens.systemGray,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Actions on Right
+                    if (!isActive) ...[
+                      CupertinoButton(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 6),
+                        minimumSize: Size.zero,
+                        color: cardColor.withValues(alpha: isDark ? 0.2 : 0.1),
+                        borderRadius:
+                            BorderRadius.circular(AppleTokens.radiusPill),
+                        onPressed: () => _switchLedger(context, item),
+                        child: Text(
+                          'Chọn sổ',
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? Colors.white : cardColor,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                    ],
+                    IconButton(
+                      icon: const Icon(
+                        CupertinoIcons.pencil,
+                        color: AppleTokens.systemGray,
+                        size: 18,
+                      ),
+                      tooltip: l10n.edit,
+                      onPressed: () {
                         unawaited(HapticFeedback.lightImpact());
                         LedgerFormSheet.show(context, existing: item);
                       },
-                      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                      child: Padding(
-                        padding: const EdgeInsets.all(14),
-                        child: Row(
-                          children: [
-                            AppleSquircleBadge(
-                              icon: _resolveIcon(item.icon),
-                              backgroundColor: Color(item.color),
-                              size: 44,
-                              iconSize: 22,
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        item.name,
-                                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
-                                      ),
-                                      if (item.id == activeId) ...[
-                                        const SizedBox(width: 8),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                          decoration: BoxDecoration(
-                                            color: AppleTokens.jadePrimary.withValues(alpha: 0.15),
-                                            borderRadius: BorderRadius.circular(4),
-                                          ),
-                                          child: Text(
-                                            l10n.ledgerActiveBadge,
-                                            style: const TextStyle(
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w700,
-                                              color: AppleTokens.jadePrimary,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    _typeLabel(item.type, l10n),
-                                    style: const TextStyle(fontSize: 12, color: AppleTokens.systemGray),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(CupertinoIcons.pencil, color: AppleTokens.systemGray, size: 18),
-                              tooltip: l10n.edit,
-                              onPressed: () {
-                                unawaited(HapticFeedback.lightImpact());
-                                LedgerFormSheet.show(context, existing: item);
-                              },
-                            ),
-                            PopupMenuButton<String>(
-                              icon: const Icon(CupertinoIcons.ellipsis, color: AppleTokens.systemGray, size: 18),
-                              onSelected: (val) {
-                                if (val == 'select') {
-                                  ref.read(ledgersActionControllerProvider.notifier).switchLedger(item.id);
-                                } else if (val == 'edit') {
-                                  LedgerFormSheet.show(context, existing: item);
-                                } else if (val == 'delete') {
-                                  _confirmDelete(context, item);
-                                }
-                              },
-                              itemBuilder: (ctx) => [
-                                if (item.id != activeId)
-                                  PopupMenuItem(
-                                    value: 'select',
-                                    child: Row(
-                                      children: [
-                                        const Icon(CupertinoIcons.check_mark, size: 18),
-                                        const SizedBox(width: 8),
-                                        Text(l10n.ledgerSelectActive),
-                                      ],
-                                    ),
-                                  ),
-                                PopupMenuItem(
-                                  value: 'edit',
-                                  child: Row(
-                                    children: [
-                                      const Icon(CupertinoIcons.pencil, size: 18),
-                                      const SizedBox(width: 8),
-                                      Text(l10n.edit),
-                                    ],
-                                  ),
-                                ),
-                                if (!item.isDefault && item.id != LedgerBook.defaultPersonalId)
-                                  PopupMenuItem(
-                                    value: 'delete',
-                                    child: Row(
-                                      children: [
-                                        const Icon(CupertinoIcons.trash, color: AppleTokens.rubyExpense, size: 18),
-                                        const SizedBox(width: 8),
-                                        Text(l10n.ledgerDelete, style: const TextStyle(color: AppleTokens.rubyExpense)),
-                                      ],
-                                    ),
-                                  ),
+                    ),
+                    PopupMenuButton<String>(
+                      icon: const Icon(
+                        CupertinoIcons.ellipsis,
+                        color: AppleTokens.systemGray,
+                        size: 18,
+                      ),
+                      onSelected: (val) {
+                        if (val == 'select') {
+                          _switchLedger(context, item);
+                        } else if (val == 'edit') {
+                          LedgerFormSheet.show(context, existing: item);
+                        } else if (val == 'delete') {
+                          _confirmDelete(context, item);
+                        }
+                      },
+                      itemBuilder: (ctx) => [
+                        if (!isActive)
+                          PopupMenuItem(
+                            value: 'select',
+                            child: Row(
+                              children: [
+                                const Icon(CupertinoIcons.check_mark, size: 18),
+                                const SizedBox(width: 8),
+                                Text(l10n.ledgerSelectActive),
                               ],
                             ),
-                          ],
+                          ),
+                        PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              const Icon(CupertinoIcons.pencil, size: 18),
+                              const SizedBox(width: 8),
+                              Text(l10n.edit),
+                            ],
+                          ),
                         ),
-                      ),
+                        if (!item.isDefault &&
+                            item.id != LedgerBook.defaultPersonalId)
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  CupertinoIcons.trash,
+                                  color: AppleTokens.rubyExpense,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  l10n.ledgerDelete,
+                                  style: const TextStyle(
+                                      color: AppleTokens.rubyExpense),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                ],
-              ],
-            ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
-      );
-    },
       ),
-    ),
-  );
+    );
+  }
 }
-}
-

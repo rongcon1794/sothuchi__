@@ -35,6 +35,18 @@ class LedgerSwitcherSheet extends ConsumerWidget {
         return CupertinoIcons.creditcard_fill;
       case 'star':
         return CupertinoIcons.star_fill;
+      case 'airplane':
+        return CupertinoIcons.airplane;
+      case 'cart':
+        return CupertinoIcons.cart_fill;
+      case 'home':
+        return CupertinoIcons.house_fill;
+      case 'school':
+        return CupertinoIcons.book_fill;
+      case 'chart':
+        return CupertinoIcons.chart_bar_alt_fill;
+      case 'heart':
+        return CupertinoIcons.heart_fill;
       case 'person':
       default:
         return CupertinoIcons.person_crop_circle_fill;

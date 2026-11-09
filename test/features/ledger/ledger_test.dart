@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
+import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/data/firebase/firebase_providers.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/accounts/data/repositories/firestore_account_repository.dart';
@@ -13,6 +14,8 @@ import 'package:so_thu_chi/features/budgets/presentation/controllers/budgets_con
 import 'package:so_thu_chi/features/ledger/data/repositories/firestore_ledger_repository.dart';
 import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
 import 'package:so_thu_chi/features/ledger/presentation/controllers/ledgers_controller.dart';
+import 'package:so_thu_chi/features/ledger/presentation/screens/ledgers_management_screen.dart';
+import 'package:so_thu_chi/features/ledger/presentation/widgets/ledger_form_sheet.dart';
 import 'package:so_thu_chi/features/ledger/presentation/widgets/ledger_selector_pill.dart';
 import 'package:so_thu_chi/features/ledger/presentation/widgets/ledger_switcher_sheet.dart';
 import 'package:so_thu_chi/features/transactions/data/repositories/firestore_transaction_repository.dart';
@@ -422,6 +425,196 @@ void main() {
 
       // Active ledger should revert to defaultPersonalId
       expect(container.read(activeLedgerIdProvider), LedgerBook.defaultPersonalId);
+    });
+  });
+
+  group('Redesigned LedgersManagementScreen and LedgerFormSheet Widget Tests', () {
+    testWidgets('renders LedgersManagementScreen with active showcase card, metrics, and switches active ledger', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      SharedPreferences.setMockInitialValues({
+        'theme_mode': 'system',
+        'locale_code': 'vi',
+        'active_ledger_id': LedgerBook.defaultPersonalId,
+      });
+      final prefs = await SharedPreferences.getInstance();
+      final ledgerRepo = InMemoryLedgerRepository();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            ledgerRepositoryProvider.overrideWithValue(ledgerRepo),
+          ],
+          child: MaterialApp(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: AppTheme.light(),
+            home: const LedgersManagementScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Title
+      expect(find.text('Quản Lý Sổ Thu Chi'), findsOneWidget);
+
+      // Active showcase badge
+      expect(find.text('ĐANG HOẠT ĐỘNG'), findsOneWidget);
+
+      // Metrics strip
+      expect(find.text('2 Sổ'), findsOneWidget);
+      expect(find.text('Tổng số sổ'), findsOneWidget);
+
+      // Sổ Gia Đình card has "Chọn sổ"
+      expect(find.text('Chọn sổ'), findsOneWidget);
+
+      // Tap "Chọn sổ"
+      await tester.tap(find.text('Chọn sổ'));
+      await tester.pumpAndSettle();
+
+      // SnackBar shown
+      expect(find.text('Đã chuyển sang sổ: Sổ Gia Đình'), findsOneWidget);
+
+      // Sổ Gia Đình is now active
+      expect(find.text('ĐANG HOẠT ĐỘNG'), findsOneWidget);
+    });
+
+    testWidgets('LedgerFormSheet renders live preview, template carousel, and creates new ledger', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      SharedPreferences.setMockInitialValues({
+        'theme_mode': 'system',
+        'locale_code': 'vi',
+        'active_ledger_id': LedgerBook.defaultPersonalId,
+      });
+      final prefs = await SharedPreferences.getInstance();
+      final ledgerRepo = InMemoryLedgerRepository();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            ledgerRepositoryProvider.overrideWithValue(ledgerRepo),
+          ],
+          child: MaterialApp(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: AppTheme.light(),
+            home: const LedgersManagementScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Tap FAB to open LedgerFormSheet
+      final fab = find.byType(AppleAdaptiveExpandableFab);
+      expect(fab, findsOneWidget);
+      await tester.tap(fab);
+      await tester.pumpAndSettle();
+
+      // Verify sheet title & section headers
+      expect(find.text('Thêm sổ thu chi mới'), findsOneWidget);
+      expect(find.text('MẪU SỔ THU CHI PHỔ BIẾN'), findsOneWidget);
+
+      // Tap template "Kinh Doanh & Dự Án"
+      final templateChip = find.text('Kinh Doanh & Dự Án');
+      expect(templateChip, findsWidgets);
+      await tester.ensureVisible(templateChip.first);
+      await tester.pumpAndSettle();
+      await tester.tap(templateChip.first);
+      await tester.pumpAndSettle();
+
+      // Verify name is auto-populated
+      expect(find.widgetWithText(TextField, 'Kinh Doanh & Dự Án'), findsOneWidget);
+
+      // Submit create
+      final createButton = find.text('Tạo sổ mới');
+      await tester.ensureVisible(createButton);
+      await tester.pumpAndSettle();
+      await tester.tap(createButton);
+      await tester.pumpAndSettle();
+
+      // Verify ledger created in repo
+      final books = await ledgerRepo.watchLedgers().first;
+      expect(books.any((b) => b.name == 'Kinh Doanh & Dự Án' && b.type == LedgerType.business), isTrue);
+    });
+
+    testWidgets('LedgerFormSheet in edit mode updates existing ledger', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      SharedPreferences.setMockInitialValues({
+        'theme_mode': 'system',
+        'locale_code': 'vi',
+        'active_ledger_id': LedgerBook.defaultPersonalId,
+      });
+      final prefs = await SharedPreferences.getInstance();
+      final ledgerRepo = InMemoryLedgerRepository();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            ledgerRepositoryProvider.overrideWithValue(ledgerRepo),
+          ],
+          child: MaterialApp(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: AppTheme.light(),
+            home: Builder(
+              builder: (context) => Scaffold(
+                body: Center(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      final items = await ledgerRepo.watchLedgers().first;
+                      final fam = items.firstWhere((i) => i.id == 'default_family');
+                      if (context.mounted) {
+                        await LedgerFormSheet.show(context, existing: fam);
+                      }
+                    },
+                    child: const Text('Open Edit Ledger'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Open Edit Ledger'));
+      await tester.pumpAndSettle();
+
+      // Header
+      expect(find.text('Sửa sổ thu chi'), findsOneWidget);
+      expect(find.widgetWithText(TextField, 'Sổ Gia Đình'), findsOneWidget);
+
+      // Change name
+      await tester.enterText(find.widgetWithText(TextField, 'Sổ Gia Đình'), 'Gia Đình Hạnh Phúc');
+      await tester.pumpAndSettle();
+
+      // Submit update
+      final updateBtn = find.text('Cập nhật sổ');
+      await tester.ensureVisible(updateBtn);
+      await tester.pumpAndSettle();
+      await tester.tap(updateBtn);
+      await tester.pumpAndSettle();
+
+      // Verify update in repo
+      final books = await ledgerRepo.watchLedgers().first;
+      expect(books.any((b) => b.name == 'Gia Đình Hạnh Phúc'), isTrue);
     });
   });
 }
