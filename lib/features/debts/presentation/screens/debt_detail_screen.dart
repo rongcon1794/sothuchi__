@@ -82,10 +82,14 @@ class DebtDetailScreen extends ConsumerWidget {
         if (debt == null) {
           return Scaffold(
             appBar: AppBar(),
-            body: Center(
-              child: Text(
-                'Không tìm thấy khoản nợ',
-                style: theme.textTheme.titleMedium,
+            body: SafeArea(
+              top: false,
+              bottom: false,
+              child: Center(
+                child: Text(
+                  'Không tìm thấy khoản nợ',
+                  style: theme.textTheme.titleMedium,
+                ),
               ),
             ),
           );
@@ -132,7 +136,10 @@ class DebtDetailScreen extends ConsumerWidget {
               const SizedBox(width: 6),
             ],
           ),
-          body: Center(
+          body: SafeArea(
+            top: false,
+            bottom: false,
+            child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 860),
               child: ListView(
@@ -443,7 +450,8 @@ class DebtDetailScreen extends ConsumerWidget {
               ),
             ),
           ),
-        );
+        ),
+      );
       },
     );
   }

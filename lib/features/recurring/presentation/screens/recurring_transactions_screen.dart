@@ -154,7 +154,10 @@ class _RecurringTransactionsScreenState
         },
         tooltip: l10n.recurringNew,
       ),
-      body: recurringAsync.when(
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: recurringAsync.when(
         loading: () => const Center(child: CupertinoActivityIndicator()),
         error: (err, _) => Center(child: Text(context.localizeError(err))),
         data: (allItems) {
@@ -530,6 +533,7 @@ class _RecurringTransactionsScreenState
       );
     },
       ),
-    );
-  }
+    ),
+  );
+}
 }

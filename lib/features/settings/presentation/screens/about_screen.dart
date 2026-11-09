@@ -16,7 +16,10 @@ class AboutScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.aboutApp)),
-      body: ListView(
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: ListView(
         padding: const EdgeInsets.all(20),
         children: [
           AppleGlassCard(
@@ -59,7 +62,8 @@ class AboutScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ),
+  );
   }
 }
 

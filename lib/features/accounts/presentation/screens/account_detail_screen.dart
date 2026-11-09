@@ -123,10 +123,14 @@ class AccountDetailScreen extends ConsumerWidget {
         if (account == null) {
           return Scaffold(
             appBar: AppBar(),
-            body: Center(
-              child: Text(
-                l10n.emptyWalletsTitle,
-                style: theme.textTheme.titleMedium,
+            body: SafeArea(
+              top: false,
+              bottom: false,
+              child: Center(
+                child: Text(
+                  l10n.emptyWalletsTitle,
+                  style: theme.textTheme.titleMedium,
+                ),
               ),
             ),
           );
@@ -236,7 +240,10 @@ class AccountDetailScreen extends ConsumerWidget {
               const SizedBox(width: 6),
             ],
           ),
-          body: Center(
+          body: SafeArea(
+            top: false,
+            bottom: false,
+            child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 860),
               child: ListView(
@@ -577,7 +584,8 @@ class AccountDetailScreen extends ConsumerWidget {
               ),
             ),
           ),
-        );
+        ),
+      );
       },
     );
   }

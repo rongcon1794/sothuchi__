@@ -74,7 +74,10 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
         },
         tooltip: l10n.savingsNewGoal,
       ),
-      body: goalsAsync.when(
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: goalsAsync.when(
         loading: () => const Center(child: CupertinoActivityIndicator()),
         error: (err, _) => Center(child: Text(context.localizeError(err))),
         data: (allGoals) {
@@ -300,6 +303,7 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
           );
         },
       ),
-    );
-  }
+    ),
+  );
+}
 }

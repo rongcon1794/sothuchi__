@@ -116,7 +116,10 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
           ],
         ],
       ),
-      body: Column(
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: Column(
         children: [
           // Month Switcher Bar (only shown in portrait mode; merged into AppBar in landscape)
           if (!isLandscape)
@@ -274,7 +277,8 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
           ),
         ],
       ),
-      floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
+    ),
+    floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
       floatingActionButton: AppleAdaptiveExpandableFab(
         heroTag: 'budgets_add_fab',
         isVisible: _isFabVisible,

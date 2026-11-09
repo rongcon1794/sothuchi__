@@ -15,7 +15,10 @@ class PrivacyPolicyScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.privacyPolicy)),
-      body: ListView(
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: ListView(
         padding: const EdgeInsets.all(20),
         children: [
           AppleGlassCard(
@@ -47,7 +50,8 @@ class PrivacyPolicyScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ),
+  );
   }
 }
 

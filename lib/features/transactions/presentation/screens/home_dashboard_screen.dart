@@ -156,7 +156,10 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
           const SizedBox(width: 12),
         ],
       ),
-      body: NotificationListener<UserScrollNotification>(
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: NotificationListener<UserScrollNotification>(
         onNotification: (notification) {
           if (notification.direction == ScrollDirection.reverse) {
             if (_isFabVisible) {
@@ -499,7 +502,8 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
           },
         ),
       ),
-      floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
+    ),
+    floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
       floatingActionButton: AppleAdaptiveExpandableFab(
         heroTag: 'home_quick_add_fab',
         isVisible: _isFabVisible,

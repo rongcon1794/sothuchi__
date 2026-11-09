@@ -110,10 +110,14 @@ class SavingsGoalDetailScreen extends ConsumerWidget {
         if (goal == null) {
           return Scaffold(
             appBar: AppBar(),
-            body: Center(
-              child: Text(
-                'Không tìm thấy mục tiêu',
-                style: theme.textTheme.titleMedium,
+            body: SafeArea(
+              top: false,
+              bottom: false,
+              child: Center(
+                child: Text(
+                  'Không tìm thấy mục tiêu',
+                  style: theme.textTheme.titleMedium,
+                ),
               ),
             ),
           );
@@ -152,7 +156,10 @@ class SavingsGoalDetailScreen extends ConsumerWidget {
               const SizedBox(width: 6),
             ],
           ),
-          body: Center(
+          body: SafeArea(
+            top: false,
+            bottom: false,
+            child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 860),
               child: ListView(
@@ -481,7 +488,8 @@ class SavingsGoalDetailScreen extends ConsumerWidget {
               ),
             ),
           ),
-        );
+        ),
+      );
       },
     );
   }

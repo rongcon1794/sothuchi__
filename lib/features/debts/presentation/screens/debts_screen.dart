@@ -68,7 +68,10 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
         },
         tooltip: l10n.debtNew,
       ),
-      body: debtsAsync.when(
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: debtsAsync.when(
         loading: () => const Center(child: CupertinoActivityIndicator()),
         error: (err, _) => Center(child: Text(context.localizeError(err))),
         data: (allDebts) {
@@ -332,8 +335,9 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
           );
         },
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 class _DebtCard extends ConsumerWidget {

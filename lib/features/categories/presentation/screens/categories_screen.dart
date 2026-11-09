@@ -72,7 +72,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         toolbarHeight: appBarHeight,
         title: Text(l10n.categoriesTitle),
       ),
-      body: Column(
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 6, 16, 12),
@@ -244,6 +247,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
           ),
         ],
       ),
+    ),
     floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
     floatingActionButton: AppleAdaptiveExpandableFab(
       heroTag: 'categories_add_fab',

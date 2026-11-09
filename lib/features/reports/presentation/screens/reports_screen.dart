@@ -144,7 +144,10 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
           const SizedBox(width: 4),
         ],
       ),
-      body: Column(
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: Column(
         children: [
           // Month Switcher (only shown in portrait mode; merged into AppBar in landscape)
           if (!isLandscape)
@@ -443,6 +446,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
           ),
         ],
       ),
-    );
+    ),
+  );
   }
 }

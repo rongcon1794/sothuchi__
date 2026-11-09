@@ -176,6 +176,7 @@ void main() {
     Widget buildAppWithScreen({
       required Widget screen,
       required Size size,
+      EdgeInsets padding = EdgeInsets.zero,
     }) {
       return ProviderScope(
         overrides: [
@@ -188,7 +189,7 @@ void main() {
           savingsGoalRepositoryProvider.overrideWithValue(savingsGoalRepo),
         ],
         child: MediaQuery(
-          data: MediaQueryData(size: size),
+          data: MediaQueryData(size: size, padding: padding),
           child: MaterialApp(
             locale: const Locale('vi'),
             localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -859,6 +860,55 @@ void main() {
       await tester.tap(expenseChipFinder);
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('iOS Landscape Notch (left/right insets) does not obscure content in Home & Transactions screens', (tester) async {
+      // Simulate iPhone 14 Pro landscape with notch on left (47dp) and home indicator (21dp bottom)
+      tester.view.physicalSize = const Size(844, 390);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      // 1. HomeDashboardScreen with notch on left: Content must start at x >= 47.0
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: const HomeDashboardScreen(),
+          size: const Size(844, 390),
+          padding: const EdgeInsets.only(left: 47.0, bottom: 21.0),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final listViewFinder = find.byType(ListView).first;
+      final listTopLeft = tester.getTopLeft(listViewFinder);
+      expect(listTopLeft.dx, greaterThanOrEqualTo(47.0));
+
+      // 2. TransactionsScreen with notch on left: Search & summary items must start at x >= 47.0
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: const TransactionsScreen(),
+          size: const Size(844, 390),
+          padding: const EdgeInsets.only(left: 47.0, bottom: 21.0),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final searchTextFieldFinder = find.byType(TextField);
+      expect(searchTextFieldFinder, findsOneWidget);
+      final searchTopLeft = tester.getTopLeft(searchTextFieldFinder);
+      expect(searchTopLeft.dx, greaterThanOrEqualTo(47.0));
+
+      // 3. TransactionsScreen with phone rotated 180 (notch on right: 47dp)
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: const TransactionsScreen(),
+          size: const Size(844, 390),
+          padding: const EdgeInsets.only(right: 47.0, bottom: 21.0),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final searchTopRight = tester.getTopRight(searchTextFieldFinder);
+      expect(searchTopRight.dx, lessThanOrEqualTo(844.0 - 47.0));
     });
   });
 

@@ -107,7 +107,10 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
           ],
         ],
       ),
-      body: NotificationListener<UserScrollNotification>(
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: NotificationListener<UserScrollNotification>(
         onNotification: (notification) {
           if (notification.direction == ScrollDirection.reverse) {
             if (_isFabVisible) {
@@ -352,7 +355,8 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
           },
         ),
       ),
-      floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
+    ),
+    floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
       floatingActionButton: AppleAdaptiveExpandableFab(
         heroTag: 'accounts_add_fab',
         isVisible: _isFabVisible,

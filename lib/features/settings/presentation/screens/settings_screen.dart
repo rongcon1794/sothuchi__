@@ -396,14 +396,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   : AppleTokens.systemGreen,
                             ),
                             const SizedBox(width: 4),
-                            Text(
-                              user.isDemoUser ? l10n.settingsAccountGuest : l10n.settingsAccountGoogle,
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w600,
-                                color: user.isDemoUser
-                                    ? AppleTokens.systemOrange
-                                    : AppleTokens.systemGreen,
+                            Flexible(
+                              child: Text(
+                                user.isDemoUser ? l10n.settingsAccountGuest : l10n.settingsAccountGoogle,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                style: TextStyle(
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: user.isDemoUser
+                                      ? AppleTokens.systemOrange
+                                      : AppleTokens.systemGreen,
+                                ),
                               ),
                             ),
                           ],
@@ -930,7 +934,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      body: Center(
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1024),
           child: ListView(
@@ -988,6 +995,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

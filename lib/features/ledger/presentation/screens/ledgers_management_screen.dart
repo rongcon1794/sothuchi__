@@ -127,7 +127,10 @@ class _LedgersManagementScreenState
         },
         tooltip: l10n.ledgerNewTitle,
       ),
-      body: ledgersAsync.when(
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: ledgersAsync.when(
         loading: () => const Center(child: CupertinoActivityIndicator()),
         error: (err, _) => Center(child: Text('Lỗi: $err')),
         data: (ledgers) {
@@ -347,7 +350,8 @@ class _LedgersManagementScreenState
       );
     },
       ),
-    );
-  }
+    ),
+  );
+}
 }
 

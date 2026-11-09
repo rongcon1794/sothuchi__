@@ -821,9 +821,12 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
           const SizedBox(width: 4),
         ],
       ),
-      body: _loadingExisting
-          ? const Center(child: CupertinoActivityIndicator())
-          : Form(
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: _loadingExisting
+            ? const Center(child: CupertinoActivityIndicator())
+            : Form(
               key: _formKey,
               child: Center(
                 child: ConstrainedBox(
@@ -1244,6 +1247,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
           ),
         ),
       ),
+    ),
       bottomNavigationBar: SafeArea(
         top: false,
         child: Container(

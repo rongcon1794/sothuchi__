@@ -99,10 +99,14 @@ class BudgetDetailScreen extends ConsumerWidget {
         if (budget == null) {
           return Scaffold(
             appBar: AppBar(),
-            body: Center(
-              child: Text(
-                'Không tìm thấy ngân sách',
-                style: theme.textTheme.titleMedium,
+            body: SafeArea(
+              top: false,
+              bottom: false,
+              child: Center(
+                child: Text(
+                  'Không tìm thấy ngân sách',
+                  style: theme.textTheme.titleMedium,
+                ),
               ),
             ),
           );
@@ -212,7 +216,10 @@ class BudgetDetailScreen extends ConsumerWidget {
               const SizedBox(width: 6),
             ],
           ),
-          body: Center(
+          body: SafeArea(
+            top: false,
+            bottom: false,
+            child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 860),
               child: ListView(
@@ -471,7 +478,8 @@ class BudgetDetailScreen extends ConsumerWidget {
               ),
             ),
           ),
-        );
+        ),
+      );
       },
     );
   }

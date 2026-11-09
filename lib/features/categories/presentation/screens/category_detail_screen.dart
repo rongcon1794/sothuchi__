@@ -101,10 +101,14 @@ class CategoryDetailScreen extends ConsumerWidget {
         if (category == null) {
           return Scaffold(
             appBar: AppBar(),
-            body: Center(
-              child: Text(
-                'Không tìm thấy danh mục',
-                style: theme.textTheme.titleMedium,
+            body: SafeArea(
+              top: false,
+              bottom: false,
+              child: Center(
+                child: Text(
+                  'Không tìm thấy danh mục',
+                  style: theme.textTheme.titleMedium,
+                ),
               ),
             ),
           );
@@ -181,7 +185,10 @@ class CategoryDetailScreen extends ConsumerWidget {
               const SizedBox(width: 6),
             ],
           ),
-          body: Center(
+          body: SafeArea(
+            top: false,
+            bottom: false,
+            child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 860),
               child: ListView(
@@ -491,7 +498,8 @@ class CategoryDetailScreen extends ConsumerWidget {
               ),
             ),
           ),
-        );
+        ),
+      );
       },
     );
   }

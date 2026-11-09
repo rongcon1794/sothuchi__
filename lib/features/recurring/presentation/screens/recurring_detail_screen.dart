@@ -126,10 +126,14 @@ class RecurringDetailScreen extends ConsumerWidget {
         if (item == null) {
           return Scaffold(
             appBar: AppBar(),
-            body: Center(
-              child: Text(
-                'Không tìm thấy giao dịch định kỳ',
-                style: theme.textTheme.titleMedium,
+            body: SafeArea(
+              top: false,
+              bottom: false,
+              child: Center(
+                child: Text(
+                  'Không tìm thấy giao dịch định kỳ',
+                  style: theme.textTheme.titleMedium,
+                ),
               ),
             ),
           );
@@ -172,7 +176,10 @@ class RecurringDetailScreen extends ConsumerWidget {
               const SizedBox(width: 6),
             ],
           ),
-          body: Center(
+          body: SafeArea(
+            top: false,
+            bottom: false,
+            child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 860),
               child: ListView(
@@ -470,7 +477,8 @@ class RecurringDetailScreen extends ConsumerWidget {
               ),
             ),
           ),
-        );
+        ),
+      );
       },
     );
   }

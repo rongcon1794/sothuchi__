@@ -199,10 +199,14 @@ class TransactionDetailScreen extends ConsumerWidget {
                 onPressed: () => context.pop(),
               ),
             ),
-            body: Center(
-              child: Text(
-                'Không tìm thấy giao dịch',
-                style: theme.textTheme.titleMedium,
+            body: SafeArea(
+              top: false,
+              bottom: false,
+              child: Center(
+                child: Text(
+                  'Không tìm thấy giao dịch',
+                  style: theme.textTheme.titleMedium,
+                ),
               ),
             ),
           );
@@ -289,7 +293,10 @@ class TransactionDetailScreen extends ConsumerWidget {
               const SizedBox(width: 4),
             ],
           ),
-          body: Center(
+          body: SafeArea(
+            top: false,
+            bottom: false,
+            child: Center(
             child: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: context.isWideScreen ? 1024 : 720),
               child: ListView(
@@ -615,7 +622,8 @@ class TransactionDetailScreen extends ConsumerWidget {
               ),
             ),
           ),
-        );
+        ),
+      );
       },
     );
   }

@@ -180,7 +180,10 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
           const SizedBox(width: 4),
         ],
       ),
-      body: Column(
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: Column(
         children: [
           // Month Switcher Bar (only shown in portrait mode; merged into AppBar in landscape)
           if (!isLandscape)
@@ -787,7 +790,8 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
           ),
         ],
       ),
-      floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
+    ),
+    floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
       floatingActionButton: AppleAdaptiveExpandableFab(
         heroTag: 'transactions_add_fab',
         isVisible: _isFabVisible,
