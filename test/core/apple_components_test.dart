@@ -75,6 +75,54 @@ void main() {
       expect(value, isEmpty);
     });
 
+    testWidgets('AppleTextField automatically capitalizes the first letter of text input', (tester) async {
+      final controller = TextEditingController();
+      String changedText = '';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AppleTextField(
+              controller: controller,
+              label: 'Tên danh mục',
+              onChanged: (val) => changedText = val,
+            ),
+          ),
+        ),
+      );
+
+      // Verify default text capitalization is sentences
+      final textField = tester.widget<TextField>(find.byType(TextField));
+      expect(textField.textCapitalization, equals(TextCapitalization.sentences));
+
+      // Enter lowercase text
+      await tester.enterText(find.byType(AppleTextField), 'cà phê');
+      await tester.pumpAndSettle();
+
+      // First letter should automatically be capitalized to 'C'
+      expect(controller.text, equals('Cà phê'));
+      expect(changedText, equals('Cà phê'));
+    });
+
+    testWidgets('AppleTextField with number keyboard does not capitalize', (tester) async {
+      final controller = TextEditingController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AppleTextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              label: 'Số tiền',
+            ),
+          ),
+        ),
+      );
+
+      final textField = tester.widget<TextField>(find.byType(TextField));
+      expect(textField.textCapitalization, equals(TextCapitalization.none));
+    });
+
     testWidgets('AppleCard renders child and triggers onTap', (tester) async {
       bool tapped = false;
 

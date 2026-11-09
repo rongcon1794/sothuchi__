@@ -155,6 +155,9 @@ class TransactionSmartNoteSection extends StatelessWidget {
                     return TextFormField(
                       controller: noteController,
                       textCapitalization: TextCapitalization.sentences,
+                      inputFormatters: const [
+                        FirstLetterCapitalizationFormatter(),
+                      ],
                       maxLines: null,
                       maxLength: 1000,
                       style: const TextStyle(fontSize: 15),

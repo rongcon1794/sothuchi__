@@ -209,6 +209,10 @@ class _AiQuickEntryCardState extends ConsumerState<AiQuickEntryCard> {
           // Search / Prompt Field
           TextField(
             controller: _textController,
+            textCapitalization: TextCapitalization.sentences,
+            inputFormatters: const [
+              FirstLetterCapitalizationFormatter(),
+            ],
             onChanged: _onTextChanged,
             onTap: () => setState(() => _isExpanded = true),
             decoration: InputDecoration(

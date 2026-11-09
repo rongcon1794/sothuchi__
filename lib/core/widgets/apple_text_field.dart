@@ -23,7 +23,7 @@ class AppleTextField extends StatefulWidget {
     this.autofocus = false,
     this.keyboardType,
     this.textInputAction,
-    this.textCapitalization = TextCapitalization.none,
+    this.textCapitalization = TextCapitalization.sentences,
     this.inputFormatters,
     this.maxLines = 1,
     this.minLines,
@@ -158,6 +158,29 @@ class _AppleTextFieldState extends State<AppleTextField> {
       );
     }
 
+    final isSpecialInput = widget.obscureText ||
+        widget.keyboardType?.index == TextInputType.phone.index ||
+        widget.keyboardType?.index == TextInputType.number.index ||
+        widget.keyboardType?.index == TextInputType.emailAddress.index ||
+        widget.keyboardType?.index == TextInputType.url.index ||
+        widget.keyboardType?.index == TextInputType.visiblePassword.index;
+
+    final effectiveTextCapitalization = isSpecialInput
+        ? TextCapitalization.none
+        : widget.textCapitalization;
+
+    final shouldCapitalizeFirstLetter =
+        !isSpecialInput && effectiveTextCapitalization != TextCapitalization.none;
+
+    final effectiveFormatters = <TextInputFormatter>[
+      if (widget.inputFormatters != null) ...widget.inputFormatters!,
+      if (shouldCapitalizeFirstLetter &&
+          (widget.inputFormatters == null ||
+              !widget.inputFormatters!
+                  .any((f) => f is FirstLetterCapitalizationFormatter)))
+        const FirstLetterCapitalizationFormatter(),
+    ];
+
     final field = TextFormField(
       controller: _controller,
       focusNode: _focusNode,
@@ -166,8 +189,8 @@ class _AppleTextFieldState extends State<AppleTextField> {
       obscureText: widget.obscureText,
       keyboardType: widget.keyboardType,
       textInputAction: widget.textInputAction,
-      textCapitalization: widget.textCapitalization,
-      inputFormatters: widget.inputFormatters,
+      textCapitalization: effectiveTextCapitalization,
+      inputFormatters: effectiveFormatters,
       maxLines: widget.maxLines,
       minLines: widget.minLines,
       maxLength: widget.maxLength,
@@ -236,5 +259,57 @@ class _AppleTextFieldState extends State<AppleTextField> {
     );
 
     return field;
+  }
+}
+
+/// A [TextInputFormatter] that automatically capitalizes the first non-whitespace
+/// letter of the input, while respecting active IME composing buffers (e.g. Vietnamese Telex).
+class FirstLetterCapitalizationFormatter extends TextInputFormatter {
+  const FirstLetterCapitalizationFormatter();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty) {
+      return newValue;
+    }
+
+    // Do not alter text while the IME is actively composing (e.g. Vietnamese Telex composing buffer).
+    if (newValue.composing.isValid &&
+        newValue.composing.start >= 0 &&
+        newValue.composing.end > newValue.composing.start) {
+      return newValue;
+    }
+
+    final match = RegExp(r'\S').firstMatch(newValue.text);
+    if (match == null) {
+      return newValue;
+    }
+
+    final index = match.start;
+    final firstChar = newValue.text[index];
+    final upperChar = firstChar.toUpperCase();
+
+    if (firstChar == upperChar) {
+      return newValue;
+    }
+
+    final lengthDiff = upperChar.length - firstChar.length;
+    final newText = newValue.text.replaceRange(index, index + 1, upperChar);
+    TextSelection newSelection = newValue.selection;
+
+    if (lengthDiff != 0 && newValue.selection.end >= index + 1) {
+      newSelection = newValue.selection.copyWith(
+        baseOffset: newValue.selection.baseOffset + lengthDiff,
+        extentOffset: newValue.selection.extentOffset + lengthDiff,
+      );
+    }
+
+    return newValue.copyWith(
+      text: newText,
+      selection: newSelection,
+    );
   }
 }

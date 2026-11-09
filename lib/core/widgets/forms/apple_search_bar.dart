@@ -26,6 +26,7 @@ class AppleSearchBar extends StatefulWidget {
     this.borderRadius,
     this.isLandscape = false,
     this.autofocus = false,
+    this.textCapitalization = TextCapitalization.sentences,
   });
 
   final TextEditingController? controller;
@@ -37,6 +38,7 @@ class AppleSearchBar extends StatefulWidget {
   final double? borderRadius;
   final bool isLandscape;
   final bool autofocus;
+  final TextCapitalization textCapitalization;
 
   @override
   State<AppleSearchBar> createState() => _AppleSearchBarState();
@@ -145,6 +147,11 @@ class _AppleSearchBarState extends State<AppleSearchBar> {
           controller: _controller,
           focusNode: _focusNode,
           autofocus: widget.autofocus,
+          textCapitalization: widget.textCapitalization,
+          inputFormatters: [
+            if (widget.textCapitalization != TextCapitalization.none)
+              const FirstLetterCapitalizationFormatter(),
+          ],
           onChanged: widget.onChanged,
           textAlignVertical: TextAlignVertical.center,
           style: TextStyle(

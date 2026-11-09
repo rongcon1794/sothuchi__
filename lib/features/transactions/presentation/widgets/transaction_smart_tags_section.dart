@@ -134,6 +134,10 @@ class TransactionSmartTagsSection extends ConsumerWidget {
                         Expanded(
                           child: TextFormField(
                             controller: tagInputController,
+                            textCapitalization: TextCapitalization.sentences,
+                            inputFormatters: const [
+                              FirstLetterCapitalizationFormatter(),
+                            ],
                             textInputAction: TextInputAction.done,
                             onFieldSubmitted: (val) {
                               if (val.trim().isNotEmpty) {
