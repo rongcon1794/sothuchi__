@@ -143,6 +143,60 @@ void main() {
       expect(find.text('Xác nhận'), findsOneWidget);
     });
 
+    testWidgets('AppleEdgeSwipeToDismiss triggers dismiss on left-to-right edge swipe', (tester) async {
+      var dismissed = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AppleEdgeSwipeToDismiss(
+              onDismiss: () => dismissed = true,
+              child: const SizedBox.expand(
+                child: Text('Content'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Perform swipe from left edge (x: 10 -> x: 120)
+      final gesture = await tester.startGesture(const Offset(10, 300));
+      await gesture.moveBy(const Offset(110, 0));
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(dismissed, isTrue);
+    });
+
+    testWidgets('AppleEdgeSwipeToDismiss ignores mid-screen swipe or vertical drag', (tester) async {
+      var dismissed = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AppleEdgeSwipeToDismiss(
+              onDismiss: () => dismissed = true,
+              child: const SizedBox.expand(
+                child: Text('Content'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Mid-screen swipe (x: 150 -> x: 260)
+      final midGesture = await tester.startGesture(const Offset(150, 300));
+      await midGesture.moveBy(const Offset(110, 0));
+      await midGesture.up();
+      await tester.pumpAndSettle();
+      expect(dismissed, isFalse);
+
+      // Vertical drag from edge (x: 10, y: 300 -> y: 400)
+      final vertGesture = await tester.startGesture(const Offset(10, 300));
+      await vertGesture.moveBy(const Offset(10, 100));
+      await vertGesture.up();
+      await tester.pumpAndSettle();
+      expect(dismissed, isFalse);
+    });
+
     testWidgets('OLED True Black applies pitch black background and card surfaces', (tester) async {
       await tester.pumpWidget(
         MaterialApp(

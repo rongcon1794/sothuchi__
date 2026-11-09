@@ -117,6 +117,7 @@ class WalletFormSheet extends ConsumerStatefulWidget {
   static Future<Account?> show(BuildContext context, {Account? existing}) {
     return AppleModalSheetLayout.show<Account?>(
       context: context,
+      useSafeArea: true,
       builder: (_) => WalletFormSheet(existing: existing),
     );
   }

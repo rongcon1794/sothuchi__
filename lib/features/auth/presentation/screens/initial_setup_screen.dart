@@ -307,43 +307,60 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
       );
     }
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: _currentStep == 1
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-                onPressed: _isSaving ? null : _goBackToStep1,
-                tooltip: 'Quay lại ví',
-              )
-            : null,
-        title: _buildStepIndicator(),
-        centerTitle: true,
-        actions: [
-          if (_currentStep == 0)
-            TextButton(
-              onPressed: _isSaving ? null : _skipAndUseDefaults,
-              child: Text(
-                'Bỏ qua',
-                style: TextStyle(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w600,
+    return PopScope(
+      canPop: _currentStep == 0,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && _currentStep == 1 && !_isSaving) {
+          _goBackToStep1();
+        }
+      },
+      child: AppleEdgeSwipeToDismiss(
+        edgeWidth: 44.0,
+        threshold: 72.0,
+        onDismiss: () {
+          if (_currentStep == 1 && !_isSaving) {
+            _goBackToStep1();
+          }
+        },
+        child: Scaffold(
+          backgroundColor: theme.scaffoldBackgroundColor,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: _currentStep == 1
+                ? IconButton(
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                    onPressed: _isSaving ? null : _goBackToStep1,
+                    tooltip: 'Quay lại ví',
+                  )
+                : null,
+            title: _buildStepIndicator(),
+            centerTitle: true,
+            actions: [
+              if (_currentStep == 0)
+                TextButton(
+                  onPressed: _isSaving ? null : _skipAndUseDefaults,
+                  child: Text(
+                    'Bỏ qua',
+                    style: TextStyle(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-              ),
+              const SizedBox(width: 8),
+            ],
+          ),
+          body: SafeArea(
+            child: PageView(
+              controller: _pageController,
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                _buildStep1WalletView(),
+                _buildStep2BudgetView(),
+              ],
             ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: SafeArea(
-        child: PageView(
-          controller: _pageController,
-          physics: const NeverScrollableScrollPhysics(),
-          children: [
-            _buildStep1WalletView(),
-            _buildStep2BudgetView(),
-          ],
+          ),
         ),
       ),
     );
