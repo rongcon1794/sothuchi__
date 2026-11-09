@@ -20,6 +20,7 @@ import 'package:so_thu_chi/features/recurring/domain/entities/recurring_transact
 import 'package:so_thu_chi/features/recurring/presentation/controllers/recurring_controller.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
+import 'package:so_thu_chi/features/transactions/presentation/widgets/transaction_type_segmented_pill.dart';
 import 'package:so_thu_chi/l10n/app_localizations.dart';
 
 class _RecurringTemplate {
@@ -80,6 +81,7 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
   bool get _isEditing => widget.existing != null;
 
   static const _popularTemplates = [
+    // --- Chi tiêu định kỳ (Expenses) ---
     _RecurringTemplate(
       title: 'Tiền điện sinh hoạt',
       type: TransactionType.expense,
@@ -130,11 +132,55 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
       defaultNote: 'Chi phí rèn luyện sức khỏe định kỳ',
     ),
     _RecurringTemplate(
+      title: 'Học phí / Khóa học',
+      type: TransactionType.expense,
+      categoryKeyword: 'education',
+      icon: Icons.school_rounded,
+      defaultNote: 'Học phí định kỳ hoặc lớp học kỹ năng',
+    ),
+    _RecurringTemplate(
+      title: 'Bảo hiểm định kỳ',
+      type: TransactionType.expense,
+      categoryKeyword: 'insurance',
+      icon: Icons.health_and_safety_rounded,
+      defaultNote: 'Phí bảo hiểm nhân thọ / y tế định kỳ',
+    ),
+
+    // --- Thu nhập định kỳ (Income) ---
+    _RecurringTemplate(
       title: 'Lương cố định',
       type: TransactionType.income,
       categoryKeyword: 'salary',
       icon: Icons.payments_rounded,
       defaultNote: 'Thu nhập tiền lương cố định hàng tháng',
+    ),
+    _RecurringTemplate(
+      title: 'Tiền thưởng định kỳ',
+      type: TransactionType.income,
+      categoryKeyword: 'bonus',
+      icon: Icons.card_giftcard_rounded,
+      defaultNote: 'Thưởng KPI hoặc trợ cấp định kỳ',
+    ),
+    _RecurringTemplate(
+      title: 'Cho thuê nhà / Mặt bằng',
+      type: TransactionType.income,
+      categoryKeyword: 'rental',
+      icon: Icons.real_estate_agent_rounded,
+      defaultNote: 'Thu nhập từ tiền cho thuê bất động sản',
+    ),
+    _RecurringTemplate(
+      title: 'Lãi tiết kiệm & Đầu tư',
+      type: TransactionType.income,
+      categoryKeyword: 'investment',
+      icon: Icons.trending_up_rounded,
+      defaultNote: 'Tiền lãi gửi tiết kiệm hoặc lợi nhuận đầu tư',
+    ),
+    _RecurringTemplate(
+      title: 'Thu nhập Freelance / Ngoài giờ',
+      type: TransactionType.income,
+      categoryKeyword: 'freelance',
+      icon: Icons.laptop_mac_rounded,
+      defaultNote: 'Thu nhập dự án làm ngoài định kỳ',
     ),
   ];
 
@@ -296,6 +342,11 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
 
   void _applyTemplate(_RecurringTemplate template, List<Category> cats) {
     unawaited(HapticFeedback.selectionClick());
+    final expenseCats = ref.read(expenseCategoriesProvider);
+    final incomeCats = ref.read(incomeCategoriesProvider);
+    final targetCats =
+        template.type == TransactionType.income ? incomeCats : expenseCats;
+
     setState(() {
       _titleController.text = template.title;
       _type = template.type;
@@ -305,14 +356,20 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
       }
 
       // Match category
-      final matchedCat = cats.where((c) {
-        final idMatch = c.id.toLowerCase().contains(template.categoryKeyword.toLowerCase());
-        final nameMatch = c.name.toLowerCase().contains(template.categoryKeyword.toLowerCase());
+      final matchedCat = targetCats.where((c) {
+        final idMatch = c.id
+            .toLowerCase()
+            .contains(template.categoryKeyword.toLowerCase());
+        final nameMatch = c.name
+            .toLowerCase()
+            .contains(template.categoryKeyword.toLowerCase());
         return idMatch || nameMatch;
       }).firstOrNull;
 
       if (matchedCat != null) {
         _categoryId = matchedCat.id;
+      } else if (targetCats.isNotEmpty) {
+        _categoryId = targetCats.first.id;
       }
     });
   }
@@ -475,10 +532,25 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
             ),
             const SizedBox(height: 16),
 
-            // 2. Sliding Segmented Type Pill (Chi tiêu vs Thu nhập)
-            _buildTypeSegmentedPill(
-              isDark: isDark,
-              l10n: l10n,
+            // 2. Sliding Segmented Type Pill (Chi tiêu vs Thu nhập) - Synchronized with App Standard
+            TransactionTypeSegmentedPill(
+              selected: _type,
+              allowedTypes: const [
+                TransactionType.expense,
+                TransactionType.income,
+              ],
+              onChanged: (newType) {
+                if (_type != newType) {
+                  setState(() {
+                    _type = newType;
+                    final targetCats =
+                        newType == TransactionType.income ? incomeCats : expenseCats;
+                    if (targetCats.isNotEmpty) {
+                      _categoryId = targetCats.first.id;
+                    }
+                  });
+                }
+              },
             ),
             const SizedBox(height: 16),
 
@@ -486,7 +558,9 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
             if (!_isEditing) ...[
               _buildSectionHeader(
                 icon: CupertinoIcons.sparkles,
-                title: 'Mẫu hóa đơn thông dụng',
+                title: _type == TransactionType.income
+                    ? 'Mẫu thu nhập thông dụng'
+                    : 'Mẫu hóa đơn thông dụng',
                 accentColor: accentColor,
               ),
               _buildTemplatesCarousel(
@@ -904,146 +978,19 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
     );
   }
 
-  Widget _buildTypeSegmentedPill({
-    required bool isDark,
-    required AppLocalizations l10n,
-  }) {
-    return Container(
-      height: 40,
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
-        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () {
-                if (_type != TransactionType.expense) {
-                  unawaited(HapticFeedback.selectionClick());
-                  setState(() => _type = TransactionType.expense);
-                }
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 220),
-                curve: Curves.easeOutCubic,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: _type == TransactionType.expense
-                      ? (isDark ? AppleTokens.bgDarkCard : Colors.white)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill - 2),
-                  boxShadow: _type == TransactionType.expense
-                      ? [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
-                            blurRadius: 4,
-                            offset: const Offset(0, 1),
-                          ),
-                        ]
-                      : null,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      CupertinoIcons.arrow_up_right,
-                      size: 14,
-                      color: _type == TransactionType.expense
-                          ? AppleTokens.rubyExpense
-                          : (isDark ? Colors.white60 : Colors.black54),
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      l10n.expense,
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        fontWeight: _type == TransactionType.expense
-                            ? FontWeight.w700
-                            : FontWeight.w500,
-                        color: _type == TransactionType.expense
-                            ? AppleTokens.rubyExpense
-                            : (isDark ? Colors.white70 : Colors.black87),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () {
-                if (_type != TransactionType.income) {
-                  unawaited(HapticFeedback.selectionClick());
-                  setState(() => _type = TransactionType.income);
-                }
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 220),
-                curve: Curves.easeOutCubic,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: _type == TransactionType.income
-                      ? (isDark ? AppleTokens.bgDarkCard : Colors.white)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill - 2),
-                  boxShadow: _type == TransactionType.income
-                      ? [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
-                            blurRadius: 4,
-                            offset: const Offset(0, 1),
-                          ),
-                        ]
-                      : null,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      CupertinoIcons.arrow_down_left,
-                      size: 14,
-                      color: _type == TransactionType.income
-                          ? AppleTokens.jadePrimary
-                          : (isDark ? Colors.white60 : Colors.black54),
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      l10n.income,
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        fontWeight: _type == TransactionType.income
-                            ? FontWeight.w700
-                            : FontWeight.w500,
-                        color: _type == TransactionType.income
-                            ? AppleTokens.jadePrimary
-                            : (isDark ? Colors.white70 : Colors.black87),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildTemplatesCarousel({
     required List<Category> availableCats,
     required bool isDark,
   }) {
+    final filteredTemplates =
+        _popularTemplates.where((t) => t.type == _type).toList();
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
       child: Row(
         children: [
-          for (final template in _popularTemplates) ...[
+          for (final template in filteredTemplates) ...[
             ApplePressable(
               scaleDown: 0.93,
               onTap: () => _applyTemplate(template, availableCats),

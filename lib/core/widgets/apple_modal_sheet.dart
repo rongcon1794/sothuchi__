@@ -16,8 +16,8 @@ class AppleEdgeSwipeToDismiss extends StatefulWidget {
   const AppleEdgeSwipeToDismiss({
     super.key,
     required this.child,
-    this.edgeWidth = 44.0,
-    this.threshold = 72.0,
+    this.edgeWidth = 64.0,
+    this.threshold = 40.0,
     this.onDismiss,
   });
 
@@ -47,8 +47,8 @@ class _AppleEdgeSwipeToDismissState extends State<AppleEdgeSwipeToDismiss> {
     unawaited(HapticFeedback.lightImpact());
     if (widget.onDismiss != null) {
       widget.onDismiss!();
-    } else if (Navigator.of(context).canPop()) {
-      Navigator.of(context).pop();
+    } else if (mounted) {
+      Navigator.of(context).maybePop();
     }
   }
 
@@ -90,19 +90,19 @@ class _AppleEdgeSwipeToDismissState extends State<AppleEdgeSwipeToDismiss> {
         final dx = event.position.dx - _startX!;
         final dy = (event.position.dy - _startY!).abs();
 
-        // If vertical scrolling dominates, cancel edge gesture
-        if (dy > 32 && dy > dx.abs()) {
+        // If vertical scrolling is overwhelmingly dominating (e.g. fast vertical scroll)
+        if (dy > 90 && dy > dx.abs() * 2.0) {
           _reset();
           return;
         }
 
         // Left edge swipe: drag to the right
-        if (_isLeftEdge && dx >= widget.threshold && dx > dy * 1.2) {
+        if (_isLeftEdge && dx >= widget.threshold && dx.abs() > dy * 0.7) {
           _triggerDismiss();
         }
 
         // Right edge swipe: drag to the left (Android gesture navigation)
-        if (_isRightEdge && -dx >= widget.threshold && -dx > dy * 1.2) {
+        if (_isRightEdge && -dx >= widget.threshold && dx.abs() > dy * 0.7) {
           _triggerDismiss();
         }
       },
@@ -173,12 +173,14 @@ class AppleModalSheetLayout extends StatelessWidget {
       mediaQuery.padding.top,
       mediaQuery.viewPadding.top,
     );
-    // Guarantees at least 44dp clearance (standard Apple notch / status bar height)
-    // plus 10dp breathing room so the sheet card floats safely below the notch.
-    final effectiveTopMargin = math.max(topHardwareInset, 44.0) + 10.0;
+    // Guarantees generous clearance below any notch / Dynamic Island / camera cutout (min 68dp)
+    final effectiveTopMargin = math.max(topHardwareInset + 16.0, 68.0);
 
     final sheetContent = Container(
       margin: EdgeInsets.only(top: effectiveTopMargin),
+      constraints: BoxConstraints(
+        maxHeight: mediaQuery.size.height - effectiveTopMargin,
+      ),
       decoration: BoxDecoration(
         color: isDark
             ? (context.isOled

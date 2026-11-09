@@ -5,23 +5,25 @@ import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 
-/// 3-State Sliding Segmented Pill for Transaction Type with Semantic Accent Color.
+/// Sliding Segmented Pill for Transaction Type with Semantic Accent Color.
 class TransactionTypeSegmentedPill extends StatelessWidget {
   const TransactionTypeSegmentedPill({
     super.key,
     required this.selected,
     required this.onChanged,
+    this.allowedTypes,
   });
 
   final TransactionType selected;
   final ValueChanged<TransactionType> onChanged;
+  final List<TransactionType>? allowedTypes;
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final l10n = context.l10n;
-    final segments = [
+    final allSegments = [
       (
         type: TransactionType.expense,
         label: l10n.expense,
@@ -41,6 +43,10 @@ class TransactionTypeSegmentedPill extends StatelessWidget {
         color: AppleTokens.cobaltTransfer,
       ),
     ];
+
+    final segments = allowedTypes != null
+        ? allSegments.where((s) => allowedTypes!.contains(s.type)).toList()
+        : allSegments;
 
     return Container(
       height: 40,
