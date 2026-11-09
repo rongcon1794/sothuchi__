@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
+import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/data/firebase/firebase_providers.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/accounts/data/repositories/firestore_account_repository.dart';
@@ -11,6 +12,7 @@ import 'package:so_thu_chi/features/categories/data/repositories/firestore_categ
 import 'package:so_thu_chi/features/recurring/data/repositories/firestore_recurring_repository.dart';
 import 'package:so_thu_chi/features/recurring/domain/entities/recurring_transaction.dart';
 import 'package:so_thu_chi/features/recurring/presentation/screens/recurring_transactions_screen.dart';
+import 'package:so_thu_chi/features/recurring/presentation/widgets/recurring_form_sheet.dart';
 import 'package:so_thu_chi/features/transactions/data/repositories/firestore_transaction_repository.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:so_thu_chi/l10n/app_localizations.dart';
@@ -191,6 +193,130 @@ void main() {
 
       final txs = await txRepo.getTransactions();
       expect(txs.length, 1);
+    });
+
+    testWidgets('RecurringFormSheet renders Apple HIG redesign, templates, and creates recurring bill', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pumpAndSettle();
+
+      // Tap FAB to open RecurringFormSheet
+      final fab = find.byType(AppleAdaptiveExpandableFab);
+      expect(fab, findsOneWidget);
+      await tester.tap(fab);
+      await tester.pumpAndSettle();
+
+      // Verify sheet title and section headers
+      expect(find.text('Thêm hóa đơn định kỳ'), findsOneWidget);
+      expect(find.text('MẪU HÓA ĐƠN THÔNG DỤNG'), findsOneWidget);
+
+      // Verify popular templates carousel has 'Tiền điện sinh hoạt'
+      final templateChip = find.text('Tiền điện sinh hoạt');
+      expect(templateChip, findsWidgets);
+
+      // Tap template chip to auto-populate
+      await tester.tap(templateChip.first);
+      await tester.pumpAndSettle();
+
+      // Verify title field is populated
+      expect(find.widgetWithText(TextField, 'Tiền điện sinh hoạt'), findsOneWidget);
+
+      // Tap quick amount preset '500k'
+      final presetChip = find.text('500k');
+      expect(presetChip, findsOneWidget);
+      await tester.tap(presetChip);
+      await tester.pumpAndSettle();
+
+      // Verify amount is formatted to 500.000
+      expect(find.widgetWithText(TextField, '500.000'), findsOneWidget);
+
+      // Scroll down if needed and submit
+      final submitButton = find.text('Thêm gói định kỳ');
+      await tester.ensureVisible(submitButton);
+      await tester.pumpAndSettle();
+      await tester.tap(submitButton);
+      await tester.pumpAndSettle();
+
+      // Verify recurring transaction created
+      final allRecurring = await recRepo.watchRecurringTransactions().first;
+      final created = allRecurring.firstWhere((r) => r.title == 'Tiền điện sinh hoạt');
+      expect(created.amount, 500000);
+      expect(created.type, TransactionType.expense);
+      expect(created.interval, RecurringInterval.monthly);
+    });
+
+    testWidgets('RecurringFormSheet in edit mode pre-populates existing recurring item and updates properly', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            accountRepositoryProvider.overrideWithValue(accRepo),
+            categoryRepositoryProvider.overrideWithValue(catRepo),
+            transactionRepositoryProvider.overrideWithValue(txRepo),
+            recurringRepositoryProvider.overrideWithValue(recRepo),
+          ],
+          child: MaterialApp(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: AppTheme.light(),
+            home: Builder(
+              builder: (context) => Scaffold(
+                body: Center(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      final items = await recRepo.watchRecurringTransactions().first;
+                      final rentItem = items.firstWhere((i) => i.id == 'rec_rent');
+                      if (context.mounted) {
+                        await RecurringFormSheet.show(context, existing: rentItem);
+                      }
+                    },
+                    child: const Text('Open Edit Sheet'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Open edit sheet
+      await tester.tap(find.text('Open Edit Sheet'));
+      await tester.pumpAndSettle();
+
+      // Verify header and pre-populated values
+      expect(find.text('Sửa gói định kỳ'), findsOneWidget);
+      expect(find.widgetWithText(TextField, 'Tiền thuê căn hộ'), findsOneWidget);
+      expect(find.widgetWithText(TextField, '4.500.000'), findsOneWidget);
+
+      // Tap preset '1 triệu'
+      final preset1M = find.text('1 triệu');
+      expect(preset1M, findsOneWidget);
+      await tester.tap(preset1M);
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(TextField, '1.000.000'), findsOneWidget);
+
+      // Submit update
+      final updateButton = find.text('Cập nhật gói định kỳ');
+      await tester.ensureVisible(updateButton);
+      await tester.pumpAndSettle();
+      await tester.tap(updateButton);
+      await tester.pumpAndSettle();
+
+      // Verify updated in repository
+      final items = await recRepo.watchRecurringTransactions().first;
+      final updatedRent = items.firstWhere((i) => i.id == 'rec_rent');
+      expect(updatedRent.amount, 1000000);
     });
   });
 }
