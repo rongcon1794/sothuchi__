@@ -734,18 +734,6 @@ class _LedgersManagementScreenState
                       ),
                       const SizedBox(width: 4),
                     ],
-                    IconButton(
-                      icon: const Icon(
-                        CupertinoIcons.pencil,
-                        color: AppleTokens.systemGray,
-                        size: 18,
-                      ),
-                      tooltip: l10n.edit,
-                      onPressed: () {
-                        unawaited(HapticFeedback.lightImpact());
-                        LedgerFormSheet.show(context, existing: item);
-                      },
-                    ),
                     ApplePopupMenuButton<String>(
                       tooltip: l10n.moreOptions,
                       onSelected: (val) {
