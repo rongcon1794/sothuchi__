@@ -1,4 +1,5 @@
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,6 +12,7 @@ import 'package:so_thu_chi/features/accounts/data/repositories/firestore_account
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
 import 'package:so_thu_chi/features/accounts/presentation/screens/account_detail_screen.dart';
 import 'package:so_thu_chi/features/accounts/presentation/screens/accounts_screen.dart';
+import 'package:so_thu_chi/features/accounts/presentation/widgets/wallet_form_sheet.dart';
 import 'package:so_thu_chi/features/categories/data/repositories/firestore_category_repository.dart';
 import 'package:so_thu_chi/features/categories/domain/entities/category.dart';
 import 'package:so_thu_chi/features/categories/presentation/screens/category_detail_screen.dart';
@@ -352,6 +354,119 @@ void main() {
       expect(find.text('Ăn uống'), findsAtLeastNWidgets(1));
       expect(find.text('Chưa có giao dịch'), findsOneWidget);
       expect(find.text('Thêm giao dịch'), findsAtLeastNWidgets(1));
+    });
+
+    testWidgets('AccountsScreen renders net balance hero card, filters and toggles eye', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(800, 1200));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      SharedPreferences.setMockInitialValues({'onboarding_completed': true});
+      final prefs = await SharedPreferences.getInstance();
+      final firestore = FakeFirebaseFirestore();
+      final accRepo = FirestoreAccountRepository(firestore: firestore, uid: 'u1');
+      await accRepo.ensureDefaultWallet(currency: 'VND');
+      await accRepo.createAccount(
+        name: 'Vietcombank',
+        type: AccountType.bank,
+        initialBalance: 500000000,
+        currency: 'VND',
+        icon: 'account_balance',
+        color: 0xFF007AFF,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            accountRepositoryProvider.overrideWithValue(accRepo),
+          ],
+          child: MaterialApp(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: AppTheme.light(),
+            home: const AccountsScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Net balance hero card
+      expect(find.text('TỔNG TÀI SẢN RÒNG'), findsOneWidget);
+      expect(find.text('Chuyển tiền giữa các ví'), findsAtLeastNWidgets(1));
+
+      // Filters
+      expect(find.text('Tất cả (2)'), findsOneWidget);
+      expect(find.text('Tiền mặt (1)'), findsOneWidget);
+
+      // Test eye toggle for masking balance
+      final eyeIcon = find.byIcon(CupertinoIcons.eye);
+      expect(eyeIcon, findsOneWidget);
+      await tester.tap(eyeIcon);
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(CupertinoIcons.eye_slash), findsOneWidget);
+    });
+
+    testWidgets('WalletFormSheet renders live preview, templates and presets', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(800, 1400));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      SharedPreferences.setMockInitialValues({'onboarding_completed': true});
+      final prefs = await SharedPreferences.getInstance();
+      final firestore = FakeFirebaseFirestore();
+      final accRepo = FirestoreAccountRepository(firestore: firestore, uid: 'u1');
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            accountRepositoryProvider.overrideWithValue(accRepo),
+          ],
+          child: MaterialApp(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: AppTheme.light(),
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => ElevatedButton(
+                  onPressed: () => WalletFormSheet.show(context),
+                  child: const Text('Open Sheet'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Open Sheet'));
+      await tester.pumpAndSettle();
+
+      // Check header and template carousel section
+      expect(find.text('Thêm ví mới'), findsOneWidget);
+      expect(find.text('MẪU TÀI KHOẢN & VÍ PHỔ BIẾN'), findsOneWidget);
+
+      // Tap Vietcombank template
+      expect(find.text('Vietcombank'), findsOneWidget);
+      await tester.tap(find.text('Vietcombank'));
+      await tester.pumpAndSettle();
+
+      // Quick amount presets
+      expect(find.text('+000'), findsOneWidget);
+      expect(find.text('1 triệu'), findsOneWidget);
+
+      // Tap 1 triệu preset
+      await tester.tap(find.text('1 triệu'));
+      await tester.pumpAndSettle();
+
+      // Tap +000
+      await tester.tap(find.text('+000'));
+      await tester.pumpAndSettle();
+
+      // Save button exists
+      expect(find.text('Lưu'), findsOneWidget);
     });
   });
 }
