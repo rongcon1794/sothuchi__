@@ -100,19 +100,26 @@ final selectedMonthBudgetProgressProvider = Provider<List<BudgetProgress>>((
   );
 });
 
-/// Triggered budget warnings (`usedPercent >= alertThreshold`) for the current calendar month.
-final currentMonthTriggeredBudgetsProvider = Provider<List<BudgetProgress>>((
+/// All budget progress items for the current calendar month (DateTime.now()).
+final currentMonthBudgetProgressProvider = Provider<List<BudgetProgress>>((
   ref,
 ) {
   final budgets = ref.watch(budgetsStreamProvider).value ?? const <Budget>[];
   final txs =
       ref.watch(transactionsStreamProvider).value ??
       const <TransactionEntity>[];
-  final all = computeMonthlyBudgetProgress(
+  return computeMonthlyBudgetProgress(
     budgets: budgets,
     transactions: txs,
     monthAnchor: DateTime.now(),
   );
+});
+
+/// Triggered budget warnings (`usedPercent >= alertThreshold`) for the current calendar month.
+final currentMonthTriggeredBudgetsProvider = Provider<List<BudgetProgress>>((
+  ref,
+) {
+  final all = ref.watch(currentMonthBudgetProgressProvider);
   return all.where((p) => p.isWarningTriggered).toList(growable: false);
 });
 

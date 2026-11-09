@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
@@ -8,9 +9,10 @@ import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
+import 'package:so_thu_chi/features/budgets/presentation/controllers/budgets_controller.dart';
 import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
 
-class DashboardSmartSpendingPaceCard extends StatelessWidget {
+class DashboardSmartSpendingPaceCard extends ConsumerWidget {
   const DashboardSmartSpendingPaceCard({
     super.key,
     required this.monthSummary,
@@ -25,28 +27,90 @@ class DashboardSmartSpendingPaceCard extends StatelessWidget {
   final bool hideBalance;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     final now = DateTime.now();
     final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
-    final daysRemaining = math.max(1, daysInMonth - now.day + 1);
+    final currentDay = now.day;
+    final daysRemaining = math.max(1, daysInMonth - currentDay + 1);
 
-    final remainingMinor = monthSummary.income.minorUnits > monthSummary.expense.minorUnits
-        ? (monthSummary.income.minorUnits - monthSummary.expense.minorUnits)
-        : math.max(0, totalBalance.minorUnits);
-    final safeDailyMinor = (remainingMinor / daysRemaining).round();
-    final safeDailyMoney = Money(minorUnits: safeDailyMinor, currencyCode: totalBalance.currencyCode);
+    // 1. Inspect current month budgets
+    final budgetProgressList = ref.watch(currentMonthBudgetProgressProvider);
 
-    final isOverPace = monthSummary.expense.minorUnits > monthSummary.income.minorUnits &&
-        monthSummary.income.minorUnits > 0;
-    final statusColor = isOverPace ? AppleTokens.systemOrange : AppleTokens.systemGreen;
-    final statusIcon = isOverPace
-        ? CupertinoIcons.exclamationmark_circle_fill
-        : CupertinoIcons.checkmark_circle_fill;
-    final statusText = isOverPace ? l10n.smartPaceOverPace : l10n.smartPaceOnTrack;
+    int? effectiveLimitMinor;
+    int effectiveSpentMinor = monthSummary.expense.minorUnits;
+    String currencyCode = totalBalance.currencyCode;
+    bool hasBudget = false;
+
+    if (budgetProgressList.isNotEmpty) {
+      final overall = budgetProgressList.where((p) => p.budget.isOverall).firstOrNull;
+      if (overall != null) {
+        effectiveLimitMinor = overall.budget.amount;
+        effectiveSpentMinor = overall.spentMinorUnits;
+        currencyCode = overall.budget.currency;
+        hasBudget = true;
+      } else {
+        effectiveLimitMinor = budgetProgressList.fold<int>(0, (acc, p) => acc + p.budget.amount);
+        effectiveSpentMinor = budgetProgressList.fold<int>(0, (acc, p) => acc + p.spentMinorUnits);
+        currencyCode = budgetProgressList.first.budget.currency;
+        hasBudget = true;
+      }
+    } else if (monthSummary.income.minorUnits > 0) {
+      // 2. Fallback to monthly income when no budget is configured
+      effectiveLimitMinor = monthSummary.income.minorUnits;
+      effectiveSpentMinor = monthSummary.expense.minorUnits;
+      currencyCode = monthSummary.income.currencyCode;
+    }
+
+    int safeDailyMinor;
+    bool isOverPace;
+    bool isExceeded = false;
+
+    if (effectiveLimitMinor != null && effectiveLimitMinor > 0) {
+      if (effectiveSpentMinor >= effectiveLimitMinor) {
+        // Exceeded: 0 safe spending left this month
+        safeDailyMinor = 0;
+        isOverPace = true;
+        isExceeded = true;
+      } else {
+        final remainingMinor = effectiveLimitMinor - effectiveSpentMinor;
+        safeDailyMinor = remainingMinor ~/ daysRemaining;
+
+        // Pace: Check if current spending is ahead of normal pro-rata day pace
+        final expectedSpentSoFar = (effectiveLimitMinor * currentDay) / daysInMonth;
+        isOverPace = effectiveSpentMinor > expectedSpentSoFar;
+      }
+    } else {
+      // 3. Neither budget nor income is recorded
+      if (totalBalance.minorUnits <= 0 || effectiveSpentMinor >= totalBalance.minorUnits) {
+        safeDailyMinor = 0;
+        isOverPace = effectiveSpentMinor > 0;
+        isExceeded = effectiveSpentMinor > 0 && totalBalance.minorUnits <= 0;
+      } else {
+        final remainingBalance = totalBalance.minorUnits - effectiveSpentMinor;
+        safeDailyMinor = remainingBalance ~/ daysRemaining;
+        isOverPace = false;
+      }
+    }
+
+    final safeDailyMoney = Money(minorUnits: safeDailyMinor, currencyCode: currencyCode);
+
+    final statusColor = isExceeded
+        ? AppleTokens.systemRed
+        : (isOverPace ? AppleTokens.systemOrange : AppleTokens.systemGreen);
+    final statusIcon = isExceeded
+        ? CupertinoIcons.exclamationmark_triangle_fill
+        : (isOverPace
+            ? CupertinoIcons.exclamationmark_circle_fill
+            : CupertinoIcons.checkmark_circle_fill);
+    final statusText = isExceeded
+        ? (hasBudget
+            ? (locale.startsWith('vi') ? 'Vượt ngân sách' : 'Over budget')
+            : (locale.startsWith('vi') ? 'Vượt thu nhập' : 'Over income'))
+        : (isOverPace ? l10n.smartPaceOverPace : l10n.smartPaceOnTrack);
 
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final isLargeText = textScale >= 1.35;
@@ -225,8 +289,10 @@ class DashboardSmartSpendingPaceCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Text(
-                    safeDailyMoney.format(locale: locale, masked: hideBalance),
+                  AppleAnimatedMoneyText(
+                    money: safeDailyMoney,
+                    locale: locale,
+                    masked: hideBalance,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
@@ -277,8 +343,10 @@ class DashboardSmartSpendingPaceCard extends StatelessWidget {
                         FittedBox(
                           fit: BoxFit.scaleDown,
                           alignment: Alignment.centerLeft,
-                          child: Text(
-                            safeDailyMoney.format(locale: locale, masked: hideBalance),
+                          child: AppleAnimatedMoneyText(
+                            money: safeDailyMoney,
+                            locale: locale,
+                            masked: hideBalance,
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w800,
@@ -334,8 +402,10 @@ class DashboardSmartSpendingPaceCard extends StatelessWidget {
                             FittedBox(
                               fit: BoxFit.scaleDown,
                               alignment: Alignment.centerLeft,
-                              child: Text(
-                                safeDailyMoney.format(locale: locale, masked: hideBalance),
+                              child: AppleAnimatedMoneyText(
+                                money: safeDailyMoney,
+                                locale: locale,
+                                masked: hideBalance,
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w800,
