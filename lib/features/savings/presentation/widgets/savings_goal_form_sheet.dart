@@ -9,7 +9,6 @@ import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
-import 'package:so_thu_chi/core/utils/date_formatter.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
@@ -687,221 +686,459 @@ class _SavingsGoalFormSheetState extends ConsumerState<SavingsGoalFormSheet> {
         ? _titleController.text.trim()
         : l10n.savingsGoalNameHint;
     final noteText = _noteController.text.trim();
+    final targetMinor = parsedTarget?.minorUnits ?? 0;
+    final remainingMinor = (targetMinor - currentAmount).clamp(0, double.infinity).toInt();
+    final progressPercent = (previewProgress * 100).round();
 
-    return AppleGlassCard(
-      borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
-      borderColor: accentColor.withValues(alpha: isDark ? 0.35 : 0.25),
-      padding: const EdgeInsets.all(14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(left: 4, bottom: 8),
+          child: Row(
             children: [
-              // Glowing Icon Badge
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      accentColor.withValues(alpha: isDark ? 0.95 : 0.9),
-                      accentColor.withValues(alpha: isDark ? 0.75 : 0.7),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                  boxShadow: [
-                    BoxShadow(
-                      color: accentColor.withValues(alpha: isDark ? 0.35 : 0.25),
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  _resolveIcon(_selectedIcon),
-                  color: Colors.white,
-                  size: 24,
+              Icon(
+                Icons.remove_red_eye_outlined,
+                size: 14,
+                color: AppleTokens.systemGray,
+              ),
+              SizedBox(width: 6),
+              Text(
+                'BẢN XEM TRƯỚC MỤC TIÊU TRÊN DANH SÁCH',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.6,
+                  color: AppleTokens.systemGray,
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      titleText,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.2,
-                        color: _titleController.text.trim().isNotEmpty
-                            ? (isDark ? Colors.white : Colors.black87)
-                            : (isDark ? Colors.white38 : Colors.black38),
+            ],
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                isDark
+                    ? Color.lerp(accentColor, const Color(0xFF1E1E22), 0.84)!
+                    : Color.lerp(accentColor, Colors.white, 0.90)!,
+                isDark
+                    ? const Color(0xFF141416)
+                    : Color.lerp(accentColor, const Color(0xFFF7F8FA), 0.96)!,
+              ],
+            ),
+            border: Border.all(
+              color: accentColor.withValues(alpha: isDark ? 0.35 : 0.22),
+              width: 1.0,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: accentColor.withValues(alpha: isDark ? 0.18 : 0.07),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+            child: Stack(
+              children: [
+                // Subtle ambient radiant glow at top-right
+                Positioned(
+                  right: -24,
+                  top: -30,
+                  child: Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          accentColor.withValues(alpha: isDark ? 0.22 : 0.12),
+                          accentColor.withValues(alpha: 0.0),
+                        ],
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 3),
-                    Row(
-                      children: [
-                        Text(
-                          parsedTarget != null && parsedTarget.minorUnits > 0
-                              ? parsedTarget.format(locale: locale)
-                              : '0 ${AppCurrencies.byCode(currency).symbol}',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                            color: accentColor,
-                            fontFeatures: AppTheme.tabularFigures,
-                            letterSpacing: -0.3,
+                  ),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // --- Tier 1: Icon, Title, Badges, Menu ---
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // Squircle Icon Badge with high-gloss gradient & shadow
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  accentColor,
+                                  Color.lerp(
+                                    accentColor,
+                                    Colors.black,
+                                    isDark ? 0.35 : 0.2,
+                                  )!,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(13),
+                              border: Border.all(
+                                color: Colors.white.withValues(
+                                  alpha: isDark ? 0.3 : 0.45,
+                                ),
+                                width: 1.0,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: accentColor.withValues(
+                                    alpha: isDark ? 0.4 : 0.25,
+                                  ),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              _resolveIcon(_selectedIcon),
+                              color: Colors.white,
+                              size: 22,
+                            ),
                           ),
-                        ),
-                        if (_isEditing && currentAmount > 0) ...[
-                          const SizedBox(width: 6),
-                          Text(
-                            '(Đã có ${(previewProgress * 100).round()}%)',
-                            style: TextStyle(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w600,
-                              color: isDark ? Colors.white60 : Colors.black54,
+                          const SizedBox(width: 12),
+
+                          // Title & Subtitle / Badges
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  titleText,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 16.5,
+                                    letterSpacing: -0.2,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Wrap(
+                                  spacing: 5,
+                                  runSpacing: 4,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  children: [
+                                    if (_deadline != null)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 7,
+                                          vertical: 2.5,
+                                        ),
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: isDark
+                                              ? Colors.white.withValues(alpha: 0.08)
+                                              : Colors.black.withValues(alpha: 0.05),
+                                          borderRadius: BorderRadius.circular(
+                                            AppleTokens.radiusPill,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              CupertinoIcons.calendar,
+                                              size: 11,
+                                              color: isDark
+                                                  ? Colors.white60
+                                                  : Colors.black54,
+                                            ),
+                                            const SizedBox(width: 3),
+                                            Text(
+                                              l10n.savingsDaysRemaining(daysRemaining ?? 0),
+                                              style: TextStyle(
+                                                fontSize: 10.5,
+                                                fontWeight: FontWeight.w600,
+                                                color: isDark
+                                                    ? Colors.white70
+                                                    : Colors.black87,
+                                                height: 1.2,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    else
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 7,
+                                          vertical: 2.5,
+                                        ),
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: isDark
+                                              ? Colors.white.withValues(alpha: 0.08)
+                                              : Colors.black.withValues(alpha: 0.05),
+                                          borderRadius: BorderRadius.circular(
+                                            AppleTokens.radiusPill,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              CupertinoIcons.calendar,
+                                              size: 11,
+                                              color: isDark
+                                                  ? Colors.white60
+                                                  : Colors.black54,
+                                            ),
+                                            const SizedBox(width: 3),
+                                            Text(
+                                              l10n.savingsNoDeadline,
+                                              style: TextStyle(
+                                                fontSize: 10.5,
+                                                fontWeight: FontWeight.w600,
+                                                color: isDark
+                                                    ? Colors.white70
+                                                    : Colors.black87,
+                                                height: 1.2,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    if (selectedWallet != null)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 7,
+                                          vertical: 2.5,
+                                        ),
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: Color(selectedWallet.color)
+                                              .withValues(alpha: 0.15),
+                                          borderRadius: BorderRadius.circular(
+                                            AppleTokens.radiusPill,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              CupertinoIcons.creditcard,
+                                              size: 11,
+                                              color: Color(selectedWallet.color),
+                                            ),
+                                            const SizedBox(width: 3),
+                                            Text(
+                                              selectedWallet.name,
+                                              style: TextStyle(
+                                                fontSize: 10.5,
+                                                fontWeight: FontWeight.w600,
+                                                color: Color(selectedWallet.color),
+                                                height: 1.2,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    if (noteText.isNotEmpty)
+                                      Text(
+                                        noteText,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          color: AppleTokens.systemGray,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(width: 8),
+
+                          // Progress Badge
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3.5,
+                            ),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: accentColor.withValues(
+                                alpha: isDark ? 0.22 : 0.12,
+                              ),
+                              borderRadius:
+                                  BorderRadius.circular(AppleTokens.radiusPill),
+                              border: Border.all(
+                                color: accentColor.withValues(alpha: 0.35),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Text(
+                              '$progressPercent%',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                fontFeatures: AppTheme.tabularFigures,
+                                color: accentColor,
+                                height: 1.2,
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(width: 4),
+
+                          // 3-dots Menu Preview
+                          Container(
+                            width: 28,
+                            height: 28,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.08)
+                                  : Colors.black.withValues(alpha: 0.04),
+                              borderRadius:
+                                  BorderRadius.circular(AppleTokens.radiusPill),
+                            ),
+                            child: const Icon(
+                              CupertinoIcons.ellipsis,
+                              size: 16,
+                              color: AppleTokens.systemGray,
                             ),
                           ),
                         ],
-                      ],
-                    ),
-                    if (noteText.isNotEmpty) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        '“$noteText”',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontStyle: FontStyle.italic,
-                          color: isDark ? Colors.white60 : Colors.black54,
+                      ),
+
+                      const SizedBox(height: 14),
+
+                      // --- Tier 2: Balance Amounts & Progress Bar ---
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              Money(minorUnits: currentAmount, currencyCode: currency)
+                                  .format(locale: locale),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontSize: 19,
+                                fontWeight: FontWeight.w800,
+                                fontFeatures: AppTheme.tabularFigures,
+                                letterSpacing: -0.3,
+                                color: isDark
+                                    ? Colors.white
+                                    : const Color(0xFF1C1C1E),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Mục tiêu: ${parsedTarget != null && parsedTarget.minorUnits > 0 ? parsedTarget.format(locale: locale) : '0 ${AppCurrencies.byCode(currency).symbol}'}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: AppleTokens.systemGray,
+                              fontFeatures: AppTheme.tabularFigures,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      // Smooth Capsule Progress Bar
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: Stack(
+                          children: [
+                            Container(
+                              height: 7,
+                              width: double.infinity,
+                              color: accentColor.withValues(
+                                alpha: isDark ? 0.18 : 0.10,
+                              ),
+                            ),
+                            FractionallySizedBox(
+                              widthFactor: previewProgress.clamp(0.0, 1.0),
+                              child: Container(
+                                height: 7,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      accentColor,
+                                      Color.lerp(
+                                        accentColor,
+                                        Colors.white,
+                                        0.25,
+                                      )!,
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(4),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: accentColor.withValues(alpha: 0.5),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 1),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
+
+                      const SizedBox(height: 6),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '$progressPercent% đã tích lũy',
+                            style: const TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                              color: AppleTokens.systemGray,
+                            ),
+                          ),
+                          Text(
+                            'Còn lại: ${Money(minorUnits: remainingMinor, currencyCode: currency).format(locale: locale)}',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                              fontFeatures: AppTheme.tabularFigures,
+                              color: isDark ? Colors.white70 : Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
-                  ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          // Progress bar
-          ClipRRect(
-            borderRadius: BorderRadius.circular(3),
-            child: LinearProgressIndicator(
-              value: previewProgress,
-              minHeight: 5,
-              backgroundColor: isDark
-                  ? Colors.white.withValues(alpha: 0.1)
-                  : Colors.black.withValues(alpha: 0.08),
-              valueColor: AlwaysStoppedAnimation<Color>(accentColor),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          // Metadata Badges
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: [
-              // Deadline badge
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.07)
-                      : Colors.black.withValues(alpha: 0.04),
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      CupertinoIcons.calendar,
-                      size: 11,
-                      color: isDark ? Colors.white70 : Colors.black54,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      _deadline != null
-                          ? '${AppDateUtils.formatShortDate(_deadline!, locale: locale)} (${l10n.savingsDaysRemaining(daysRemaining ?? 0)})'
-                          : l10n.savingsNoDeadline,
-                      style: TextStyle(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white70 : Colors.black54,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Linked wallet badge
-              if (selectedWallet != null)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: Color(selectedWallet.color).withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        CupertinoIcons.creditcard,
-                        size: 11,
-                        color: Color(selectedWallet.color),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        selectedWallet.name,
-                        style: TextStyle(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w700,
-                          color: Color(selectedWallet.color),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              // Pace pill
-              if (dailyNeeded != null && dailyNeeded > 0)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: accentColor.withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        CupertinoIcons.bolt_fill,
-                        size: 10,
-                        color: accentColor,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        l10n.savingsDailyNeeded(
-                          Money(minorUnits: dailyNeeded, currencyCode: currency)
-                              .format(locale: locale),
-                        ),
-                        style: TextStyle(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w700,
-                          color: accentColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

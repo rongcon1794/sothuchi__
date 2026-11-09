@@ -409,162 +409,141 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
         ? _nameController.text.trim()
         : l10n.ledgerNameHint;
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            accentColor,
-            Color.lerp(accentColor, Colors.black, isDark ? 0.45 : 0.3)!,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
-        boxShadow: [
-          BoxShadow(
-            color: accentColor.withValues(alpha: isDark ? 0.45 : 0.28),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
-        child: Stack(
-          children: [
-            // Left Book Spine Ribbon
-            Positioned(
-              left: 0,
-              top: 0,
-              bottom: 0,
-              width: 8,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.22),
-                  border: Border(
-                    right: BorderSide(
-                      color: Colors.black.withValues(alpha: 0.15),
-                      width: 1,
-                    ),
-                  ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(left: 4, bottom: 8),
+          child: Row(
+            children: [
+              Icon(
+                Icons.remove_red_eye_outlined,
+                size: 14,
+                color: AppleTokens.systemGray,
+              ),
+              SizedBox(width: 6),
+              Text(
+                'BẢN XEM TRƯỚC SỔ TRÊN DANH SÁCH',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.6,
+                  color: AppleTokens.systemGray,
                 ),
               ),
-            ),
-            // Book Stitching Accent Line
-            Positioned(
-              left: 13,
-              top: 0,
-              bottom: 0,
-              width: 1,
-              child: Container(
-                color: Colors.white.withValues(alpha: 0.2),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(26, 18, 18, 18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            ],
+          ),
+        ),
+        AppleGlassCard(
+          padding: EdgeInsets.zero,
+          borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+          borderColor: accentColor.withValues(alpha: isDark ? 0.35 : 0.22),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+            child: Stack(
+              children: [
+                // Colored Left Spine Strip
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: 6,
+                  child: Container(color: accentColor),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 14, 12, 14),
+                  child: Row(
                     children: [
-                      // Squircle Badge with Book Icon
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.35),
-                            width: 1.5,
-                          ),
-                        ),
-                        child: Icon(
-                          _resolveIcon(_selectedIcon),
-                          color: Colors.white,
-                          size: 26,
-                        ),
+                      // Squircle Badge
+                      AppleSquircleBadge(
+                        icon: _resolveIcon(_selectedIcon),
+                        backgroundColor: accentColor,
+                        size: 46,
+                        iconSize: 24,
                       ),
-                      // Badges on top right (Type + Default tag)
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
+                      const SizedBox(width: 14),
+                      // Name & Tags
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    title,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 16,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                if (widget.existing?.isDefault == true) ...[
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: isDark
+                                          ? Colors.white12
+                                          : Colors.black.withValues(alpha: 0.06),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: const Text(
+                                      'Mặc định',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppleTokens.systemGray,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.25),
-                              borderRadius:
-                                  BorderRadius.circular(AppleTokens.radiusPill),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.3),
-                                width: 0.8,
-                              ),
-                            ),
-                            child: Text(
+                            const SizedBox(height: 3),
+                            Text(
                               _typeLabel(_type, l10n),
                               style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          if (widget.existing?.isDefault == true) ...[
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppleTokens.systemYellow.withValues(alpha: 0.9),
-                                borderRadius:
-                                    BorderRadius.circular(AppleTokens.radiusPill),
-                              ),
-                              child: const Text(
-                                'MẶC ĐỊNH',
-                                style: TextStyle(
-                                  color: Colors.black87,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
-                                ),
+                                fontSize: 12,
+                                color: AppleTokens.systemGray,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
-                        ],
+                        ),
+                      ),
+                      // 3-dots preview button
+                      Container(
+                        width: 28,
+                        height: 28,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.08)
+                              : Colors.black.withValues(alpha: 0.04),
+                          borderRadius:
+                              BorderRadius.circular(AppleTokens.radiusPill),
+                        ),
+                        child: const Icon(
+                          CupertinoIcons.ellipsis,
+                          size: 16,
+                          color: AppleTokens.systemGray,
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.4,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Độc lập dữ liệu tài chính • Tiền tệ ${widget.existing?.currency ?? AppCurrencies.defaultCode}',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.82),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 

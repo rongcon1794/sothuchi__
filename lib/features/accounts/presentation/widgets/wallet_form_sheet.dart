@@ -468,6 +468,13 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
     );
   }
 
+  IconData _typeIcon(AccountType type) => switch (type) {
+        AccountType.cash => Icons.payments_rounded,
+        AccountType.bank => Icons.account_balance_rounded,
+        AccountType.ewallet => Icons.qr_code_2_rounded,
+        AccountType.card => Icons.credit_card_rounded,
+      };
+
   Widget _buildLiveWalletPreviewCard({
     required BuildContext context,
     required bool isDark,
@@ -476,6 +483,7 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
     required AppLocalizations l10n,
     required CurrencyInfo currencyInfo,
   }) {
+    final theme = Theme.of(context);
     final nameText = _nameController.text.trim().isNotEmpty
         ? _nameController.text.trim()
         : l10n.walletNameHint;
@@ -484,23 +492,36 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
           currencyCode: _currency,
         ) ??
         Money.zero(_currency);
+    final balanceText = parsedBalance.format(locale: locale);
 
     return Container(
       decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            walletColor,
-            Color.lerp(walletColor, Colors.black, isDark ? 0.45 : 0.3)!,
+            isDark
+                ? Color.lerp(walletColor, const Color(0xFF1E1E22), 0.82)!
+                : Color.lerp(walletColor, Colors.white, 0.90)!,
+            isDark
+                ? const Color(0xFF141416)
+                : Color.lerp(walletColor, const Color(0xFFF7F8FA), 0.96)!,
           ],
         ),
-        borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+        border: Border.all(
+          color: _isDefault
+              ? const Color(0xFFFFB800).withValues(alpha: isDark ? 0.65 : 0.55)
+              : walletColor.withValues(alpha: isDark ? 0.35 : 0.22),
+          width: _isDefault ? 1.4 : 1.0,
+        ),
         boxShadow: [
           BoxShadow(
-            color: walletColor.withValues(alpha: isDark ? 0.45 : 0.28),
-            blurRadius: 18,
-            offset: const Offset(0, 6),
+            color: _isDefault
+                ? const Color(0xFFFFB800).withValues(alpha: isDark ? 0.16 : 0.08)
+                : walletColor.withValues(alpha: isDark ? 0.18 : 0.07),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -508,186 +529,312 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
         borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
         child: Stack(
           children: [
-            // Decorative card gloss/shimmer circle
+            // Subtle ambient radiant glow at top-right
             Positioned(
-              right: -20,
+              right: -24,
               top: -30,
               child: Container(
-                width: 140,
-                height: 140,
+                width: 120,
+                height: 120,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.12),
+                  gradient: RadialGradient(
+                    colors: [
+                      walletColor.withValues(alpha: isDark ? 0.22 : 0.12),
+                      walletColor.withValues(alpha: 0.0),
+                    ],
+                  ),
                 ),
               ),
             ),
+
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
+                  // --- Tier 1: Identity, Badges, and Overflow Actions ---
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Metallic Smart Chip Graphic
+                      // Squircle Icon Badge with high-gloss gradient & shadow
                       Container(
-                        width: 38,
-                        height: 28,
+                        width: 44,
+                        height: 44,
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
+                          gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              Color(0xFFFFDF7A),
-                              Color(0xFFD4AF37),
+                              walletColor,
+                              Color.lerp(walletColor, Colors.black, isDark ? 0.35 : 0.2)!,
                             ],
                           ),
-                          borderRadius: BorderRadius.circular(5),
+                          borderRadius: BorderRadius.circular(13),
                           border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.5),
-                            width: 0.8,
+                            color: Colors.white.withValues(alpha: isDark ? 0.3 : 0.45),
+                            width: 1.0,
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: walletColor.withValues(alpha: isDark ? 0.4 : 0.25),
+                              blurRadius: 10,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        child: Icon(
+                          AppIconCatalog.resolve(_icon),
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+
+                      // Wallet Name & Tags (Type, Currency, Default)
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Container(width: 1, color: Colors.black26),
-                            const SizedBox(width: 8),
-                            Container(width: 1, color: Colors.black26),
+                            Text(
+                              nameText,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16.5,
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Wrap(
+                              spacing: 5,
+                              runSpacing: 4,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                // Wallet Type Pill with Icon
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 3.5,
+                                  ),
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: walletColor.withValues(
+                                      alpha: isDark ? 0.20 : 0.12,
+                                    ),
+                                    borderRadius: BorderRadius.circular(
+                                      AppleTokens.radiusPill,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        _typeIcon(_type),
+                                        size: 11,
+                                        color: isDark
+                                            ? Colors.white70
+                                            : walletColor,
+                                      ),
+                                      const SizedBox(width: 3.5),
+                                      Text(
+                                        _typeLabel(l10n, _type),
+                                        style: TextStyle(
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.w600,
+                                          color: isDark
+                                              ? Colors.white70
+                                              : walletColor,
+                                          height: 1.2,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                // Default Wallet Badge
+                                if (_isDefault)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 3.5,
+                                    ),
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          Color(0xFFFFDF7A),
+                                          Color(0xFFD4AF37),
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                        AppleTokens.radiusPill,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: const Color(0xFFD4AF37)
+                                              .withValues(alpha: 0.35),
+                                          blurRadius: 4,
+                                          offset: const Offset(0, 1),
+                                        ),
+                                      ],
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.star_rounded,
+                                          size: 11,
+                                          color: Color(0xFF4A3500),
+                                        ),
+                                        SizedBox(width: 2.5),
+                                        Text(
+                                          'Mặc định',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w800,
+                                            color: Color(0xFF4A3500),
+                                            letterSpacing: 0.1,
+                                            height: 1.2,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                // Currency Code Pill
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 7,
+                                    vertical: 3.5,
+                                  ),
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? Colors.white.withValues(alpha: 0.08)
+                                        : Colors.black.withValues(alpha: 0.05),
+                                    borderRadius: BorderRadius.circular(
+                                      AppleTokens.radiusPill,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    _currency.toUpperCase(),
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      color: isDark
+                                          ? Colors.white54
+                                          : Colors.black54,
+                                      letterSpacing: 0.2,
+                                      height: 1.2,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
-                      // Icon Badge & NFC Symbol
-                      Row(
-                        children: [
-                          Icon(
-                            CupertinoIcons.radiowaves_right,
-                            color: Colors.white.withValues(alpha: 0.7),
-                            size: 18,
-                          ),
-                          const SizedBox(width: 10),
-                          Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.22),
-                              borderRadius: BorderRadius.circular(13),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.35),
-                                width: 1.2,
-                              ),
-                            ),
-                            child: Icon(
-                              AppIconCatalog.resolve(_icon),
-                              color: Colors.white,
-                              size: 22,
-                            ),
-                          ),
-                        ],
+
+                      const SizedBox(width: 6),
+
+                      // 3-dots action icon matching list tile
+                      Container(
+                        width: 32,
+                        height: 32,
+                        alignment: Alignment.center,
+                        child: const Icon(
+                          CupertinoIcons.ellipsis_vertical,
+                          size: 16,
+                          color: AppleTokens.systemGray,
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 22),
-                  // Wallet Name
-                  Text(
-                    nameText,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 19,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.3,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  // Balance with tabular figures
-                  Text(
-                    parsedBalance.format(locale: locale),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.5,
-                      fontFeatures: AppTheme.tabularFigures,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+
                   const SizedBox(height: 12),
-                  // Bottom row: Type pill & currency tag
+
+                  // Subtle Hairline Divider
+                  Divider(
+                    height: 1,
+                    thickness: AppleTokens.hairline,
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : Colors.black.withValues(alpha: 0.06),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // --- Tier 2: Financial Balance Row ---
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      // Label: "SỐ DƯ BAN ĐẦU" with glowing indicator dot
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
+                            width: 6,
+                            height: 6,
                             decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.25),
-                              borderRadius:
-                                  BorderRadius.circular(AppleTokens.radiusPill),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.25),
-                                width: 0.8,
-                              ),
-                            ),
-                            child: Text(
-                              _typeLabel(l10n, _type).toUpperCase(),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.4,
-                              ),
+                              color: walletColor,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: walletColor.withValues(alpha: 0.6),
+                                  blurRadius: 4,
+                                  spreadRadius: 0.5,
+                                ),
+                              ],
                             ),
                           ),
-                          if (_isDefault) ...[
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFFB800).withValues(alpha: 0.25),
-                                borderRadius:
-                                    BorderRadius.circular(AppleTokens.radiusPill),
-                                border: Border.all(
-                                  color: const Color(0xFFFFDF7A).withValues(alpha: 0.6),
-                                  width: 0.8,
-                                ),
-                              ),
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.star_rounded, size: 12, color: Color(0xFFFFDF7A)),
-                                  SizedBox(width: 3),
-                                  Text(
-                                    'MẶC ĐỊNH',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: 0.3,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                          const SizedBox(width: 6),
+                          Text(
+                            widget.existing != null ? 'SỐ DƯ HIỆN TẠI' : 'SỐ DƯ BAN ĐẦU',
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.4,
+                              color: isDark
+                                  ? Colors.white54
+                                  : Colors.black.withValues(alpha: 0.5),
                             ),
-                          ],
+                          ),
                         ],
                       ),
-                      Text(
-                        _currency,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.8),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
+
+                      // Large Tabular Balance Figure + Forward Chevron
+                      Flexible(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                balanceText,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 16,
+                                  letterSpacing: -0.3,
+                                  fontFeatures: AppTheme.tabularFigures,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            const Icon(
+                              CupertinoIcons.chevron_right,
+                              size: 14,
+                              color: AppleTokens.systemGray,
+                            ),
+                          ],
                         ),
                       ),
                     ],

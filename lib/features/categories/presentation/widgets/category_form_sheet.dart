@@ -297,150 +297,165 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
       theme.brightness,
     );
     final isIncome = _type == CategoryType.income;
+    final isDefault = widget.existing?.isDefault ?? false;
     final trimmedName = _nameController.text.trim();
     final displayName = trimmedName.isEmpty
         ? (isIncome ? 'Khoản thu mới' : 'Khoản chi mới')
         : trimmedName;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: isDark
-              ? [
-                  activeColor.withValues(alpha: 0.22),
-                  Colors.black.withValues(alpha: 0.65),
-                ]
-              : [
-                  activeColor.withValues(alpha: 0.12),
-                  Colors.white,
-                ],
-        ),
-        border: Border.all(
-          color: activeColor.withValues(alpha: isDark ? 0.38 : 0.28),
-          width: 1.2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: activeColor.withValues(alpha: isDark ? 0.16 : 0.10),
-            blurRadius: 18,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Squircle Icon Badge with halo
-          Container(
-            width: 54,
-            height: 54,
-            decoration: BoxDecoration(
-              color: activeColor.withValues(alpha: isDark ? 0.28 : 0.18),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: activeColor.withValues(alpha: 0.5),
-                width: 1.5,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(left: 4, bottom: 8),
+          child: Row(
+            children: [
+              Icon(
+                Icons.remove_red_eye_outlined,
+                size: 14,
+                color: AppleTokens.systemGray,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: activeColor.withValues(alpha: 0.28),
-                  blurRadius: 12,
-                  offset: const Offset(0, 3),
+              SizedBox(width: 6),
+              Text(
+                'BẢN XEM TRƯỚC DANH MỤC TRÊN DANH SÁCH',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.6,
+                  color: AppleTokens.systemGray,
                 ),
-              ],
-            ),
-            child: Icon(
-              AppIconCatalog.resolve(_icon),
-              color: activeColor,
-              size: 28,
-            ),
+              ),
+            ],
           ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.auto_awesome_rounded,
-                      size: 13,
-                      color: AppleTokens.systemGray,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'XEM TRƯỚC HIỂN THỊ',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        letterSpacing: 0.6,
-                        fontWeight: FontWeight.w700,
-                        color: AppleTokens.systemGray,
-                        fontSize: 10.5,
-                      ),
+        ),
+        AppleGlassCard(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+          child: Row(
+            children: [
+              // Squircle Badge with glowing border and subtle shadow
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: activeColor.withValues(alpha: isDark ? 0.22 : 0.14),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: activeColor.withValues(alpha: isDark ? 0.40 : 0.28),
+                    width: 1.2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: activeColor.withValues(alpha: isDark ? 0.22 : 0.14),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  displayName,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 16,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                child: Icon(
+                  AppIconCatalog.resolve(_icon),
+                  color: activeColor,
+                  size: 24,
                 ),
-                const SizedBox(height: 5),
-                Row(
+              ),
+              const SizedBox(width: 14),
+
+              // Middle Column: Title & Metadata Badges
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
-                      decoration: BoxDecoration(
-                        color: isIncome
-                            ? AppleTokens.emeraldIncome.withValues(alpha: 0.15)
-                            : AppleTokens.rubyExpense.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                    Text(
+                      displayName,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15.5,
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            isIncome ? Icons.trending_up_rounded : Icons.trending_down_rounded,
-                            size: 12,
-                            color: isIncome ? AppleTokens.emeraldIncome : AppleTokens.rubyExpense,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        // Default or Custom badge
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6.5, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: isDefault
+                                ? AppleTokens.systemBlue.withValues(alpha: 0.12)
+                                : AppleTokens.systemPurple.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            isIncome ? 'Khoản thu' : 'Khoản chi',
+                          child: Text(
+                            isDefault ? 'Mặc định' : 'Tùy chỉnh',
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 10.5,
                               fontWeight: FontWeight.w700,
-                              color: isIncome ? AppleTokens.emeraldIncome : AppleTokens.rubyExpense,
+                              color: isDefault
+                                  ? AppleTokens.systemBlue
+                                  : AppleTokens.systemPurple,
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      isIncome ? '+500.000 ₫' : '-50.000 ₫',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        fontFeatures: AppTheme.tabularFigures,
-                        color: isIncome ? AppleTokens.emeraldIncome : AppleTokens.rubyExpense,
-                      ),
+                        ),
+                        const SizedBox(width: 6),
+                        // Transaction count indicator
+                        const Flexible(
+                          child: Text(
+                            'Chưa dùng',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              fontFeatures: AppTheme.tabularFigures,
+                              color: AppleTokens.systemGray,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+
+              // Right Column: Month Spend & Actions
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '0 ₫',
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w500,
+                      color: isDark ? Colors.white24 : Colors.black26,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Container(
+                    width: 26,
+                    height: 26,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.08)
+                          : Colors.black.withValues(alpha: 0.04),
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                    ),
+                    child: const Icon(
+                      Icons.more_horiz_rounded,
+                      size: 18,
+                      color: AppleTokens.systemGray,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

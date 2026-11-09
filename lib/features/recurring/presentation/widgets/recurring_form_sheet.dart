@@ -20,7 +20,6 @@ import 'package:so_thu_chi/features/recurring/domain/entities/recurring_transact
 import 'package:so_thu_chi/features/recurring/presentation/controllers/recurring_controller.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
-import 'package:so_thu_chi/features/transactions/presentation/widgets/transaction_type_segmented_pill.dart';
 import 'package:so_thu_chi/l10n/app_localizations.dart';
 
 class _RecurringTemplate {
@@ -1041,7 +1040,7 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                           ? '${isExpense ? '-' : '+'}${parsedAmount.format(locale: locale)}'
                           : '0 ${AppCurrencies.byCode(currency).symbol}',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 14.5,
                         fontWeight: FontWeight.w800,
                         color: accentColor,
                         fontFeatures: AppTheme.tabularFigures,
@@ -1064,6 +1063,17 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                   ],
                 ),
               ),
+              // Trailing 3-dots preview matching list card
+              Container(
+                width: 32,
+                height: 32,
+                alignment: Alignment.center,
+                child: const Icon(
+                  CupertinoIcons.ellipsis_vertical,
+                  size: 16,
+                  color: AppleTokens.systemGray,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 10),
@@ -1072,7 +1082,7 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
             spacing: 6,
             runSpacing: 6,
             children: [
-              // Frequency badge
+              // 1. Frequency badge
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                 decoration: BoxDecoration(
@@ -1099,7 +1109,7 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                   ],
                 ),
               ),
-              // Start Date badge
+              // 2. Start Date / Next Due badge
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                 decoration: BoxDecoration(
@@ -1119,8 +1129,8 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                     const SizedBox(width: 4),
                     Text(
                       isExpense
-                          ? 'Hạn đầu: ${AppDateUtils.formatShortDate(_startDate, locale: locale)}'
-                          : 'Nhận đầu: ${AppDateUtils.formatShortDate(_startDate, locale: locale)}',
+                          ? l10n.recurringNextDue(AppDateUtils.formatShortDate(_startDate, locale: locale))
+                          : l10n.recurringNextIncomeDue(AppDateUtils.formatShortDate(_startDate, locale: locale)),
                       style: TextStyle(
                         fontSize: 10.5,
                         fontWeight: FontWeight.w600,
@@ -1130,7 +1140,7 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                   ],
                 ),
               ),
-              // Wallet badge
+              // 3. Wallet badge
               if (selectedWallet != null)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
@@ -1148,9 +1158,7 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        isExpense
-                            ? 'Trừ ví: ${selectedWallet.name}'
-                            : 'Nhận ví: ${selectedWallet.name}',
+                        selectedWallet.name,
                         style: TextStyle(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w700,
@@ -1160,7 +1168,7 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                     ],
                   ),
                 ),
-              // Auto Mode badge
+              // 4. Auto Mode badge
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                 decoration: BoxDecoration(
@@ -1179,7 +1187,7 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                     const SizedBox(width: 4),
                     Text(
                       _autoExecute
-                          ? (isExpense ? 'Tự động trừ' : 'Tự động nhận')
+                          ? (isExpense ? 'Tự động thanh toán' : 'Tự động nhận tiền')
                           : 'Thủ công',
                       style: TextStyle(
                         fontSize: 10.5,

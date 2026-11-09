@@ -579,7 +579,7 @@ void main() {
 
       // Check header and live preview
       expect(find.text('Thêm danh mục'), findsOneWidget);
-      expect(find.text('XEM TRƯỚC HIỂN THỊ'), findsOneWidget);
+      expect(find.text('BẢN XEM TRƯỚC DANH MỤC TRÊN DANH SÁCH'), findsOneWidget);
       expect(find.text('MẪU DANH MỤC GỢI Ý'), findsOneWidget);
 
       // Tap on "Cà phê & Đồ uống" template chip

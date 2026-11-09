@@ -10,7 +10,6 @@ import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
-import 'package:so_thu_chi/core/widgets/empty_state_view.dart';
 import 'package:so_thu_chi/features/savings/presentation/controllers/savings_goals_controller.dart';
 import 'package:so_thu_chi/features/savings/presentation/widgets/savings_arc_progress.dart';
 import 'package:so_thu_chi/features/savings/presentation/widgets/savings_goal_card.dart';

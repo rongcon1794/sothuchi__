@@ -12,7 +12,6 @@ import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/savings/domain/entities/savings_goal.dart';
 import 'package:so_thu_chi/features/savings/presentation/controllers/savings_goals_controller.dart';
-import 'package:so_thu_chi/features/savings/presentation/widgets/savings_arc_progress.dart';
 import 'package:so_thu_chi/features/savings/presentation/widgets/savings_deposit_sheet.dart';
 import 'package:so_thu_chi/features/savings/presentation/widgets/savings_goal_form_sheet.dart';
 
@@ -399,7 +398,7 @@ class SavingsGoalCard extends ConsumerWidget {
                         const SizedBox(width: 8),
                         Text(
                           'Mục tiêu: ${goal.targetMoney.format(locale: locale, masked: hideBalance)}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                             color: AppleTokens.systemGray,
