@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserProfileDto {
 
- String get uid; String get email; String? get displayName; String? get photoUrl; String get defaultCurrency; String get locale;@FirestoreDateTimeConverter() DateTime get createdAt;@FirestoreDateTimeConverter() DateTime get updatedAt;@NullableFirestoreDateTimeConverter() DateTime? get deletedAt;
+ String get uid; String get email; String? get displayName; String? get photoUrl; String get defaultCurrency; String get locale; String? get themeMode; int? get accentColorIndex; String? get defaultWalletId; bool? get oledMode; bool? get hideBalance; bool? get initialSetupCompleted;@FirestoreDateTimeConverter() DateTime get createdAt;@FirestoreDateTimeConverter() DateTime get updatedAt;@NullableFirestoreDateTimeConverter() DateTime? get deletedAt;
 /// Create a copy of UserProfileDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $UserProfileDtoCopyWith<UserProfileDto> get copyWith => _$UserProfileDtoCopyWith
 @override
 bool operator ==(Object other) {
   final _this = this as UserProfileDto;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserProfileDto&&(identical(other.uid, _this.uid) || other.uid == _this.uid)&&(identical(other.email, _this.email) || other.email == _this.email)&&(identical(other.displayName, _this.displayName) || other.displayName == _this.displayName)&&(identical(other.photoUrl, _this.photoUrl) || other.photoUrl == _this.photoUrl)&&(identical(other.defaultCurrency, _this.defaultCurrency) || other.defaultCurrency == _this.defaultCurrency)&&(identical(other.locale, _this.locale) || other.locale == _this.locale)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.updatedAt, _this.updatedAt) || other.updatedAt == _this.updatedAt)&&(identical(other.deletedAt, _this.deletedAt) || other.deletedAt == _this.deletedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserProfileDto&&(identical(other.uid, _this.uid) || other.uid == _this.uid)&&(identical(other.email, _this.email) || other.email == _this.email)&&(identical(other.displayName, _this.displayName) || other.displayName == _this.displayName)&&(identical(other.photoUrl, _this.photoUrl) || other.photoUrl == _this.photoUrl)&&(identical(other.defaultCurrency, _this.defaultCurrency) || other.defaultCurrency == _this.defaultCurrency)&&(identical(other.locale, _this.locale) || other.locale == _this.locale)&&(identical(other.themeMode, _this.themeMode) || other.themeMode == _this.themeMode)&&(identical(other.accentColorIndex, _this.accentColorIndex) || other.accentColorIndex == _this.accentColorIndex)&&(identical(other.defaultWalletId, _this.defaultWalletId) || other.defaultWalletId == _this.defaultWalletId)&&(identical(other.oledMode, _this.oledMode) || other.oledMode == _this.oledMode)&&(identical(other.hideBalance, _this.hideBalance) || other.hideBalance == _this.hideBalance)&&(identical(other.initialSetupCompleted, _this.initialSetupCompleted) || other.initialSetupCompleted == _this.initialSetupCompleted)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.updatedAt, _this.updatedAt) || other.updatedAt == _this.updatedAt)&&(identical(other.deletedAt, _this.deletedAt) || other.deletedAt == _this.deletedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as UserProfileDto;
-  return Object.hash(runtimeType,_this.uid,_this.email,_this.displayName,_this.photoUrl,_this.defaultCurrency,_this.locale,_this.createdAt,_this.updatedAt,_this.deletedAt);
+  return Object.hash(runtimeType,_this.uid,_this.email,_this.displayName,_this.photoUrl,_this.defaultCurrency,_this.locale,_this.themeMode,_this.accentColorIndex,_this.defaultWalletId,_this.oledMode,_this.hideBalance,_this.initialSetupCompleted,_this.createdAt,_this.updatedAt,_this.deletedAt);
 }
 
 @override
 String toString() {
   final _this = this as UserProfileDto;
-  return 'UserProfileDto(uid: ${_this.uid}, email: ${_this.email}, displayName: ${_this.displayName}, photoUrl: ${_this.photoUrl}, defaultCurrency: ${_this.defaultCurrency}, locale: ${_this.locale}, createdAt: ${_this.createdAt}, updatedAt: ${_this.updatedAt}, deletedAt: ${_this.deletedAt})';
+  return 'UserProfileDto(uid: ${_this.uid}, email: ${_this.email}, displayName: ${_this.displayName}, photoUrl: ${_this.photoUrl}, defaultCurrency: ${_this.defaultCurrency}, locale: ${_this.locale}, themeMode: ${_this.themeMode}, accentColorIndex: ${_this.accentColorIndex}, defaultWalletId: ${_this.defaultWalletId}, oledMode: ${_this.oledMode}, hideBalance: ${_this.hideBalance}, initialSetupCompleted: ${_this.initialSetupCompleted}, createdAt: ${_this.createdAt}, updatedAt: ${_this.updatedAt}, deletedAt: ${_this.deletedAt})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $UserProfileDtoCopyWith<$Res>  {
   factory $UserProfileDtoCopyWith(UserProfileDto value, $Res Function(UserProfileDto) _then) = _$UserProfileDtoCopyWithImpl;
 @useResult
 $Res call({
- String uid, String email, String? displayName, String? photoUrl, String defaultCurrency, String locale,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt,@NullableFirestoreDateTimeConverter() DateTime? deletedAt
+ String uid, String email, String? displayName, String? photoUrl, String defaultCurrency, String locale, String? themeMode, int? accentColorIndex, String? defaultWalletId, bool? oledMode, bool? hideBalance, bool? initialSetupCompleted,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt,@NullableFirestoreDateTimeConverter() DateTime? deletedAt
 });
 
 
@@ -71,7 +71,7 @@ class _$UserProfileDtoCopyWithImpl<$Res>
 
 /// Create a copy of UserProfileDto
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? uid = null,Object? email = null,Object? displayName = freezed,Object? photoUrl = freezed,Object? defaultCurrency = null,Object? locale = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? uid = null,Object? email = null,Object? displayName = freezed,Object? photoUrl = freezed,Object? defaultCurrency = null,Object? locale = null,Object? themeMode = freezed,Object? accentColorIndex = freezed,Object? defaultWalletId = freezed,Object? oledMode = freezed,Object? hideBalance = freezed,Object? initialSetupCompleted = freezed,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,}) {
   return _then(UserProfileDto(
 uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
@@ -79,7 +79,13 @@ as String,displayName: freezed == displayName ? _self.displayName : displayName 
 as String?,photoUrl: freezed == photoUrl ? _self.photoUrl : photoUrl // ignore: cast_nullable_to_non_nullable
 as String?,defaultCurrency: null == defaultCurrency ? _self.defaultCurrency : defaultCurrency // ignore: cast_nullable_to_non_nullable
 as String,locale: null == locale ? _self.locale : locale // ignore: cast_nullable_to_non_nullable
-as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as String,themeMode: freezed == themeMode ? _self.themeMode : themeMode // ignore: cast_nullable_to_non_nullable
+as String?,accentColorIndex: freezed == accentColorIndex ? _self.accentColorIndex : accentColorIndex // ignore: cast_nullable_to_non_nullable
+as int?,defaultWalletId: freezed == defaultWalletId ? _self.defaultWalletId : defaultWalletId // ignore: cast_nullable_to_non_nullable
+as String?,oledMode: freezed == oledMode ? _self.oledMode : oledMode // ignore: cast_nullable_to_non_nullable
+as bool?,hideBalance: freezed == hideBalance ? _self.hideBalance : hideBalance // ignore: cast_nullable_to_non_nullable
+as bool?,initialSetupCompleted: freezed == initialSetupCompleted ? _self.initialSetupCompleted : initialSetupCompleted // ignore: cast_nullable_to_non_nullable
+as bool?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,deletedAt: freezed == deletedAt ? _self.deletedAt : deletedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
@@ -167,10 +173,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uid,  String email,  String? displayName,  String? photoUrl,  String defaultCurrency,  String locale, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt, @NullableFirestoreDateTimeConverter()  DateTime? deletedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uid,  String email,  String? displayName,  String? photoUrl,  String defaultCurrency,  String locale,  String? themeMode,  int? accentColorIndex,  String? defaultWalletId,  bool? oledMode,  bool? hideBalance,  bool? initialSetupCompleted, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt, @NullableFirestoreDateTimeConverter()  DateTime? deletedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserProfileDto() when $default != null:
-return $default(_that.uid,_that.email,_that.displayName,_that.photoUrl,_that.defaultCurrency,_that.locale,_that.createdAt,_that.updatedAt,_that.deletedAt);case _:
+return $default(_that.uid,_that.email,_that.displayName,_that.photoUrl,_that.defaultCurrency,_that.locale,_that.themeMode,_that.accentColorIndex,_that.defaultWalletId,_that.oledMode,_that.hideBalance,_that.initialSetupCompleted,_that.createdAt,_that.updatedAt,_that.deletedAt);case _:
   return orElse();
 
 }
@@ -188,10 +194,10 @@ return $default(_that.uid,_that.email,_that.displayName,_that.photoUrl,_that.def
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uid,  String email,  String? displayName,  String? photoUrl,  String defaultCurrency,  String locale, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt, @NullableFirestoreDateTimeConverter()  DateTime? deletedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uid,  String email,  String? displayName,  String? photoUrl,  String defaultCurrency,  String locale,  String? themeMode,  int? accentColorIndex,  String? defaultWalletId,  bool? oledMode,  bool? hideBalance,  bool? initialSetupCompleted, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt, @NullableFirestoreDateTimeConverter()  DateTime? deletedAt)  $default,) {final _that = this;
 switch (_that) {
 case _UserProfileDto():
-return $default(_that.uid,_that.email,_that.displayName,_that.photoUrl,_that.defaultCurrency,_that.locale,_that.createdAt,_that.updatedAt,_that.deletedAt);case _:
+return $default(_that.uid,_that.email,_that.displayName,_that.photoUrl,_that.defaultCurrency,_that.locale,_that.themeMode,_that.accentColorIndex,_that.defaultWalletId,_that.oledMode,_that.hideBalance,_that.initialSetupCompleted,_that.createdAt,_that.updatedAt,_that.deletedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -208,10 +214,10 @@ return $default(_that.uid,_that.email,_that.displayName,_that.photoUrl,_that.def
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uid,  String email,  String? displayName,  String? photoUrl,  String defaultCurrency,  String locale, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt, @NullableFirestoreDateTimeConverter()  DateTime? deletedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uid,  String email,  String? displayName,  String? photoUrl,  String defaultCurrency,  String locale,  String? themeMode,  int? accentColorIndex,  String? defaultWalletId,  bool? oledMode,  bool? hideBalance,  bool? initialSetupCompleted, @FirestoreDateTimeConverter()  DateTime createdAt, @FirestoreDateTimeConverter()  DateTime updatedAt, @NullableFirestoreDateTimeConverter()  DateTime? deletedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _UserProfileDto() when $default != null:
-return $default(_that.uid,_that.email,_that.displayName,_that.photoUrl,_that.defaultCurrency,_that.locale,_that.createdAt,_that.updatedAt,_that.deletedAt);case _:
+return $default(_that.uid,_that.email,_that.displayName,_that.photoUrl,_that.defaultCurrency,_that.locale,_that.themeMode,_that.accentColorIndex,_that.defaultWalletId,_that.oledMode,_that.hideBalance,_that.initialSetupCompleted,_that.createdAt,_that.updatedAt,_that.deletedAt);case _:
   return null;
 
 }
@@ -223,7 +229,7 @@ return $default(_that.uid,_that.email,_that.displayName,_that.photoUrl,_that.def
 @JsonSerializable()
 
 class _UserProfileDto extends UserProfileDto {
-  const _UserProfileDto({required this.uid, this.email = '', this.displayName, this.photoUrl, this.defaultCurrency = AppCurrencies.defaultCode, this.locale = 'vi', @FirestoreDateTimeConverter() required this.createdAt, @FirestoreDateTimeConverter() required this.updatedAt, @NullableFirestoreDateTimeConverter() this.deletedAt}): super._();
+  const _UserProfileDto({required this.uid, this.email = '', this.displayName, this.photoUrl, this.defaultCurrency = AppCurrencies.defaultCode, this.locale = 'vi', this.themeMode, this.accentColorIndex, this.defaultWalletId, this.oledMode, this.hideBalance, this.initialSetupCompleted, @FirestoreDateTimeConverter() required this.createdAt, @FirestoreDateTimeConverter() required this.updatedAt, @NullableFirestoreDateTimeConverter() this.deletedAt}): super._();
   factory _UserProfileDto.fromJson(Map<String, dynamic> json) => _$UserProfileDtoFromJson(json);
 
 @override final  String uid;
@@ -232,6 +238,12 @@ class _UserProfileDto extends UserProfileDto {
 @override final  String? photoUrl;
 @override@JsonKey() final  String defaultCurrency;
 @override@JsonKey() final  String locale;
+@override final  String? themeMode;
+@override final  int? accentColorIndex;
+@override final  String? defaultWalletId;
+@override final  bool? oledMode;
+@override final  bool? hideBalance;
+@override final  bool? initialSetupCompleted;
 @override@FirestoreDateTimeConverter() final  DateTime createdAt;
 @override@FirestoreDateTimeConverter() final  DateTime updatedAt;
 @override@NullableFirestoreDateTimeConverter() final  DateTime? deletedAt;
@@ -249,18 +261,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserProfileDto&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.email, email) || other.email == email)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.photoUrl, photoUrl) || other.photoUrl == photoUrl)&&(identical(other.defaultCurrency, defaultCurrency) || other.defaultCurrency == defaultCurrency)&&(identical(other.locale, locale) || other.locale == locale)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserProfileDto&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.email, email) || other.email == email)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.photoUrl, photoUrl) || other.photoUrl == photoUrl)&&(identical(other.defaultCurrency, defaultCurrency) || other.defaultCurrency == defaultCurrency)&&(identical(other.locale, locale) || other.locale == locale)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.accentColorIndex, accentColorIndex) || other.accentColorIndex == accentColorIndex)&&(identical(other.defaultWalletId, defaultWalletId) || other.defaultWalletId == defaultWalletId)&&(identical(other.oledMode, oledMode) || other.oledMode == oledMode)&&(identical(other.hideBalance, hideBalance) || other.hideBalance == hideBalance)&&(identical(other.initialSetupCompleted, initialSetupCompleted) || other.initialSetupCompleted == initialSetupCompleted)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,uid,email,displayName,photoUrl,defaultCurrency,locale,createdAt,updatedAt,deletedAt);
+    return Object.hash(runtimeType,uid,email,displayName,photoUrl,defaultCurrency,locale,themeMode,accentColorIndex,defaultWalletId,oledMode,hideBalance,initialSetupCompleted,createdAt,updatedAt,deletedAt);
 }
 
 @override
 String toString() {
-    return 'UserProfileDto(uid: $uid, email: $email, displayName: $displayName, photoUrl: $photoUrl, defaultCurrency: $defaultCurrency, locale: $locale, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt)';
+    return 'UserProfileDto(uid: $uid, email: $email, displayName: $displayName, photoUrl: $photoUrl, defaultCurrency: $defaultCurrency, locale: $locale, themeMode: $themeMode, accentColorIndex: $accentColorIndex, defaultWalletId: $defaultWalletId, oledMode: $oledMode, hideBalance: $hideBalance, initialSetupCompleted: $initialSetupCompleted, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt)';
 }
 
 
@@ -271,7 +283,7 @@ abstract mixin class _$UserProfileDtoCopyWith<$Res> implements $UserProfileDtoCo
   factory _$UserProfileDtoCopyWith(_UserProfileDto value, $Res Function(_UserProfileDto) _then) = __$UserProfileDtoCopyWithImpl;
 @override @useResult
 $Res call({
- String uid, String email, String? displayName, String? photoUrl, String defaultCurrency, String locale,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt,@NullableFirestoreDateTimeConverter() DateTime? deletedAt
+ String uid, String email, String? displayName, String? photoUrl, String defaultCurrency, String locale, String? themeMode, int? accentColorIndex, String? defaultWalletId, bool? oledMode, bool? hideBalance, bool? initialSetupCompleted,@FirestoreDateTimeConverter() DateTime createdAt,@FirestoreDateTimeConverter() DateTime updatedAt,@NullableFirestoreDateTimeConverter() DateTime? deletedAt
 });
 
 
@@ -288,7 +300,7 @@ class __$UserProfileDtoCopyWithImpl<$Res>
 
 /// Create a copy of UserProfileDto
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? uid = null,Object? email = null,Object? displayName = freezed,Object? photoUrl = freezed,Object? defaultCurrency = null,Object? locale = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? uid = null,Object? email = null,Object? displayName = freezed,Object? photoUrl = freezed,Object? defaultCurrency = null,Object? locale = null,Object? themeMode = freezed,Object? accentColorIndex = freezed,Object? defaultWalletId = freezed,Object? oledMode = freezed,Object? hideBalance = freezed,Object? initialSetupCompleted = freezed,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,}) {
   return _then(_UserProfileDto(
 uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
@@ -296,7 +308,13 @@ as String,displayName: freezed == displayName ? _self.displayName : displayName 
 as String?,photoUrl: freezed == photoUrl ? _self.photoUrl : photoUrl // ignore: cast_nullable_to_non_nullable
 as String?,defaultCurrency: null == defaultCurrency ? _self.defaultCurrency : defaultCurrency // ignore: cast_nullable_to_non_nullable
 as String,locale: null == locale ? _self.locale : locale // ignore: cast_nullable_to_non_nullable
-as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as String,themeMode: freezed == themeMode ? _self.themeMode : themeMode // ignore: cast_nullable_to_non_nullable
+as String?,accentColorIndex: freezed == accentColorIndex ? _self.accentColorIndex : accentColorIndex // ignore: cast_nullable_to_non_nullable
+as int?,defaultWalletId: freezed == defaultWalletId ? _self.defaultWalletId : defaultWalletId // ignore: cast_nullable_to_non_nullable
+as String?,oledMode: freezed == oledMode ? _self.oledMode : oledMode // ignore: cast_nullable_to_non_nullable
+as bool?,hideBalance: freezed == hideBalance ? _self.hideBalance : hideBalance // ignore: cast_nullable_to_non_nullable
+as bool?,initialSetupCompleted: freezed == initialSetupCompleted ? _self.initialSetupCompleted : initialSetupCompleted // ignore: cast_nullable_to_non_nullable
+as bool?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,deletedAt: freezed == deletedAt ? _self.deletedAt : deletedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,

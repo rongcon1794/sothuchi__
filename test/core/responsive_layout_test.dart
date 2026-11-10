@@ -67,7 +67,16 @@ class _TestAuthRepo implements AuthRepository {
   Future<Result<void>> deleteAccountAndAllData() async => const Success(null);
 
   @override
-  Future<Result<void>> updateProfilePreferences({String? defaultCurrency, String? locale}) async => const Success(null);
+  Future<Result<void>> updateProfilePreferences({
+    String? defaultCurrency,
+    String? locale,
+    String? themeMode,
+    int? accentColorIndex,
+    String? defaultWalletId,
+    bool? oledMode,
+    bool? hideBalance,
+    bool? initialSetupCompleted,
+  }) async => const Success(null);
 }
 
 void main() {

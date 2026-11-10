@@ -17,6 +17,12 @@ rules_version = '2';
 //      - photoUrl: string | null (optional, <= 2048 chars)
 //      - defaultCurrency: string in ['VND', 'USD', 'EUR', 'JPY', 'KRW']
 //      - locale: string in ['vi', 'en']
+//      - themeMode: string in ['system', 'light', 'dark'] | null (optional)
+//      - accentColorIndex: int (0..30) | null (optional)
+//      - defaultWalletId: string (0..128 chars) | null (optional)
+//      - oledMode: bool | null (optional)
+//      - hideBalance: bool | null (optional)
+//      - initialSetupCompleted: bool | null (optional)
 //      - isDemoUser: bool (optional)
 //      - createdAt: timestamp (immutable once set)
 //      - updatedAt: timestamp (required)
@@ -211,6 +217,12 @@ service cloud.firestore {
              (data[field] is int && data[field] >= minVal && data[field] <= maxVal);
     }
 
+    function isOptionalNullableBool(data, field) {
+      return !(field in data) ||
+             data[field] == null ||
+             data[field] is bool;
+    }
+
     function isValidCurrency(value) {
       return value is string &&
              value in ['VND', 'USD', 'EUR', 'JPY', 'KRW'];
@@ -345,6 +357,12 @@ service cloud.firestore {
         'photoUrl',
         'defaultCurrency',
         'locale',
+        'themeMode',
+        'accentColorIndex',
+        'defaultWalletId',
+        'oledMode',
+        'hideBalance',
+        'initialSetupCompleted',
         'isDemoUser',
         'createdAt',
         'updatedAt',
@@ -364,8 +382,21 @@ service cloud.firestore {
       let isPreferenceBootstrap = hasOnlyAllowedKeys(data, [
         'defaultCurrency',
         'locale',
+        'themeMode',
+        'accentColorIndex',
+        'defaultWalletId',
+        'oledMode',
+        'hideBalance',
+        'initialSetupCompleted',
         'updatedAt'
-      ]) && ('defaultCurrency' in data || 'locale' in data);
+      ]) && ('defaultCurrency' in data ||
+             'locale' in data ||
+             'themeMode' in data ||
+             'accentColorIndex' in data ||
+             'defaultWalletId' in data ||
+             'oledMode' in data ||
+             'hideBalance' in data ||
+             'initialSetupCompleted' in data);
 
       return hasOnlyAllowedKeys(data, allowedKeys) &&
              (hasFullProfile || isPreferenceBootstrap) &&
@@ -376,6 +407,14 @@ service cloud.firestore {
              isOptionalNullableString(data, 'photoUrl', 0, 2048) &&
              (!('defaultCurrency' in data) || isValidCurrency(data.defaultCurrency)) &&
              (!('locale' in data) || isValidLocale(data.locale)) &&
+             (!('themeMode' in data) ||
+              data.themeMode == null ||
+              (data.themeMode is string && data.themeMode in ['system', 'light', 'dark'])) &&
+             isOptionalNullableInt(data, 'accentColorIndex', 0, 30) &&
+             isOptionalNullableString(data, 'defaultWalletId', 0, 128) &&
+             isOptionalNullableBool(data, 'oledMode') &&
+             isOptionalNullableBool(data, 'hideBalance') &&
+             isOptionalNullableBool(data, 'initialSetupCompleted') &&
              (!('isDemoUser' in data) || data.isDemoUser is bool) &&
              (!('createdAt' in data) || data.createdAt is timestamp) &&
              isOptionalNullableTimestamp(data, 'deletedAt');

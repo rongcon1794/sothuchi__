@@ -12,5 +12,11 @@ abstract interface class AuthRepository {
   Future<Result<void>> updateProfilePreferences({
     String? defaultCurrency,
     String? locale,
+    String? themeMode,
+    int? accentColorIndex,
+    String? defaultWalletId,
+    bool? oledMode,
+    bool? hideBalance,
+    bool? initialSetupCompleted,
   });
 }

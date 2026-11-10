@@ -274,6 +274,12 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<Result<void>> updateProfilePreferences({
     String? defaultCurrency,
     String? locale,
+    String? themeMode,
+    int? accentColorIndex,
+    String? defaultWalletId,
+    bool? oledMode,
+    bool? hideBalance,
+    bool? initialSetupCompleted,
   }) async {
     final user = _currentUser;
     if (user == null) return const Success(null);
@@ -281,6 +287,12 @@ class FirebaseAuthRepository implements AuthRepository {
     final updated = user.copyWith(
       defaultCurrency: defaultCurrency ?? user.defaultCurrency,
       locale: locale ?? user.locale,
+      themeMode: themeMode ?? user.themeMode,
+      accentColorIndex: accentColorIndex ?? user.accentColorIndex,
+      defaultWalletId: defaultWalletId ?? user.defaultWalletId,
+      oledMode: oledMode ?? user.oledMode,
+      hideBalance: hideBalance ?? user.hideBalance,
+      initialSetupCompleted: initialSetupCompleted ?? user.initialSetupCompleted,
       updatedAt: DateTime.now(),
     );
     _emit(updated);
@@ -290,11 +302,21 @@ class FirebaseAuthRepository implements AuthRepository {
     }
 
     try {
-      await firestore!.collection('users').doc(user.uid).set({
+      final map = <String, dynamic>{
         'defaultCurrency': ?defaultCurrency,
         'locale': ?locale,
+        'themeMode': ?themeMode,
+        'accentColorIndex': ?accentColorIndex,
+        'defaultWalletId': ?defaultWalletId,
+        'oledMode': ?oledMode,
+        'hideBalance': ?hideBalance,
+        'initialSetupCompleted': ?initialSetupCompleted,
         'updatedAt': Timestamp.fromDate(updated.updatedAt),
-      }, SetOptions(merge: true));
+      };
+      await firestore!.collection('users').doc(user.uid).set(
+        map,
+        SetOptions(merge: true),
+      );
       return const Success(null);
     } on FirebaseException catch (e) {
       return Failure(StorageException('${e.code}: ${e.message}'));

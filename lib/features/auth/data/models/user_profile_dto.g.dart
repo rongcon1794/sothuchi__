@@ -15,6 +15,12 @@ _UserProfileDto _$UserProfileDtoFromJson(Map<String, dynamic> json) =>
       defaultCurrency:
           json['defaultCurrency'] as String? ?? AppCurrencies.defaultCode,
       locale: json['locale'] as String? ?? 'vi',
+      themeMode: json['themeMode'] as String?,
+      accentColorIndex: (json['accentColorIndex'] as num?)?.toInt(),
+      defaultWalletId: json['defaultWalletId'] as String?,
+      oledMode: json['oledMode'] as bool?,
+      hideBalance: json['hideBalance'] as bool?,
+      initialSetupCompleted: json['initialSetupCompleted'] as bool?,
       createdAt: const FirestoreDateTimeConverter().fromJson(json['createdAt']),
       updatedAt: const FirestoreDateTimeConverter().fromJson(json['updatedAt']),
       deletedAt: const NullableFirestoreDateTimeConverter().fromJson(
@@ -31,6 +37,12 @@ Map<String, dynamic> _$UserProfileDtoToJson(
   'photoUrl': instance.photoUrl,
   'defaultCurrency': instance.defaultCurrency,
   'locale': instance.locale,
+  'themeMode': instance.themeMode,
+  'accentColorIndex': instance.accentColorIndex,
+  'defaultWalletId': instance.defaultWalletId,
+  'oledMode': instance.oledMode,
+  'hideBalance': instance.hideBalance,
+  'initialSetupCompleted': instance.initialSetupCompleted,
   'createdAt': const FirestoreDateTimeConverter().toJson(instance.createdAt),
   'updatedAt': const FirestoreDateTimeConverter().toJson(instance.updatedAt),
   'deletedAt': const NullableFirestoreDateTimeConverter().toJson(

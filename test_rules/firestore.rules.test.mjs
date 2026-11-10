@@ -1207,4 +1207,161 @@ describe('Sổ Thu Chi — Firestore Security Rules', () => {
       }),
     );
   });
+
+  it('enforces user settings and preferences fields on /users/{uid} (profile & bootstrap)', async () => {
+    const aliceDb = testEnv.authenticatedContext(ALICE_UID).firestore();
+    const userRef = doc(aliceDb, `users/${ALICE_UID}`);
+
+    // 1. Full user profile with all new preferences succeeds
+    await assertSucceeds(
+      setDoc(userRef, {
+        ...validUserProfile(ALICE_UID),
+        themeMode: 'dark',
+        accentColorIndex: 5,
+        defaultWalletId: 'acc_cash',
+        oledMode: true,
+        hideBalance: false,
+        initialSetupCompleted: true,
+      }),
+    );
+
+    // 2. Full user profile with null preferences succeeds
+    await assertSucceeds(
+      setDoc(userRef, {
+        ...validUserProfile(ALICE_UID),
+        themeMode: null,
+        accentColorIndex: null,
+        defaultWalletId: null,
+        oledMode: null,
+        hideBalance: null,
+        initialSetupCompleted: null,
+      }),
+    );
+
+    // 3. Update individual preference fields on existing profile succeeds
+    await assertSucceeds(
+      updateDoc(userRef, {
+        themeMode: 'light',
+        accentColorIndex: 0,
+        defaultWalletId: '',
+        oledMode: false,
+        hideBalance: true,
+        initialSetupCompleted: true,
+        updatedAt: t1,
+      }),
+    );
+
+    // 4. Preference bootstrap sets before full profile materialization succeed
+    const charlieUid = 'user_charlie_789';
+    const charlieDb = testEnv.authenticatedContext(charlieUid).firestore();
+    const charlieRef = doc(charlieDb, `users/${charlieUid}`);
+
+    // Bootstrap with themeMode
+    await assertSucceeds(
+      setDoc(charlieRef, { themeMode: 'system', updatedAt: t0 }, { merge: true }),
+    );
+    // Bootstrap with accentColorIndex
+    await assertSucceeds(
+      setDoc(charlieRef, { accentColorIndex: 30, updatedAt: t1 }, { merge: true }),
+    );
+    // Bootstrap with defaultWalletId
+    await assertSucceeds(
+      setDoc(charlieRef, { defaultWalletId: 'acc_bank', updatedAt: t2 }, { merge: true }),
+    );
+    // Bootstrap with oledMode, hideBalance, initialSetupCompleted
+    await assertSucceeds(
+      setDoc(
+        charlieRef,
+        { oledMode: true, hideBalance: true, initialSetupCompleted: false, updatedAt: t2 },
+        { merge: true },
+      ),
+    );
+    // Clean up charlie doc
+    await assertSucceeds(deleteDoc(charlieRef));
+
+    // 5. Validation rejection: Invalid themeMode
+    await assertFails(
+      updateDoc(userRef, {
+        themeMode: 'neon_blue',
+        updatedAt: t1,
+      }),
+    );
+    await assertFails(
+      updateDoc(userRef, {
+        themeMode: 123,
+        updatedAt: t1,
+      }),
+    );
+
+    // 6. Validation rejection: Invalid accentColorIndex (< 0 or > 30 or non-int)
+    await assertFails(
+      updateDoc(userRef, {
+        accentColorIndex: -1,
+        updatedAt: t1,
+      }),
+    );
+    await assertFails(
+      updateDoc(userRef, {
+        accentColorIndex: 31,
+        updatedAt: t1,
+      }),
+    );
+    await assertFails(
+      updateDoc(userRef, {
+        accentColorIndex: '5',
+        updatedAt: t1,
+      }),
+    );
+
+    // 7. Validation rejection: Invalid defaultWalletId (> 128 chars or non-string)
+    await assertFails(
+      updateDoc(userRef, {
+        defaultWalletId: 'w'.repeat(129),
+        updatedAt: t1,
+      }),
+    );
+    await assertFails(
+      updateDoc(userRef, {
+        defaultWalletId: 12345,
+        updatedAt: t1,
+      }),
+    );
+
+    // 8. Validation rejection: Invalid bool fields (oledMode, hideBalance, initialSetupCompleted)
+    await assertFails(
+      updateDoc(userRef, {
+        oledMode: 'true',
+        updatedAt: t1,
+      }),
+    );
+    await assertFails(
+      updateDoc(userRef, {
+        hideBalance: 1,
+        updatedAt: t1,
+      }),
+    );
+    await assertFails(
+      updateDoc(userRef, {
+        initialSetupCompleted: 'yes',
+        updatedAt: t1,
+      }),
+    );
+
+    // 9. Rejects unallowed key in preference bootstrap
+    const daveUid = 'user_dave_999';
+    const daveDb = testEnv.authenticatedContext(daveUid).firestore();
+    const daveRef = doc(daveDb, `users/${daveUid}`);
+    await assertFails(
+      setDoc(
+        daveRef,
+        { themeMode: 'dark', unallowedHack: true, updatedAt: t0 },
+        { merge: true },
+      ),
+    );
+
+    // 10. Rejects bootstrap with only updatedAt and no preference key
+    await assertFails(
+      setDoc(daveRef, { updatedAt: t0 }, { merge: true }),
+    );
+  });
 });

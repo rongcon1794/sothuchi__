@@ -79,11 +79,24 @@ class FakeAuthRepository implements AuthRepository {
   Future<Result<void>> updateProfilePreferences({
     String? defaultCurrency,
     String? locale,
+    String? themeMode,
+    int? accentColorIndex,
+    String? defaultWalletId,
+    bool? oledMode,
+    bool? hideBalance,
+    bool? initialSetupCompleted,
   }) async {
     if (_user != null) {
       _user = _user!.copyWith(
         defaultCurrency: defaultCurrency ?? _user!.defaultCurrency,
         locale: locale ?? _user!.locale,
+        themeMode: themeMode ?? _user!.themeMode,
+        accentColorIndex: accentColorIndex ?? _user!.accentColorIndex,
+        defaultWalletId: defaultWalletId ?? _user!.defaultWalletId,
+        oledMode: oledMode ?? _user!.oledMode,
+        hideBalance: hideBalance ?? _user!.hideBalance,
+        initialSetupCompleted:
+            initialSetupCompleted ?? _user!.initialSetupCompleted,
       );
       _ctrl.add(_user);
     }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:so_thu_chi/data/firebase/firebase_providers.dart';
@@ -85,10 +86,30 @@ final userBootstrapCallbackProvider = Provider<UserBootstrapCallback?>((ref) {
     final firestore = ref.read(firestoreProvider);
     final settingsRepo = ref.read(settingsRepositoryProvider);
 
+    // 1. If user has settings stored in cloud, restore them immediately
+    if (user.themeMode != null ||
+        user.accentColorIndex != null ||
+        (user.defaultWalletId != null && user.defaultWalletId!.isNotEmpty) ||
+        user.oledMode != null ||
+        user.hideBalance != null ||
+        user.initialSetupCompleted == true) {
+      await ref
+          .read(settingsControllerProvider.notifier)
+          .restoreFromCloudUser(user);
+    }
+
     // Fast-path: If setup is already completed, exit immediately.
     // Avoids heavy Firestore queries & JSON deserialization on app wake-up.
     final currentSettings = await settingsRepo.loadSettings();
     if (currentSettings.initialSetupCompleted) {
+      if (user.themeMode == null &&
+          user.accentColorIndex == null &&
+          !user.isDemoUser &&
+          firestore != null) {
+        unawaited(
+          ref.read(settingsControllerProvider.notifier).backupToCloudUser(),
+        );
+      }
       return;
     }
 
@@ -200,8 +221,15 @@ final userBootstrapCallbackProvider = Provider<UserBootstrapCallback?>((ref) {
 
         if (activeAccDocs.isNotEmpty) {
           final settings = ref.read(settingsControllerProvider).value;
-          final defaultId = settings?.defaultWalletId;
-          if (defaultId == null || defaultId.isEmpty) {
+          final savedDefaultId = user.defaultWalletId;
+          if (savedDefaultId != null &&
+              savedDefaultId.isNotEmpty &&
+              activeAccDocs.any((d) => d.id == savedDefaultId)) {
+            await ref
+                .read(settingsControllerProvider.notifier)
+                .setDefaultWalletId(savedDefaultId);
+          } else if (settings?.defaultWalletId == null ||
+              settings!.defaultWalletId!.isEmpty) {
             await ref
                 .read(settingsControllerProvider.notifier)
                 .setDefaultWalletId(activeAccDocs.first.id);
