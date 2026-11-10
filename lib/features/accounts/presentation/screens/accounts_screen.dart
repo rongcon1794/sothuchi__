@@ -529,7 +529,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+          padding: const EdgeInsets.fromLTRB(16, 14, 10, 14),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -588,7 +588,8 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                   IconButton(
                     visualDensity: VisualDensity.compact,
                     padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                    constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                    alignment: Alignment.centerRight,
                     tooltip: hideBalance ? l10n.showBalance : l10n.hideBalance,
                     onPressed: () {
                       unawaited(HapticFeedback.selectionClick());
