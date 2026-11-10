@@ -143,11 +143,15 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Verify budget legend
-    expect(find.text('Thấp (<65% NS)'), findsOneWidget);
-    expect(find.text('TB (≤100% NS)'), findsOneWidget);
-    expect(find.text('Cao (>100% NS)'), findsOneWidget);
-    expect(find.textContaining('Định mức:'), findsOneWidget);
+    // Verify clean simplified legend (only Thấp, Trung bình, Cao)
+    expect(find.text('Không chi tiêu'), findsOneWidget);
+    expect(find.text('Thấp'), findsOneWidget);
+    expect(find.text('Trung bình'), findsOneWidget);
+    expect(find.text('Cao'), findsOneWidget);
+    expect(find.textContaining('Định mức:'), findsNothing);
+    expect(find.textContaining('% NS'), findsNothing);
+    expect(find.text('Chạm vào ngày để xem số tiền đã tiêu chi tiết'), findsNothing);
+    expect(find.text('Nhịp điệu chi tiêu'), findsNothing);
 
     // Tap Day 5 (500,000 VND spent vs 100,000 VND daily budget => over budget)
     await tester.tap(find.text('5'));

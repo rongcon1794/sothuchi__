@@ -147,18 +147,11 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
               ],
             ],
           ),
-          const SizedBox(height: 6),
-          Text(
-            l10n.heatmapTapHint,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
 
-          // 1. Creative Daily Spending Rhythm Waveform (Nhịp điệu chi tiêu hằng ngày)
+          // 1. Creative Daily Spending Rhythm Waveform (Biểu đồ nhịp điệu chi tiêu hằng ngày)
           Container(
-            padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
               color: isDark
                   ? (context.isOled
@@ -173,99 +166,32 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
                 width: AppleTokens.hairline,
               ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    const Icon(
-                      CupertinoIcons.sparkles,
-                      size: 13,
-                      color: AppleTokens.jadePrimary,
+            child: SizedBox(
+              height: 52,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onHorizontalDragUpdate: (details) =>
+                        _onScrubDay(details.localPosition.dx, constraints.maxWidth, totalDays),
+                    onTapDown: (details) =>
+                        _onScrubDay(details.localPosition.dx, constraints.maxWidth, totalDays),
+                    child: CustomPaint(
+                      painter: _DailySpendingPulsePainter(
+                        dailyExpenseMinor: report.dailyExpenseMinor,
+                        daysInMonth: totalDays,
+                        avgMinor: avgMinor,
+                        benchmarkMinor: benchmarkMinor,
+                        dailyBudgetMinor: dailyBudget,
+                        peakSpendingDay: report.peakSpendingDay,
+                        selectedDay: _selectedDay,
+                        isDark: isDark,
+                      ),
+                      size: Size.infinite,
                     ),
-                    const SizedBox(width: 5),
-                    Expanded(
-                      child: Text(
-                        'Nhịp điệu chi tiêu',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w700,
-                          color: isDark ? Colors.white70 : Colors.black87,
-                        ),
-                      ),
-                    ),
-                    if (dailyBudget != null && dailyBudget > 0) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 10,
-                        height: 2,
-                        decoration: BoxDecoration(
-                          color: AppleTokens.systemOrange.withValues(alpha: 0.8),
-                          borderRadius: BorderRadius.circular(1),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'NS: ${Money(minorUnits: dailyBudget, currencyCode: report.currencyCode).format(locale: widget.locale, masked: widget.hideBalance)}/ng',
-                        style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: AppleTokens.systemOrange,
-                        ),
-                      ),
-                    ] else if (avgMinor > 0) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 10,
-                        height: 2,
-                        decoration: BoxDecoration(
-                          color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.35),
-                          borderRadius: BorderRadius.circular(1),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'TB: ${Money(minorUnits: avgMinor, currencyCode: report.currencyCode).format(locale: widget.locale, masked: widget.hideBalance)}',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  height: 64,
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      return GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onHorizontalDragUpdate: (details) =>
-                            _onScrubDay(details.localPosition.dx, constraints.maxWidth, totalDays),
-                        onTapDown: (details) =>
-                            _onScrubDay(details.localPosition.dx, constraints.maxWidth, totalDays),
-                        child: CustomPaint(
-                          painter: _DailySpendingPulsePainter(
-                            dailyExpenseMinor: report.dailyExpenseMinor,
-                            daysInMonth: totalDays,
-                            avgMinor: avgMinor,
-                            benchmarkMinor: benchmarkMinor,
-                            dailyBudgetMinor: dailyBudget,
-                            peakSpendingDay: report.peakSpendingDay,
-                            selectedDay: _selectedDay,
-                            isDark: isDark,
-                          ),
-                          size: Size.infinite,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
+                  );
+                },
+              ),
             ),
           ),
           const SizedBox(height: 14),
@@ -328,7 +254,7 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
                             theme: theme,
                           ),
                           const SizedBox(height: 14),
-                          _buildLegend(theme, isDark, dailyBudget),
+                          _buildLegend(theme, isDark),
                         ],
                       ),
                     ),
@@ -402,7 +328,7 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
                     theme: theme,
                   ),
                   const SizedBox(height: 14),
-                  _buildLegend(theme, isDark, dailyBudget),
+                  _buildLegend(theme, isDark),
                 ],
               );
             },
@@ -1007,60 +933,36 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
   }
 
   /// 4-tier spending intensity legend.
-  Widget _buildLegend(ThemeData theme, bool isDark, int? dailyBudget) {
+  Widget _buildLegend(ThemeData theme, bool isDark) {
     final isVi = widget.locale.startsWith('vi');
-    final hasBudget = dailyBudget != null && dailyBudget > 0;
 
-    return Column(
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 12,
+      runSpacing: 6,
       children: [
-        Wrap(
-          alignment: WrapAlignment.center,
-          spacing: 12,
-          runSpacing: 6,
-          children: [
-            _buildLegendItem(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.08)
-                  : Colors.black.withValues(alpha: 0.06),
-              label: isVi ? 'Không chi tiêu' : 'Zero',
-              theme: theme,
-            ),
-            _buildLegendItem(
-              color: AppleTokens.jadePrimary.withValues(alpha: isDark ? 0.45 : 0.38),
-              label: isVi
-                  ? (hasBudget ? 'Thấp (<65% NS)' : 'Thấp')
-                  : (hasBudget ? 'Low (<65% Bdgt)' : 'Low'),
-              theme: theme,
-            ),
-            _buildLegendItem(
-              color: AppleTokens.systemOrange.withValues(alpha: isDark ? 0.70 : 0.65),
-              label: isVi
-                  ? (hasBudget ? 'TB (≤100% NS)' : 'Trung bình')
-                  : (hasBudget ? 'Med (≤100% Bdgt)' : 'Medium'),
-              theme: theme,
-            ),
-            _buildLegendItem(
-              color: AppleTokens.systemRed.withValues(alpha: isDark ? 0.88 : 0.85),
-              label: isVi
-                  ? (hasBudget ? 'Cao (>100% NS)' : 'Cao')
-                  : (hasBudget ? 'High (>100% Bdgt)' : 'High'),
-              theme: theme,
-            ),
-          ],
+        _buildLegendItem(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.black.withValues(alpha: 0.06),
+          label: isVi ? 'Không chi tiêu' : 'Zero',
+          theme: theme,
         ),
-        if (hasBudget) ...[
-          const SizedBox(height: 4),
-          Text(
-            isVi
-                ? 'Định mức: ${Money(minorUnits: dailyBudget, currencyCode: widget.report.currencyCode).format(locale: widget.locale, masked: widget.hideBalance)}/ngày'
-                : 'Quota: ${Money(minorUnits: dailyBudget, currencyCode: widget.report.currencyCode).format(locale: widget.locale, masked: widget.hideBalance)}/day',
-            style: theme.textTheme.labelSmall?.copyWith(
-              fontSize: 10,
-              color: AppleTokens.systemOrange,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
+        _buildLegendItem(
+          color: AppleTokens.jadePrimary.withValues(alpha: isDark ? 0.45 : 0.38),
+          label: isVi ? 'Thấp' : 'Low',
+          theme: theme,
+        ),
+        _buildLegendItem(
+          color: AppleTokens.systemOrange.withValues(alpha: isDark ? 0.70 : 0.65),
+          label: isVi ? 'Trung bình' : 'Medium',
+          theme: theme,
+        ),
+        _buildLegendItem(
+          color: AppleTokens.systemRed.withValues(alpha: isDark ? 0.88 : 0.85),
+          label: isVi ? 'Cao' : 'High',
+          theme: theme,
+        ),
       ],
     );
   }
