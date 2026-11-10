@@ -13,25 +13,31 @@ final recurringStreamProvider = StreamProvider<List<RecurringTransaction>>((ref)
 /// Returns all bills & recurring transactions that are due today or overdue.
 final dueRecurringListProvider = Provider<List<RecurringTransaction>>((ref) {
   final all = ref.watch(recurringStreamProvider).value ?? const [];
-  return all.where((r) => r.isDue && !r.isPaused).toList();
+  return all.where((r) => r.isDue && !r.isPaused).toList(growable: false);
 });
 
 /// Returns bills / expenses that are due today or overdue.
 final dueRecurringExpensesProvider = Provider<List<RecurringTransaction>>((ref) {
   final all = ref.watch(recurringStreamProvider).value ?? const [];
-  return all.where((r) => r.isDue && !r.isPaused && r.type == TransactionType.expense).toList();
+  return all
+      .where((r) => r.isDue && !r.isPaused && r.type == TransactionType.expense)
+      .toList(growable: false);
 });
 
 /// Returns recurring incomes (e.g. salary) that are due today or overdue.
 final dueRecurringIncomesProvider = Provider<List<RecurringTransaction>>((ref) {
   final all = ref.watch(recurringStreamProvider).value ?? const [];
-  return all.where((r) => r.isDue && !r.isPaused && r.type == TransactionType.income).toList();
+  return all
+      .where((r) => r.isDue && !r.isPaused && r.type == TransactionType.income)
+      .toList(growable: false);
 });
 
 /// Returns active upcoming recurring transactions within the next 30 days.
 final upcomingRecurringListProvider = Provider<List<RecurringTransaction>>((ref) {
   final all = ref.watch(recurringStreamProvider).value ?? const [];
-  return all.where((r) => !r.isPaused && r.daysUntilDue >= 0 && r.daysUntilDue <= 30).toList();
+  return all
+      .where((r) => !r.isPaused && r.daysUntilDue >= 0 && r.daysUntilDue <= 30)
+      .toList(growable: false);
 });
 
 int _calculateMonthlyEquivalent(RecurringTransaction r) {

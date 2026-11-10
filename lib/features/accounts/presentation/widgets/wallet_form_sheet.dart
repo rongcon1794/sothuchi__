@@ -220,7 +220,7 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
           );
 
     if (!mounted) return;
-    result.fold(
+    await result.fold(
       onSuccess: (acc) async {
         unawaited(HapticFeedback.lightImpact());
         if (_isDefault) {
@@ -240,7 +240,7 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
           Navigator.of(context).pop(acc);
         }
       },
-      onFailure: (err) {
+      onFailure: (err) async {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(context.localizeError(err))));
@@ -423,7 +423,7 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
                   ),
                   Switch.adaptive(
                     value: _isDefault,
-                    activeColor: walletColor,
+                    activeTrackColor: walletColor,
                     onChanged: (val) {
                       unawaited(HapticFeedback.selectionClick());
                       setState(() => _isDefault = val);

@@ -13,12 +13,12 @@ final savingsGoalsStreamProvider = StreamProvider<List<SavingsGoal>>((ref) {
 
 final activeSavingsGoalsProvider = Provider<List<SavingsGoal>>((ref) {
   final all = ref.watch(savingsGoalsStreamProvider).value ?? const [];
-  return all.where((g) => !g.isCompleted).toList();
+  return all.where((g) => !g.isCompleted).toList(growable: false);
 });
 
 final completedSavingsGoalsProvider = Provider<List<SavingsGoal>>((ref) {
   final all = ref.watch(savingsGoalsStreamProvider).value ?? const [];
-  return all.where((g) => g.isCompleted).toList();
+  return all.where((g) => g.isCompleted).toList(growable: false);
 });
 
 class SavingsSummary {

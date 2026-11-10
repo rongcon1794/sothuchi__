@@ -35,9 +35,11 @@ final archivedAccountsProvider = Provider<List<Account>>((ref) {
 
 /// Total net balance across active wallets matching the selected default currency.
 final totalNetBalanceProvider = Provider<Money>((ref) {
-  final currency =
-      ref.watch(settingsControllerProvider).value?.currencyCode ??
-      AppCurrencies.defaultCode;
+  final currency = ref.watch(
+    settingsControllerProvider.select(
+      (s) => s.value?.currencyCode ?? AppCurrencies.defaultCode,
+    ),
+  );
   final active = ref.watch(activeAccountsProvider);
   var sum = 0;
   for (final account in active) {

@@ -26,9 +26,11 @@ final selectedReportMonthProvider =
 
 final monthlyReportProvider = Provider<MonthlyReportData>((ref) {
   final selectedMonth = ref.watch(selectedReportMonthProvider);
-  final currency =
-      ref.watch(settingsControllerProvider).value?.currencyCode ??
-      AppCurrencies.defaultCode;
+  final currency = ref.watch(
+    settingsControllerProvider.select(
+      (s) => s.value?.currencyCode ?? AppCurrencies.defaultCode,
+    ),
+  );
   final txs =
       ref.watch(transactionsStreamProvider).value ??
       const <TransactionEntity>[];

@@ -55,13 +55,16 @@ final filteredDebtsProvider = Provider<List<Debt>>((ref) {
       DebtFilterMode.borrowed => d.type == DebtType.borrowed && !d.isSettled,
       DebtFilterMode.settled => d.isSettled,
     };
-  }).toList();
+  }).toList(growable: false);
 });
 
 final debtSummaryProvider = Provider<DebtSummary>((ref) {
   final all = ref.watch(debtsStreamProvider).value ?? const <Debt>[];
-  final currency = ref.watch(settingsControllerProvider).value?.currencyCode ??
-      AppCurrencies.defaultCode;
+  final currency = ref.watch(
+    settingsControllerProvider.select(
+      (s) => s.value?.currencyCode ?? AppCurrencies.defaultCode,
+    ),
+  );
 
   var totalLentMinor = 0;
   var totalBorrowedMinor = 0;

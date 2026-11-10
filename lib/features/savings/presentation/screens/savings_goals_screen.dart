@@ -411,7 +411,7 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
                                   masked: hideBalance,
                                 ),
                               ),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: AppleTokens.systemGray,

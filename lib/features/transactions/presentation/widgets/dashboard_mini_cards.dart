@@ -129,10 +129,12 @@ class DashboardMiniWalletCard extends StatelessWidget {
                 bottom: 0,
                 height: 28,
                 child: IgnorePointer(
-                  child: CustomPaint(
-                    painter: _MiniWalletSparklinePainter(
-                      points: _calculateSparkPoints(),
-                      color: color,
+                  child: RepaintBoundary(
+                    child: CustomPaint(
+                      painter: _MiniWalletSparklinePainter(
+                        points: _calculateSparkPoints(),
+                        color: color,
+                      ),
                     ),
                   ),
                 ),

@@ -328,40 +328,46 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
           // 1. Header: Live Pulse Dot + Metric Label + Visibility Toggle
           Row(
             children: [
-              // Live Breathing Pulse Dot
-              AnimatedBuilder(
-                animation: _pulseAnimation,
-                builder: (context, _) {
-                  return Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Container(
-                        width: 8 + (10 * _pulseAnimation.value),
-                        height: 8 + (10 * _pulseAnimation.value),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: accentColor.withValues(
-                            alpha: (1.0 - _pulseAnimation.value) * 0.45,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: accentColor,
-                          boxShadow: [
-                            BoxShadow(
-                              color: accentColor.withValues(alpha: 0.6),
-                              blurRadius: 4,
+              // Live Breathing Pulse Dot (isolated in fixed 18x18 RepaintBoundary to prevent parent relayout/repaint)
+              RepaintBoundary(
+                child: SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: AnimatedBuilder(
+                    animation: _pulseAnimation,
+                    builder: (context, _) {
+                      return Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            width: 8 + (10 * _pulseAnimation.value),
+                            height: 8 + (10 * _pulseAnimation.value),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: accentColor.withValues(
+                                alpha: (1.0 - _pulseAnimation.value) * 0.45,
+                              ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  );
-                },
+                          ),
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: accentColor,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: accentColor.withValues(alpha: 0.6),
+                                  blurRadius: 4,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -548,32 +554,34 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
           const SizedBox(height: 10),
 
           // 4. Lucian Sparkline Bezier Trend Curve with Touch Scrubbing
-          SizedBox(
-            height: 52,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onHorizontalDragStart: (details) =>
-                      _onScrub(details.localPosition.dx, constraints.maxWidth, sparkData.length),
-                  onHorizontalDragUpdate: (details) =>
-                      _onScrub(details.localPosition.dx, constraints.maxWidth, sparkData.length),
-                  onHorizontalDragEnd: (_) => _scheduleScrubReset(),
-                  onTapDown: (details) =>
-                      _onScrub(details.localPosition.dx, constraints.maxWidth, sparkData.length),
-                  onTapUp: (_) => _scheduleScrubReset(),
-                  onTapCancel: () => _resetScrub(),
-                  child: CustomPaint(
-                    painter: _LucianSparklinePainter(
-                      points: sparkPoints,
-                      lineColor: accentColor,
-                      isDark: isDark,
-                      selectedIndex: _scrubbedIndex,
+          RepaintBoundary(
+            child: SizedBox(
+              height: 52,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onHorizontalDragStart: (details) =>
+                        _onScrub(details.localPosition.dx, constraints.maxWidth, sparkData.length),
+                    onHorizontalDragUpdate: (details) =>
+                        _onScrub(details.localPosition.dx, constraints.maxWidth, sparkData.length),
+                    onHorizontalDragEnd: (_) => _scheduleScrubReset(),
+                    onTapDown: (details) =>
+                        _onScrub(details.localPosition.dx, constraints.maxWidth, sparkData.length),
+                    onTapUp: (_) => _scheduleScrubReset(),
+                    onTapCancel: () => _resetScrub(),
+                    child: CustomPaint(
+                      painter: _LucianSparklinePainter(
+                        points: sparkPoints,
+                        lineColor: accentColor,
+                        isDark: isDark,
+                        selectedIndex: _scrubbedIndex,
+                      ),
+                      size: Size.infinite,
                     ),
-                    size: Size.infinite,
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
           const SizedBox(height: 12),

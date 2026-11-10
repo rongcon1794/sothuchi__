@@ -193,7 +193,7 @@ class AccountDetailScreen extends ConsumerWidget {
                 tooltip: l10n.moreOptions,
                 onSelected: (val) async {
                   if (val == 'edit') {
-                    WalletFormSheet.show(context, existing: account);
+                    await WalletFormSheet.show(context, existing: account);
                   } else if (val == 'set_default') {
                     unawaited(HapticFeedback.mediumImpact());
                     await ref.read(settingsControllerProvider.notifier).setDefaultWalletId(account.id);
@@ -203,9 +203,9 @@ class AccountDetailScreen extends ConsumerWidget {
                       );
                     }
                   } else if (val == 'archive') {
-                    _handleToggleArchive(context, ref, account);
+                    await _handleToggleArchive(context, ref, account);
                   } else if (val == 'delete') {
-                    _handleDelete(context, ref, account);
+                    await _handleDelete(context, ref, account);
                   }
                 },
                 itemBuilder: (_) => [
@@ -857,14 +857,16 @@ class _WalletBalanceTrendSparklineState
                 onTapDown: (d) => _onScrub(
                     d.localPosition.dx, constraints.maxWidth, points.length),
                 onTapUp: (_) => _scheduleReset(),
-                child: CustomPaint(
-                  painter: _WalletDetailSparklinePainter(
-                    points: points.map((p) => p.normalizedY).toList(),
-                    color: widget.walletColor,
-                    selectedIndex: _scrubbedIndex,
-                    isDark: widget.isDark,
+                child: RepaintBoundary(
+                  child: CustomPaint(
+                    painter: _WalletDetailSparklinePainter(
+                      points: points.map((p) => p.normalizedY).toList(growable: false),
+                      color: widget.walletColor,
+                      selectedIndex: _scrubbedIndex,
+                      isDark: widget.isDark,
+                    ),
+                    size: Size.infinite,
                   ),
-                  size: Size.infinite,
                 ),
               );
             },

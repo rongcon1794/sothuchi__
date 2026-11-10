@@ -20,24 +20,28 @@ class SoThuChiApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settingsAsync = ref.watch(settingsControllerProvider);
-    final settings = settingsAsync.value ?? const AppSettings();
+    final (themeMode, accentColorIndex, oledMode, localeCode) = ref.watch(
+      settingsControllerProvider.select((s) {
+        final v = s.value ?? const AppSettings();
+        return (v.themeMode, v.accentColorIndex, v.oledMode, v.localeCode);
+      }),
+    );
     final router = ref.watch(goRouterProvider);
     final rootWrapper = ref.watch(appRootWrapperProvider);
 
-    final accentIndex = (settings.accentColorIndex >= 0 &&
-            settings.accentColorIndex < AppTheme.palettes.length)
-        ? settings.accentColorIndex
-        : 0;
+    final accentIndex =
+        (accentColorIndex >= 0 && accentColorIndex < AppTheme.palettes.length)
+            ? accentColorIndex
+            : 0;
     final seedColor = AppTheme.palettes[accentIndex];
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       onGenerateTitle: (ctx) => AppLocalizations.of(ctx).appTitle,
       theme: AppTheme.light(seedColor),
-      darkTheme: AppTheme.dark(seedColor, settings.oledMode),
-      themeMode: settings.themeMode,
-      locale: Locale(settings.localeCode),
+      darkTheme: AppTheme.dark(seedColor, oledMode),
+      themeMode: themeMode,
+      locale: Locale(localeCode),
       supportedLocales: const [
         Locale('vi'),
         Locale('en'),

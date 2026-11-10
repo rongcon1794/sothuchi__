@@ -76,19 +76,21 @@ class _BiometricLockGateState extends ConsumerState<BiometricLockGate>
 
   @override
   Widget build(BuildContext context) {
-    final settingsAsync = ref.watch(settingsControllerProvider);
+    final (settingsLoading, lockEnabled) = ref.watch(
+      settingsControllerProvider.select(
+        (s) => (s.isLoading, s.value?.biometricLockEnabled ?? false),
+      ),
+    );
     final authAsync = ref.watch(authStateStreamProvider);
     final user = ref.watch(currentUserProvider);
 
     // Never reveal or mark unlocked while secure storage / auth session is still loading.
-    if (settingsAsync.isLoading || (authAsync.isLoading && user == null)) {
+    if (settingsLoading || (authAsync.isLoading && user == null)) {
       return Material(
         color: Theme.of(context).colorScheme.surface,
         child: const SizedBox.expand(),
       );
     }
-
-    final lockEnabled = settingsAsync.value?.biometricLockEnabled ?? false;
 
     if (!lockEnabled || user == null) {
       _unlockedForSession = false;

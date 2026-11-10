@@ -169,7 +169,13 @@ class _RouterRefreshNotifier extends ChangeNotifier {
         (_, _) => notifyListeners(),
       )
       ..listen(
-        settingsControllerProvider,
+        settingsControllerProvider.select(
+          (s) => (
+            s.isLoading,
+            s.value?.onboardingCompleted,
+            s.value?.initialSetupCompleted,
+          ),
+        ),
         (_, _) => notifyListeners(),
       );
   }

@@ -52,9 +52,11 @@ class MonthlyCashflowSummary {
 /// Computes this month's Income vs Expense (excluding internal transfers)
 /// strictly for transactions matching the active display currency.
 final currentMonthSummaryProvider = Provider<MonthlyCashflowSummary>((ref) {
-  final currency =
-      ref.watch(settingsControllerProvider).value?.currencyCode ??
-      AppCurrencies.defaultCode;
+  final currency = ref.watch(
+    settingsControllerProvider.select(
+      (s) => s.value?.currencyCode ?? AppCurrencies.defaultCode,
+    ),
+  );
   final txs =
       ref.watch(transactionsStreamProvider).value ??
       const <TransactionEntity>[];
@@ -96,9 +98,11 @@ final recentTransactionsProvider = Provider<List<TransactionEntity>>((ref) {
 final filteredTransactionsSummaryProvider =
     Provider<({int income, int expense, int net, int count})>((ref) {
   final filteredTxs = ref.watch(filteredTransactionsProvider);
-  final currency =
-      ref.watch(settingsControllerProvider).value?.currencyCode ??
-      AppCurrencies.defaultCode;
+  final currency = ref.watch(
+    settingsControllerProvider.select(
+      (s) => s.value?.currencyCode ?? AppCurrencies.defaultCode,
+    ),
+  );
 
   int totalIncome = 0;
   int totalExpense = 0;
@@ -292,9 +296,11 @@ final groupedFilteredTransactionsProvider =
     Provider<List<DailyTransactionGroup>>((ref) {
       final list = ref.watch(filteredTransactionsProvider);
       if (list.isEmpty) return const <DailyTransactionGroup>[];
-      final currency =
-          ref.watch(settingsControllerProvider).value?.currencyCode ??
-          AppCurrencies.defaultCode;
+      final currency = ref.watch(
+        settingsControllerProvider.select(
+          (s) => s.value?.currencyCode ?? AppCurrencies.defaultCode,
+        ),
+      );
 
       final groups = <DateTime, List<TransactionEntity>>{};
       for (final tx in list) {

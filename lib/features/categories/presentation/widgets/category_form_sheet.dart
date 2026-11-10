@@ -7,7 +7,6 @@ import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
-import 'package:so_thu_chi/core/theme/lucian_theme_tokens.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/core/widgets/icon_and_color_picker.dart';
 import 'package:so_thu_chi/features/categories/domain/entities/category.dart';
@@ -571,7 +570,7 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                           const SizedBox(height: 2),
                           Text(
                             item.subtitle,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 10.5,
                               color: AppleTokens.systemGray,
                             ),

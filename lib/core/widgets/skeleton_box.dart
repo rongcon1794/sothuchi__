@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 /// Subtle animated pulse skeleton placeholder for loading states.
@@ -21,6 +22,7 @@ class SkeletonBox extends StatefulWidget {
 class _SkeletonBoxState extends State<SkeletonBox>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
+  late final Animation<double> _opacityAnimation;
 
   @override
   void initState() {
@@ -29,8 +31,11 @@ class _SkeletonBoxState extends State<SkeletonBox>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     );
+    _opacityAnimation = Tween<double>(begin: 0.45, end: 0.85).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
     // In automated widget tests, avoid infinite repeat so pumpAndSettle can settle.
-    if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (!kIsWeb && !Platform.environment.containsKey('FLUTTER_TEST')) {
       _controller.repeat(reverse: true);
     } else {
       _controller.value = 0.65;
@@ -46,16 +51,16 @@ class _SkeletonBoxState extends State<SkeletonBox>
   @override
   Widget build(BuildContext context) {
     final baseColor = Theme.of(context).colorScheme.surfaceContainerHighest;
-    return FadeTransition(
-      opacity: Tween<double>(begin: 0.45, end: 0.85).animate(
-        CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-      ),
-      child: Container(
-        width: widget.width,
-        height: widget.height,
-        decoration: BoxDecoration(
-          color: baseColor,
-          borderRadius: BorderRadius.circular(widget.borderRadius),
+    return RepaintBoundary(
+      child: FadeTransition(
+        opacity: _opacityAnimation,
+        child: Container(
+          width: widget.width,
+          height: widget.height,
+          decoration: BoxDecoration(
+            color: baseColor,
+            borderRadius: BorderRadius.circular(widget.borderRadius),
+          ),
         ),
       ),
     );

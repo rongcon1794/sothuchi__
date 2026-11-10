@@ -98,50 +98,63 @@ class _LucianProgressBarState extends State<LucianProgressBar>
             ? Colors.white.withValues(alpha: 0.08)
             : Colors.black.withValues(alpha: 0.06));
 
-    return AnimatedBuilder(
-      animation: _pulseController,
-      builder: (context, child) {
-        final glowAlpha = widget.showGlow
-            ? (0.25 + 0.35 * _pulseController.value)
-            : 0.0;
-
-        return Container(
-          height: widget.height,
-          decoration: BoxDecoration(
-            color: trackBg,
-            borderRadius: radius,
-            boxShadow: widget.showGlow
-                ? [
-                    BoxShadow(
-                      color: progressColor.withValues(alpha: glowAlpha),
-                      blurRadius: 8,
-                      spreadRadius: 1,
-                    ),
-                  ]
-                : null,
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Stack(
-            children: [
-              FractionallySizedBox(
-                alignment: Alignment.centerLeft,
-                widthFactor: clampedValue,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: radius,
-                    gradient: LinearGradient(
-                      colors: [
-                        progressColor.withValues(alpha: 0.85),
-                        progressColor,
-                      ],
-                    ),
-                  ),
-                ),
+    final barFill = Stack(
+      children: [
+        FractionallySizedBox(
+          alignment: Alignment.centerLeft,
+          widthFactor: clampedValue,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: radius,
+              gradient: LinearGradient(
+                colors: [
+                  progressColor.withValues(alpha: 0.85),
+                  progressColor,
+                ],
               ),
-            ],
+            ),
           ),
-        );
-      },
+        ),
+      ],
+    );
+
+    if (!widget.showGlow) {
+      return Container(
+        height: widget.height,
+        decoration: BoxDecoration(
+          color: trackBg,
+          borderRadius: radius,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: barFill,
+      );
+    }
+
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _pulseController,
+        child: barFill,
+        builder: (context, child) {
+          final glowAlpha = 0.25 + 0.35 * _pulseController.value;
+
+          return Container(
+            height: widget.height,
+            decoration: BoxDecoration(
+              color: trackBg,
+              borderRadius: radius,
+              boxShadow: [
+                BoxShadow(
+                  color: progressColor.withValues(alpha: glowAlpha),
+                  blurRadius: 8,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: child,
+          );
+        },
+      ),
     );
   }
 }
