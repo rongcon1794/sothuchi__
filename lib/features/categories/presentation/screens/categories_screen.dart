@@ -567,48 +567,37 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                     ),
                   ),
                 const SizedBox(height: 2),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ApplePopupMenuButton<String>(
-                      tooltip: l10n.moreOptions,
-                      iconSize: 18,
-                      size: 26,
-                      onSelected: (value) {
-                        if (value == 'detail') {
-                          context.push(AppRoutes.categoryDetail(cat.id));
-                        } else if (value == 'edit') {
-                          _openCategorySheet(existing: cat);
-                        } else if (value == 'delete') {
-                          _deleteCategory(cat);
-                        }
-                      },
-                      itemBuilder: (ctx) => [
-                        ApplePopupMenuItem(
-                          value: 'detail',
-                          icon: CupertinoIcons.chart_bar_alt_fill,
-                          title: 'Xem báo cáo chi tiết',
-                        ),
-                        ApplePopupMenuItem(
-                          value: 'edit',
-                          icon: Icons.edit_outlined,
-                          title: l10n.edit,
-                        ),
-                        if (!cat.isDefault)
-                          ApplePopupMenuItem(
-                            value: 'delete',
-                            icon: Icons.delete_outline_rounded,
-                            title: l10n.delete,
-                            isDestructive: true,
-                          ),
-                      ],
+                ApplePopupMenuButton<String>(
+                  tooltip: l10n.moreOptions,
+                  iconSize: 18,
+                  size: 26,
+                  onSelected: (value) {
+                    if (value == 'detail') {
+                      context.push(AppRoutes.categoryDetail(cat.id));
+                    } else if (value == 'edit') {
+                      _openCategorySheet(existing: cat);
+                    } else if (value == 'delete') {
+                      _deleteCategory(cat);
+                    }
+                  },
+                  itemBuilder: (ctx) => [
+                    ApplePopupMenuItem(
+                      value: 'detail',
+                      icon: CupertinoIcons.chart_bar_alt_fill,
+                      title: 'Xem báo cáo chi tiết',
                     ),
-                    const SizedBox(width: 2),
-                    const Icon(
-                      CupertinoIcons.chevron_forward,
-                      size: 14,
-                      color: AppleTokens.systemGray,
+                    ApplePopupMenuItem(
+                      value: 'edit',
+                      icon: Icons.edit_outlined,
+                      title: l10n.edit,
                     ),
+                    if (!cat.isDefault)
+                      ApplePopupMenuItem(
+                        value: 'delete',
+                        icon: Icons.delete_outline_rounded,
+                        title: l10n.delete,
+                        isDestructive: true,
+                      ),
                   ],
                 ),
               ],
