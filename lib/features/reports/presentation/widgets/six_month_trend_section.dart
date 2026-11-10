@@ -49,158 +49,236 @@ class SixMonthTrendBarChart extends StatelessWidget {
             '${l10n.expense} ${hideBalance ? l10n.balanceHidden : bar.expenseMoney.format(locale: locale)}',
     ].join('; ');
 
-    final ghostColor = isDark
-        ? Colors.white.withValues(alpha: 0.045)
-        : Colors.black.withValues(alpha: 0.035);
+    final dotFillColor = isDark
+        ? (context.isOled ? AppleTokens.bgOledCard : AppleTokens.bgDarkCard)
+        : AppleTokens.bgLightCard;
 
-    final incomeGradient = LinearGradient(
-      begin: Alignment.bottomCenter,
-      end: Alignment.topCenter,
-      colors: [
-        financeColors.income,
-        financeColors.income.withValues(alpha: 0.8),
-      ],
-    );
-    final expenseGradient = LinearGradient(
-      begin: Alignment.bottomCenter,
-      end: Alignment.topCenter,
-      colors: [
-        financeColors.expense,
-        financeColors.expense.withValues(alpha: 0.8),
-      ],
-    );
+    final incomeSpots = <FlSpot>[
+      for (var i = 0; i < bars.length; i++)
+        FlSpot(i.toDouble(), bars[i].incomeMinorUnits.toDouble()),
+    ];
+    final expenseSpots = <FlSpot>[
+      for (var i = 0; i < bars.length; i++)
+        FlSpot(i.toDouble(), bars[i].expenseMinorUnits.toDouble()),
+    ];
+
+    final maxX = bars.length > 1 ? (bars.length - 1).toDouble() : 1.0;
 
     return Semantics(
       container: true,
       label: screenReaderSummary,
       excludeSemantics: true,
       child: RepaintBoundary(
-        child: BarChart(
-        BarChartData(
-          maxY: visualMaxY,
-          minY: 0,
-          alignment: BarChartAlignment.spaceAround,
-          borderData: FlBorderData(show: false),
-          gridData: FlGridData(
-            drawVerticalLine: false,
-            getDrawingHorizontalLine: (_) => FlLine(
-              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.25),
-              strokeWidth: 1,
-              dashArray: [4, 4],
-            ),
-          ),
-          barTouchData: BarTouchData(
-            enabled: !hideBalance,
-            touchTooltipData: BarTouchTooltipData(
-              getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                if (groupIndex < 0 || groupIndex >= bars.length) return null;
-                final item = bars[groupIndex];
-                final isIncome = rodIndex == 0;
-                final money = isIncome
-                    ? item.incomeMoney
-                    : item.expenseMoney;
-                final tag = isIncome ? l10n.income : l10n.expense;
-                return BarTooltipItem(
-                  '$tag\n${money.format(locale: locale)}',
-                  TextStyle(
-                    color: theme.colorScheme.onInverseSurface,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 11.5,
+        child: Padding(
+          padding: const EdgeInsets.only(left: 10, right: 10, top: 8),
+          child: LineChart(
+            LineChartData(
+              minX: 0,
+              maxX: maxX,
+              maxY: visualMaxY,
+              minY: 0,
+              clipData: const FlClipData.none(),
+              borderData: FlBorderData(show: false),
+              gridData: FlGridData(
+                drawVerticalLine: true,
+                horizontalInterval: visualMaxY / 4,
+                verticalInterval: 1,
+                getDrawingHorizontalLine: (_) => FlLine(
+                  color: theme.colorScheme.outlineVariant.withValues(alpha: 0.25),
+                  strokeWidth: 1,
+                  dashArray: [4, 4],
+                ),
+                getDrawingVerticalLine: (_) => FlLine(
+                  color: theme.colorScheme.outlineVariant.withValues(alpha: 0.14),
+                  strokeWidth: 1,
+                  dashArray: [3, 4],
+                ),
+              ),
+              lineTouchData: LineTouchData(
+                enabled: !hideBalance,
+                getTouchedSpotIndicator: (barData, spotIndexes) {
+                  final lineColor = barData.color ?? theme.colorScheme.primary;
+                  return spotIndexes.map((spotIndex) {
+                    return TouchedSpotIndicatorData(
+                      FlLine(
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.25),
+                        strokeWidth: 1.2,
+                        dashArray: [4, 3],
+                      ),
+                      FlDotData(
+                        getDotPainter: (spot, percent, bar, index) =>
+                            FlDotCirclePainter(
+                          radius: 5.5,
+                          color: lineColor,
+                          strokeWidth: 2.5,
+                          strokeColor: dotFillColor,
+                        ),
+                      ),
+                    );
+                  }).toList();
+                },
+                touchTooltipData: LineTouchTooltipData(
+                  fitInsideHorizontally: true,
+                  fitInsideVertically: true,
+                  tooltipBorderRadius: BorderRadius.circular(10),
+                  tooltipPadding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 8,
                   ),
-                );
-              },
-            ),
-          ),
-          titlesData: FlTitlesData(
-            topTitles: const AxisTitles(),
-            rightTitles: const AxisTitles(),
-            leftTitles: const AxisTitles(),
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: bottomReserved,
-                getTitlesWidget: (value, meta) {
-                  final idx = value.toInt();
-                  if (idx < 0 || idx >= bars.length) {
-                    return const SizedBox.shrink();
-                  }
-                  final item = bars[idx];
-                  final label = AppDateUtils.formatShortMonth(
-                    item.monthAnchor,
-                    locale: locale,
-                  );
-                  final isNetSurplus = item.incomeMinorUnits >= item.expenseMinorUnits;
+                  maxContentWidth: 180,
+                  getTooltipColor: (_) => isDark
+                      ? const Color(0xEE1C1C1E)
+                      : const Color(0xEE2C2C2E),
+                  getTooltipItems: (touchedSpots) {
+                    return touchedSpots.map((touchedSpot) {
+                      final idx = touchedSpot.x.round();
+                      if (idx < 0 || idx >= bars.length) return null;
+                      final item = bars[idx];
+                      final isIncome = touchedSpot.barIndex == 0;
+                      final money = isIncome
+                          ? item.incomeMoney
+                          : item.expenseMoney;
+                      final tag = isIncome ? l10n.income : l10n.expense;
+                      final color = isIncome
+                          ? const Color(0xFF4ADE80)
+                          : const Color(0xFFFB7185);
+                      return LineTooltipItem(
+                        '$tag: ${money.format(locale: locale)}',
+                        TextStyle(
+                          color: color,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11.5,
+                        ),
+                      );
+                    }).toList();
+                  },
+                ),
+              ),
+              titlesData: FlTitlesData(
+                topTitles: const AxisTitles(),
+                rightTitles: const AxisTitles(),
+                leftTitles: const AxisTitles(),
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    interval: 1,
+                    reservedSize: bottomReserved,
+                    getTitlesWidget: (value, meta) {
+                      if ((value - value.roundToDouble()).abs() > 0.01) {
+                        return const SizedBox.shrink();
+                      }
+                      final idx = value.round();
+                      if (idx < 0 || idx >= bars.length) {
+                        return const SizedBox.shrink();
+                      }
+                      final item = bars[idx];
+                      final label = AppDateUtils.formatShortMonth(
+                        item.monthAnchor,
+                        locale: locale,
+                      );
+                      final isNetSurplus =
+                          item.incomeMinorUnits >= item.expenseMinorUnits;
 
-                  return SideTitleWidget(
-                    meta: meta,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          label,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w600,
-                          ),
+                      return SideTitleWidget(
+                        meta: meta,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              label,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Container(
+                              width: 4,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: isNetSurplus
+                                    ? financeColors.income.withValues(alpha: 0.8)
+                                    : financeColors.expense.withValues(alpha: 0.8),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 2),
-                        Container(
-                          width: 4,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: isNetSurplus
-                                ? financeColors.income.withValues(alpha: 0.8)
-                                : financeColors.expense.withValues(alpha: 0.8),
-                          ),
-                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              lineBarsData: [
+                // 1. Đường Thu nhập (Income Line)
+                LineChartBarData(
+                  spots: incomeSpots,
+                  isCurved: true,
+                  curveSmoothness: 0.32,
+                  preventCurveOverShooting: true,
+                  color: financeColors.income,
+                  barWidth: isWide ? 3.2 : 2.8,
+                  isStrokeCapRound: true,
+                  isStrokeJoinRound: true,
+                  dotData: FlDotData(
+                    getDotPainter: (spot, percent, barData, index) =>
+                        FlDotCirclePainter(
+                      radius: isWide ? 4.2 : 3.6,
+                      color: dotFillColor,
+                      strokeWidth: 2.2,
+                      strokeColor: financeColors.income,
+                    ),
+                  ),
+                  belowBarData: BarAreaData(
+                    show: true,
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        financeColors.income.withValues(alpha: isDark ? 0.24 : 0.18),
+                        financeColors.income.withValues(alpha: 0.0),
                       ],
                     ),
-                  );
-                },
-              ),
+                  ),
+                ),
+                // 2. Đường Chi tiêu (Expense Line)
+                LineChartBarData(
+                  spots: expenseSpots,
+                  isCurved: true,
+                  curveSmoothness: 0.32,
+                  preventCurveOverShooting: true,
+                  color: financeColors.expense,
+                  barWidth: isWide ? 3.2 : 2.8,
+                  isStrokeCapRound: true,
+                  isStrokeJoinRound: true,
+                  dotData: FlDotData(
+                    getDotPainter: (spot, percent, barData, index) =>
+                        FlDotCirclePainter(
+                      radius: isWide ? 4.2 : 3.6,
+                      color: dotFillColor,
+                      strokeWidth: 2.2,
+                      strokeColor: financeColors.expense,
+                    ),
+                  ),
+                  belowBarData: BarAreaData(
+                    show: true,
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        financeColors.expense.withValues(alpha: isDark ? 0.20 : 0.14),
+                        financeColors.expense.withValues(alpha: 0.0),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          barGroups: [
-            for (var i = 0; i < bars.length; i++)
-              BarChartGroupData(
-                x: i,
-                barsSpace: isWide ? 6 : 4,
-                barRods: [
-                  BarChartRodData(
-                    toY: bars[i].incomeMinorUnits.toDouble(),
-                    gradient: incomeGradient,
-                    width: isWide ? 14 : 11,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(5),
-                    ),
-                    backDrawRodData: BackgroundBarChartRodData(
-                      show: true,
-                      toY: visualMaxY,
-                      color: ghostColor,
-                    ),
-                  ),
-                  BarChartRodData(
-                    toY: bars[i].expenseMinorUnits.toDouble(),
-                    gradient: expenseGradient,
-                    width: isWide ? 14 : 11,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(5),
-                    ),
-                    backDrawRodData: BackgroundBarChartRodData(
-                      show: true,
-                      toY: visualMaxY,
-                      color: ghostColor,
-                    ),
-                  ),
-                ],
-              ),
-          ],
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
 
 class SixMonthSummaryPanel extends StatelessWidget {
