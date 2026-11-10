@@ -338,7 +338,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      expect(find.text('Giao dịch'), findsOneWidget);
       expect(find.text('Ví tiền'), findsOneWidget);
+      expect(find.text('Tiết kiệm'), findsOneWidget);
+      expect(find.text('Định kỳ'), findsOneWidget);
+      expect(find.text('Sổ Ghi Nợ'), findsOneWidget);
+      expect(find.text('Danh mục'), findsOneWidget);
     });
 
     testWidgets('CategoryDetailScreen renders category information and actions', (tester) async {
