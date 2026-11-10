@@ -62,7 +62,7 @@ class _AppleEdgeSwipeToDismissState extends State<AppleEdgeSwipeToDismiss> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.sizeOf(context).width;
 
     return Listener(
       behavior: HitTestBehavior.translucent,
@@ -165,21 +165,20 @@ class AppleModalSheetLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final mediaQuery = MediaQuery.of(context);
-    final keyboardInset = mediaQuery.viewInsets.bottom;
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final paddingTop = MediaQuery.paddingOf(context).top;
+    final viewPaddingTop = MediaQuery.viewPaddingOf(context).top;
+    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
 
     // Physical hardware notch / camera cutout / status bar insets protection
-    final topHardwareInset = math.max(
-      mediaQuery.padding.top,
-      mediaQuery.viewPadding.top,
-    );
+    final topHardwareInset = math.max(paddingTop, viewPaddingTop);
     // Guarantees generous clearance below any notch / Dynamic Island / camera cutout (min 68dp)
     final effectiveTopMargin = math.max(topHardwareInset + 16.0, 68.0);
 
     final sheetContent = Container(
       margin: EdgeInsets.only(top: effectiveTopMargin),
       constraints: BoxConstraints(
-        maxHeight: mediaQuery.size.height - effectiveTopMargin,
+        maxHeight: screenHeight - effectiveTopMargin,
       ),
       decoration: BoxDecoration(
         color: isDark
@@ -295,7 +294,7 @@ class AppleModalSheetLayout extends StatelessWidget {
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   padding: padding,
-                  child: child,
+                  child: RepaintBoundary(child: child),
                 ),
               ),
 
@@ -309,7 +308,7 @@ class AppleModalSheetLayout extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-                  child: bottomAction!,
+                  child: RepaintBoundary(child: bottomAction!),
                 ),
               ],
             ],

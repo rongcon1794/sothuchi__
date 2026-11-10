@@ -103,7 +103,7 @@ class LedgerSwitcherSheet extends ConsumerWidget {
 
     return Container(
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.75,
+        maxHeight: MediaQuery.sizeOf(context).height * 0.75,
       ),
       decoration: BoxDecoration(
         color: isDark ? AppleTokens.bgDarkCard : Colors.white,

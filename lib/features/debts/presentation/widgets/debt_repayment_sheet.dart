@@ -121,10 +121,10 @@ class _DebtRepaymentSheetState extends ConsumerState<DebtRepaymentSheet> {
 
     return Container(
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.88,
+        maxHeight: MediaQuery.sizeOf(context).height * 0.88,
       ),
       padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        bottom: MediaQuery.viewInsetsOf(context).bottom + 24,
         left: 20,
         right: 20,
         top: 16,

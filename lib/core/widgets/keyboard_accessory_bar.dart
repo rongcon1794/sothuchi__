@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -31,18 +31,21 @@ class KeyboardDismissBarOverlay extends StatelessWidget {
     final barHeight = isLandscape ? barHeightLandscape : barHeightPortrait;
     final isKeyboardVisible = rawKeyboardHeight > 0;
 
-    // Augment viewInsets.bottom for child by barHeight so Scaffolds and
-    // Scrollables keep the focused input safely above the accessory bar.
-    final adjustedChild = isKeyboardVisible
-        ? MediaQuery(
-            data: mediaQuery.copyWith(
-              viewInsets: mediaQuery.viewInsets.copyWith(
-                bottom: rawKeyboardHeight + barHeight,
-              ),
-            ),
-            child: child,
-          )
-        : child;
+    // Smoothly scale the accessory bar inset as the keyboard slides up/down
+    // and ALWAYS keep the MediaQuery widget in the tree so the child Element
+    // subtree is never unmounted/remounted when isKeyboardVisible toggles!
+    final effectiveBarInset = isKeyboardVisible
+        ? math.min(rawKeyboardHeight, barHeight)
+        : 0.0;
+
+    final adjustedChild = MediaQuery(
+      data: mediaQuery.copyWith(
+        viewInsets: mediaQuery.viewInsets.copyWith(
+          bottom: rawKeyboardHeight + effectiveBarInset,
+        ),
+      ),
+      child: child,
+    );
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
@@ -62,9 +65,11 @@ class KeyboardDismissBarOverlay extends StatelessWidget {
               right: 0,
               bottom: rawKeyboardHeight,
               height: barHeight,
-              child: _AppleKeyboardAccessoryBar(
-                barHeight: barHeight,
-                isLandscape: isLandscape,
+              child: RepaintBoundary(
+                child: _AppleKeyboardAccessoryBar(
+                  barHeight: barHeight,
+                  isLandscape: isLandscape,
+                ),
               ),
             ),
         ],
@@ -94,89 +99,83 @@ class _AppleKeyboardAccessoryBar extends StatelessWidget {
 
     return Material(
       color: Colors.transparent,
-      child: ClipRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-          child: Container(
-            height: barHeight,
-            decoration: BoxDecoration(
+      child: Container(
+        height: barHeight,
+        decoration: BoxDecoration(
+          color: isDark
+              ? const Color(0xFF1E1E1E)
+              : const Color(0xFFF7F7F7),
+          border: Border(
+            top: BorderSide(
               color: isDark
-                  ? const Color(0xFF1E1E1E).withValues(alpha: 0.92)
-                  : const Color(0xFFF7F7F7).withValues(alpha: 0.94),
-              border: Border(
-                top: BorderSide(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.12)
-                      : Colors.black.withValues(alpha: 0.08),
-                  width: AppleTokens.hairline,
-                ),
-              ),
+                  ? Colors.white.withValues(alpha: 0.12)
+                  : Colors.black.withValues(alpha: 0.08),
+              width: AppleTokens.hairline,
             ),
-            padding: EdgeInsets.symmetric(
-              horizontal: isLandscape ? 12 : 16,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          ),
+        ),
+        padding: EdgeInsets.symmetric(
+          horizontal: isLandscape ? 12 : 16,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Subtle keyboard indicator
+            Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // Subtle keyboard indicator
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      CupertinoIcons.keyboard,
-                      size: isLandscape ? 15 : 17,
-                      color: isDark ? Colors.white54 : Colors.black45,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      keyboardLabel,
-                      style: TextStyle(
-                        fontSize: isLandscape ? 11.5 : 12.5,
-                        fontWeight: FontWeight.w500,
-                        color: isDark ? Colors.white54 : Colors.black45,
-                      ),
-                    ),
-                  ],
+                Icon(
+                  CupertinoIcons.keyboard,
+                  size: isLandscape ? 15 : 17,
+                  color: isDark ? Colors.white54 : Colors.black45,
                 ),
-
-                // Prominent Dismiss Keyboard Button
-                CupertinoButton(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isLandscape ? 10 : 12,
-                    vertical: isLandscape ? 2 : 4,
-                  ),
-                  minimumSize: Size(0, barHeight - 8),
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                  color: primary.withValues(alpha: isDark ? 0.22 : 0.12),
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    FocusManager.instance.primaryFocus?.unfocus();
-                    SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
-                  },
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        CupertinoIcons.keyboard_chevron_compact_down,
-                        size: isLandscape ? 16 : 18,
-                        color: primary,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        hideKeyboardLabel,
-                        style: TextStyle(
-                          fontSize: isLandscape ? 12 : 13,
-                          fontWeight: FontWeight.w600,
-                          color: primary,
-                          letterSpacing: -0.2,
-                        ),
-                      ),
-                    ],
+                const SizedBox(width: 6),
+                Text(
+                  keyboardLabel,
+                  style: TextStyle(
+                    fontSize: isLandscape ? 11.5 : 12.5,
+                    fontWeight: FontWeight.w500,
+                    color: isDark ? Colors.white54 : Colors.black45,
                   ),
                 ),
               ],
             ),
-          ),
+
+            // Prominent Dismiss Keyboard Button
+            CupertinoButton(
+              padding: EdgeInsets.symmetric(
+                horizontal: isLandscape ? 10 : 12,
+                vertical: isLandscape ? 2 : 4,
+              ),
+              minimumSize: Size(0, barHeight - 8),
+              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+              color: primary.withValues(alpha: isDark ? 0.22 : 0.12),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                FocusManager.instance.primaryFocus?.unfocus();
+              },
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    CupertinoIcons.keyboard_chevron_compact_down,
+                    size: isLandscape ? 16 : 18,
+                    color: primary,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    hideKeyboardLabel,
+                    style: TextStyle(
+                      fontSize: isLandscape ? 12 : 13,
+                      fontWeight: FontWeight.w600,
+                      color: primary,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

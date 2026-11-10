@@ -384,7 +384,7 @@ class _TransactionCategoryPickerSheetState
 
     return Container(
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.8,
+        maxHeight: MediaQuery.sizeOf(context).height * 0.8,
       ),
       decoration: BoxDecoration(
         color: isDark ? AppleTokens.bgDarkCard : Colors.white,

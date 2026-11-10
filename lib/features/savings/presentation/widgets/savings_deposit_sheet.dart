@@ -145,18 +145,19 @@ class _SavingsDepositSheetState extends ConsumerState<SavingsDepositSheet> {
     }
 
     final accentColor = Color(widget.goal.color);
-    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = MediaQuery.sizeOf(context).height;
     final topHardwareInset = math.max(
-      mediaQuery.padding.top,
-      mediaQuery.viewPadding.top,
+      MediaQuery.paddingOf(context).top,
+      MediaQuery.viewPaddingOf(context).top,
     );
+    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
     final effectiveTopMargin = math.max(topHardwareInset, 44.0) + 10.0;
 
     return AppleEdgeSwipeToDismiss(
       child: Container(
         margin: EdgeInsets.only(top: effectiveTopMargin),
         constraints: BoxConstraints(
-          maxHeight: mediaQuery.size.height * 0.85,
+          maxHeight: screenHeight * 0.85,
         ),
         decoration: BoxDecoration(
           color: isDark ? AppleTokens.bgDarkCard : Colors.white,
@@ -174,7 +175,7 @@ class _SavingsDepositSheetState extends ConsumerState<SavingsDepositSheet> {
           bottom: true,
           child: Padding(
             padding: EdgeInsets.only(
-              bottom: mediaQuery.viewInsets.bottom,
+              bottom: keyboardInset,
             ),
             child: Column(
             mainAxisSize: MainAxisSize.min,

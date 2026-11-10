@@ -227,8 +227,9 @@ class _TransactionFilterBottomSheetState
     if (filter.effectiveCategoryIds.isNotEmpty) activeFilterCount += filter.effectiveCategoryIds.length;
 
     final activePreset = _resolveActivePreset(filter.startDate, filter.endDate, selectedMonth);
-    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
-    final sheetHeight = MediaQuery.of(context).size.height * (isLandscape ? 0.94 : 0.85);
+    final size = MediaQuery.sizeOf(context);
+    final isLandscape = size.width > size.height;
+    final sheetHeight = size.height * (isLandscape ? 0.94 : 0.85);
 
     return Container(
       constraints: BoxConstraints(maxHeight: sheetHeight),

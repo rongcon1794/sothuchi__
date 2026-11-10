@@ -130,13 +130,6 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       } else {
         _requestAmountFocus();
       }
-
-      // Safeguard fallback: ensure focus is requested after route transition settles
-      Future.delayed(const Duration(milliseconds: 250), () {
-        if (mounted && !_isEditing) {
-          _requestAmountFocus();
-        }
-      });
     });
   }
 
@@ -720,48 +713,58 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         // 1. Hero Amount & Mode Card
-                        TransactionHeroAmountCard(
-                    type: _type,
-                    amountController: _amountController,
-                    focusNode: _amountFocusNode,
-                    currencyInfo: currencyInfo,
-                    currencyCode: currencyCode,
-                    locale: locale,
-                    isEditing: _isEditing,
-                    availableWalletBalance: availableBalance,
-                    onTypeChanged: (newType) {
-                      setState(() {
-                        _type = newType;
-                        if (newType != TransactionType.transfer) {
-                          final list = newType == TransactionType.income
-                              ? incomeCategories
-                              : expenseCategories;
-                          if (!list.any((c) => c.id == _categoryId)) {
-                            _categoryId = list.isNotEmpty ? list.first.id : null;
-                          }
-                        }
-                      });
-                    },
-                    onSetAmount: (amount) => _setAmount(amount, currencyCode, locale),
-                    onClear: _clearAmount,
-                  ),
-                  const SizedBox(height: 12),
+                        RepaintBoundary(
+                          child: TransactionHeroAmountCard(
+                            type: _type,
+                            amountController: _amountController,
+                            focusNode: _amountFocusNode,
+                            currencyInfo: currencyInfo,
+                            currencyCode: currencyCode,
+                            locale: locale,
+                            isEditing: _isEditing,
+                            availableWalletBalance: availableBalance,
+                            onTypeChanged: (newType) {
+                              setState(() {
+                                _type = newType;
+                                if (newType != TransactionType.transfer) {
+                                  final list = newType == TransactionType.income
+                                      ? incomeCategories
+                                      : expenseCategories;
+                                  if (!list.any((c) => c.id == _categoryId)) {
+                                    _categoryId =
+                                        list.isNotEmpty ? list.first.id : null;
+                                  }
+                                }
+                              });
+                            },
+                            onSetAmount: (amount) =>
+                                _setAmount(amount, currencyCode, locale),
+                            onClear: _clearAmount,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
 
-                  // 2. Category Selection Section (Only for Expense & Income)
-                  if (_type != TransactionType.transfer) ...[
-                    if (availableCategories.isNotEmpty) ...[
-                      TransactionCategorySelectionCard(
-                        categories: availableCategories,
-                        selectedId: _categoryId,
-                        selectedCategory: selectedCategory,
-                        onSelected: (id) {
-                          HapticFeedback.selectionClick();
-                          setState(() => _categoryId = id);
-                        },
-                        onOpenMore: () => _openCategoryPicker(context, categories: availableCategories),
-                        onCreateNew: () => _openCreateCategorySheet(context),
-                      ),
-                      const SizedBox(height: 12),
+                        // 2. Category Selection Section (Only for Expense & Income)
+                        if (_type != TransactionType.transfer) ...[
+                          if (availableCategories.isNotEmpty) ...[
+                            RepaintBoundary(
+                              child: TransactionCategorySelectionCard(
+                                categories: availableCategories,
+                                selectedId: _categoryId,
+                                selectedCategory: selectedCategory,
+                                onSelected: (id) {
+                                  HapticFeedback.selectionClick();
+                                  setState(() => _categoryId = id);
+                                },
+                                onOpenMore: () => _openCategoryPicker(
+                                  context,
+                                  categories: availableCategories,
+                                ),
+                                onCreateNew: () =>
+                                    _openCreateCategorySheet(context),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
                     ] else if (categoriesAsync.isLoading) ...[
                       AppleGlassCard(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
@@ -905,7 +908,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                   ],
 
                   // 3. Unified Wallet & Date Selection Card
-                  AppleGlassCard(
+                  RepaintBoundary(
+                    child: AppleGlassCard(
                     padding: EdgeInsets.zero,
                     borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
                     borderColor: isDark
@@ -1117,38 +1121,41 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                       ],
                     ),
                   ),
+                  ),
                   const SizedBox(height: 12),
 
                   // 4. Unified Note & Tags Card
-                  AppleGlassCard(
-                    padding: EdgeInsets.zero,
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                    borderColor: isDark
-                        ? Colors.white.withValues(alpha: 0.10)
-                        : AppleTokens.borderLight,
-                    child: Column(
-                      children: [
-                        // Note Input Section
-                        TransactionSmartNoteSection(
-                          noteController: _noteController,
-                          type: _type,
-                          selectedCategory: selectedCategory,
-                          isDark: isDark,
-                        ),
-                        Divider(
-                          height: AppleTokens.hairline,
-                          indent: 64,
-                          color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
-                        ),
-                        // Tags Input Section
-                        TransactionSmartTagsSection(
-                          selectedTags: _selectedTags,
-                          tagInputController: _tagInputController,
-                          onAddTag: _addTag,
-                          onRemoveTag: _removeTag,
-                          isDark: isDark,
-                        ),
-                      ],
+                  RepaintBoundary(
+                    child: AppleGlassCard(
+                      padding: EdgeInsets.zero,
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                      borderColor: isDark
+                          ? Colors.white.withValues(alpha: 0.10)
+                          : AppleTokens.borderLight,
+                      child: Column(
+                        children: [
+                          // Note Input Section
+                          TransactionSmartNoteSection(
+                            noteController: _noteController,
+                            type: _type,
+                            selectedCategory: selectedCategory,
+                            isDark: isDark,
+                          ),
+                          Divider(
+                            height: AppleTokens.hairline,
+                            indent: 64,
+                            color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
+                          ),
+                          // Tags Input Section
+                          TransactionSmartTagsSection(
+                            selectedTags: _selectedTags,
+                            tagInputController: _tagInputController,
+                            onAddTag: _addTag,
+                            onRemoveTag: _removeTag,
+                            isDark: isDark,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
