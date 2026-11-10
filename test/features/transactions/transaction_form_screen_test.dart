@@ -227,8 +227,7 @@ void main() {
       await tester.enterText(amountField, '5');
       await tester.pumpAndSettle();
 
-      // Suggestions header appears with actual calculated amounts
-      expect(find.text('Gợi ý thêm số 0'), findsOneWidget);
+      // Calculated zero-suggestion chips appear without extra label clutter
       expect(find.text('50.000 ₫'), findsOneWidget);
       expect(find.text('500.000 ₫'), findsOneWidget);
       expect(find.text('5.000.000 ₫'), findsOneWidget);

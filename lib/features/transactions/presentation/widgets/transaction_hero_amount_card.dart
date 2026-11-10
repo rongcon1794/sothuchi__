@@ -247,126 +247,108 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          typeSign,
-                          style: TextStyle(
-                            fontSize: typeSignFontSize,
+                    Text(
+                      typeSign,
+                      style: TextStyle(
+                        fontSize: typeSignFontSize,
+                        fontWeight: FontWeight.w800,
+                        color: typeColor,
+                        height: 1.0,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: IntrinsicWidth(
+                        child: TextFormField(
+                          controller: widget.amountController,
+                          focusNode: widget.focusNode,
+                          autofocus: !widget.isEditing,
+                          textAlign: TextAlign.center,
+                          showCursor: false,
+                          keyboardType: TextInputType.numberWithOptions(
+                            decimal: widget.currencyInfo.decimalDigits > 0,
+                          ),
+                          inputFormatters: [
+                            MoneyInputFormatter(
+                              currencyCode: widget.currencyCode,
+                              locale: widget.locale,
+                            ),
+                          ],
+                          style: theme.textTheme.displaySmall?.copyWith(
+                            fontSize: amountFontSize,
                             fontWeight: FontWeight.w800,
                             color: typeColor,
-                            height: 1.0,
+                            letterSpacing: -0.8,
+                            fontFeatures: AppTheme.tabularFigures,
+                            height: 1.1,
                           ),
-                        ),
-                        const SizedBox(width: 6),
-                        Flexible(
-                          child: IntrinsicWidth(
-                            child: TextFormField(
-                              controller: widget.amountController,
-                              focusNode: widget.focusNode,
-                              autofocus: !widget.isEditing,
-                              textAlign: TextAlign.center,
-                              showCursor: false,
-                              keyboardType: TextInputType.numberWithOptions(
-                                decimal: widget.currencyInfo.decimalDigits > 0,
-                              ),
-                              inputFormatters: [
-                                MoneyInputFormatter(
-                                  currencyCode: widget.currencyCode,
-                                  locale: widget.locale,
-                                ),
-                              ],
-                              style: theme.textTheme.displaySmall?.copyWith(
-                                fontSize: amountFontSize,
-                                fontWeight: FontWeight.w800,
-                                color: typeColor,
-                                letterSpacing: -0.8,
-                                fontFeatures: AppTheme.tabularFigures,
-                                height: 1.1,
-                              ),
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                                errorBorder: InputBorder.none,
-                                focusedErrorBorder: InputBorder.none,
-                                disabledBorder: InputBorder.none,
-                                filled: false,
-                                fillColor: Colors.transparent,
-                                isDense: true,
-                                hintText: '0',
-                                hintStyle: TextStyle(
-                                  fontSize: amountFontSize,
-                                  color: typeColor.withValues(alpha: 0.25),
-                                  fontWeight: FontWeight.w800,
-                                ),
-                                contentPadding: EdgeInsets.zero,
-                              ),
-                              validator: (val) {
-                                final m = Money.tryParse(
-                                  val ?? '',
-                                  currencyCode: widget.currencyCode,
-                                );
-                                if (m == null || m.minorUnits <= 0) {
-                                  return context.l10n.amountRequiredError;
-                                }
-                                return null;
-                              },
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            errorBorder: InputBorder.none,
+                            focusedErrorBorder: InputBorder.none,
+                            disabledBorder: InputBorder.none,
+                            filled: false,
+                            fillColor: Colors.transparent,
+                            isDense: true,
+                            hintText: '0',
+                            hintStyle: TextStyle(
+                              fontSize: amountFontSize,
+                              color: typeColor.withValues(alpha: 0.25),
+                              fontWeight: FontWeight.w800,
                             ),
+                            contentPadding: EdgeInsets.zero,
                           ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          widget.currencyInfo.symbol,
-                          style: TextStyle(
-                            fontSize: symbolFontSize,
-                            fontWeight: FontWeight.w700,
-                            color: typeColor.withValues(alpha: 0.8),
-                            height: 1.0,
-                          ),
-                        ),
-                        ListenableBuilder(
-                          listenable: widget.amountController,
-                          builder: (context, _) {
-                            if (widget.amountController.text.trim().isEmpty) {
-                              return const SizedBox.shrink();
-                            }
-                            return Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: ApplePressable(
-                                scaleDown: 0.88,
-                                onTap: widget.onClear,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(4),
-                                  child: Icon(
-                                    CupertinoIcons.clear_circled_solid,
-                                    size: 20,
-                                    color: typeColor.withValues(alpha: 0.7),
-                                  ),
-                                ),
-                              ),
+                          validator: (val) {
+                            final m = Money.tryParse(
+                              val ?? '',
+                              currencyCode: widget.currencyCode,
                             );
+                            if (m == null || m.minorUnits <= 0) {
+                              return context.l10n.amountRequiredError;
+                            }
+                            return null;
                           },
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeOutCubic,
-                      width: isFocused ? 56 : 28,
-                      height: 3,
-                      decoration: BoxDecoration(
-                        color: isFocused
-                            ? typeColor
-                            : typeColor.withValues(alpha: 0.22),
-                        borderRadius: BorderRadius.circular(2),
                       ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      widget.currencyInfo.symbol,
+                      style: TextStyle(
+                        fontSize: symbolFontSize,
+                        fontWeight: FontWeight.w700,
+                        color: typeColor.withValues(alpha: 0.8),
+                        height: 1.0,
+                      ),
+                    ),
+                    ListenableBuilder(
+                      listenable: widget.amountController,
+                      builder: (context, _) {
+                        if (widget.amountController.text.trim().isEmpty) {
+                          return const SizedBox.shrink();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: ApplePressable(
+                            scaleDown: 0.88,
+                            onTap: widget.onClear,
+                            child: Padding(
+                              padding: const EdgeInsets.all(4),
+                              child: Icon(
+                                CupertinoIcons.clear_circled_solid,
+                                size: 20,
+                                color: typeColor.withValues(alpha: 0.7),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -423,7 +405,6 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
           ListenableBuilder(
             listenable: widget.amountController,
             builder: (context, _) {
-              final l10n = context.l10n;
               final rawMoney = Money.tryParse(
                 widget.amountController.text,
                 currencyCode: widget.currencyCode,
@@ -517,30 +498,6 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              CupertinoIcons.sparkles,
-                              size: 12,
-                              color: typeColor,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              l10n.zeroSuggestions,
-                              style: TextStyle(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w600,
-                                color: isDark
-                                    ? const Color(0xFF98989F)
-                                    : const Color(0xFF6E6E73),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                       for (final s in zeroSuggestions)
                         Padding(
                           padding: const EdgeInsets.only(right: 6),
