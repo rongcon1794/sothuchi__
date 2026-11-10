@@ -59,55 +59,55 @@ class WalletListTile extends StatelessWidget {
     );
 
     return ApplePressable(
-      borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+          borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
               isDark
-                  ? Color.lerp(walletColor, const Color(0xFF1E1E22), 0.82)!
-                  : Color.lerp(walletColor, Colors.white, 0.90)!,
+                  ? Color.lerp(walletColor, const Color(0xFF1E1E22), 0.85)!
+                  : Color.lerp(walletColor, Colors.white, 0.92)!,
               isDark
                   ? const Color(0xFF141416)
-                  : Color.lerp(walletColor, const Color(0xFFF7F8FA), 0.96)!,
+                  : Color.lerp(walletColor, const Color(0xFFF7F8FA), 0.97)!,
             ],
           ),
           border: Border.all(
             color: isDefault
-                ? const Color(0xFFFFB800).withValues(alpha: isDark ? 0.65 : 0.55)
-                : walletColor.withValues(alpha: isDark ? 0.35 : 0.22),
-            width: isDefault ? 1.4 : 1.0,
+                ? const Color(0xFFFFB800).withValues(alpha: isDark ? 0.60 : 0.48)
+                : walletColor.withValues(alpha: isDark ? 0.30 : 0.18),
+            width: isDefault ? 1.2 : 1.0,
           ),
           boxShadow: [
             BoxShadow(
               color: isDefault
-                  ? const Color(0xFFFFB800).withValues(alpha: isDark ? 0.16 : 0.08)
-                  : walletColor.withValues(alpha: isDark ? 0.18 : 0.07),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
+                  ? const Color(0xFFFFB800).withValues(alpha: isDark ? 0.14 : 0.06)
+                  : walletColor.withValues(alpha: isDark ? 0.14 : 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+          borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
           child: Stack(
             children: [
               // Subtle ambient radiant glow at top-right
               Positioned(
-                right: -24,
-                top: -30,
+                right: -20,
+                top: -24,
                 child: Container(
-                  width: 120,
-                  height: 120,
+                  width: 90,
+                  height: 90,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
                       colors: [
-                        walletColor.withValues(alpha: isDark ? 0.22 : 0.12),
+                        walletColor.withValues(alpha: isDark ? 0.18 : 0.10),
                         walletColor.withValues(alpha: 0.0),
                       ],
                     ),
@@ -116,330 +116,217 @@ class WalletListTile extends StatelessWidget {
               ),
 
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // --- Tier 1: Identity, Badges, and Overflow Actions ---
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Squircle Icon Badge with high-gloss gradient & shadow
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                walletColor,
-                                Color.lerp(
-                                  walletColor,
-                                  Colors.black,
-                                  isDark ? 0.35 : 0.2,
-                                )!,
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(13),
-                            border: Border.all(
-                              color: Colors.white.withValues(
-                                alpha: isDark ? 0.3 : 0.45,
-                              ),
-                              width: 1.0,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: walletColor.withValues(
-                                  alpha: isDark ? 0.4 : 0.25,
-                                ),
-                                blurRadius: 10,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            AppIconCatalog.resolve(account.icon),
-                            color: Colors.white,
-                            size: 22,
-                          ),
+                    // Squircle Icon Badge with subtle gradient & shadow
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            walletColor,
+                            Color.lerp(
+                              walletColor,
+                              Colors.black,
+                              isDark ? 0.35 : 0.2,
+                            )!,
+                          ],
                         ),
-                        const SizedBox(width: 12),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.white.withValues(
+                            alpha: isDark ? 0.3 : 0.45,
+                          ),
+                          width: 1.0,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: walletColor.withValues(
+                              alpha: isDark ? 0.35 : 0.20,
+                            ),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        AppIconCatalog.resolve(account.icon),
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
 
-                        // Wallet Name & Tags (Type, Currency, Default)
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
+                    // Main info: Line 1 (Name + Badges + Menu) & Line 2 (Type/Currency + Balance)
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Line 1: Wallet Name + Badges + 3-dots Menu
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text(
-                                account.name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 16.5,
-                                  letterSpacing: -0.2,
-                                  decoration: account.archived
-                                      ? TextDecoration.lineThrough
-                                      : null,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Wrap(
-                                spacing: 5,
-                                runSpacing: 4,
-                                crossAxisAlignment: WrapCrossAlignment.center,
-                                children: [
-                                  // Wallet Type Pill with Icon
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 3.5,
-                                    ),
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                      color: walletColor.withValues(
-                                        alpha: isDark ? 0.20 : 0.12,
-                                      ),
-                                      borderRadius: BorderRadius.circular(
-                                        AppleTokens.radiusPill,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          _typeIcon(account.type),
-                                          size: 11,
-                                          color: isDark
-                                              ? Colors.white70
-                                              : walletColor,
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        account.name,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: theme.textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 15.5,
+                                          letterSpacing: -0.2,
+                                          decoration: account.archived
+                                              ? TextDecoration.lineThrough
+                                              : null,
                                         ),
-                                        const SizedBox(width: 3.5),
-                                        Text(
-                                          typeLabel,
-                                          style: TextStyle(
-                                            fontSize: 10.5,
-                                            fontWeight: FontWeight.w600,
-                                            color: isDark
-                                                ? Colors.white70
-                                                : walletColor,
-                                            height: 1.2,
+                                      ),
+                                    ),
+                                    if (isDefault) ...[
+                                      const SizedBox(width: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          gradient: const LinearGradient(
+                                            colors: [
+                                              Color(0xFFFFDF7A),
+                                              Color(0xFFD4AF37),
+                                            ],
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-
-                                  // Default Wallet Badge
-                                  if (isDefault)
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 3.5,
-                                      ),
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        gradient: const LinearGradient(
-                                          colors: [
-                                            Color(0xFFFFDF7A),
-                                            Color(0xFFD4AF37),
+                                          borderRadius: BorderRadius.circular(
+                                            AppleTokens.radiusPill,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color(0xFFD4AF37)
+                                                  .withValues(alpha: 0.3),
+                                              blurRadius: 3,
+                                              offset: const Offset(0, 1),
+                                            ),
                                           ],
                                         ),
-                                        borderRadius: BorderRadius.circular(
-                                          AppleTokens.radiusPill,
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: const Color(0xFFD4AF37)
-                                                .withValues(alpha: 0.35),
-                                            blurRadius: 4,
-                                            offset: const Offset(0, 1),
-                                          ),
-                                        ],
-                                      ),
-                                      child: const Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.star_rounded,
-                                            size: 11,
-                                            color: Color(0xFF4A3500),
-                                          ),
-                                          SizedBox(width: 2.5),
-                                          Text(
-                                            'Mặc định',
-                                            style: TextStyle(
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w800,
+                                        child: const Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.star_rounded,
+                                              size: 10,
                                               color: Color(0xFF4A3500),
-                                              letterSpacing: 0.1,
-                                              height: 1.2,
                                             ),
+                                            SizedBox(width: 2),
+                                            Text(
+                                              'Mặc định',
+                                              style: TextStyle(
+                                                fontSize: 9.5,
+                                                fontWeight: FontWeight.w800,
+                                                color: Color(0xFF4A3500),
+                                                letterSpacing: 0.1,
+                                                height: 1.1,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                    if (account.archived) ...[
+                                      const SizedBox(width: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppleTokens.rubyExpense
+                                              .withValues(alpha: 0.15),
+                                          borderRadius: BorderRadius.circular(
+                                            AppleTokens.radiusPill,
                                           ),
-                                        ],
+                                        ),
+                                        child: Text(
+                                          l10n.archivedWallets,
+                                          style: const TextStyle(
+                                            fontSize: 9.5,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppleTokens.rubyExpense,
+                                            height: 1.1,
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                    ],
+                                  ],
+                                ),
+                              ),
 
-                                  // Currency Code Pill
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 7,
-                                      vertical: 3.5,
+                              // Apple 3-dots Menu Button
+                              ApplePopupMenuButton<String>(
+                                tooltip: l10n.moreOptions,
+                                onSelected: (value) {
+                                  if (value == 'edit') onEdit();
+                                  if (value == 'archive') onToggleArchive();
+                                  if (value == 'set_default') onSetDefault?.call();
+                                },
+                                itemBuilder: (ctx) => [
+                                  if (!isDefault && onSetDefault != null)
+                                    ApplePopupMenuItem(
+                                      value: 'set_default',
+                                      icon: CupertinoIcons.star_fill,
+                                      title: 'Đặt làm ví mặc định',
                                     ),
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                      color: isDark
-                                          ? Colors.white.withValues(alpha: 0.08)
-                                          : Colors.black.withValues(alpha: 0.05),
-                                      borderRadius: BorderRadius.circular(
-                                        AppleTokens.radiusPill,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      account.currency.toUpperCase(),
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w600,
-                                        color: isDark
-                                            ? Colors.white54
-                                            : Colors.black54,
-                                        letterSpacing: 0.2,
-                                        height: 1.2,
-                                      ),
-                                    ),
+                                  ApplePopupMenuItem(
+                                    value: 'edit',
+                                    icon: CupertinoIcons.pencil,
+                                    title: l10n.edit,
                                   ),
-
-                                  // Archived Badge
-                                  if (account.archived)
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 7,
-                                        vertical: 3.5,
-                                      ),
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        color: AppleTokens.rubyExpense
-                                            .withValues(alpha: 0.15),
-                                        borderRadius: BorderRadius.circular(
-                                          AppleTokens.radiusPill,
-                                        ),
-                                      ),
-                                      child: Text(
-                                        l10n.archivedWallets,
-                                        style: const TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w600,
-                                          color: AppleTokens.rubyExpense,
-                                          height: 1.2,
-                                        ),
-                                      ),
-                                    ),
+                                  ApplePopupMenuItem(
+                                    value: 'archive',
+                                    icon: account.archived
+                                        ? CupertinoIcons.arrow_counterclockwise
+                                        : CupertinoIcons.archivebox,
+                                    title: account.archived
+                                        ? l10n.unarchiveWallet
+                                        : l10n.archiveWallet,
+                                  ),
                                 ],
                               ),
                             ],
                           ),
-                        ),
+                          const SizedBox(height: 5),
 
-                        const SizedBox(width: 6),
-
-                        // Apple 3-dots Menu Button
-                        ApplePopupMenuButton<String>(
-                          tooltip: l10n.moreOptions,
-                          onSelected: (value) {
-                            if (value == 'edit') onEdit();
-                            if (value == 'archive') onToggleArchive();
-                            if (value == 'set_default') onSetDefault?.call();
-                          },
-                          itemBuilder: (ctx) => [
-                            if (!isDefault && onSetDefault != null)
-                              ApplePopupMenuItem(
-                                value: 'set_default',
-                                icon: CupertinoIcons.star_fill,
-                                title: 'Đặt làm ví mặc định',
-                              ),
-                            ApplePopupMenuItem(
-                              value: 'edit',
-                              icon: CupertinoIcons.pencil,
-                              title: l10n.edit,
-                            ),
-                            ApplePopupMenuItem(
-                              value: 'archive',
-                              icon: account.archived
-                                  ? CupertinoIcons.arrow_counterclockwise
-                                  : CupertinoIcons.archivebox,
-                              title: account.archived
-                                  ? l10n.unarchiveWallet
-                                  : l10n.archiveWallet,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    // Subtle Hairline Divider
-                    Divider(
-                      height: 1,
-                      thickness: AppleTokens.hairline,
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.08)
-                          : Colors.black.withValues(alpha: 0.06),
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    // --- Tier 2: Financial Balance Row ---
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Label: "SỐ DƯ HIỆN TẠI" with glowing indicator dot
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 6,
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: walletColor,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: walletColor.withValues(alpha: 0.6),
-                                    blurRadius: 4,
-                                    spreadRadius: 0.5,
+                          // Line 2: Type • Currency & Financial Balance
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    _typeIcon(account.type),
+                                    size: 12,
+                                    color: isDark ? Colors.white60 : Colors.black54,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '$typeLabel • ${account.currency.toUpperCase()}',
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w500,
+                                      color: isDark ? Colors.white60 : Colors.black54,
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              'SỐ DƯ HIỆN TẠI',
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.4,
-                                color: isDark
-                                    ? Colors.white54
-                                    : Colors.black.withValues(alpha: 0.5),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        // Large Tabular Balance Figure + Forward Chevron
-                        Flexible(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
                               Flexible(
                                 child: Text(
                                   balanceText,
@@ -449,7 +336,7 @@ class WalletListTile extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                   textAlign: TextAlign.right,
                                   style: theme.textTheme.titleMedium?.copyWith(
-                                    fontSize: 18,
+                                    fontSize: 15.5,
                                     fontWeight: FontWeight.w800,
                                     fontFeatures: AppTheme.tabularFigures,
                                     letterSpacing: -0.3,
@@ -459,18 +346,10 @@ class WalletListTile extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 4),
-                              Icon(
-                                CupertinoIcons.chevron_right,
-                                size: 14,
-                                color: isDark
-                                    ? Colors.white38
-                                    : Colors.black.withValues(alpha: 0.3),
-                              ),
                             ],
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -482,4 +361,3 @@ class WalletListTile extends StatelessWidget {
     );
   }
 }
-
