@@ -137,6 +137,8 @@ class TransactionSmartTagsSection extends ConsumerWidget {
                               FirstLetterCapitalizationFormatter(),
                             ],
                             textInputAction: TextInputAction.done,
+                            scrollPadding:
+                                const EdgeInsets.fromLTRB(20, 20, 20, 360),
                             onFieldSubmitted: (val) {
                               if (val.trim().isNotEmpty) {
                                 onAddTag(val.trim());

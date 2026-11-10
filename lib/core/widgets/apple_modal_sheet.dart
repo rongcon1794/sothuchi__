@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
+import 'package:so_thu_chi/core/widgets/keyboard_accessory_bar.dart';
 
 /// Tactile edge-swipe detector that brings native iOS and Android edge-swipe
 /// dismiss gestures to bottom sheets and overlay modals.
@@ -148,8 +149,9 @@ class AppleModalSheetLayout extends StatelessWidget {
     required WidgetBuilder builder,
     bool isDismissible = true,
     bool enableDrag = true,
-    bool useSafeArea = true,
+    bool useSafeArea = false,
   }) {
+    Widget? cachedChild;
     return showModalBottomSheet<T>(
       context: context,
       isScrollControlled: true,
@@ -157,7 +159,7 @@ class AppleModalSheetLayout extends StatelessWidget {
       backgroundColor: Colors.transparent,
       isDismissible: isDismissible,
       enableDrag: enableDrag,
-      builder: builder,
+      builder: (sheetContext) => cachedChild ??= builder(sheetContext),
     );
   }
 
@@ -165,43 +167,42 @@ class AppleModalSheetLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final isAndroid = theme.platform == TargetPlatform.android;
     final screenHeight = MediaQuery.sizeOf(context).height;
-    final paddingTop = MediaQuery.paddingOf(context).top;
-    final viewPaddingTop = MediaQuery.viewPaddingOf(context).top;
-    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    final viewPadding = MediaQuery.viewPaddingOf(context);
 
     // Physical hardware notch / camera cutout / status bar insets protection
-    final topHardwareInset = math.max(paddingTop, viewPaddingTop);
+    final topHardwareInset = viewPadding.top;
     // Guarantees generous clearance below any notch / Dynamic Island / camera cutout (min 68dp)
     final effectiveTopMargin = math.max(topHardwareInset + 16.0, 68.0);
 
-    final sheetContent = Container(
-      margin: EdgeInsets.only(top: effectiveTopMargin),
-      constraints: BoxConstraints(
-        maxHeight: screenHeight - effectiveTopMargin,
-      ),
-      decoration: BoxDecoration(
-        color: isDark
-            ? (context.isOled
-                ? AppleTokens.bgOledCard
-                : AppleTokens.bgDarkPrimary)
-            : AppleTokens.bgLightPrimary,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(AppleTokens.radiusHero),
+    final sheetContent = RepaintBoundary(
+      child: Container(
+        margin: EdgeInsets.only(top: effectiveTopMargin),
+        constraints: BoxConstraints(
+          maxHeight: screenHeight - effectiveTopMargin,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.15),
-            blurRadius: 24,
-            offset: const Offset(0, -4),
+        decoration: BoxDecoration(
+          color: isDark
+              ? (context.isOled
+                  ? AppleTokens.bgOledCard
+                  : AppleTokens.bgDarkPrimary)
+              : AppleTokens.bgLightPrimary,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(AppleTokens.radiusHero),
           ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        bottom: true,
+          boxShadow: isAndroid
+              ? const <BoxShadow>[]
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.15),
+                    blurRadius: 24,
+                    offset: const Offset(0, -4),
+                  ),
+                ],
+        ),
         child: Padding(
-          padding: EdgeInsets.only(bottom: keyboardInset),
+          padding: EdgeInsets.only(bottom: viewPadding.bottom),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -294,7 +295,14 @@ class AppleModalSheetLayout extends StatelessWidget {
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   padding: padding,
-                  child: RepaintBoundary(child: child),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      RepaintBoundary(child: child),
+                      const _SheetKeyboardScrollSpacer(),
+                    ],
+                  ),
                 ),
               ),
 
@@ -325,5 +333,16 @@ class AppleModalSheetLayout extends StatelessWidget {
     }
 
     return sheetContent;
+  }
+}
+
+class _SheetKeyboardScrollSpacer extends StatelessWidget {
+  const _SheetKeyboardScrollSpacer();
+
+  @override
+  Widget build(BuildContext context) {
+    final isKeyboardOpen = KeyboardVisibilityScope.isOpenOf(context);
+    if (!isKeyboardOpen) return const SizedBox.shrink();
+    return const SizedBox(height: 320);
   }
 }

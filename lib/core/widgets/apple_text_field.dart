@@ -194,6 +194,7 @@ class _AppleTextFieldState extends State<AppleTextField> {
       maxLines: widget.maxLines,
       minLines: widget.minLines,
       maxLength: widget.maxLength,
+      scrollPadding: const EdgeInsets.fromLTRB(20, 20, 20, 340),
       validator: widget.validator,
       onChanged: widget.onChanged,
       onFieldSubmitted: widget.onSubmitted,

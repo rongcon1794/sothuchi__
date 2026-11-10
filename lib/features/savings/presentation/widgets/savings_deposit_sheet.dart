@@ -8,6 +8,7 @@ import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
+import 'package:so_thu_chi/core/widgets/keyboard_accessory_bar.dart';
 import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_controller.dart';
 import 'package:so_thu_chi/features/savings/domain/entities/savings_goal.dart';
 import 'package:so_thu_chi/features/savings/presentation/controllers/savings_goals_controller.dart';
@@ -27,12 +28,14 @@ class SavingsDepositSheet extends ConsumerStatefulWidget {
     required SavingsGoal goal,
     bool isWithdraw = false,
   }) {
+    Widget? cachedSheet;
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      useSafeArea: true,
+      useSafeArea: false,
       backgroundColor: Colors.transparent,
-      builder: (_) => SavingsDepositSheet(goal: goal, isWithdraw: isWithdraw),
+      builder: (_) =>
+          cachedSheet ??= SavingsDepositSheet(goal: goal, isWithdraw: isWithdraw),
     );
   }
 
@@ -146,12 +149,14 @@ class _SavingsDepositSheetState extends ConsumerState<SavingsDepositSheet> {
 
     final accentColor = Color(widget.goal.color);
     final screenHeight = MediaQuery.sizeOf(context).height;
-    final topHardwareInset = math.max(
-      MediaQuery.paddingOf(context).top,
-      MediaQuery.viewPaddingOf(context).top,
-    );
-    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    final viewPadding = MediaQuery.viewPaddingOf(context);
+    final topHardwareInset = viewPadding.top;
+    final isKeyboardOpen = KeyboardVisibilityScope.isOpenOf(context);
+    final keyboardInset = isKeyboardOpen
+        ? 300.0
+        : MediaQuery.viewInsetsOf(context).bottom;
     final effectiveTopMargin = math.max(topHardwareInset, 44.0) + 10.0;
+    final isAndroid = theme.platform == TargetPlatform.android;
 
     return AppleEdgeSwipeToDismiss(
       child: Container(
@@ -162,22 +167,21 @@ class _SavingsDepositSheetState extends ConsumerState<SavingsDepositSheet> {
         decoration: BoxDecoration(
           color: isDark ? AppleTokens.bgDarkCard : Colors.white,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(AppleTokens.radiusSheet)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.15),
-              blurRadius: 24,
-              offset: const Offset(0, -4),
-            ),
-          ],
+          boxShadow: isAndroid
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.15),
+                    blurRadius: 24,
+                    offset: const Offset(0, -4),
+                  ),
+                ],
         ),
-        child: SafeArea(
-          top: false,
-          bottom: true,
-          child: Padding(
-            padding: EdgeInsets.only(
-              bottom: keyboardInset,
-            ),
-            child: Column(
+        child: Padding(
+          padding: EdgeInsets.only(
+            bottom: math.max(viewPadding.bottom, keyboardInset),
+          ),
+          child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               // Drag handle
@@ -398,7 +402,6 @@ class _SavingsDepositSheetState extends ConsumerState<SavingsDepositSheet> {
           ),
         ),
       ),
-    ),
-  );
+    );
   }
 }

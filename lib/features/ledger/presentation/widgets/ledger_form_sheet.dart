@@ -135,11 +135,17 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
       _selectedIcon = item.icon;
       _selectedColor = item.color;
     }
+    _lastNameText = _nameController.text;
     _nameController.addListener(_onNameChanged);
   }
 
+  String _lastNameText = '';
+
   void _onNameChanged() {
-    setState(() {});
+    final current = _nameController.text;
+    if (current == _lastNameText) return;
+    _lastNameText = current;
+    if (mounted) setState(() {});
   }
 
   @override

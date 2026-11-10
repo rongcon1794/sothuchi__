@@ -167,10 +167,20 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
 
     _nameController.addListener(_onFieldChanged);
     _balanceController.addListener(_onFieldChanged);
+    _lastNameText = _nameController.text;
+    _lastBalanceText = _balanceController.text;
   }
 
+  String _lastNameText = '';
+  String _lastBalanceText = '';
+
   void _onFieldChanged() {
-    setState(() {});
+    final name = _nameController.text;
+    final balance = _balanceController.text;
+    if (name == _lastNameText && balance == _lastBalanceText) return;
+    _lastNameText = name;
+    _lastBalanceText = balance;
+    if (mounted) setState(() {});
   }
 
   @override

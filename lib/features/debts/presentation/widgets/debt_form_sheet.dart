@@ -74,11 +74,17 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
       _selectedAccountId = d.accountId;
     }
 
+    _lastFieldsSnapshot = _computeFieldsSnapshot();
     _nameController.addListener(_onFieldChanged);
     _phoneController.addListener(_onFieldChanged);
     _amountController.addListener(_onFieldChanged);
     _noteController.addListener(_onFieldChanged);
   }
+
+  String _lastFieldsSnapshot = '';
+
+  String _computeFieldsSnapshot() =>
+      '${_nameController.text}|${_phoneController.text}|${_amountController.text}|${_noteController.text}';
 
   @override
   void dispose() {
@@ -94,6 +100,9 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
   }
 
   void _onFieldChanged() {
+    final snap = _computeFieldsSnapshot();
+    if (snap == _lastFieldsSnapshot) return;
+    _lastFieldsSnapshot = snap;
     if (mounted) setState(() {});
   }
 

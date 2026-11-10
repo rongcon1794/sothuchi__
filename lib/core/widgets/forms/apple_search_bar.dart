@@ -110,7 +110,6 @@ class _AppleSearchBarState extends State<AppleSearchBar> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final colors = context.semanticColors;
     final primary = theme.colorScheme.primary;
 
@@ -121,10 +120,8 @@ class _AppleSearchBarState extends State<AppleSearchBar> {
       widget.borderRadius ?? AppleTokens.radiusPill,
     );
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
+    return Container(
       height: barHeight,
-      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: colors.inputBackground,
         borderRadius: effectiveRadius,
@@ -132,18 +129,9 @@ class _AppleSearchBarState extends State<AppleSearchBar> {
           color: _isFocused ? primary : colors.inputBorder,
           width: _isFocused ? 1.3 : 1.0,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
-            blurRadius: 4,
-            offset: const Offset(0, 1),
-          ),
-        ],
       ),
       alignment: Alignment.center,
-      child: ClipRRect(
-        borderRadius: effectiveRadius,
-        child: TextField(
+      child: TextField(
           controller: _controller,
           focusNode: _focusNode,
           autofocus: widget.autofocus,
@@ -216,7 +204,6 @@ class _AppleSearchBarState extends State<AppleSearchBar> {
             ),
           ),
         ),
-      ),
     );
   }
 }

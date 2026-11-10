@@ -217,11 +217,17 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
     _icon = existing?.icon ?? (_type == CategoryType.income ? 'salary' : 'food');
     _color = existing?.color ?? AppIconCatalog.palette.first;
 
+    _lastNameText = _nameController.text;
     _nameController.addListener(_onTextChanged);
   }
 
+  String _lastNameText = '';
+
   void _onTextChanged() {
-    setState(() {});
+    final current = _nameController.text;
+    if (current == _lastNameText) return;
+    _lastNameText = current;
+    if (mounted) setState(() {});
   }
 
   @override

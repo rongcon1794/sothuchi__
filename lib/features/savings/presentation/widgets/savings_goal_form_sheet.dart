@@ -171,19 +171,30 @@ class _SavingsGoalFormSheetState extends ConsumerState<SavingsGoalFormSheet> {
       _linkedAccountId = item.linkedAccountId;
     }
 
+    _lastFieldsSnapshot = _computeFieldsSnapshot();
     _amountFocusNode.addListener(_onFocusChange);
     _titleController.addListener(_onFieldChange);
     _targetAmountController.addListener(_onFieldChange);
     _noteController.addListener(_onFieldChange);
   }
 
+  String _lastFieldsSnapshot = '';
+
+  String _computeFieldsSnapshot() =>
+      '${_titleController.text}|${_targetAmountController.text}|${_noteController.text}';
+
   void _onFocusChange() {
+    final hasFocus = _amountFocusNode.hasFocus;
+    if (hasFocus == _isAmountFocused) return;
     if (mounted) {
-      setState(() => _isAmountFocused = _amountFocusNode.hasFocus);
+      setState(() => _isAmountFocused = hasFocus);
     }
   }
 
   void _onFieldChange() {
+    final snap = _computeFieldsSnapshot();
+    if (snap == _lastFieldsSnapshot) return;
+    _lastFieldsSnapshot = snap;
     if (mounted) setState(() {});
   }
 

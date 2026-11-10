@@ -204,6 +204,7 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
       _autoExecute = item.autoExecute;
     }
 
+    _lastFieldsSnapshot = _computeFieldsSnapshot();
     _amountFocusNode.addListener(_onFocusChange);
     _titleController.addListener(_onFieldChange);
     _amountController.addListener(_onFieldChange);
@@ -216,13 +217,23 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
     });
   }
 
+  String _lastFieldsSnapshot = '';
+
+  String _computeFieldsSnapshot() =>
+      '${_titleController.text}|${_amountController.text}|${_noteController.text}';
+
   void _onFocusChange() {
+    final hasFocus = _amountFocusNode.hasFocus;
+    if (hasFocus == _isAmountFocused) return;
     if (mounted) {
-      setState(() => _isAmountFocused = _amountFocusNode.hasFocus);
+      setState(() => _isAmountFocused = hasFocus);
     }
   }
 
   void _onFieldChange() {
+    final snap = _computeFieldsSnapshot();
+    if (snap == _lastFieldsSnapshot) return;
+    _lastFieldsSnapshot = snap;
     if (mounted) setState(() {});
   }
 

@@ -2,16 +2,48 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/l10n/app_localizations.dart';
+
+/// Lightweight scope that only notifies dependents when keyboard visibility
+/// toggles (`false <-> true`), avoiding 60-120fps per-frame rebuilds during
+/// keyboard slide animations.
+class KeyboardVisibilityScope extends InheritedWidget {
+  const KeyboardVisibilityScope({
+    required this.isKeyboardOpen,
+    required this.heightListenable,
+    required super.child,
+    super.key,
+  });
+
+  final bool isKeyboardOpen;
+  final ValueNotifier<double> heightListenable;
+
+  static bool isOpenOf(BuildContext context) {
+    final scope =
+        context.dependOnInheritedWidgetOfExactType<KeyboardVisibilityScope>();
+    if (scope != null) return scope.isKeyboardOpen;
+    return MediaQuery.viewInsetsOf(context).bottom > 0;
+  }
+
+  static ValueNotifier<double>? heightListenableOf(BuildContext context) {
+    final element = context
+        .getElementForInheritedWidgetOfExactType<KeyboardVisibilityScope>();
+    return (element?.widget as KeyboardVisibilityScope?)?.heightListenable;
+  }
+
+  @override
+  bool updateShouldNotify(KeyboardVisibilityScope oldWidget) {
+    return isKeyboardOpen != oldWidget.isKeyboardOpen;
+  }
+}
 
 /// Translucent Apple HIG Keyboard Accessory Toolbar.
 ///
 /// Automatically docks directly on top of the software keyboard whenever
 /// any text input is focused. Features a prominent, tactile "Ẩn bàn phím"
 /// (Hide keyboard) button with smooth haptics and keyboard dismissal.
-class KeyboardDismissBarOverlay extends StatelessWidget {
+class KeyboardDismissBarOverlay extends StatefulWidget {
   const KeyboardDismissBarOverlay({
     required this.child,
     this.barHeightPortrait = 38.0,
@@ -24,27 +56,49 @@ class KeyboardDismissBarOverlay extends StatelessWidget {
   final double barHeightLandscape;
 
   @override
+  State<KeyboardDismissBarOverlay> createState() =>
+      _KeyboardDismissBarOverlayState();
+}
+
+class _KeyboardDismissBarOverlayState extends State<KeyboardDismissBarOverlay> {
+  final ValueNotifier<double> _keyboardHeightNotifier = ValueNotifier<double>(0);
+
+  @override
+  void dispose() {
+    _keyboardHeightNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final rawKeyboardHeight = mediaQuery.viewInsets.bottom;
-    final isLandscape = context.isLandscape;
-    final barHeight = isLandscape ? barHeightLandscape : barHeightPortrait;
+    final isLandscape = mediaQuery.size.width > mediaQuery.size.height;
+    final barHeight =
+        isLandscape ? widget.barHeightLandscape : widget.barHeightPortrait;
     final isKeyboardVisible = rawKeyboardHeight > 0;
 
-    // Smoothly scale the accessory bar inset as the keyboard slides up/down
-    // and ALWAYS keep the MediaQuery widget in the tree so the child Element
-    // subtree is never unmounted/remounted when isKeyboardVisible toggles!
     final effectiveBarInset = isKeyboardVisible
         ? math.min(rawKeyboardHeight, barHeight)
         : 0.0;
+    _keyboardHeightNotifier.value =
+        isKeyboardVisible ? rawKeyboardHeight + effectiveBarInset : 0.0;
 
-    final adjustedChild = MediaQuery(
+    // Stabilize both `padding` (to `viewPadding`) and `viewInsets` (to `zero`)
+    // for the entire Navigator subtree! Because `data` remains 100% identical
+    // on every frame of the keyboard animation, `MediaQuery.updateShouldNotify`
+    // returns `false`, completely preventing all Scaffolds, AppBars, SafeAreas,
+    // and ModalBottomSheets in the app from rebuilding/relayouting at 120fps.
+    final stabilizedChild = MediaQuery(
       data: mediaQuery.copyWith(
-        viewInsets: mediaQuery.viewInsets.copyWith(
-          bottom: rawKeyboardHeight + effectiveBarInset,
-        ),
+        padding: mediaQuery.viewPadding,
+        viewInsets: EdgeInsets.zero,
       ),
-      child: child,
+      child: KeyboardVisibilityScope(
+        isKeyboardOpen: isKeyboardVisible,
+        heightListenable: _keyboardHeightNotifier,
+        child: RepaintBoundary(child: widget.child),
+      ),
     );
 
     return GestureDetector(
@@ -58,20 +112,28 @@ class KeyboardDismissBarOverlay extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          adjustedChild,
-          if (isKeyboardVisible)
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: rawKeyboardHeight,
-              height: barHeight,
-              child: RepaintBoundary(
-                child: _AppleKeyboardAccessoryBar(
-                  barHeight: barHeight,
-                  isLandscape: isLandscape,
+          stabilizedChild,
+          Positioned.fill(
+            child: Offstage(
+              offstage: !isKeyboardVisible,
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: Transform.translate(
+                  offset: Offset(0, -rawKeyboardHeight),
+                  child: RepaintBoundary(
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: barHeight,
+                      child: _AppleKeyboardAccessoryBar(
+                        barHeight: barHeight,
+                        isLandscape: isLandscape,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
+          ),
         ],
       ),
     );

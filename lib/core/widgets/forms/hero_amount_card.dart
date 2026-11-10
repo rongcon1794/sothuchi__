@@ -180,6 +180,7 @@ class HeroAmountCard extends StatelessWidget {
                   focusNode: focusNode,
                   autofocus: autofocus,
                   readOnly: readOnly,
+                  scrollPadding: const EdgeInsets.fromLTRB(20, 20, 20, 340),
                   keyboardType: TextInputType.numberWithOptions(
                     decimal: currencyInfo.decimalDigits > 0,
                   ),

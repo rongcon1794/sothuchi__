@@ -6,6 +6,7 @@ import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
+import 'package:so_thu_chi/core/widgets/keyboard_accessory_bar.dart';
 import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_controller.dart';
 import 'package:so_thu_chi/features/debts/domain/entities/debt.dart';
 import 'package:so_thu_chi/features/debts/presentation/controllers/debts_controller.dart';
@@ -16,11 +17,13 @@ class DebtRepaymentSheet extends ConsumerStatefulWidget {
   final Debt debt;
 
   static Future<void> show(BuildContext context, Debt debt) {
+    Widget? cachedSheet;
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: false,
       backgroundColor: Colors.transparent,
-      builder: (_) => DebtRepaymentSheet(debt: debt),
+      builder: (_) => cachedSheet ??= DebtRepaymentSheet(debt: debt),
     );
   }
 
@@ -119,12 +122,17 @@ class _DebtRepaymentSheetState extends ConsumerState<DebtRepaymentSheet> {
         ? l10n.debtRepaymentCollectTitle(widget.debt.personName)
         : l10n.debtRepaymentPayTitle(widget.debt.personName);
 
+    final isKeyboardOpen = KeyboardVisibilityScope.isOpenOf(context);
+    final bottomKeyboardSpacer = isKeyboardOpen
+        ? 300.0
+        : MediaQuery.viewInsetsOf(context).bottom;
+
     return Container(
       constraints: BoxConstraints(
         maxHeight: MediaQuery.sizeOf(context).height * 0.88,
       ),
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.viewInsetsOf(context).bottom + 24,
+      padding: const EdgeInsets.only(
+        bottom: 24,
         left: 20,
         right: 20,
         top: 16,
@@ -134,6 +142,7 @@ class _DebtRepaymentSheetState extends ConsumerState<DebtRepaymentSheet> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(AppleTokens.radiusHero)),
       ),
       child: SingleChildScrollView(
+        padding: EdgeInsets.only(bottom: bottomKeyboardSpacer),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,

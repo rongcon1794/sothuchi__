@@ -57,7 +57,8 @@ class _BudgetFormBottomSheetState extends ConsumerState<BudgetFormBottomSheet> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _amountController;
   final _amountFocusNode = FocusNode();
-  Timer? _autoFocusTimer;
+  Animation<double>? _routeAnimation;
+  late String _lastAmountText;
 
   late _BudgetScopeMode _scopeMode;
   String? _selectedCategoryId; // null => Overall Monthly Budget
@@ -81,24 +82,46 @@ class _BudgetFormBottomSheetState extends ConsumerState<BudgetFormBottomSheet> {
           ? existing.limitMoney.toInputString(locale: locale)
           : '',
     );
+    _lastAmountText = _amountController.text;
 
     _amountController.addListener(_onAmountChange);
 
-    // Auto-focus amount field when creating a new budget
+    // Auto-focus amount field after sheet transition finishes when creating a new budget
     if (existing == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        _autoFocusTimer = Timer(const Duration(milliseconds: 250), () {
-          if (mounted && !_amountFocusNode.hasFocus) {
-            _amountFocusNode.requestFocus();
-            SystemChannels.textInput.invokeMethod<void>('TextInput.show');
-          }
-        });
+        _scheduleAutoFocus();
       });
     }
   }
 
+  void _scheduleAutoFocus() {
+    final routeAnimation = ModalRoute.of(context)?.animation;
+    if (routeAnimation != null && !routeAnimation.isCompleted) {
+      _routeAnimation = routeAnimation;
+      routeAnimation.addStatusListener(_onRouteAnimationStatus);
+    } else {
+      _focusAmountField();
+    }
+  }
+
+  void _onRouteAnimationStatus(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      _routeAnimation?.removeStatusListener(_onRouteAnimationStatus);
+      _routeAnimation = null;
+      _focusAmountField();
+    }
+  }
+
+  void _focusAmountField() {
+    if (!mounted || _amountFocusNode.hasFocus) return;
+    _amountFocusNode.requestFocus();
+  }
+
   void _onAmountChange() {
+    final currentText = _amountController.text;
+    if (currentText == _lastAmountText) return;
+    _lastAmountText = currentText;
     if (mounted) {
       setState(() {});
     }
@@ -106,7 +129,7 @@ class _BudgetFormBottomSheetState extends ConsumerState<BudgetFormBottomSheet> {
 
   @override
   void dispose() {
-    _autoFocusTimer?.cancel();
+    _routeAnimation?.removeStatusListener(_onRouteAnimationStatus);
     _amountController.removeListener(_onAmountChange);
     _amountFocusNode.dispose();
     _amountController.dispose();

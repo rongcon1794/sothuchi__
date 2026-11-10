@@ -580,8 +580,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         ? AppleTokens.appBarHeightLandscape
         : AppleTokens.appBarHeightPortrait;
     final scrollBottomPadding = isWide
-        ? AppleTokens.scrollBottomPaddingLandscape + 40
-        : 120.0;
+        ? AppleTokens.scrollBottomPaddingLandscape + 220
+        : 360.0;
 
     final activeWallets = ref.watch(activeAccountsProvider);
     final allWallets = ref.watch(accountsStreamProvider).value ?? const [];
@@ -668,6 +668,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     }
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         toolbarHeight: appBarHeight,

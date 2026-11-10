@@ -51,10 +51,14 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
   late final AnimationController _shakeController;
   late final Animation<double> _shakeAnimation;
   bool _wasOverBalance = false;
+  late String _lastAmountText;
+  late bool _lastFocused;
 
   @override
   void initState() {
     super.initState();
+    _lastAmountText = widget.amountController.text;
+    _lastFocused = widget.focusNode.hasFocus;
     widget.focusNode.addListener(_onFocusChange);
     widget.amountController.addListener(_onAmountChange);
 
@@ -99,10 +103,16 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
   }
 
   void _onFocusChange() {
+    final hasFocus = widget.focusNode.hasFocus;
+    if (hasFocus == _lastFocused) return;
+    _lastFocused = hasFocus;
     if (mounted) setState(() {});
   }
 
   void _onAmountChange() {
+    final currentText = widget.amountController.text;
+    if (currentText == _lastAmountText) return;
+    _lastAmountText = currentText;
     _checkBalance(notify: false);
     if (mounted) setState(() {});
   }
@@ -230,7 +240,8 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
                         child: TextFormField(
                           controller: widget.amountController,
                           focusNode: widget.focusNode,
-                          autofocus: !widget.isEditing,
+                          autofocus: false,
+                          scrollPadding: const EdgeInsets.fromLTRB(20, 20, 20, 340),
                           textAlign: TextAlign.center,
                           showCursor: false,
                           keyboardType: TextInputType.numberWithOptions(

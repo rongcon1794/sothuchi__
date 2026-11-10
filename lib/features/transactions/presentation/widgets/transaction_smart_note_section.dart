@@ -149,53 +149,59 @@ class TransactionSmartNoteSection extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: ListenableBuilder(
-                  listenable: noteController,
-                  builder: (context, _) {
-                    return TextFormField(
-                      controller: noteController,
-                      textCapitalization: TextCapitalization.sentences,
-                      inputFormatters: const [
-                        FirstLetterCapitalizationFormatter(),
-                      ],
-                      maxLines: null,
-                      maxLength: 1000,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        filled: false,
-                        fillColor: Colors.transparent,
-                        isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 8),
-                        hintText: l10n.noteHint,
-                        hintStyle: TextStyle(
-                          fontSize: 14,
-                          color: isDark
-                              ? const Color(0xFF6C6C70)
-                              : const Color(0xFF8E8E93),
-                        ),
-                        counterText: '',
-                        suffixIcon: noteController.text.isNotEmpty
-                            ? GestureDetector(
-                                onTap: () {
-                                  noteController.clear();
-                                  HapticFeedback.lightImpact();
-                                },
-                                child: const Icon(
-                                  CupertinoIcons.clear_circled_solid,
-                                  size: 18,
-                                  color: AppleTokens.systemGray,
-                                ),
-                              )
-                            : null,
-                      ),
-                    );
-                  },
+                child: TextFormField(
+                  controller: noteController,
+                  textCapitalization: TextCapitalization.sentences,
+                  inputFormatters: const [
+                    FirstLetterCapitalizationFormatter(),
+                  ],
+                  maxLines: null,
+                  maxLength: 1000,
+                  scrollPadding: const EdgeInsets.fromLTRB(20, 20, 20, 360),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    filled: false,
+                    fillColor: Colors.transparent,
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                    hintText: l10n.noteHint,
+                    hintStyle: TextStyle(
+                      fontSize: 14,
+                      color: isDark
+                          ? const Color(0xFF6C6C70)
+                          : const Color(0xFF8E8E93),
+                    ),
+                    counterText: '',
+                    suffixIcon: ListenableBuilder(
+                      listenable: noteController,
+                      builder: (context, _) {
+                        if (noteController.text.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
+                        return GestureDetector(
+                          onTap: () {
+                            noteController.clear();
+                            HapticFeedback.lightImpact();
+                          },
+                          child: const Icon(
+                            CupertinoIcons.clear_circled_solid,
+                            size: 18,
+                            color: AppleTokens.systemGray,
+                          ),
+                        );
+                      },
+                    ),
+                    suffixIconConstraints: const BoxConstraints(
+                      minWidth: 24,
+                      minHeight: 24,
+                    ),
+                  ),
                 ),
               ),
             ],

@@ -184,6 +184,7 @@ class AppleGlassCard extends StatelessWidget {
 
     Widget content = Container(
       padding: padding ?? const EdgeInsets.all(16),
+      clipBehavior: padding == EdgeInsets.zero ? Clip.hardEdge : Clip.none,
       decoration: BoxDecoration(
         color: gradient == null ? bg : null,
         gradient: gradient,
@@ -204,8 +205,6 @@ class AppleGlassCard extends StatelessWidget {
           child: content,
         ),
       );
-    } else {
-      content = ClipRRect(borderRadius: radius, child: content);
     }
 
     if (margin != null || shadow.isNotEmpty) {

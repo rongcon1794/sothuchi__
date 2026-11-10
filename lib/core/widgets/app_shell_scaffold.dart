@@ -123,20 +123,23 @@ class AppShellScaffold extends StatelessWidget {
     );
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Column(
         children: [
           ?topBanner,
           Expanded(child: navigationShell),
         ],
       ),
-      bottomNavigationBar: isOled
-          ? navBarContent
-          : ClipRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-                child: navBarContent,
+      bottomNavigationBar: RepaintBoundary(
+        child: isOled || Theme.of(context).platform == TargetPlatform.android
+            ? navBarContent
+            : ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                  child: navBarContent,
+                ),
               ),
-            ),
+      ),
     );
   }
 }

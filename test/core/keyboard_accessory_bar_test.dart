@@ -136,6 +136,50 @@ void main() {
       expect(find.text('Ẩn bàn phím'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets(
+      'does not rebuild MediaQuery-dependent child screens on intermediate keyboard animation frames',
+      (tester) async {
+        tester.view.physicalSize = const Size(1080, 2400);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+          tester.view.resetViewInsets();
+        });
+
+        var childMediaQueryBuilds = 0;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: AppTheme.light(),
+            builder: (context, child) => KeyboardDismissBarOverlay(child: child!),
+            home: Builder(
+              builder: (context) {
+                // Subscribe to MediaQuery (just like Scaffold, AppBar, SafeArea, ModalBottomSheet)
+                MediaQuery.of(context);
+                childMediaQueryBuilds++;
+                return const Scaffold(body: SizedBox.expand());
+              },
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final initialBuilds = childMediaQueryBuilds;
+
+        // Simulate 5 frames of Android 120Hz keyboard slide-up animation
+        for (final inset in <double>[40, 110, 190, 260, 320]) {
+          tester.view.viewInsets = FakeViewPadding(bottom: inset);
+          await tester.pump();
+        }
+
+        // Child depending on MediaQuery.of(context) must have 0 rebuilds across all keyboard frames!
+        expect(childMediaQueryBuilds, equals(initialBuilds));
+      },
+    );
   });
 }
 
