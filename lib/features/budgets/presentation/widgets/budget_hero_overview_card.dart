@@ -48,8 +48,6 @@ class BudgetHeroOverviewCard extends StatelessWidget {
     final isCurrentMonth = selectedMonth.year == now.year && selectedMonth.month == now.month;
     final daysInMonth = DateTime(selectedMonth.year, selectedMonth.month + 1, 0).day;
     final daysLeft = isCurrentMonth ? (daysInMonth - now.day + 1).clamp(1, daysInMonth) : daysInMonth;
-    final daysPassed = (daysInMonth - daysLeft + 1).clamp(1, daysInMonth);
-    final timePercent = ((daysPassed * 100) ~/ daysInMonth).clamp(0, 100);
 
     final safeDailyMinor = daysLeft > 0 ? totalRemaining ~/ daysLeft : 0;
     final safeDailyMoney = Money(minorUnits: safeDailyMinor, currencyCode: currency);
@@ -81,57 +79,43 @@ class BudgetHeroOverviewCard extends StatelessWidget {
       statusIcon = CupertinoIcons.checkmark_shield_fill;
     }
 
-    // Spending Pace evaluation
-    final String paceHeadline;
-    if (isExceeded) {
-      paceHeadline = isVi
-          ? 'Đã vượt hạn mức ngân sách tháng!'
-          : 'Monthly budget has been exceeded!';
-    } else if (usedPercent > timePercent + 12) {
-      paceHeadline = isVi
-          ? 'Tốc độ chi tiêu nhanh hơn tiến độ tháng ($usedPercent% chi / $timePercent% tháng)'
-          : 'Spending pace is faster than elapsed month ($usedPercent% spent / $timePercent% time)';
-    } else {
-      paceHeadline = isVi
-          ? 'Tiến độ rất tốt: Đang chi tiêu chậm hơn tiến độ tháng'
-          : 'Great pacing: You are spending under the monthly timeline';
-    }
-
     return AppleGlassCard(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
       borderColor: isExceeded ? AppleTokens.systemRed.withValues(alpha: 0.35) : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Bar: Title + Health Status Pill
+          // 1. Header Bar: Title + Health Status Pill
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(7),
+                      width: 26,
+                      height: 26,
                       decoration: BoxDecoration(
-                        color: barColor.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(10),
+                        color: barColor.withValues(alpha: isDark ? 0.22 : 0.12),
+                        borderRadius: BorderRadius.circular(7),
                       ),
                       child: Icon(
-                        Icons.account_balance_wallet_rounded,
-                        size: 18,
+                        Icons.pie_chart_rounded,
+                        size: 15,
                         color: barColor,
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
+                    const SizedBox(width: 8),
+                    Flexible(
                       child: Text(
-                        l10n.overallMonthlyBudget,
+                        l10n.overallMonthlyBudget.toUpperCase(),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleMedium?.copyWith(
+                        style: const TextStyle(
+                          fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          letterSpacing: -0.2,
+                          letterSpacing: 0.5,
+                          color: AppleTokens.systemGray,
                         ),
                       ),
                     ),
@@ -140,22 +124,26 @@ class BudgetHeroOverviewCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
                 decoration: BoxDecoration(
-                  color: barColor.withValues(alpha: 0.14),
+                  color: barColor.withValues(alpha: isDark ? 0.22 : 0.12),
                   borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                  border: Border.all(
+                    color: barColor.withValues(alpha: isDark ? 0.40 : 0.25),
+                    width: 0.8,
+                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(statusIcon, size: 12, color: barColor),
+                    Icon(statusIcon, size: 11, color: barColor),
                     const SizedBox(width: 4),
                     Text(
                       statusText,
                       style: TextStyle(
                         color: barColor,
                         fontWeight: FontWeight.w700,
-                        fontSize: 12,
+                        fontSize: 11,
                       ),
                     ),
                   ],
@@ -164,17 +152,55 @@ class BudgetHeroOverviewCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 18),
+          const SizedBox(height: 12),
 
-          // Central Visual Section: Activity Ring & 3-Stat Financial Breakdown
+          // 2. Hero Section: Còn lại / Bội chi + Compact Activity Ring
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Apple Activity Ring
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      isExceeded
+                          ? (isVi ? 'ĐÃ BỘI CHI' : 'EXCEEDED BY')
+                          : (isVi ? 'SỐ DƯ CÒN LẠI' : 'REMAINING BUDGET'),
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.4,
+                        color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        isExceeded
+                            ? totalExceededMoney.format(locale: locale, masked: hideBalance)
+                            : totalRemainingMoney.format(locale: locale, masked: hideBalance),
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                          fontFeatures: AppTheme.tabularFigures,
+                          letterSpacing: -0.4,
+                          color: isExceeded
+                              ? AppleTokens.systemRed
+                              : (isDark ? Colors.white : const Color(0xFF1C1C1E)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
               LucianActivityRing(
                 progress: clampedRatio,
-                size: 94,
-                strokeWidth: 9.0,
+                size: 52,
+                strokeWidth: 5.5,
                 primaryColor: barColor,
                 secondaryColor: ringSecondaryColor,
                 showGlow: isExceeded || usedPercent >= 80,
@@ -182,65 +208,15 @@ class BudgetHeroOverviewCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      isVi ? '$usedPercent% tổng' : '$usedPercent% total',
+                      '$usedPercent%\ntổng',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 10.5,
                         fontWeight: FontWeight.w800,
                         color: barColor,
                         fontFeatures: AppTheme.tabularFigures,
-                        letterSpacing: -0.3,
-                        height: 1.15,
+                        height: 1.05,
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      isVi ? 'đã dùng' : 'used',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
-                        height: 1.1,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(width: 18),
-
-              // 3 Key Financial Stat Rows
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Limit
-                    _MetricTile(
-                      label: l10n.budgetLimit,
-                      amountText: totalLimitMoney.format(locale: locale, masked: hideBalance),
-                      color: scheme.onSurface,
-                      icon: Icons.layers_outlined,
-                      hideBalance: hideBalance,
-                    ),
-                    const SizedBox(height: 8),
-                    // Spent
-                    _MetricTile(
-                      label: isVi ? 'Đã chi tiêu' : 'Spent',
-                      amountText: totalSpentMoney.format(locale: locale, masked: hideBalance),
-                      color: financeColors.expense,
-                      icon: Icons.arrow_upward_rounded,
-                      hideBalance: hideBalance,
-                    ),
-                    const SizedBox(height: 8),
-                    // Remaining or Exceeded
-                    _MetricTile(
-                      label: isExceeded ? (isVi ? 'Bội chi' : 'Over budget') : (isVi ? 'Còn lại' : 'Remaining'),
-                      amountText: isExceeded
-                          ? totalExceededMoney.format(locale: locale, masked: hideBalance)
-                          : totalRemainingMoney.format(locale: locale, masked: hideBalance),
-                      color: isExceeded ? financeColors.expense : financeColors.income,
-                      icon: isExceeded ? Icons.warning_amber_rounded : Icons.shield_outlined,
-                      hideBalance: hideBalance,
                     ),
                   ],
                 ),
@@ -248,173 +224,170 @@ class BudgetHeroOverviewCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
 
-          // Pacing & Runway Section
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.05)
-                  : scheme.surfaceContainerHighest.withValues(alpha: 0.45),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          // 3. Smooth Progress Bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: Stack(
               children: [
-                Row(
-                  children: [
-                    Icon(
-                      isExceeded
-                          ? CupertinoIcons.exclamationmark_circle
-                          : CupertinoIcons.sparkles,
-                      size: 14,
-                      color: barColor,
+                Container(
+                  height: 6,
+                  width: double.infinity,
+                  color: isDark ? Colors.white12 : Colors.black.withValues(alpha: 0.06),
+                ),
+                FractionallySizedBox(
+                  widthFactor: clampedRatio,
+                  child: Container(
+                    height: 6,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [barColor, ringSecondaryColor],
+                      ),
+                      borderRadius: BorderRadius.circular(3),
                     ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        paceHeadline,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // 4. Secondary Numbers: Đã chi vs Tổng hạn mức
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Text.rich(
+                  TextSpan(
+                    text: '${isVi ? 'Đã chi' : 'Spent'}: ',
+                    style: const TextStyle(
+                      fontSize: 11.5,
+                      color: AppleTokens.systemGray,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: totalSpentMoney.format(locale: locale, masked: hideBalance),
                         style: TextStyle(
                           fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black87,
+                          fontWeight: FontWeight.w700,
+                          fontFeatures: AppTheme.tabularFigures,
+                          color: financeColors.expense,
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                if (isCurrentMonth) ...[
-                  const SizedBox(height: 10),
-                  Row(
+              ),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text.rich(
+                  TextSpan(
+                    text: '${l10n.budgetLimit}: ',
+                    style: const TextStyle(
+                      fontSize: 11.5,
+                      color: AppleTokens.systemGray,
+                      fontWeight: FontWeight.w500,
+                    ),
                     children: [
-                      // Days left pill
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: scheme.surface.withValues(alpha: isDark ? 0.4 : 0.8),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.today_rounded, size: 14, color: AppleTokens.systemBlue),
-                              const SizedBox(width: 6),
-                              Flexible(
-                                child: Text(
-                                  l10n.budgetRemainingDays(daysLeft),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600),
-                                ),
-                              ),
-                            ],
-                          ),
+                      TextSpan(
+                        text: totalLimitMoney.format(locale: locale, masked: hideBalance),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          fontFeatures: AppTheme.tabularFigures,
+                          color: isDark ? Colors.white70 : Colors.black87,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      // Daily safe pace pill
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: scheme.surface.withValues(alpha: isDark ? 0.4 : 0.8),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(CupertinoIcons.flame_fill, size: 14, color: AppleTokens.systemOrange),
-                              const SizedBox(width: 6),
-                              Flexible(
-                                child: Text(
-                                  l10n.budgetDailyRecommended(
-                                    safeDailyMoney.format(locale: locale, masked: hideBalance),
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600),
-                                ),
-                              ),
-                            ],
+                    ],
+                  ),
+                  textAlign: TextAlign.end,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+
+          if (isCurrentMonth) ...[
+            const SizedBox(height: 10),
+            Container(
+              height: 0.6,
+              color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
+            ),
+            const SizedBox(height: 8),
+
+            // 5. Clean Single-line Footer (Days left & Safe Daily Spending Pace)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        CupertinoIcons.calendar,
+                        size: 12,
+                        color: AppleTokens.systemBlue,
+                      ),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          l10n.budgetRemainingDays(daysLeft),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white70 : Colors.black87,
                           ),
                         ),
                       ),
                     ],
                   ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MetricTile extends StatelessWidget {
-  const _MetricTile({
-    required this.label,
-    required this.amountText,
-    required this.color,
-    required this.icon,
-    required this.hideBalance,
-  });
-
-  final String label;
-  final String amountText;
-  final Color color;
-  final IconData icon;
-  final bool hideBalance;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: scheme.surface.withValues(alpha: 0.35),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 12, color: color),
-              const SizedBox(width: 5),
-              Expanded(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: scheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Icon(
+                        isExceeded
+                            ? CupertinoIcons.exclamationmark_triangle_fill
+                            : CupertinoIcons.flame_fill,
+                        size: 12,
+                        color: isExceeded ? AppleTokens.systemRed : AppleTokens.systemOrange,
+                      ),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          isExceeded
+                              ? (isVi ? 'Đã vượt' : 'Exceeded')
+                              : l10n.budgetDailyRecommended(
+                                  safeDailyMoney.format(locale: locale, masked: hideBalance),
+                                ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.end,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            fontFeatures: AppTheme.tabularFigures,
+                            color: isExceeded ? AppleTokens.systemRed : barColor,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 2),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              amountText,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: color,
-                fontFeatures: AppTheme.tabularFigures,
-              ),
+              ],
             ),
-          ),
+          ],
         ],
       ),
     );
