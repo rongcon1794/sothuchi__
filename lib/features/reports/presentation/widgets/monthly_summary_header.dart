@@ -109,7 +109,7 @@ class MonthlySummaryHeader extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (momBadge != null) ...[
-              Align(alignment: Alignment.centerLeft, child: momBadge),
+              Align(alignment: Alignment.center, child: momBadge),
               const SizedBox(height: 12),
             ],
             incStat,
@@ -133,7 +133,7 @@ class MonthlySummaryHeader extends StatelessWidget {
       child: Column(
         children: [
           if (momBadge != null) ...[
-            Align(alignment: Alignment.centerLeft, child: momBadge),
+            Align(alignment: Alignment.center, child: momBadge),
             const SizedBox(height: 12),
           ],
           Row(
@@ -178,10 +178,11 @@ class SummaryStatColumn extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
           label,
+          textAlign: TextAlign.center,
           style: theme.textTheme.labelMedium?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -189,6 +190,7 @@ class SummaryStatColumn extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           value,
+          textAlign: TextAlign.center,
           semanticsLabel: semanticsValue,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
