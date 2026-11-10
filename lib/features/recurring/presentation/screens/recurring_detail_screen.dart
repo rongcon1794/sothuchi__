@@ -290,9 +290,11 @@ class RecurringDetailScreen extends ConsumerWidget {
                               children: [
                                 Icon(CupertinoIcons.exclamationmark_triangle_fill, color: AppleTokens.systemOrange, size: 16),
                                 SizedBox(width: 6),
-                                Text(
-                                  'Giao dịch đã đến hạn cần thanh toán / ghi sổ!',
-                                  style: TextStyle(color: AppleTokens.systemOrange, fontWeight: FontWeight.w700, fontSize: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Giao dịch đã đến hạn cần thanh toán / ghi sổ!',
+                                    style: TextStyle(color: AppleTokens.systemOrange, fontWeight: FontWeight.w700, fontSize: 12),
+                                  ),
                                 ),
                               ],
                             ),

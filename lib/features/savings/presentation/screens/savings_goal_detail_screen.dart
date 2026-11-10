@@ -291,13 +291,17 @@ class SavingsGoalDetailScreen extends ConsumerWidget {
                                       style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppleTokens.systemGray),
                                     ),
                                     const SizedBox(height: 3),
-                                    Text(
-                                      goal.currentMoney.format(locale: locale, masked: hideBalance),
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w800,
-                                        color: accentColor,
-                                        fontFeatures: AppTheme.tabularFigures,
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        goal.currentMoney.format(locale: locale, masked: hideBalance),
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w800,
+                                          color: accentColor,
+                                          fontFeatures: AppTheme.tabularFigures,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -314,12 +318,16 @@ class SavingsGoalDetailScreen extends ConsumerWidget {
                                       style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppleTokens.systemGray),
                                     ),
                                     const SizedBox(height: 3),
-                                    Text(
-                                      goal.targetMoney.format(locale: locale, masked: hideBalance),
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w800,
-                                        fontFeatures: AppTheme.tabularFigures,
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        goal.targetMoney.format(locale: locale, masked: hideBalance),
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w800,
+                                          fontFeatures: AppTheme.tabularFigures,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -336,12 +344,16 @@ class SavingsGoalDetailScreen extends ConsumerWidget {
                                       style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppleTokens.systemGray),
                                     ),
                                     const SizedBox(height: 3),
-                                    Text(
-                                      goal.remainingMoney.format(locale: locale, masked: hideBalance),
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w800,
-                                        fontFeatures: AppTheme.tabularFigures,
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        goal.remainingMoney.format(locale: locale, masked: hideBalance),
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w800,
+                                          fontFeatures: AppTheme.tabularFigures,
+                                        ),
                                       ),
                                     ),
                                   ],

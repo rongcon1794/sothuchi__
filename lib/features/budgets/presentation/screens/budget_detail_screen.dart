@@ -309,24 +309,50 @@ class BudgetDetailScreen extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(height: 14),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            l10n.budgetSpentOf(spentText, limitText),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              fontFeatures: AppTheme.tabularFigures,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              l10n.budgetSpentOf(spentText, limitText),
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                fontFeatures: AppTheme.tabularFigures,
+                            Expanded(
+                              child: Text(
+                                progress.isExceeded
+                                    ? l10n.budgetExceededBy(diffText)
+                                    : l10n.budgetRemaining(diffText),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: progress.isExceeded
+                                      ? financeColors.expense
+                                      : scheme.onSurface,
+                                  fontWeight: FontWeight.w700,
+                                  fontFeatures: AppTheme.tabularFigures,
+                                ),
                               ),
                             ),
-                            Text(
-                              progress.isExceeded
-                                  ? l10n.budgetExceededBy(diffText)
-                                  : l10n.budgetRemaining(diffText),
-                              style: TextStyle(
-                                color: progress.isExceeded ? financeColors.expense : scheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w700,
-                                fontFeatures: AppTheme.tabularFigures,
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                l10n.alertThresholdLabel(budget.alertThreshold),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.end,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: scheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.w600,
+                                  fontFeatures: AppTheme.tabularFigures,
+                                ),
                               ),
                             ),
                           ],
@@ -346,9 +372,12 @@ class BudgetDetailScreen extends ConsumerWidget {
                                 Expanded(
                                   child: Text(
                                     l10n.budgetDailyRecommended(dailyMoney.format(locale: locale, masked: hideBalance)),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
                                   ),
                                 ),
+                                const SizedBox(width: 8),
                                 Text(
                                   l10n.budgetRemainingDays(daysLeft),
                                   style: const TextStyle(fontSize: 12, color: AppleTokens.systemGray),

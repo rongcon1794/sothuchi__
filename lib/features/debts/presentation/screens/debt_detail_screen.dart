@@ -270,9 +270,11 @@ class DebtDetailScreen extends ConsumerWidget {
                               children: [
                                 Icon(CupertinoIcons.exclamationmark_triangle_fill, color: AppleTokens.systemRed, size: 16),
                                 SizedBox(width: 6),
-                                Text(
-                                  'Khoản nợ đã quá hạn cần thanh toán!',
-                                  style: TextStyle(color: AppleTokens.systemRed, fontWeight: FontWeight.w700, fontSize: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Khoản nợ đã quá hạn cần thanh toán!',
+                                    style: TextStyle(color: AppleTokens.systemRed, fontWeight: FontWeight.w700, fontSize: 12),
+                                  ),
                                 ),
                               ],
                             ),
@@ -314,13 +316,23 @@ class DebtDetailScreen extends ConsumerWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              'Đã trả: ${debt.paidMoney.format(locale: locale, masked: hideBalance)}',
-                              style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, fontFeatures: AppTheme.tabularFigures),
+                            Flexible(
+                              child: Text(
+                                'Đã trả: ${debt.paidMoney.format(locale: locale, masked: hideBalance)}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, fontFeatures: AppTheme.tabularFigures),
+                              ),
                             ),
-                            Text(
-                              'Tổng: ${debt.totalMoney.format(locale: locale, masked: hideBalance)}',
-                              style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, fontFeatures: AppTheme.tabularFigures),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                'Tổng: ${debt.totalMoney.format(locale: locale, masked: hideBalance)}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.end,
+                                style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, fontFeatures: AppTheme.tabularFigures),
+                              ),
                             ),
                           ],
                         ),

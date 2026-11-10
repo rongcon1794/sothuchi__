@@ -11,6 +11,7 @@ import 'package:so_thu_chi/features/accounts/data/repositories/firestore_account
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
 import 'package:so_thu_chi/features/budgets/data/repositories/firestore_budget_repository.dart';
 import 'package:so_thu_chi/features/budgets/domain/entities/budget.dart';
+import 'package:so_thu_chi/features/budgets/presentation/screens/budget_detail_screen.dart';
 import 'package:so_thu_chi/features/budgets/presentation/screens/budgets_screen.dart';
 import 'package:so_thu_chi/features/categories/data/repositories/firestore_category_repository.dart';
 import 'package:so_thu_chi/features/transactions/data/repositories/firestore_transaction_repository.dart';
@@ -121,6 +122,78 @@ void main() {
         findsOneWidget,
       );
     });
+
+    testWidgets(
+      'BudgetDetailScreen renders without right overflow on narrow mobile screens',
+      (tester) async {
+        tester.view.physicalSize = const Size(360, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        SharedPreferences.setMockInitialValues({'onboarding_completed': true});
+        final prefs = await SharedPreferences.getInstance();
+        final accRepo = InMemoryAccountRepository();
+        final catRepo = InMemoryCategoryRepository();
+        final txRepo = InMemoryTransactionRepository(accountRepo: accRepo);
+        final budgetRepo = InMemoryBudgetRepository();
+
+        await catRepo.seedDefaultCategoriesIfNeeded();
+        final wallet = ((await accRepo.createAccount(
+          name: 'Tiền mặt',
+          type: AccountType.cash,
+          initialBalance: 10000000,
+          currency: 'VND',
+          icon: 'cash',
+          color: 0xFF0D7C66,
+        )) as Success<Account>).value;
+
+        final now = DateTime.now();
+        final budget = ((await budgetRepo.upsertMonthlyBudget(
+          categoryId: null,
+          amount: 3000000,
+          currency: 'VND',
+          monthStart: now,
+          alertThreshold: 80,
+        )) as Success<Budget>).value;
+
+        await txRepo.addTransaction(
+          amount: 50000,
+          currency: 'VND',
+          type: TransactionType.expense,
+          accountId: wallet.id,
+          categoryId: 'default_food',
+          note: 'ăn sáng',
+          date: now,
+        );
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              sharedPreferencesProvider.overrideWithValue(prefs),
+              accountRepositoryProvider.overrideWithValue(accRepo),
+              categoryRepositoryProvider.overrideWithValue(catRepo),
+              transactionRepositoryProvider.overrideWithValue(txRepo),
+              budgetRepositoryProvider.overrideWithValue(budgetRepo),
+            ],
+            child: MaterialApp(
+              locale: const Locale('vi'),
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              theme: AppTheme.light(),
+              home: BudgetDetailScreen(budgetId: budget.id),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+        expect(find.textContaining('Đã chi'), findsOneWidget);
+        expect(find.textContaining('Còn lại'), findsOneWidget);
+      },
+    );
   });
 }
 
