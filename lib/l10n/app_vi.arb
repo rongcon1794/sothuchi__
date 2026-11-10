@@ -200,7 +200,7 @@
   "languageEnglish": "English",
   "defaultCurrency": "Đơn vị tiền tệ",
   "securitySection": "Bảo mật & Dữ liệu",
-  "biometricLock": "Khóa ứng dụng sinh trắc học",
+  "biometricLock": "Khóa ứng dụng",
   "biometricLockSubtitle": "Yêu cầu vân tay / Face ID khi mở ứng dụng",
   "biometricNotAvailable": "Thiết bị hiện không hỗ trợ hoặc chưa cài đặt sinh trắc học.",
   "biometricPromptReason": "Xác thực sinh trắc học để mở Sổ Thu Chi",

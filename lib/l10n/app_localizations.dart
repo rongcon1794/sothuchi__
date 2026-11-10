@@ -1037,7 +1037,7 @@ abstract class AppLocalizations {
   /// No description provided for @biometricLock.
   ///
   /// In vi, this message translates to:
-  /// **'Khóa ứng dụng sinh trắc học'**
+  /// **'Khóa ứng dụng'**
   String get biometricLock;
 
   /// No description provided for @biometricLockSubtitle.

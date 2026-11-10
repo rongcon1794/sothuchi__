@@ -504,7 +504,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get securitySection => 'Bảo mật & Dữ liệu';
 
   @override
-  String get biometricLock => 'Khóa ứng dụng sinh trắc học';
+  String get biometricLock => 'Khóa ứng dụng';
 
   @override
   String get biometricLockSubtitle =>
