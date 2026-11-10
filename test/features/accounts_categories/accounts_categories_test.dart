@@ -427,6 +427,25 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byIcon(CupertinoIcons.eye_slash), findsOneWidget);
+
+      // Test 3-dots popup menu on wallet has Delete option
+      final moreOptionsButton = find.byTooltip('Tùy chọn khác');
+      expect(moreOptionsButton, findsWidgets);
+      await tester.tap(moreOptionsButton.first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Xóa'), findsOneWidget);
+      await tester.tap(find.text('Xóa'));
+      await tester.pumpAndSettle();
+
+      // CupertinoActionSheet appears
+      expect(find.byType(CupertinoActionSheet), findsOneWidget);
+      await tester.tap(find.widgetWithText(CupertinoActionSheetAction, 'Xóa'));
+      await tester.pumpAndSettle();
+
+      // Verify wallet was deleted
+      final accounts = await accRepo.getAccounts();
+      expect(accounts.length, 1);
     });
 
     testWidgets('WalletFormSheet renders live preview, templates and presets', (tester) async {

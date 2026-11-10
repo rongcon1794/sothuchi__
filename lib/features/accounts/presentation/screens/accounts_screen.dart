@@ -83,6 +83,66 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
     );
   }
 
+  Future<void> _handleDeleteWallet(
+    BuildContext context,
+    Account account,
+  ) async {
+    final l10n = context.l10n;
+    final confirmed = await showCupertinoModalPopup<bool>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text('${l10n.delete} ${account.name}'),
+        message: const Text('Bạn có chắc chắn muốn xóa ví này? Giao dịch liên quan sẽ không bị mất.'),
+        actions: [
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.delete),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.of(ctx).pop(false),
+          child: Text(l10n.cancel),
+        ),
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      unawaited(HapticFeedback.mediumImpact());
+      final res = await ref.read(accountsActionControllerProvider.notifier).deleteWallet(account.id);
+      if (!context.mounted) return;
+      await res.fold(
+        onSuccess: (_) async {
+          final settings = ref.read(settingsControllerProvider).value;
+          if (settings?.defaultWalletId == account.id) {
+            final otherAccounts = ref
+                .read(accountsStreamProvider)
+                .value
+                ?.where((a) => a.id != account.id && a.deletedAt == null)
+                .toList();
+            final nextDefaultId =
+                (otherAccounts != null && otherAccounts.isNotEmpty)
+                    ? otherAccounts.first.id
+                    : null;
+            await ref
+                .read(settingsControllerProvider.notifier)
+                .setDefaultWalletId(nextDefaultId);
+          }
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Đã xóa ví "${account.name}"')),
+            );
+          }
+        },
+        onFailure: (err) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.localizeError(err))),
+          );
+        },
+      );
+    }
+  }
+
   Future<void> _handleSetDefaultWallet(
     BuildContext context,
     Account account,
@@ -296,6 +356,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                         accountId: account.id,
                         archived: true,
                       ),
+                      onDelete: () => _handleDeleteWallet(context, account),
                     ),
                   ),
                 ),
@@ -352,6 +413,10 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                                         context,
                                         accountId: account.id,
                                         archived: false,
+                                      ),
+                                      onDelete: () => _handleDeleteWallet(
+                                        context,
+                                        account,
                                       ),
                                     ),
                                   ),

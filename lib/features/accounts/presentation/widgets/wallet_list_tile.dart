@@ -19,6 +19,7 @@ class WalletListTile extends StatelessWidget {
     required this.onToggleArchive,
     this.isDefault = false,
     this.onSetDefault,
+    this.onDelete,
   });
 
   final Account account;
@@ -30,6 +31,7 @@ class WalletListTile extends StatelessWidget {
   final VoidCallback onToggleArchive;
   final bool isDefault;
   final VoidCallback? onSetDefault;
+  final VoidCallback? onDelete;
 
   IconData _typeIcon(AccountType type) {
     switch (type) {
@@ -275,6 +277,7 @@ class WalletListTile extends StatelessWidget {
                                   if (value == 'edit') onEdit();
                                   if (value == 'archive') onToggleArchive();
                                   if (value == 'set_default') onSetDefault?.call();
+                                  if (value == 'delete') onDelete?.call();
                                 },
                                 itemBuilder: (ctx) => [
                                   if (!isDefault && onSetDefault != null)
@@ -297,6 +300,13 @@ class WalletListTile extends StatelessWidget {
                                         ? l10n.unarchiveWallet
                                         : l10n.archiveWallet,
                                   ),
+                                  if (onDelete != null)
+                                    ApplePopupMenuItem(
+                                      value: 'delete',
+                                      icon: CupertinoIcons.trash,
+                                      title: l10n.delete,
+                                      isDestructive: true,
+                                    ),
                                 ],
                               ),
                             ],
