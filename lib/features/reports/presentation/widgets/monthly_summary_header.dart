@@ -6,6 +6,8 @@ import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/reports/domain/entities/monthly_report.dart';
 
+/// Compact, Apple-style monthly summary header showing:
+/// Income, Expense, Net Balance, and Savings Rate.
 class MonthlySummaryHeader extends StatelessWidget {
   const MonthlySummaryHeader({
     super.key,
@@ -22,8 +24,8 @@ class MonthlySummaryHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final financeColors = context.financeColors;
-    final stackSingleCol = MediaQuery.textScalerOf(context).scale(1) >= 1.5;
 
     final incStat = SummaryStatColumn(
       label: l10n.income,
@@ -35,6 +37,7 @@ class MonthlySummaryHeader extends StatelessWidget {
       semanticsValue: hideBalance ? l10n.balanceHidden : null,
       valueColor: financeColors.income,
     );
+
     final expStat = SummaryStatColumn(
       label: l10n.expense,
       value: report.expenseMoney.format(
@@ -44,6 +47,7 @@ class MonthlySummaryHeader extends StatelessWidget {
       semanticsValue: hideBalance ? l10n.balanceHidden : null,
       valueColor: financeColors.expense,
     );
+
     final netStat = SummaryStatColumn(
       label: l10n.netBalance,
       value: report.netMoney.format(
@@ -56,6 +60,7 @@ class MonthlySummaryHeader extends StatelessWidget {
           ? financeColors.income
           : financeColors.expense,
     );
+
     final rateStat = SummaryStatColumn(
       label: l10n.savingsRate,
       value: hideBalance ? '••%' : '${report.savingsRatePercent}%',
@@ -69,92 +74,117 @@ class MonthlySummaryHeader extends StatelessWidget {
       final isUp = momPercent > 0;
       final badgeColor = isUp ? AppleTokens.systemRed : AppleTokens.jadeDark;
       final badgeBg = isUp
-          ? AppleTokens.systemRed.withValues(alpha: 0.12)
-          : AppleTokens.jadeDark.withValues(alpha: 0.12);
-      final arrowIcon = isUp ? CupertinoIcons.arrow_up_right : CupertinoIcons.arrow_down_right;
+          ? AppleTokens.systemRed.withValues(alpha: 0.10)
+          : AppleTokens.jadeDark.withValues(alpha: 0.10);
+      final arrowIcon =
+          isUp ? CupertinoIcons.arrow_up_right : CupertinoIcons.arrow_down_right;
       final trendText = isUp
           ? '${l10n.reportsSpendingIncreased} ${momPercent.abs()}%'
           : '${l10n.reportsSpendingDecreased} ${momPercent.abs()}%';
 
-      momBadge = Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: badgeBg,
-          borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(arrowIcon, size: 12, color: badgeColor),
-            const SizedBox(width: 5),
-            Text(
-              '${l10n.reportsVsLastMonth}: $trendText',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: badgeColor,
-                fontFeatures: AppTheme.tabularFigures,
-              ),
+      momBadge = Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: badgeBg,
+              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
             ),
-          ],
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(arrowIcon, size: 11, color: badgeColor),
+                const SizedBox(width: 4),
+                Text(
+                  '${l10n.reportsVsLastMonth}: $trendText',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: badgeColor,
+                    fontFeatures: AppTheme.tabularFigures,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       );
     }
 
-    if (stackSingleCol) {
-      return AppleGlassCard(
-        padding: const EdgeInsets.all(16),
-        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (momBadge != null) ...[
-              Align(alignment: Alignment.center, child: momBadge),
-              const SizedBox(height: 12),
-            ],
-            incStat,
-            const SizedBox(height: 10),
-            expStat,
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 10),
-              child: Divider(),
-            ),
-            netStat,
-            const SizedBox(height: 10),
-            rateStat,
-          ],
-        ),
+    Widget buildVerticalDivider() {
+      return Container(
+        width: 1,
+        height: 28,
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : Colors.black.withValues(alpha: 0.06),
+      );
+    }
+
+    Widget buildHorizontalDivider() {
+      return Container(
+        height: 1,
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : Colors.black.withValues(alpha: 0.06),
       );
     }
 
     return AppleGlassCard(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
       borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-      child: Column(
-        children: [
-          if (momBadge != null) ...[
-            Align(alignment: Alignment.center, child: momBadge),
-            const SizedBox(height: 12),
-          ],
-          Row(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth >= 540;
+
+          if (isWide) {
+            // Landscape/Tablet: All 4 in 1 clean horizontal row
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ?momBadge,
+                Row(
+                  children: [
+                    Expanded(child: incStat),
+                    buildVerticalDivider(),
+                    Expanded(child: expStat),
+                    buildVerticalDivider(),
+                    Expanded(child: netStat),
+                    buildVerticalDivider(),
+                    Expanded(child: rateStat),
+                  ],
+                ),
+              ],
+            );
+          }
+
+          // Portrait: 2x2 grid with subtle dividers
+          return Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Expanded(child: incStat),
-              const SizedBox(width: 8),
-              Expanded(child: expStat),
+              ?momBadge,
+              Row(
+                children: [
+                  Expanded(child: incStat),
+                  buildVerticalDivider(),
+                  Expanded(child: expStat),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: buildHorizontalDivider(),
+              ),
+              Row(
+                children: [
+                  Expanded(child: netStat),
+                  buildVerticalDivider(),
+                  Expanded(child: rateStat),
+                ],
+              ),
             ],
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Divider(),
-          ),
-          Row(
-            children: [
-              Expanded(child: netStat),
-              const SizedBox(width: 8),
-              Expanded(child: rateStat),
-            ],
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -178,25 +208,31 @@ class SummaryStatColumn extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
           label,
           textAlign: TextAlign.center,
-          style: theme.textTheme.labelMedium?.copyWith(
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 2),
         Text(
           value,
           textAlign: TextAlign.center,
           semanticsLabel: semanticsValue,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.titleMedium?.copyWith(
-            color: valueColor,
+          style: TextStyle(
+            fontSize: 14.5,
             fontWeight: FontWeight.w700,
+            color: valueColor,
             fontFeatures: AppTheme.tabularFigures,
           ),
         ),
