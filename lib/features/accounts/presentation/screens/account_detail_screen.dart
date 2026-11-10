@@ -211,15 +211,6 @@ class AccountDetailScreen extends ConsumerWidget {
               style: const TextStyle(fontWeight: FontWeight.w700),
             ),
             actions: [
-              IconButton(
-                tooltip: l10n.delete,
-                icon: const Icon(
-                  CupertinoIcons.trash,
-                  color: AppleTokens.systemRed,
-                  size: 20,
-                ),
-                onPressed: () => _handleDelete(context, ref, account),
-              ),
               ApplePopupMenuButton<String>(
                 tooltip: l10n.moreOptions,
                 onSelected: (val) async {
@@ -285,40 +276,41 @@ class AccountDetailScreen extends ConsumerWidget {
                 children: [
                   // Hero Card: Wallet Emblem, Balance & Status
                   AppleGlassCard(
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
-                    padding: const EdgeInsets.all(20),
-                    borderColor: walletColor.withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                    padding: const EdgeInsets.all(16),
+                    borderColor: walletColor.withValues(alpha: 0.3),
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: isDark
-                          ? [walletColor.withValues(alpha: 0.22), Colors.black54]
-                          : [walletColor.withValues(alpha: 0.14), Colors.white],
+                          ? [walletColor.withValues(alpha: 0.18), Colors.black45]
+                          : [walletColor.withValues(alpha: 0.10), Colors.white],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Header row: Squircle Emblem + Info & Badges + Eye toggle
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Container(
-                              width: 52,
-                              height: 52,
+                              width: 42,
+                              height: 42,
                               decoration: BoxDecoration(
-                                color: walletColor.withValues(alpha: 0.22),
+                                color: walletColor.withValues(alpha: 0.18),
                                 borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
                                 border: Border.all(
-                                  color: walletColor.withValues(alpha: 0.4),
-                                  width: 1.5,
+                                  color: walletColor.withValues(alpha: 0.35),
+                                  width: 1.2,
                                 ),
                               ),
                               child: Icon(
                                 AppIconCatalog.resolve(account.icon),
                                 color: walletColor,
-                                size: 28,
+                                size: 22,
                               ),
                             ),
-                            const SizedBox(width: 14),
+                            const SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -328,7 +320,7 @@ class AccountDetailScreen extends ConsumerWidget {
                                       Flexible(
                                         child: Text(
                                           account.name,
-                                          style: theme.textTheme.titleLarge?.copyWith(
+                                          style: theme.textTheme.titleMedium?.copyWith(
                                             fontWeight: FontWeight.w800,
                                             decoration: account.archived ? TextDecoration.lineThrough : null,
                                           ),
@@ -337,40 +329,40 @@ class AccountDetailScreen extends ConsumerWidget {
                                         ),
                                       ),
                                       if (account.archived) ...[
-                                        const SizedBox(width: 8),
+                                        const SizedBox(width: 6),
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                           decoration: BoxDecoration(
                                             color: AppleTokens.systemGray.withValues(alpha: 0.2),
                                             borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                                           ),
                                           child: Text(
                                             l10n.archivedWallets,
-                                            style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600),
+                                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
                                           ),
                                         ),
                                       ],
                                       if (isDefault) ...[
-                                        const SizedBox(width: 8),
+                                        const SizedBox(width: 6),
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                                           decoration: BoxDecoration(
-                                            color: const Color(0xFFFFB800).withValues(alpha: 0.25),
+                                            color: const Color(0xFFFFB800).withValues(alpha: 0.2),
                                             borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                                             border: Border.all(
-                                              color: const Color(0xFFFFB800).withValues(alpha: 0.6),
+                                              color: const Color(0xFFFFB800).withValues(alpha: 0.5),
                                               width: 0.8,
                                             ),
                                           ),
                                           child: const Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              Icon(Icons.star_rounded, size: 12, color: Color(0xFFFFB800)),
+                                              Icon(Icons.star_rounded, size: 11, color: Color(0xFFFFB800)),
                                               SizedBox(width: 3),
                                               Text(
-                                                'Ví mặc định',
+                                                'Mặc định',
                                                 style: TextStyle(
-                                                  fontSize: 10.5,
+                                                  fontSize: 10,
                                                   fontWeight: FontWeight.w700,
                                                   color: Color(0xFFFFB800),
                                                 ),
@@ -381,10 +373,10 @@ class AccountDetailScreen extends ConsumerWidget {
                                       ],
                                     ],
                                   ),
-                                  const SizedBox(height: 3),
+                                  const SizedBox(height: 2),
                                   Text(
                                     '${_typeLabel(l10n, account.type)} • ${account.currency}',
-                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                    style: theme.textTheme.bodySmall?.copyWith(
                                       color: theme.colorScheme.onSurfaceVariant,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -393,35 +385,40 @@ class AccountDetailScreen extends ConsumerWidget {
                               ),
                             ),
                             IconButton(
+                              visualDensity: VisualDensity.compact,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                               tooltip: hideBalance ? l10n.showBalance : l10n.hideBalance,
                               icon: Icon(
                                 hideBalance ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
-                                size: 20,
+                                size: 19,
                               ),
                               onPressed: () => ref.read(settingsControllerProvider.notifier).toggleHideBalance(),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 18),
+                        const SizedBox(height: 12),
+                        // Current Balance Section
                         Text(
                           l10n.currentBalance,
                           style: TextStyle(
-                            fontSize: 12.5,
+                            fontSize: 11.5,
                             fontWeight: FontWeight.w600,
-                            letterSpacing: 0.4,
+                            letterSpacing: 0.3,
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 2),
                         Text(
                           account.balanceMoney.format(locale: locale, masked: hideBalance),
-                          style: theme.textTheme.headlineMedium?.copyWith(
+                          style: theme.textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.w800,
                             fontFeatures: AppTheme.tabularFigures,
                             color: walletColor,
+                            letterSpacing: -0.4,
                           ),
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 10),
                         // Real-Time 14-Day Balance Trend Sparkline with Touch Scrubbing
                         _WalletBalanceTrendSparkline(
                           account: account,
@@ -431,13 +428,13 @@ class AccountDetailScreen extends ConsumerWidget {
                           hideBalance: hideBalance,
                           isDark: isDark,
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         // Cashflow Tri-Stat Strip
                         Container(
-                          padding: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
                             color: isDark
-                                ? Colors.black.withValues(alpha: 0.3)
+                                ? Colors.black.withValues(alpha: 0.28)
                                 : Colors.white.withValues(alpha: 0.65),
                             borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
                           ),
@@ -449,13 +446,13 @@ class AccountDetailScreen extends ConsumerWidget {
                                   children: [
                                     Text(
                                       l10n.income,
-                                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppleTokens.systemGray),
+                                      style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, color: AppleTokens.systemGray),
                                     ),
-                                    const SizedBox(height: 2),
+                                    const SizedBox(height: 1),
                                     Text(
                                       incomeMoney.format(locale: locale, masked: hideBalance),
                                       style: const TextStyle(
-                                        fontSize: 13,
+                                        fontSize: 12.5,
                                         fontWeight: FontWeight.w700,
                                         color: AppleTokens.emeraldIncome,
                                         fontFeatures: AppTheme.tabularFigures,
@@ -466,21 +463,21 @@ class AccountDetailScreen extends ConsumerWidget {
                                   ],
                                 ),
                               ),
-                              Container(width: 1, height: 26, color: AppleTokens.separatorLight),
-                              const SizedBox(width: 10),
+                              Container(width: 1, height: 22, color: AppleTokens.separatorLight),
+                              const SizedBox(width: 8),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       l10n.expense,
-                                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppleTokens.systemGray),
+                                      style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, color: AppleTokens.systemGray),
                                     ),
-                                    const SizedBox(height: 2),
+                                    const SizedBox(height: 1),
                                     Text(
                                       expenseMoney.format(locale: locale, masked: hideBalance),
                                       style: const TextStyle(
-                                        fontSize: 13,
+                                        fontSize: 12.5,
                                         fontWeight: FontWeight.w700,
                                         color: AppleTokens.rubyExpense,
                                         fontFeatures: AppTheme.tabularFigures,
@@ -491,21 +488,21 @@ class AccountDetailScreen extends ConsumerWidget {
                                   ],
                                 ),
                               ),
-                              Container(width: 1, height: 26, color: AppleTokens.separatorLight),
-                              const SizedBox(width: 10),
+                              Container(width: 1, height: 22, color: AppleTokens.separatorLight),
+                              const SizedBox(width: 8),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       l10n.netBalance,
-                                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppleTokens.systemGray),
+                                      style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, color: AppleTokens.systemGray),
                                     ),
-                                    const SizedBox(height: 2),
+                                    const SizedBox(height: 1),
                                     Text(
                                       netMoney.format(locale: locale, masked: hideBalance),
                                       style: TextStyle(
-                                        fontSize: 13,
+                                        fontSize: 12.5,
                                         fontWeight: FontWeight.w700,
                                         color: netMoney.minorUnits >= 0 ? AppleTokens.emeraldIncome : AppleTokens.rubyExpense,
                                         fontFeatures: AppTheme.tabularFigures,
@@ -657,31 +654,7 @@ class AccountDetailScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
-                  const SizedBox(height: 32),
-                  Center(
-                    child: TextButton.icon(
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppleTokens.systemRed,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-                          side: BorderSide(
-                            color: AppleTokens.systemRed.withValues(alpha: isDark ? 0.35 : 0.22),
-                          ),
-                        ),
-                      ),
-                      icon: const Icon(CupertinoIcons.trash, size: 16),
-                      label: Text(
-                        'Xóa ví "${account.name}"',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13.5,
-                        ),
-                      ),
-                      onPressed: () => _handleDelete(context, ref, account),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
@@ -916,10 +889,10 @@ class _WalletBalanceTrendSparklineState
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         // Interactive Scrubbing Chart Canvas
         SizedBox(
-          height: 48,
+          height: 40,
           child: LayoutBuilder(
             builder: (context, constraints) {
               return GestureDetector(

@@ -216,16 +216,12 @@ void main() {
       expect(find.text('Chưa có giao dịch trên ví này'), findsOneWidget);
       expect(find.text('Thêm giao dịch'), findsAtLeastNWidgets(1));
 
-      // Verify delete buttons exist (in AppBar, Quick Actions)
-      expect(find.byIcon(CupertinoIcons.trash), findsWidgets);
+      // Verify delete button is present in Quick Actions, and removed from bottom & header
+      expect(find.text('Xóa ví "Ví Tiền Mặt"'), findsNothing);
+      expect(find.byIcon(CupertinoIcons.trash), findsOneWidget);
 
-      // Scroll to verify bottom delete button
-      final bottomDeleteFinder = find.text('Xóa ví "Ví Tiền Mặt"');
-      await tester.scrollUntilVisible(bottomDeleteFinder, 300);
-      expect(bottomDeleteFinder, findsOneWidget);
-
-      // Tap delete button in AppBar
-      await tester.tap(find.byIcon(CupertinoIcons.trash).first);
+      // Tap delete button in Quick Actions
+      await tester.tap(find.byIcon(CupertinoIcons.trash));
       await tester.pumpAndSettle();
 
       // CupertinoActionSheet appears
