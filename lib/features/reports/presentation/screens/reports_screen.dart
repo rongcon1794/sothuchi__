@@ -113,6 +113,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
     final hideBalance = settings?.hideBalance ?? false;
 
     final selectedMonth = ref.watch(selectedReportMonthProvider);
+    final monthlyBudgetMinor = ref.watch(selectedReportMonthBudgetMinorProvider);
     if (_lastMonth != selectedMonth) {
       _lastMonth = selectedMonth;
       _selectedCategoryIndex = null;
@@ -498,6 +499,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                                 report: report,
                                 locale: locale,
                                 hideBalance: hideBalance,
+                                monthlyBudgetMinor: monthlyBudgetMinor,
                               ),
                             ),
                             const SizedBox(height: 16),

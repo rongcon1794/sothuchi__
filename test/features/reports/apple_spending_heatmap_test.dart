@@ -114,4 +114,46 @@ void main() {
     expect(find.text('Ngày 10/11:'), findsOneWidget);
     expect(find.text('Tổng chi trong ngày:'), findsOneWidget);
   });
+
+  testWidgets('AppleSpendingHeatmap displays budget-based thresholds when monthlyBudgetMinor is set', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    // 3,000,000 VND budget for Nov (30 days) => 100,000 VND/day
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light(),
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: AppleSpendingHeatmap(
+              report: report,
+              locale: 'vi',
+              hideBalance: false,
+              monthlyBudgetMinor: 3000000,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Verify budget legend
+    expect(find.text('Thấp (<65% NS)'), findsOneWidget);
+    expect(find.text('TB (≤100% NS)'), findsOneWidget);
+    expect(find.text('Cao (>100% NS)'), findsOneWidget);
+    expect(find.textContaining('Định mức:'), findsOneWidget);
+
+    // Tap Day 5 (500,000 VND spent vs 100,000 VND daily budget => over budget)
+    await tester.tap(find.text('5'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ngày 5/11:'), findsOneWidget);
+    expect(find.text('Vượt NS ngày +400%'), findsOneWidget);
+  });
 }
