@@ -39,6 +39,7 @@ app.*.map.json
 /android/key.properties
 *.jks
 *.keystore
+!/android/app/debug.keystore
 
 # Environment files
 .env

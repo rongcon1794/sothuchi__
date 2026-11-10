@@ -25,6 +25,18 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        getByName("debug") {
+            val sharedDebugKeystore = file("debug.keystore")
+            if (sharedDebugKeystore.exists()) {
+                storeFile = sharedDebugKeystore
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            }
+        }
+    }
+
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("debug")
