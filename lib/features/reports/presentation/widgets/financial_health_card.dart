@@ -1,23 +1,28 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
-import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
+import 'package:so_thu_chi/features/reports/domain/entities/health_score_data.dart';
 import 'package:so_thu_chi/features/reports/domain/entities/monthly_report.dart';
-import 'package:so_thu_chi/l10n/app_localizations.dart';
+import 'package:so_thu_chi/features/reports/presentation/screens/financial_health_detail_screen.dart';
 
+/// Compact, Apple-style financial health status card.
+/// Tapping opens [FinancialHealthDetailScreen] for comprehensive 50/30/20 insights.
 class FinancialHealthCard extends StatelessWidget {
   const FinancialHealthCard({
     super.key,
     required this.report,
     required this.locale,
     required this.hideBalance,
+    this.onTap,
   });
 
   final MonthlyReportData report;
   final String locale;
   final bool hideBalance;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -25,270 +30,167 @@ class FinancialHealthCard extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final l10n = context.l10n;
 
-    final scoreData = _calculateHealthScore(report, l10n);
+    final scoreData = HealthScoreData.calculate(report, l10n);
     final score = scoreData.score;
     final rating = scoreData.rating;
     final badgeColor = scoreData.color;
 
-    return AppleGlassCard(
-      padding: const EdgeInsets.all(16),
+    return ApplePressable(
       borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: badgeColor.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  CupertinoIcons.heart_fill,
-                  size: 18,
-                  color: badgeColor,
-                ),
+      onTap: () {
+        HapticFeedback.lightImpact();
+        if (onTap != null) {
+          onTap!();
+        } else {
+          Navigator.of(context).push(
+            CupertinoPageRoute(
+              builder: (_) => FinancialHealthDetailScreen(
+                report: report,
+                locale: locale,
+                hideBalance: hideBalance,
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.reportsFinancialHealth,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    Text(
-                      'Đánh giá dựa trên quy chuẩn tài chính 50/30/20',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: badgeColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                  border: Border.all(
-                    color: badgeColor.withValues(alpha: 0.35),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '$score',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: badgeColor,
-                      ),
-                    ),
-                    Text(
-                      '/100',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-
-          // Rating badge & bar
-          Wrap(
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 4,
-            runSpacing: 4,
-            children: [
-              Text(
-                'Mức độ: ',
-                style: TextStyle(
-                  fontSize: 12.5,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              Text(
-                rating,
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w700,
-                  color: badgeColor,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-            child: LinearProgressIndicator(
-              value: score / 100,
-              minHeight: 6,
-              backgroundColor: isDark
-                  ? AppleTokens.bgDarkTertiary
-                  : const Color(0xFFE2E8F0),
-              valueColor: AlwaysStoppedAnimation<Color>(badgeColor),
             ),
-          ),
-          const SizedBox(height: 16),
-
-          // Insights bullets
-          _InsightRow(
-            icon: CupertinoIcons.sparkles,
-            iconColor: AppleTokens.systemOrange,
-            title: l10n.healthSavingsRate,
-            description: report.totalIncomeMinor > 0
-                ? 'Bạn đã tích lũy ${report.savingsRatePercent}% thu nhập tháng này${report.savingsRatePercent >= 20 ? ' (Đạt chuẩn tốt)' : ' (Nên phấn đấu đạt 20%)'}.'
-                : 'Chưa ghi nhận thu nhập trong tháng này.',
-          ),
-          const SizedBox(height: 10),
-          _InsightRow(
-            icon: CupertinoIcons.calendar,
-            iconColor: AppleTokens.systemBlue,
-            title: l10n.healthSpendingPace,
-            description: report.peakSpendingDay > 0
-                ? 'Ngày chi cao nhất là ngày ${report.peakSpendingDay} (${Money(minorUnits: report.peakSpendingAmountMinor, currencyCode: report.currencyCode).format(locale: locale, masked: hideBalance)}).'
-                : 'Không có chi tiêu nào trong tháng.',
-          ),
-          if (report.categorySlices.isNotEmpty) ...[
-            const SizedBox(height: 10),
-            _InsightRow(
-              icon: CupertinoIcons.chart_pie,
-              iconColor: AppleTokens.jadeDark,
-              title: l10n.healthTopCategory,
-              description:
-                  '${report.categorySlices.first.fallbackName} chiếm ${report.categorySlices.first.percentage}% tổng ngân sách chi (${report.categorySlices.first.amountMoney.format(locale: locale, masked: hideBalance)}).',
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  static _HealthScoreResult _calculateHealthScore(MonthlyReportData r, AppLocalizations l10n) {
-    if (r.totalIncomeMinor <= 0 && r.totalExpenseMinor <= 0) {
-      return _HealthScoreResult(score: 50, rating: l10n.healthInsufficientData, color: AppleTokens.systemGray);
-    }
-
-    var score = 50;
-
-    // 1. Savings rate weight (up to 30 points)
-    final rate = r.savingsRatePercent;
-    if (rate >= 30) {
-      score += 30;
-    } else if (rate >= 20) {
-      score += 25;
-    } else if (rate >= 10) {
-      score += 15;
-    } else if (rate > 0) {
-      score += 5;
-    } else {
-      score -= 20; // deficit
-    }
-
-    // 2. Spending discipline: is there any category exceeding 70%?
-    if (r.categorySlices.isNotEmpty && r.categorySlices.first.percentage > 70) {
-      score -= 10;
-    } else {
-      score += 10;
-    }
-
-    // 3. Positive Net Cashflow
-    if (r.netMinor > 0) {
-      score += 10;
-    }
-
-    score = score.clamp(10, 100);
-
-    if (score >= 80) {
-      return _HealthScoreResult(score: score, rating: l10n.healthRatingExcellent, color: AppleTokens.systemGreen);
-    } else if (score >= 60) {
-      return _HealthScoreResult(score: score, rating: l10n.healthRatingGood, color: AppleTokens.jadeDark);
-    } else if (score >= 40) {
-      return _HealthScoreResult(score: score, rating: l10n.healthRatingAverage, color: AppleTokens.systemOrange);
-    } else {
-      return _HealthScoreResult(score: score, rating: l10n.healthRatingNeedsAttention, color: AppleTokens.systemRed);
-    }
-  }
-}
-
-class _HealthScoreResult {
-  const _HealthScoreResult({
-    required this.score,
-    required this.rating,
-    required this.color,
-  });
-
-  final int score;
-  final String rating;
-  final Color color;
-}
-
-class _InsightRow extends StatelessWidget {
-  const _InsightRow({
-    required this.icon,
-    required this.iconColor,
-    required this.title,
-    required this.description,
-  });
-
-  final IconData icon;
-  final Color iconColor;
-  final String title;
-  final String description;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: isDark
-            ? (context.isOled
-                ? AppleTokens.bgOledSecondary
-                : AppleTokens.bgDarkPrimary)
-            : AppleTokens.bgLightSecondary,
-        borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 16, color: iconColor),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          );
+        }
+      },
+      child: AppleGlassCard(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  description,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: theme.colorScheme.onSurfaceVariant,
-                    height: 1.35,
+                // Heart icon with pulsing circle
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: badgeColor.withValues(alpha: 0.14),
+                    shape: BoxShape.circle,
                   ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    CupertinoIcons.heart_fill,
+                    size: 18,
+                    color: badgeColor,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        l10n.reportsFinancialHealth,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: badgeColor,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          Expanded(
+                            child: Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: rating,
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w600,
+                                      color: badgeColor,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: ' • Chuẩn 50/30/20',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Score badge
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: badgeColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                    border: Border.all(
+                      color: badgeColor.withValues(alpha: 0.3),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '$score',
+                        style: TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w800,
+                          color: badgeColor,
+                        ),
+                      ),
+                      Text(
+                        '/100',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Icon(
+                  CupertinoIcons.chevron_right,
+                  size: 14,
+                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                 ),
               ],
             ),
-          ),
-        ],
+            const SizedBox(height: 10),
+            // Slim progress bar
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+              child: LinearProgressIndicator(
+                value: score / 100,
+                minHeight: 4,
+                backgroundColor: isDark
+                    ? AppleTokens.bgDarkTertiary
+                    : const Color(0xFFE2E8F0),
+                valueColor: AlwaysStoppedAnimation<Color>(badgeColor),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

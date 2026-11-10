@@ -23,6 +23,7 @@ import 'package:so_thu_chi/features/debts/presentation/screens/debts_screen.dart
 import 'package:so_thu_chi/features/ledger/presentation/screens/ledgers_management_screen.dart';
 import 'package:so_thu_chi/features/recurring/presentation/screens/recurring_detail_screen.dart';
 import 'package:so_thu_chi/features/recurring/presentation/screens/recurring_transactions_screen.dart';
+import 'package:so_thu_chi/features/reports/presentation/screens/financial_health_detail_screen.dart';
 import 'package:so_thu_chi/features/reports/presentation/screens/reports_screen.dart';
 import 'package:so_thu_chi/features/savings/presentation/screens/savings_goal_detail_screen.dart';
 import 'package:so_thu_chi/features/savings/presentation/screens/savings_goals_screen.dart';
@@ -60,6 +61,7 @@ class AppScreenRegistry {
     required this.transactionFormBuilder,
     required this.budgetsBuilder,
     required this.reportsBuilder,
+    required this.financialHealthBuilder,
     required this.settingsBuilder,
     required this.accountsBuilder,
     required this.accountDetailBuilder,
@@ -91,6 +93,7 @@ class AppScreenRegistry {
   final Widget Function(BuildContext context, GoRouterState state)
   budgetDetailBuilder;
   final WidgetBuilder reportsBuilder;
+  final WidgetBuilder financialHealthBuilder;
   final WidgetBuilder settingsBuilder;
   final WidgetBuilder accountsBuilder;
   final Widget Function(BuildContext context, GoRouterState state)
@@ -134,6 +137,7 @@ class AppScreenRegistry {
       budgetDetailBuilder: (_, state) =>
           BudgetDetailScreen(budgetId: state.pathParameters['id'] ?? ''),
       reportsBuilder: (_) => const ReportsScreen(),
+      financialHealthBuilder: (_) => const FinancialHealthDetailScreen(),
       settingsBuilder: (_) => const SettingsScreen(),
       accountsBuilder: (_) => const AccountsScreen(),
       accountDetailBuilder: (_, state) =>
@@ -458,6 +462,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           context: context,
           state: state,
           child: screens.ledgersBuilder(context),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.financialHealth,
+        pageBuilder: (context, state) => adaptivePage(
+          context: context,
+          state: state,
+          child: screens.financialHealthBuilder(context),
         ),
       ),
     ],
