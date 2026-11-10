@@ -607,6 +607,18 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.byType(SettingsScreen), findsOneWidget);
 
+      // Verify on 16:9 compact landscape phone (640x360)
+      tester.view.physicalSize = const Size(640, 360);
+      await tester.pumpWidget(
+        buildAppWithScreen(
+          screen: const SettingsScreen(),
+          size: const Size(640, 360),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(SettingsScreen), findsOneWidget);
+
       // Verify on tablet
       tester.view.physicalSize = const Size(1024, 768);
       await tester.pumpWidget(

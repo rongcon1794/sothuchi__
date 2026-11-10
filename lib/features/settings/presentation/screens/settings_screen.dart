@@ -373,7 +373,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     final profileCard = user != null
         ? AppleGlassCard(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(isLandscape ? 12 : 16),
             borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
             child: Row(
               children: [
@@ -381,10 +381,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   photoUrl: user.photoUrl,
                   displayName: user.displayName,
                   email: user.email,
-                  size: 52,
-                  borderRadius: 16,
+                  size: isLandscape ? 44 : 52,
+                  borderRadius: isLandscape ? 14 : 16,
                 ),
-                const SizedBox(width: 14),
+                SizedBox(width: isLandscape ? 12 : 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -395,6 +395,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
+                          fontSize: isLandscape ? 15 : 16,
                           letterSpacing: -0.2,
                         ),
                       ),
@@ -405,10 +406,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: scheme.onSurfaceVariant,
-                          fontSize: 12,
+                          fontSize: isLandscape ? 11 : 12,
                         ),
                       ),
-                      const SizedBox(height: 5),
+                      SizedBox(height: isLandscape ? 3 : 5),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                         decoration: BoxDecoration(
@@ -455,8 +456,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 AppleIconButton(
                   icon: Icons.logout_rounded,
                   tooltip: l10n.signOut,
-                  size: 38,
-                  iconSize: 19,
+                  size: isLandscape ? 34 : 38,
+                  iconSize: isLandscape ? 17 : 19,
                   foregroundColor: AppleTokens.systemOrange,
                   backgroundColor: AppleTokens.systemOrange.withValues(alpha: 0.12),
                   borderColor: AppleTokens.systemOrange.withValues(alpha: 0.22),
@@ -469,207 +470,218 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     final dataSection = AppleListGroup(
       header: l10n.settingsDataAndManagement,
-      margin: const EdgeInsets.only(bottom: 20),
+      margin: EdgeInsets.only(bottom: isLandscape ? 14 : 20),
       children: [
-              ListTile(
-                leading: const AppleSquircleBadge(
-                  icon: Icons.account_balance_wallet_rounded,
-                  backgroundColor: AppleTokens.systemGreen,
+        ListTile(
+          dense: isLandscape,
+          leading: const AppleSquircleBadge(
+            icon: Icons.account_balance_wallet_rounded,
+            backgroundColor: AppleTokens.systemGreen,
+          ),
+          title: Text(l10n.walletsTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                 ),
-                title: Text(l10n.walletsTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
-                        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                      ),
-                      child: Text(
-                        '${activeWallets.length} ví',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.chevron_right_rounded, size: 20),
-                  ],
-                ),
-                onTap: () => context.push(AppRoutes.accounts),
-              ),
-              ListTile(
-                leading: const AppleSquircleBadge(
-                  icon: Icons.star_rounded,
-                  backgroundColor: Color(0xFFFFB800),
-                ),
-                title: const Text(
-                  'Ví mặc định chi tiêu',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                subtitle: Text(
-                  activeWallets
-                          .where((w) => w.id == settings.defaultWalletId)
-                          .firstOrNull
-                          ?.name ??
-                      (activeWallets.isNotEmpty ? 'Chưa thiết lập' : 'Chưa có ví'),
+                child: Text(
+                  '${activeWallets.length} ví',
                   style: TextStyle(
-                    fontSize: 12.5,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
-                trailing: const Icon(Icons.chevron_right_rounded, size: 20),
-                onTap: () => _showDefaultWalletPicker(
-                  context,
-                  activeWallets,
-                  settings.defaultWalletId,
-                  settings.localeCode,
-                ),
               ),
-              ListTile(
-                leading: const AppleSquircleBadge(
-                  icon: Icons.category_rounded,
-                  backgroundColor: AppleTokens.systemOrange,
-                ),
-                title: Text(l10n.categoriesTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: Text(
-                  '${expenseCategories.length} khoản chi • ${incomeCategories.length} khoản thu',
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
-                        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                      ),
-                      child: Text(
-                        '${categoriesMap.length} mục',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.chevron_right_rounded, size: 20),
-                  ],
-                ),
-                onTap: () => context.push(AppRoutes.categories),
-              ),
-              ListTile(
-                leading: const AppleSquircleBadge(
-                  icon: CupertinoIcons.person_2_fill,
-                  backgroundColor: AppleTokens.systemIndigo,
-                ),
-                title: Text(l10n.debtsTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: Text(l10n.settingsDebtsSubtitle, style: const TextStyle(fontSize: 12)),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (unsettledDebtsCount > 0) ...[
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: AppleTokens.systemIndigo.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                        ),
-                        child: Text(
-                          '$unsettledDebtsCount nợ',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: AppleTokens.systemIndigo,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                    ],
-                    const Icon(Icons.chevron_right_rounded, size: 20),
-                  ],
-                ),
-                onTap: () => context.push(AppRoutes.debts),
-              ),
-              ListTile(
-                leading: const AppleSquircleBadge(
-                  icon: CupertinoIcons.repeat,
-                  backgroundColor: AppleTokens.systemTeal,
-                ),
-                title: Text(l10n.recurringTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: Text(l10n.settingsRecurringSubtitle, style: const TextStyle(fontSize: 12)),
-                trailing: const Icon(Icons.chevron_right_rounded, size: 20),
-                onTap: () => context.push(AppRoutes.recurring),
-              ),
-              ListTile(
-                leading: const AppleSquircleBadge(
-                  icon: CupertinoIcons.cube_box_fill,
-                  backgroundColor: AppleTokens.systemOrange,
-                ),
-                title: Text(l10n.savingsTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: Text(l10n.settingsSavingsSubtitle, style: const TextStyle(fontSize: 12)),
-                trailing: const Icon(Icons.chevron_right_rounded, size: 20),
-                onTap: () => context.push(AppRoutes.savings),
-              ),
-              ListTile(
-                leading: const AppleSquircleBadge(
-                  icon: CupertinoIcons.layers_alt_fill,
-                  backgroundColor: AppleTokens.systemBlue,
-                ),
-                title: Text(l10n.ledgersTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: Text(l10n.settingsLedgersSubtitle, style: const TextStyle(fontSize: 12)),
-                trailing: const Icon(Icons.chevron_right_rounded, size: 20),
-                onTap: () => context.push(AppRoutes.ledgers),
-              ),
-              ListTile(
-                leading: _exportingCsv
-                    ? const SizedBox(
-                        width: 32,
-                        height: 32,
-                        child: Center(
-                          child: SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        ),
-                      )
-                    : const AppleSquircleBadge(
-                        icon: Icons.table_view_rounded,
-                        backgroundColor: AppleTokens.jadePrimary,
-                      ),
-                title: Text(l10n.exportCsv, style: const TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: Text(l10n.exportCsvSubtitle, style: const TextStyle(fontSize: 12)),
-                trailing: AppleIconButton(
-                  icon: Icons.ios_share_rounded,
-                  size: 34,
-                  iconSize: 18,
-                  tooltip: l10n.exportCsv,
-                  foregroundColor: AppleTokens.jadePrimary,
-                  backgroundColor: AppleTokens.jadePrimary.withValues(alpha: 0.12),
-                  borderColor: AppleTokens.jadePrimary.withValues(alpha: 0.2),
-                  onTap: _exportingCsv ? null : _handleExportCsv,
-                ),
-                onTap: _exportingCsv ? null : _handleExportCsv,
-              ),
+              const SizedBox(width: 4),
+              const Icon(Icons.chevron_right_rounded, size: 20),
             ],
-          );
+          ),
+          onTap: () => context.push(AppRoutes.accounts),
+        ),
+        ListTile(
+          dense: isLandscape,
+          leading: const AppleSquircleBadge(
+            icon: Icons.star_rounded,
+            backgroundColor: Color(0xFFFFB800),
+          ),
+          title: const Text(
+            'Ví mặc định chi tiêu',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+          subtitle: Text(
+            activeWallets
+                    .where((w) => w.id == settings.defaultWalletId)
+                    .firstOrNull
+                    ?.name ??
+                (activeWallets.isNotEmpty ? 'Chưa thiết lập' : 'Chưa có ví'),
+            style: TextStyle(
+              fontSize: 12.5,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+          onTap: () => _showDefaultWalletPicker(
+            context,
+            activeWallets,
+            settings.defaultWalletId,
+            settings.localeCode,
+          ),
+        ),
+        ListTile(
+          dense: isLandscape,
+          leading: const AppleSquircleBadge(
+            icon: Icons.category_rounded,
+            backgroundColor: AppleTokens.systemOrange,
+          ),
+          title: Text(l10n.categoriesTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
+          subtitle: Text(
+            '${expenseCategories.length} khoản chi • ${incomeCategories.length} khoản thu',
+            style: TextStyle(
+              fontSize: 12.5,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                ),
+                child: Text(
+                  '${categoriesMap.length} mục',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+              const Icon(Icons.chevron_right_rounded, size: 20),
+            ],
+          ),
+          onTap: () => context.push(AppRoutes.categories),
+        ),
+        ListTile(
+          dense: isLandscape,
+          leading: const AppleSquircleBadge(
+            icon: CupertinoIcons.person_2_fill,
+            backgroundColor: AppleTokens.systemIndigo,
+          ),
+          title: Text(l10n.debtsTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
+          subtitle: Text(l10n.settingsDebtsSubtitle, style: const TextStyle(fontSize: 12)),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (unsettledDebtsCount > 0) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: AppleTokens.systemIndigo.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                  ),
+                  child: Text(
+                    '$unsettledDebtsCount nợ',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppleTokens.systemIndigo,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
+              ],
+              const Icon(Icons.chevron_right_rounded, size: 20),
+            ],
+          ),
+          onTap: () => context.push(AppRoutes.debts),
+        ),
+        ListTile(
+          dense: isLandscape,
+          leading: const AppleSquircleBadge(
+            icon: CupertinoIcons.repeat,
+            backgroundColor: AppleTokens.systemTeal,
+          ),
+          title: Text(l10n.recurringTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
+          subtitle: Text(l10n.settingsRecurringSubtitle, style: const TextStyle(fontSize: 12)),
+          trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+          onTap: () => context.push(AppRoutes.recurring),
+        ),
+        ListTile(
+          dense: isLandscape,
+          leading: const AppleSquircleBadge(
+            icon: CupertinoIcons.cube_box_fill,
+            backgroundColor: AppleTokens.systemOrange,
+          ),
+          title: Text(l10n.savingsTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
+          subtitle: Text(l10n.settingsSavingsSubtitle, style: const TextStyle(fontSize: 12)),
+          trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+          onTap: () => context.push(AppRoutes.savings),
+        ),
+        ListTile(
+          dense: isLandscape,
+          leading: const AppleSquircleBadge(
+            icon: CupertinoIcons.layers_alt_fill,
+            backgroundColor: AppleTokens.systemBlue,
+          ),
+          title: Text(l10n.ledgersTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
+          subtitle: Text(l10n.settingsLedgersSubtitle, style: const TextStyle(fontSize: 12)),
+          trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+          onTap: () => context.push(AppRoutes.ledgers),
+        ),
+        ListTile(
+          dense: isLandscape,
+          leading: _exportingCsv
+              ? const SizedBox(
+                  width: 32,
+                  height: 32,
+                  child: Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                )
+              : const AppleSquircleBadge(
+                  icon: Icons.table_view_rounded,
+                  backgroundColor: AppleTokens.jadePrimary,
+                ),
+          title: Text(l10n.exportCsv, style: const TextStyle(fontWeight: FontWeight.w600)),
+          subtitle: Text(l10n.exportCsvSubtitle, style: const TextStyle(fontSize: 12)),
+          trailing: AppleIconButton(
+            icon: Icons.ios_share_rounded,
+            size: 34,
+            iconSize: 18,
+            tooltip: l10n.exportCsv,
+            foregroundColor: AppleTokens.jadePrimary,
+            backgroundColor: AppleTokens.jadePrimary.withValues(alpha: 0.12),
+            borderColor: AppleTokens.jadePrimary.withValues(alpha: 0.2),
+            onTap: _exportingCsv ? null : _handleExportCsv,
+          ),
+          onTap: _exportingCsv ? null : _handleExportCsv,
+        ),
+      ],
+    );
 
     // Section 2: Appearance & Preferences (With Icon Theme Selector)
     final appearanceSection = AppleListGroup(
       header: l10n.appearanceSection,
-      margin: const EdgeInsets.only(bottom: 20),
+      margin: EdgeInsets.only(bottom: isLandscape ? 14 : 20),
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+          padding: EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: isLandscape ? 8 : 11,
+          ),
           child: Row(
             children: [
               const AppleSquircleBadge(
@@ -680,13 +692,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               Expanded(
                 child: Text(
                   l10n.themeMode,
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: isLandscape ? 14 : 15,
+                  ),
                 ),
               ),
               // Icon-driven Theme Mode Pill (Saves massive screen space)
               AppleIconSegmentedPill<ThemeMode>(
                 selected: settings.themeMode,
-                height: 34,
+                height: isLandscape ? 30 : 34,
                 onChanged: (mode) => ref
                     .read(settingsControllerProvider.notifier)
                     .updateThemeMode(mode),
@@ -715,6 +730,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ),
         if (settings.themeMode == ThemeMode.dark || (settings.themeMode == ThemeMode.system && isDark))
           ListTile(
+            dense: isLandscape,
             leading: const AppleSquircleBadge(
               icon: CupertinoIcons.circle_fill,
               backgroundColor: Colors.black,
@@ -731,7 +747,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          padding: EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: isLandscape ? 8 : 10,
+          ),
           child: Row(
             children: [
               const AppleSquircleBadge(
@@ -746,7 +765,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   children: [
                     Text(
                       l10n.accentColor,
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: isLandscape ? 14 : 15,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -763,65 +785,63 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ],
                 ),
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
+              Wrap(
+                spacing: isLandscape ? 6 : 8,
+                runSpacing: 4,
                 children: [
-                  for (int i = 0; i < AppTheme.palettes.length; i++) ...[
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8),
-                      child: ApplePressable(
-                        onTap: () {
-                          HapticFeedback.selectionClick();
-                          ref
-                              .read(settingsControllerProvider.notifier)
-                              .updateAccentColor(i);
-                        },
-                        child: Semantics(
-                          label: AppTheme.localizedPaletteName(
-                            i,
-                            locale: Localizations.localeOf(context).languageCode,
-                          ),
-                          button: true,
-                          selected: settings.accentColorIndex == i,
-                          child: Container(
-                            width: 28,
-                            height: 28,
-                            decoration: BoxDecoration(
-                              color: AppTheme.palettes[i],
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: (settings.accentColorIndex == i)
-                                    ? (isDark ? Colors.white : Colors.black87)
-                                    : Colors.transparent,
-                                width: 2.5,
-                              ),
-                              boxShadow: [
-                                if (settings.accentColorIndex == i)
-                                  BoxShadow(
-                                    color: AppTheme.palettes[i].withValues(alpha: 0.4),
-                                    blurRadius: 6,
-                                    spreadRadius: 1,
-                                  ),
-                              ],
+                  for (int i = 0; i < AppTheme.palettes.length; i++)
+                    ApplePressable(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        ref
+                            .read(settingsControllerProvider.notifier)
+                            .updateAccentColor(i);
+                      },
+                      child: Semantics(
+                        label: AppTheme.localizedPaletteName(
+                          i,
+                          locale: Localizations.localeOf(context).languageCode,
+                        ),
+                        button: true,
+                        selected: settings.accentColorIndex == i,
+                        child: Container(
+                          width: isLandscape ? 25 : 28,
+                          height: isLandscape ? 25 : 28,
+                          decoration: BoxDecoration(
+                            color: AppTheme.palettes[i],
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: (settings.accentColorIndex == i)
+                                  ? (isDark ? Colors.white : Colors.black87)
+                                  : Colors.transparent,
+                              width: 2.5,
                             ),
-                            child: settings.accentColorIndex == i
-                                ? const Icon(
-                                    CupertinoIcons.checkmark,
-                                    size: 14,
-                                    color: Colors.white,
-                                  )
-                                : null,
+                            boxShadow: [
+                              if (settings.accentColorIndex == i)
+                                BoxShadow(
+                                  color: AppTheme.palettes[i].withValues(alpha: 0.4),
+                                  blurRadius: 6,
+                                  spreadRadius: 1,
+                                ),
+                            ],
                           ),
+                          child: settings.accentColorIndex == i
+                              ? Icon(
+                                  CupertinoIcons.checkmark,
+                                  size: isLandscape ? 12.5 : 14,
+                                  color: Colors.white,
+                                )
+                              : null,
                         ),
                       ),
                     ),
-                  ],
                 ],
               ),
             ],
           ),
         ),
         ListTile(
+          dense: isLandscape,
           leading: const AppleSquircleBadge(
             icon: Icons.translate_rounded,
             backgroundColor: AppleTokens.systemTeal,
@@ -848,6 +868,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           onTap: () => _pickLanguage(settings.localeCode),
         ),
         ListTile(
+          dense: isLandscape,
           leading: const AppleSquircleBadge(
             icon: Icons.monetization_on_rounded,
             backgroundColor: AppleTokens.systemYellow,
@@ -879,9 +900,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     // Section 3: Security & Privacy
     final securitySection = AppleListGroup(
       header: l10n.securitySection,
-      margin: const EdgeInsets.only(bottom: 20),
+      margin: EdgeInsets.only(bottom: isLandscape ? 14 : 20),
       children: [
         SwitchListTile.adaptive(
+          dense: isLandscape,
           secondary: const AppleSquircleBadge(
             icon: Icons.fingerprint_rounded,
             backgroundColor: AppleTokens.systemBlue,
@@ -898,9 +920,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     // Section 4: About & Legal
     final aboutSection = AppleListGroup(
       header: l10n.aboutSection,
-      margin: const EdgeInsets.only(bottom: 24),
+      margin: EdgeInsets.only(bottom: isLandscape ? 16 : 24),
       children: [
         ListTile(
+          dense: isLandscape,
           leading: const AppleSquircleBadge(
             icon: Icons.shield_outlined,
             backgroundColor: AppleTokens.systemMint,
@@ -910,6 +933,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           onTap: () => context.push(AppRoutes.privacy),
         ),
         ListTile(
+          dense: isLandscape,
           leading: const AppleSquircleBadge(
             icon: Icons.info_outline_rounded,
             backgroundColor: Color(0xFF8E8E93),
@@ -945,7 +969,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     // Compact, isolated Delete Account & Data Button (subtle & safe from mistaps)
     final deleteAccountButton = user != null
         ? Padding(
-            padding: const EdgeInsets.only(top: 4, bottom: 28),
+            padding: EdgeInsets.only(top: 4, bottom: isLandscape ? 16 : 28),
             child: Center(
               child: CupertinoButton(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
@@ -998,7 +1022,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         toolbarHeight: appBarHeight,
         title: Text(
           l10n.settingsTitle,
-          style: const TextStyle(fontWeight: FontWeight.w700),
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: isLandscape ? 17 : 20,
+          ),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -1007,64 +1034,64 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         top: false,
         bottom: false,
         child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1024),
-          child: ListView(
-            padding: EdgeInsets.fromLTRB(
-              16,
-              8,
-              16,
-              scrollBottomPadding,
-            ),
-            children: [
-              if (isWide)
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      flex: 48,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          if (profileCard != null) ...[
-                            profileCard,
-                            const SizedBox(height: 18),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1024),
+            child: ListView(
+              padding: EdgeInsets.fromLTRB(
+                isLandscape ? 20 : 16,
+                isLandscape ? 6 : 8,
+                isLandscape ? 20 : 16,
+                scrollBottomPadding,
+              ),
+              children: [
+                if (isWide)
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Cột 1: Thông tin tài khoản & Quản lý dữ liệu
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (profileCard != null) ...[
+                              profileCard,
+                              SizedBox(height: isLandscape ? 12 : 18),
+                            ],
+                            dataSection,
                           ],
-                          dataSection,
-                          appearanceSection,
-                        ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      flex: 52,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          securitySection,
-                          aboutSection,
-                          ?deleteAccountButton,
-                        ],
+                      SizedBox(width: isLandscape ? 16 : 20),
+                      // Cột 2: Giao diện trải nghiệm, Bảo mật, Giới thiệu & Xóa tài khoản
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            appearanceSection,
+                            securitySection,
+                            aboutSection,
+                            ?deleteAccountButton,
+                          ],
+                        ),
                       ),
-                    ),
+                    ],
+                  )
+                else ...[
+                  if (profileCard != null) ...[
+                    profileCard,
+                    const SizedBox(height: 18),
                   ],
-                )
-              else ...[
-                if (profileCard != null) ...[
-                  profileCard,
-                  const SizedBox(height: 18),
+                  dataSection,
+                  appearanceSection,
+                  securitySection,
+                  aboutSection,
+                  ?deleteAccountButton,
                 ],
-                dataSection,
-                appearanceSection,
-                securitySection,
-                aboutSection,
-                ?deleteAccountButton,
               ],
-            ],
+            ),
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
