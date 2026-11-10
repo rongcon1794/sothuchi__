@@ -1682,4 +1682,130 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get quickFilterTooltipTransfer => 'Chỉ lọc chuyển khoản';
+
+  @override
+  String get privacyHeroTitle => 'Cam kết Bảo mật & Quyền riêng tư';
+
+  @override
+  String get privacyHeroSubtitle =>
+      'Dữ liệu tài chính của bạn thuộc toàn quyền sở hữu của bạn';
+
+  @override
+  String get privacyHeroBody =>
+      'Sổ Thu Chi được xây dựng với nguyên tắc đặt sự riêng tư lên hàng đầu. Chúng tôi chỉ xử lý những dữ liệu cần thiết để cung cấp tính năng quản lý thu chi, đồng bộ hóa giữa các thiết bị của bạn và tuyệt đối không khai thác dữ liệu cá nhân cho mục đích thương mại hay quảng cáo.';
+
+  @override
+  String get privacySection1Title => '1. Thông tin ứng dụng thu thập';
+
+  @override
+  String get privacySection1Item1 =>
+      'Thông tin tài khoản Google (khi bạn chọn đăng nhập đám mây): Ứng dụng chỉ ghi nhận tên hiển thị, địa chỉ email và ảnh đại diện nhằm định danh tài khoản và đồng bộ dữ liệu chính xác giữa các thiết bị của bạn.';
+
+  @override
+  String get privacySection1Item2 =>
+      'Chế độ Khách (Ngoại tuyến): Bạn có thể sử dụng đầy đủ tính năng ghi chép ngay trên thiết bị mà không cần cung cấp email hay thông tin cá nhân.';
+
+  @override
+  String get privacySection1Item3 =>
+      'Dữ liệu tài chính do bạn tự nhập: Bao gồm sổ thu chi, ví & tài khoản, giao dịch thu/chi/chuyển khoản, hạn mức ngân sách, mục tiêu tiết kiệm, sổ nợ và giao dịch định kỳ.';
+
+  @override
+  String get privacySection1Item4 =>
+      'Không yêu cầu liên kết ngân hàng: Sổ Thu Chi không bao giờ yêu cầu mật khẩu ngân hàng, mã OTP hay quyền đọc tin nhắn SMS của bạn.';
+
+  @override
+  String get privacySection2Title => '2. Lưu trữ & Bảo vệ dữ liệu';
+
+  @override
+  String get privacySection2Item1 =>
+      'Lưu trữ đám mây cô lập: Khi bật đồng bộ, dữ liệu được lưu trữ trên hạ tầng Google Cloud Firestore thông qua kết nối mã hóa TLS. Quy tắc bảo mật đảm bảo chỉ duy nhất tài khoản đã xác thực của bạn mới có quyền đọc và chỉnh sửa dữ liệu của mình.';
+
+  @override
+  String get privacySection2Item2 =>
+      'Hoạt động ngoại tuyến (Offline-First): Dữ liệu được lưu cục bộ trên thiết bị để bạn tra cứu và ghi chép tức thì ngay cả khi mất mạng, sau đó tự động đồng bộ an toàn khi có kết nối Internet.';
+
+  @override
+  String get privacySection2Item3 =>
+      'Khóa ứng dụng sinh trắc học: Xác thực vân tay và khuôn mặt (Android Biometric / iOS Face ID & Touch ID) được xử lý trực tiếp bởi phần cứng bảo mật của hệ điều hành; ứng dụng không bao giờ lưu trữ dữ liệu sinh trắc học của bạn.';
+
+  @override
+  String get privacySection3Title =>
+      '3. Không quảng cáo & Không chia sẻ bên thứ ba';
+
+  @override
+  String get privacySection3Item1 =>
+      'Không thu thập dữ liệu quảng cáo: Ứng dụng hoàn toàn không chứa quảng cáo và không tích hợp các bộ công cụ theo dõi hành vi tiếp thị của bên thứ ba.';
+
+  @override
+  String get privacySection3Item2 =>
+      'Tuyệt đối không bán hoặc chia sẻ dữ liệu: Mọi thông tin thu chi, số dư ví và lịch sử giao dịch của bạn được giữ kín tuyệt đối, không chia sẻ cho bất kỳ tổ chức tài chính hay đối tác trung gian nào.';
+
+  @override
+  String get privacySection4Title => '4. Quyền kiểm soát, Xuất & Xóa dữ liệu';
+
+  @override
+  String get privacySection4Item1 =>
+      'Trích xuất dữ liệu tự do (CSV): Bạn có thể xuất toàn bộ lịch sử giao dịch ra tệp bảng tính CSV (chuẩn UTF-8 hỗ trợ đầy đủ tiếng Việt) bất cứ lúc nào tại mục Cài đặt > Xuất giao dịch ra tệp CSV.';
+
+  @override
+  String get privacySection4Item2 =>
+      'Quyền xóa vĩnh viễn tài khoản & dữ liệu: Bạn có thể chủ động xóa hoàn toàn tài khoản cùng toàn bộ dữ liệu trên đám mây và trên thiết bị ngay lập tức tại mục Cài đặt > Xóa tài khoản & toàn bộ dữ liệu mà không cần chờ phê duyệt.';
+
+  @override
+  String aboutVersionLabel(String version) {
+    return 'Phiên bản $version';
+  }
+
+  @override
+  String get aboutDescription =>
+      'Giải pháp quản lý tài chính cá nhân và gia đình toàn diện, trực quan và bảo mật. Giúp bạn làm chủ dòng tiền, kiểm soát ngân sách thông minh và xây dựng thói quen tích lũy bền vững mỗi ngày.';
+
+  @override
+  String get aboutCapabilitiesHeader => 'TÍNH NĂNG NỔI BẬT';
+
+  @override
+  String get aboutFeature1Title => 'Đa sổ thu chi & Đa ví tài khoản';
+
+  @override
+  String get aboutFeature1Desc =>
+      'Tách biệt rõ ràng các sổ thu chi (Cá nhân, Gia đình, Công việc, Du lịch) và quản lý số dư trên Tiền mặt, Ngân hàng, Ví điện tử, Thẻ tín dụng.';
+
+  @override
+  String get aboutFeature2Title => 'Ghi chép thông minh & Giao dịch định kỳ';
+
+  @override
+  String get aboutFeature2Desc =>
+      'Ghi nhận thu, chi, chuyển khoản giữa các ví chỉ trong vài chạm kèm gắn thẻ phân loại và tự động theo dõi các hóa đơn lặp lại hàng tháng.';
+
+  @override
+  String get aboutFeature3Title => 'Kiểm soát ngân sách & Tốc độ chi tiêu';
+
+  @override
+  String get aboutFeature3Desc =>
+      'Thiết lập ngân sách tổng hoặc theo từng danh mục, cảnh báo khi chạm ngưỡng và gợi ý mức chi tiêu an toàn cho những ngày còn lại trong tháng.';
+
+  @override
+  String get aboutFeature4Title => 'Mục tiêu tiết kiệm & Sổ nợ minh bạch';
+
+  @override
+  String get aboutFeature4Desc =>
+      'Theo dõi tiến độ tích lũy cho từng mục tiêu dự định và quản lý chi tiết các khoản vay, cho vay cùng lịch sử thu hồi hoặc trả nợ.';
+
+  @override
+  String get aboutFeature5Title => 'Báo cáo trực quan & Sức khỏe tài chính';
+
+  @override
+  String get aboutFeature5Desc =>
+      'Phân tích cơ cấu chi tiêu, bản đồ nhiệt theo ngày, đường xu hướng thu - chi 6 tháng và đánh giá sức khỏe tài chính theo quy chuẩn 50/30/20.';
+
+  @override
+  String get aboutFeature6Title => 'Bảo mật cao, Đa tiền tệ & Xuất dữ liệu CSV';
+
+  @override
+  String get aboutFeature6Desc =>
+      'Hỗ trợ 6 loại tiền tệ (VND, USD, EUR, JPY, KRW, SGD), khóa ứng dụng bằng vân tay/khuôn mặt, giao diện OLED True Black và xuất báo cáo CSV.';
+
+  @override
+  String get aboutFooterNote =>
+      'Hoạt động mượt mà cả khi ngoại tuyến • Đồng bộ đám mây an toàn • Không quảng cáo';
 }

@@ -3187,6 +3187,210 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Chỉ lọc chuyển khoản'**
   String get quickFilterTooltipTransfer;
+
+  /// No description provided for @privacyHeroTitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Cam kết Bảo mật & Quyền riêng tư'**
+  String get privacyHeroTitle;
+
+  /// No description provided for @privacyHeroSubtitle.
+  ///
+  /// In vi, this message translates to:
+  /// **'Dữ liệu tài chính của bạn thuộc toàn quyền sở hữu của bạn'**
+  String get privacyHeroSubtitle;
+
+  /// No description provided for @privacyHeroBody.
+  ///
+  /// In vi, this message translates to:
+  /// **'Sổ Thu Chi được xây dựng với nguyên tắc đặt sự riêng tư lên hàng đầu. Chúng tôi chỉ xử lý những dữ liệu cần thiết để cung cấp tính năng quản lý thu chi, đồng bộ hóa giữa các thiết bị của bạn và tuyệt đối không khai thác dữ liệu cá nhân cho mục đích thương mại hay quảng cáo.'**
+  String get privacyHeroBody;
+
+  /// No description provided for @privacySection1Title.
+  ///
+  /// In vi, this message translates to:
+  /// **'1. Thông tin ứng dụng thu thập'**
+  String get privacySection1Title;
+
+  /// No description provided for @privacySection1Item1.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thông tin tài khoản Google (khi bạn chọn đăng nhập đám mây): Ứng dụng chỉ ghi nhận tên hiển thị, địa chỉ email và ảnh đại diện nhằm định danh tài khoản và đồng bộ dữ liệu chính xác giữa các thiết bị của bạn.'**
+  String get privacySection1Item1;
+
+  /// No description provided for @privacySection1Item2.
+  ///
+  /// In vi, this message translates to:
+  /// **'Chế độ Khách (Ngoại tuyến): Bạn có thể sử dụng đầy đủ tính năng ghi chép ngay trên thiết bị mà không cần cung cấp email hay thông tin cá nhân.'**
+  String get privacySection1Item2;
+
+  /// No description provided for @privacySection1Item3.
+  ///
+  /// In vi, this message translates to:
+  /// **'Dữ liệu tài chính do bạn tự nhập: Bao gồm sổ thu chi, ví & tài khoản, giao dịch thu/chi/chuyển khoản, hạn mức ngân sách, mục tiêu tiết kiệm, sổ nợ và giao dịch định kỳ.'**
+  String get privacySection1Item3;
+
+  /// No description provided for @privacySection1Item4.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không yêu cầu liên kết ngân hàng: Sổ Thu Chi không bao giờ yêu cầu mật khẩu ngân hàng, mã OTP hay quyền đọc tin nhắn SMS của bạn.'**
+  String get privacySection1Item4;
+
+  /// No description provided for @privacySection2Title.
+  ///
+  /// In vi, this message translates to:
+  /// **'2. Lưu trữ & Bảo vệ dữ liệu'**
+  String get privacySection2Title;
+
+  /// No description provided for @privacySection2Item1.
+  ///
+  /// In vi, this message translates to:
+  /// **'Lưu trữ đám mây cô lập: Khi bật đồng bộ, dữ liệu được lưu trữ trên hạ tầng Google Cloud Firestore thông qua kết nối mã hóa TLS. Quy tắc bảo mật đảm bảo chỉ duy nhất tài khoản đã xác thực của bạn mới có quyền đọc và chỉnh sửa dữ liệu của mình.'**
+  String get privacySection2Item1;
+
+  /// No description provided for @privacySection2Item2.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hoạt động ngoại tuyến (Offline-First): Dữ liệu được lưu cục bộ trên thiết bị để bạn tra cứu và ghi chép tức thì ngay cả khi mất mạng, sau đó tự động đồng bộ an toàn khi có kết nối Internet.'**
+  String get privacySection2Item2;
+
+  /// No description provided for @privacySection2Item3.
+  ///
+  /// In vi, this message translates to:
+  /// **'Khóa ứng dụng sinh trắc học: Xác thực vân tay và khuôn mặt (Android Biometric / iOS Face ID & Touch ID) được xử lý trực tiếp bởi phần cứng bảo mật của hệ điều hành; ứng dụng không bao giờ lưu trữ dữ liệu sinh trắc học của bạn.'**
+  String get privacySection2Item3;
+
+  /// No description provided for @privacySection3Title.
+  ///
+  /// In vi, this message translates to:
+  /// **'3. Không quảng cáo & Không chia sẻ bên thứ ba'**
+  String get privacySection3Title;
+
+  /// No description provided for @privacySection3Item1.
+  ///
+  /// In vi, this message translates to:
+  /// **'Không thu thập dữ liệu quảng cáo: Ứng dụng hoàn toàn không chứa quảng cáo và không tích hợp các bộ công cụ theo dõi hành vi tiếp thị của bên thứ ba.'**
+  String get privacySection3Item1;
+
+  /// No description provided for @privacySection3Item2.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tuyệt đối không bán hoặc chia sẻ dữ liệu: Mọi thông tin thu chi, số dư ví và lịch sử giao dịch của bạn được giữ kín tuyệt đối, không chia sẻ cho bất kỳ tổ chức tài chính hay đối tác trung gian nào.'**
+  String get privacySection3Item2;
+
+  /// No description provided for @privacySection4Title.
+  ///
+  /// In vi, this message translates to:
+  /// **'4. Quyền kiểm soát, Xuất & Xóa dữ liệu'**
+  String get privacySection4Title;
+
+  /// No description provided for @privacySection4Item1.
+  ///
+  /// In vi, this message translates to:
+  /// **'Trích xuất dữ liệu tự do (CSV): Bạn có thể xuất toàn bộ lịch sử giao dịch ra tệp bảng tính CSV (chuẩn UTF-8 hỗ trợ đầy đủ tiếng Việt) bất cứ lúc nào tại mục Cài đặt > Xuất giao dịch ra tệp CSV.'**
+  String get privacySection4Item1;
+
+  /// No description provided for @privacySection4Item2.
+  ///
+  /// In vi, this message translates to:
+  /// **'Quyền xóa vĩnh viễn tài khoản & dữ liệu: Bạn có thể chủ động xóa hoàn toàn tài khoản cùng toàn bộ dữ liệu trên đám mây và trên thiết bị ngay lập tức tại mục Cài đặt > Xóa tài khoản & toàn bộ dữ liệu mà không cần chờ phê duyệt.'**
+  String get privacySection4Item2;
+
+  /// No description provided for @aboutVersionLabel.
+  ///
+  /// In vi, this message translates to:
+  /// **'Phiên bản {version}'**
+  String aboutVersionLabel(String version);
+
+  /// No description provided for @aboutDescription.
+  ///
+  /// In vi, this message translates to:
+  /// **'Giải pháp quản lý tài chính cá nhân và gia đình toàn diện, trực quan và bảo mật. Giúp bạn làm chủ dòng tiền, kiểm soát ngân sách thông minh và xây dựng thói quen tích lũy bền vững mỗi ngày.'**
+  String get aboutDescription;
+
+  /// No description provided for @aboutCapabilitiesHeader.
+  ///
+  /// In vi, this message translates to:
+  /// **'TÍNH NĂNG NỔI BẬT'**
+  String get aboutCapabilitiesHeader;
+
+  /// No description provided for @aboutFeature1Title.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đa sổ thu chi & Đa ví tài khoản'**
+  String get aboutFeature1Title;
+
+  /// No description provided for @aboutFeature1Desc.
+  ///
+  /// In vi, this message translates to:
+  /// **'Tách biệt rõ ràng các sổ thu chi (Cá nhân, Gia đình, Công việc, Du lịch) và quản lý số dư trên Tiền mặt, Ngân hàng, Ví điện tử, Thẻ tín dụng.'**
+  String get aboutFeature1Desc;
+
+  /// No description provided for @aboutFeature2Title.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ghi chép thông minh & Giao dịch định kỳ'**
+  String get aboutFeature2Title;
+
+  /// No description provided for @aboutFeature2Desc.
+  ///
+  /// In vi, this message translates to:
+  /// **'Ghi nhận thu, chi, chuyển khoản giữa các ví chỉ trong vài chạm kèm gắn thẻ phân loại và tự động theo dõi các hóa đơn lặp lại hàng tháng.'**
+  String get aboutFeature2Desc;
+
+  /// No description provided for @aboutFeature3Title.
+  ///
+  /// In vi, this message translates to:
+  /// **'Kiểm soát ngân sách & Tốc độ chi tiêu'**
+  String get aboutFeature3Title;
+
+  /// No description provided for @aboutFeature3Desc.
+  ///
+  /// In vi, this message translates to:
+  /// **'Thiết lập ngân sách tổng hoặc theo từng danh mục, cảnh báo khi chạm ngưỡng và gợi ý mức chi tiêu an toàn cho những ngày còn lại trong tháng.'**
+  String get aboutFeature3Desc;
+
+  /// No description provided for @aboutFeature4Title.
+  ///
+  /// In vi, this message translates to:
+  /// **'Mục tiêu tiết kiệm & Sổ nợ minh bạch'**
+  String get aboutFeature4Title;
+
+  /// No description provided for @aboutFeature4Desc.
+  ///
+  /// In vi, this message translates to:
+  /// **'Theo dõi tiến độ tích lũy cho từng mục tiêu dự định và quản lý chi tiết các khoản vay, cho vay cùng lịch sử thu hồi hoặc trả nợ.'**
+  String get aboutFeature4Desc;
+
+  /// No description provided for @aboutFeature5Title.
+  ///
+  /// In vi, this message translates to:
+  /// **'Báo cáo trực quan & Sức khỏe tài chính'**
+  String get aboutFeature5Title;
+
+  /// No description provided for @aboutFeature5Desc.
+  ///
+  /// In vi, this message translates to:
+  /// **'Phân tích cơ cấu chi tiêu, bản đồ nhiệt theo ngày, đường xu hướng thu - chi 6 tháng và đánh giá sức khỏe tài chính theo quy chuẩn 50/30/20.'**
+  String get aboutFeature5Desc;
+
+  /// No description provided for @aboutFeature6Title.
+  ///
+  /// In vi, this message translates to:
+  /// **'Bảo mật cao, Đa tiền tệ & Xuất dữ liệu CSV'**
+  String get aboutFeature6Title;
+
+  /// No description provided for @aboutFeature6Desc.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hỗ trợ 6 loại tiền tệ (VND, USD, EUR, JPY, KRW, SGD), khóa ứng dụng bằng vân tay/khuôn mặt, giao diện OLED True Black và xuất báo cáo CSV.'**
+  String get aboutFeature6Desc;
+
+  /// No description provided for @aboutFooterNote.
+  ///
+  /// In vi, this message translates to:
+  /// **'Hoạt động mượt mà cả khi ngoại tuyến • Đồng bộ đám mây an toàn • Không quảng cáo'**
+  String get aboutFooterNote;
 }
 
 class _AppLocalizationsDelegate

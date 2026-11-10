@@ -1687,4 +1687,129 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get quickFilterTooltipTransfer => 'Filter transfers only';
+
+  @override
+  String get privacyHeroTitle => 'Privacy & Security Commitment';
+
+  @override
+  String get privacyHeroSubtitle =>
+      'Your personal financial data belongs strictly to you';
+
+  @override
+  String get privacyHeroBody =>
+      'Sổ Thu Chi is built on a privacy-first foundation. We only process the data necessary to provide expense tracking and multi-device synchronization, and we never monetize or share your financial records for advertising.';
+
+  @override
+  String get privacySection1Title => '1. Information We Process';
+
+  @override
+  String get privacySection1Item1 =>
+      'Google Account Profile (when using Cloud Sync): We only receive your display name, email address, and profile photo to identify your account and synchronize your data across devices.';
+
+  @override
+  String get privacySection1Item2 =>
+      'Guest Mode (Offline): You can use the app locally on your device without providing an email address or any personal identity information.';
+
+  @override
+  String get privacySection1Item3 =>
+      'User-Entered Financial Records: Includes your ledgers, wallets, income/expense/transfer transactions, monthly budgets, savings goals, debt records, and recurring bills.';
+
+  @override
+  String get privacySection1Item4 =>
+      'No Bank Credentials Required: Sổ Thu Chi never asks for your bank login credentials, OTP codes, or SMS reading permissions.';
+
+  @override
+  String get privacySection2Title => '2. Data Storage & Protection';
+
+  @override
+  String get privacySection2Item1 =>
+      'Isolated Cloud Storage: Synced records are stored on Google Cloud Firestore over encrypted TLS connections. Strict security rules ensure only your authenticated account can read or modify your records.';
+
+  @override
+  String get privacySection2Item2 =>
+      'Offline-First Reliability: Your records are cached locally on your device for instant access without an internet connection and automatically synchronized when back online.';
+
+  @override
+  String get privacySection2Item3 =>
+      'Biometric App Lock: Fingerprint and facial authentication (Android Biometric / iOS Face ID & Touch ID) are handled strictly by your device hardware; biometric data is never accessed or stored by the app.';
+
+  @override
+  String get privacySection3Title => '3. Zero Ads & No Third-Party Sharing';
+
+  @override
+  String get privacySection3Item1 =>
+      'Zero Ad Tracking: The application contains no advertisements and embeds no third-party marketing or behavioral tracking SDKs.';
+
+  @override
+  String get privacySection3Item2 =>
+      'No Data Selling or Sharing: Your financial records, wallet balances, and transaction history are never sold, rented, or shared with any third party.';
+
+  @override
+  String get privacySection4Title => '4. Data Portability & Right to Erasure';
+
+  @override
+  String get privacySection4Item1 =>
+      'Full CSV Export: You can export your entire transaction history to a standard UTF-8 CSV spreadsheet at any time via Settings > Export Transactions to CSV.';
+
+  @override
+  String get privacySection4Item2 =>
+      'Instant Account & Data Deletion: You can permanently delete your account and erase all cloud and local records immediately from Settings > Delete Account & All Data.';
+
+  @override
+  String aboutVersionLabel(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get aboutDescription =>
+      'A comprehensive, intuitive, and private personal and family finance manager. Designed to help you master your cashflow, stay on budget, and build lasting savings habits every day.';
+
+  @override
+  String get aboutCapabilitiesHeader => 'KEY CAPABILITIES';
+
+  @override
+  String get aboutFeature1Title => 'Multiple Ledgers & Wallets';
+
+  @override
+  String get aboutFeature1Desc =>
+      'Separate your finances across Personal, Family, Business, or Travel ledgers and track balances across Cash, Bank, E-Wallets, and Cards.';
+
+  @override
+  String get aboutFeature2Title => 'Smart Entry & Recurring Bills';
+
+  @override
+  String get aboutFeature2Desc =>
+      'Log income, expenses, and wallet transfers in seconds with smart suggestions, tags, and automated tracking for recurring subscriptions and bills.';
+
+  @override
+  String get aboutFeature3Title => 'Monthly Budgets & Spending Pace';
+
+  @override
+  String get aboutFeature3Desc =>
+      'Set overall or category budgets, receive early threshold alerts, and view recommended daily spending limits for the rest of the month.';
+
+  @override
+  String get aboutFeature4Title => 'Savings Goals & Debt Tracking';
+
+  @override
+  String get aboutFeature4Desc =>
+      'Track progress toward your savings milestones and manage lent or borrowed balances with full repayment histories.';
+
+  @override
+  String get aboutFeature5Title => 'Visual Reports & Financial Health';
+
+  @override
+  String get aboutFeature5Desc =>
+      'Explore category breakdowns, daily spending heatmaps, 6-month income vs. expense trend lines, and 50/30/20 financial health scores.';
+
+  @override
+  String get aboutFeature6Title => 'Biometric Security, Multi-Currency & CSV';
+
+  @override
+  String get aboutFeature6Desc =>
+      'Supports 6 currencies (VND, USD, EUR, JPY, KRW, SGD), biometric app lock, OLED True Black mode, and full UTF-8 CSV export.';
+
+  @override
+  String get aboutFooterNote =>
+      'Offline-first reliability • Secure cloud sync • Zero ads';
 }
