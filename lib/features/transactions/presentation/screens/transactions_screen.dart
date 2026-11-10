@@ -148,7 +148,18 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
         toolbarHeight: isLandscape
             ? AppleTokens.appBarHeightLandscape
             : AppleTokens.appBarHeightPortrait,
-        title: Text(l10n.transactionsTitle),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleSpacing: 16,
+        title: AppleHeaderTitle(
+          title: l10n.transactionsTitle,
+          icon: Icons.receipt_long_rounded,
+          accentColor: AppleTokens.systemBlue,
+          badgeText: totalCount > 0 ? '$totalCount' : null,
+          isLandscape: isLandscape,
+        ),
         actions: [
           if (isLandscape) ...[
             Center(
@@ -158,19 +169,22 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
             ),
             const SizedBox(width: 8),
           ],
-          Badge(
-            isLabelVisible: filter.hasActiveFilters,
-            child: IconButton(
-              tooltip: l10n.filterTransactions,
-              padding: isLandscape ? EdgeInsets.zero : const EdgeInsets.all(8),
-              constraints: isLandscape
-                  ? const BoxConstraints(minWidth: 32, minHeight: 32)
-                  : null,
-              onPressed: _openFilterSheet,
-              icon: Icon(Icons.tune_rounded, size: isLandscape ? 19 : 24),
-            ),
+          AppleIconButton(
+            icon: Icons.tune_rounded,
+            size: isLandscape ? 32 : 36,
+            iconSize: isLandscape ? 16 : 18,
+            tooltip: l10n.filterTransactions,
+            badgeText: filter.hasActiveFilters ? '•' : null,
+            foregroundColor: filter.hasActiveFilters ? AppleTokens.systemBlue : null,
+            borderColor: filter.hasActiveFilters
+                ? AppleTokens.systemBlue.withValues(alpha: 0.4)
+                : null,
+            backgroundColor: filter.hasActiveFilters
+                ? AppleTokens.systemBlue.withValues(alpha: isDark ? 0.2 : 0.1)
+                : null,
+            onTap: _openFilterSheet,
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 12),
         ],
       ),
       body: SafeArea(

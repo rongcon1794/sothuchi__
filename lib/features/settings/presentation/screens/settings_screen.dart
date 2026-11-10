@@ -1020,15 +1020,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         toolbarHeight: appBarHeight,
-        title: Text(
-          l10n.settingsTitle,
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: isLandscape ? 17 : 20,
-          ),
-        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleSpacing: 16,
+        title: AppleHeaderTitle(
+          title: l10n.settingsTitle,
+          icon: CupertinoIcons.gear_alt_fill,
+          accentColor: AppleTokens.systemGray,
+          badgeText: 'Hệ thống',
+          isLandscape: isLandscape,
+        ),
       ),
       body: SafeArea(
         top: false,

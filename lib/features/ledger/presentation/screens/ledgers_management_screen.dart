@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
@@ -151,20 +150,24 @@ class _LedgersManagementScreenState
     final ledgersAsync = ref.watch(ledgersStreamProvider);
     final activeId = ref.watch(activeLedgerIdProvider);
 
+    final totalLedgers = ledgersAsync.value?.length ?? 0;
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         toolbarHeight: appBarHeight,
-        title: Text(
-          l10n.ledgersTitle,
-          style: const TextStyle(fontWeight: FontWeight.w700),
-        ),
-        centerTitle: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(CupertinoIcons.chevron_left, size: 24),
-          onPressed: () => context.pop(),
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleSpacing: 0,
+        leading: const AppleBackButton(),
+        title: AppleHeaderTitle(
+          title: l10n.ledgersTitle,
+          icon: Icons.auto_stories_rounded,
+          accentColor: AppleTokens.systemIndigo,
+          badgeText: totalLedgers > 0 ? '$totalLedgers sổ' : null,
+          isLandscape: isLandscape,
         ),
       ),
       floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),

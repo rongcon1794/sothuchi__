@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
+import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/date_formatter.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
@@ -45,9 +46,32 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
       locale: effectiveLocale,
     );
 
+    final isLandscape = context.isLandscape;
+    final appBarHeight = isLandscape
+        ? AppleTokens.appBarHeightLandscape
+        : AppleTokens.appBarHeightPortrait;
+
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(l10n.reportsFinancialHealth),
+        toolbarHeight: appBarHeight,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleSpacing: 0,
+        leading: const AppleBackButton(),
+        title: AppleHeaderTitle(
+          title: l10n.reportsFinancialHealth,
+          icon: CupertinoIcons.heart_fill,
+          accentColor: scoreData.color,
+          badgeText: '${scoreData.score}/100 • ${scoreData.rating}',
+          badgeColor: scoreData.color.withValues(
+            alpha: theme.brightness == Brightness.dark ? 0.22 : 0.12,
+          ),
+          badgeTextColor: scoreData.color,
+          isLandscape: isLandscape,
+        ),
       ),
       body: SafeArea(
         top: false,

@@ -47,14 +47,26 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
         ? AppleTokens.scrollBottomPaddingLandscape + 42
         : AppleTokens.scrollBottomPaddingWithFab;
 
+    final totalDebts = debtsAsync.value?.length ?? 0;
+    final canPop = Navigator.of(context).canPop();
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         toolbarHeight: appBarHeight,
-        title: Text(l10n.debtBookTitle, style: const TextStyle(fontWeight: FontWeight.w700)),
-        centerTitle: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleSpacing: canPop ? 0 : 16,
+        leading: canPop ? const AppleBackButton() : null,
+        title: AppleHeaderTitle(
+          title: l10n.debtBookTitle,
+          icon: Icons.assignment_outlined,
+          accentColor: AppleTokens.rubyExpense,
+          badgeText: totalDebts > 0 ? '$totalDebts khoản' : null,
+          isLandscape: isLandscape,
+        ),
       ),
       floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
       floatingActionButton: AppleAdaptiveExpandableFab(

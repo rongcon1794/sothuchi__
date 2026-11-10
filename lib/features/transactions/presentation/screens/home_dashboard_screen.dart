@@ -81,11 +81,16 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: appBarHeight,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleSpacing: 16,
         title: Row(
           children: [
             Padding(
               padding: EdgeInsets.only(right: isLandscape ? 8 : 10),
-              child: SoThuChiLogo(size: isLandscape ? 22 : 36),
+              child: SoThuChiLogo(size: isLandscape ? 24 : 34),
             ),
             Expanded(
               child: Builder(
@@ -110,7 +115,7 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
-                        fontSize: 14,
+                        fontSize: 15,
                         letterSpacing: -0.3,
                       ),
                     );
@@ -130,7 +135,8 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
-                          letterSpacing: -0.3,
+                          fontSize: 18,
+                          letterSpacing: -0.35,
                         ),
                       ),
                       if (subtitleText.isNotEmpty)
@@ -140,6 +146,7 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: scheme.onSurfaceVariant,
+                            fontSize: 11,
                           ),
                         ),
                     ],

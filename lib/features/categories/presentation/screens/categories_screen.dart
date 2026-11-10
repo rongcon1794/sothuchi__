@@ -672,18 +672,24 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
           cat.name.toLowerCase().contains(query);
     }).toList(growable: false);
 
+    final totalCategories = expenseList.length + incomeList.length;
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         toolbarHeight: appBarHeight,
-        leading: IconButton(
-          icon: const Icon(CupertinoIcons.chevron_left, size: 22),
-          tooltip: 'Quay lại',
-          onPressed: () => context.pop(),
-        ),
-        title: Text(
-          l10n.categoriesTitle,
-          style: const TextStyle(fontWeight: FontWeight.w700),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleSpacing: 0,
+        leading: const AppleBackButton(),
+        title: AppleHeaderTitle(
+          title: l10n.categoriesTitle,
+          icon: Icons.category_rounded,
+          accentColor: AppleTokens.systemTeal,
+          badgeText: totalCategories > 0 ? '$totalCategories mục' : null,
+          isLandscape: isLandscape,
         ),
         actions: [
           ApplePopupMenuButton<String>(

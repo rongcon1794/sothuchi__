@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
+import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/reports/domain/entities/monthly_report.dart';
 import 'package:so_thu_chi/features/reports/presentation/screens/financial_health_detail_screen.dart';
 import 'package:so_thu_chi/features/reports/presentation/widgets/financial_health_card.dart';
@@ -79,7 +80,7 @@ void main() {
     expect(find.text('Gợi ý tối ưu tài chính'), findsOneWidget);
 
     // 4. Verify back navigation
-    final backButton = find.byType(BackButton);
+    final backButton = find.byType(AppleBackButton);
     expect(backButton, findsOneWidget);
     await tester.tap(backButton);
     await tester.pumpAndSettle();

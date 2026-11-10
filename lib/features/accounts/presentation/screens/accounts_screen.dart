@@ -192,13 +192,19 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         toolbarHeight: appBarHeight,
-        title: Text(
-          l10n.walletsTitle,
-          style: const TextStyle(fontWeight: FontWeight.w700),
-        ),
-        centerTitle: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleSpacing: 16,
+        leading: Navigator.of(context).canPop() ? const AppleBackButton() : null,
+        title: AppleHeaderTitle(
+          title: l10n.walletsTitle,
+          icon: Icons.account_balance_wallet_rounded,
+          accentColor: const Color(0xFF0284C7),
+          badgeText: '${activeAccounts.length} ví',
+          isLandscape: isLandscape,
+        ),
         actions: [
           if (activeAccounts.length >= 2) ...[
             CupertinoButton(

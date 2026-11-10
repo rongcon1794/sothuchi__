@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
@@ -115,35 +114,37 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
     final locale = settings?.localeCode ?? 'vi';
     final hideBalance = settings?.hideBalance ?? false;
 
+    final totalGoals = goalsAsync.value?.length ?? 0;
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         toolbarHeight: appBarHeight,
-        title: Text(
-          l10n.savingsTitle,
-          style: const TextStyle(fontWeight: FontWeight.w700),
-        ),
-        centerTitle: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(CupertinoIcons.chevron_left, size: 24),
-          onPressed: () => context.pop(),
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleSpacing: 0,
+        leading: const AppleBackButton(),
+        title: AppleHeaderTitle(
+          title: l10n.savingsTitle,
+          icon: Icons.savings_rounded,
+          accentColor: AppleTokens.systemOrange,
+          badgeText: totalGoals > 0 ? '$totalGoals mục tiêu' : null,
+          isLandscape: isLandscape,
         ),
         actions: [
-          IconButton(
+          AppleIconButton(
+            icon: hideBalance ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
+            size: isLandscape ? 32 : 36,
+            iconSize: isLandscape ? 16 : 18,
             tooltip: hideBalance ? l10n.showBalance : l10n.hideBalance,
-            onPressed: () {
+            onTap: () {
               unawaited(HapticFeedback.selectionClick());
               ref.read(settingsControllerProvider.notifier).toggleHideBalance();
             },
-            icon: Icon(
-              hideBalance ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
-              size: 20,
-              color: isDark ? Colors.white70 : Colors.black54,
-            ),
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 12),
         ],
       ),
       floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),

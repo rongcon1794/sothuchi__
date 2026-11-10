@@ -126,7 +126,18 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
         toolbarHeight: isLandscape
             ? AppleTokens.appBarHeightLandscape
             : AppleTokens.appBarHeightPortrait,
-        title: Text(l10n.reportsTitle),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleSpacing: 16,
+        title: AppleHeaderTitle(
+          title: l10n.reportsTitle,
+          icon: Icons.insights_rounded,
+          accentColor: AppleTokens.jadePrimary,
+          badgeText: 'Th ${selectedMonth.month}/${selectedMonth.year}',
+          isLandscape: isLandscape,
+        ),
         actions: [
           if (isLandscape) ...[
             Center(
@@ -137,12 +148,14 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
             ),
             const SizedBox(width: 8),
           ],
-          IconButton(
+          AppleIconButton(
+            icon: CupertinoIcons.share,
+            size: isLandscape ? 32 : 36,
+            iconSize: isLandscape ? 16 : 18,
             tooltip: l10n.reportsShareTooltip,
-            icon: const Icon(CupertinoIcons.share, size: 20),
-            onPressed: () => _shareFinancialSummary(report, selectedMonth, locale),
+            onTap: () => _shareFinancialSummary(report, selectedMonth, locale),
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 12),
         ],
       ),
       body: SafeArea(

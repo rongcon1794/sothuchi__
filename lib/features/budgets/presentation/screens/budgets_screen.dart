@@ -120,12 +120,43 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
           .toList(growable: false),
     };
 
+    final hasExceeded = progressList.any((p) => p.isExceeded);
+    final hasWarning = progressList.any((p) => p.isWarningTriggered && !p.isExceeded);
+    final budgetBadgeText = hasExceeded
+        ? '! Vượt mức'
+        : hasWarning
+            ? 'Cảnh báo'
+            : (progressList.isNotEmpty ? '${progressList.length}' : null);
+    final budgetBadgeColor = hasExceeded
+        ? AppleTokens.rubyExpense.withValues(alpha: 0.18)
+        : hasWarning
+            ? AppleTokens.systemOrange.withValues(alpha: 0.18)
+            : null;
+    final budgetBadgeTextColor = hasExceeded
+        ? AppleTokens.rubyExpense
+        : hasWarning
+            ? AppleTokens.systemOrange
+            : null;
+
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: isLandscape
             ? AppleTokens.appBarHeightLandscape
             : AppleTokens.appBarHeightPortrait,
-        title: Text(l10n.budgetsTitle),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleSpacing: 16,
+        title: AppleHeaderTitle(
+          title: l10n.budgetsTitle,
+          icon: Icons.pie_chart_rounded,
+          accentColor: AppleTokens.systemOrange,
+          badgeText: budgetBadgeText,
+          badgeColor: budgetBadgeColor,
+          badgeTextColor: budgetBadgeTextColor,
+          isLandscape: isLandscape,
+        ),
         actions: [
           if (isLandscape) ...[
             Center(
