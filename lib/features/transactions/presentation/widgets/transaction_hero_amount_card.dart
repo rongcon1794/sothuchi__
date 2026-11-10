@@ -207,21 +207,28 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
 
     return AppleGlassCard(
       padding: EdgeInsets.fromLTRB(
-          16, isLandscape ? 10 : 16, 16, isLandscape ? 12 : 18),
-      borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+        16,
+        isLandscape ? 10 : 14,
+        16,
+        isLandscape ? 10 : 14,
+      ),
+      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
       borderColor: isFocused
-          ? typeColor.withValues(alpha: isDark ? 0.6 : 0.45)
-          : typeColor.withValues(alpha: isDark ? 0.35 : 0.25),
+          ? typeColor.withValues(alpha: isDark ? 0.45 : 0.35)
+          : (isDark
+              ? Colors.white.withValues(alpha: 0.10)
+              : AppleTokens.borderLight),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           // 1. Sliding Segmented Type Pill
           TransactionTypeSegmentedPill(
             selected: widget.type,
             onChanged: widget.onTypeChanged,
           ),
-          const SizedBox(height: 18),
+          SizedBox(height: isLandscape ? 10 : 16),
 
-          // 2. Large Amount Input Display with Lucian Shake Animation
+          // 2. Clean Borderless Hero Amount Canvas (No nested card box)
           AnimatedBuilder(
             animation: _shakeAnimation,
             builder: (context, child) {
@@ -231,147 +238,135 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
               );
             },
             child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
               onTap: () {
                 if (!widget.focusNode.hasFocus) {
                   widget.focusNode.requestFocus();
                 }
                 SystemChannels.textInput.invokeMethod<void>('TextInput.show');
               },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 220),
-                curve: Curves.easeOutCubic,
-                constraints: const BoxConstraints(minHeight: 62),
-                alignment: Alignment.center,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: isFocused
-                      ? typeColor.withValues(alpha: isDark ? 0.12 : 0.07)
-                      : (isDark
-                          ? Colors.white.withValues(alpha: 0.04)
-                          : Colors.black.withValues(alpha: 0.02)),
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                  border: Border.all(
-                    color: isFocused
-                        ? typeColor
-                        : (isDark
-                            ? Colors.white.withValues(alpha: 0.12)
-                            : Colors.black.withValues(alpha: 0.08)),
-                    width: isFocused ? 2.0 : 1.0,
-                  ),
-                  boxShadow: isFocused
-                      ? [
-                          BoxShadow(
-                            color: typeColor.withValues(
-                                alpha: isDark ? 0.35 : 0.22),
-                            blurRadius: 16,
-                            spreadRadius: 1,
-                            offset: const Offset(0, 2),
-                          ),
-                        ]
-                      : null,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      typeSign,
-                      style: TextStyle(
-                        fontSize: typeSignFontSize,
-                        fontWeight: FontWeight.w800,
-                        color: typeColor,
-                        height: 1.0,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: IntrinsicWidth(
-                        child: TextFormField(
-                          controller: widget.amountController,
-                          focusNode: widget.focusNode,
-                          autofocus: !widget.isEditing,
-                          textAlign: TextAlign.center,
-                          showCursor: false,
-                          keyboardType: TextInputType.numberWithOptions(
-                            decimal: widget.currencyInfo.decimalDigits > 0,
-                          ),
-                          inputFormatters: [
-                            MoneyInputFormatter(
-                              currencyCode: widget.currencyCode,
-                              locale: widget.locale,
-                            ),
-                          ],
-                          style: theme.textTheme.displaySmall?.copyWith(
-                            fontSize: amountFontSize,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          typeSign,
+                          style: TextStyle(
+                            fontSize: typeSignFontSize,
                             fontWeight: FontWeight.w800,
                             color: typeColor,
-                            letterSpacing: -0.8,
-                            fontFeatures: AppTheme.tabularFigures,
-                            height: 1.1,
+                            height: 1.0,
                           ),
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            errorBorder: InputBorder.none,
-                            focusedErrorBorder: InputBorder.none,
-                            disabledBorder: InputBorder.none,
-                            filled: false,
-                            fillColor: Colors.transparent,
-                            isDense: true,
-                            hintText: '0',
-                            hintStyle: TextStyle(
-                              fontSize: amountFontSize,
-                              color: typeColor.withValues(alpha: 0.25),
-                              fontWeight: FontWeight.w800,
+                        ),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: IntrinsicWidth(
+                            child: TextFormField(
+                              controller: widget.amountController,
+                              focusNode: widget.focusNode,
+                              autofocus: !widget.isEditing,
+                              textAlign: TextAlign.center,
+                              showCursor: false,
+                              keyboardType: TextInputType.numberWithOptions(
+                                decimal: widget.currencyInfo.decimalDigits > 0,
+                              ),
+                              inputFormatters: [
+                                MoneyInputFormatter(
+                                  currencyCode: widget.currencyCode,
+                                  locale: widget.locale,
+                                ),
+                              ],
+                              style: theme.textTheme.displaySmall?.copyWith(
+                                fontSize: amountFontSize,
+                                fontWeight: FontWeight.w800,
+                                color: typeColor,
+                                letterSpacing: -0.8,
+                                fontFeatures: AppTheme.tabularFigures,
+                                height: 1.1,
+                              ),
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                errorBorder: InputBorder.none,
+                                focusedErrorBorder: InputBorder.none,
+                                disabledBorder: InputBorder.none,
+                                filled: false,
+                                fillColor: Colors.transparent,
+                                isDense: true,
+                                hintText: '0',
+                                hintStyle: TextStyle(
+                                  fontSize: amountFontSize,
+                                  color: typeColor.withValues(alpha: 0.25),
+                                  fontWeight: FontWeight.w800,
+                                ),
+                                contentPadding: EdgeInsets.zero,
+                              ),
+                              validator: (val) {
+                                final m = Money.tryParse(
+                                  val ?? '',
+                                  currencyCode: widget.currencyCode,
+                                );
+                                if (m == null || m.minorUnits <= 0) {
+                                  return context.l10n.amountRequiredError;
+                                }
+                                return null;
+                              },
                             ),
-                            contentPadding: EdgeInsets.zero,
                           ),
-                          validator: (val) {
-                            final m = Money.tryParse(val ?? '',
-                                currencyCode: widget.currencyCode);
-                            if (m == null || m.minorUnits <= 0) {
-                              return context.l10n.amountRequiredError;
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          widget.currencyInfo.symbol,
+                          style: TextStyle(
+                            fontSize: symbolFontSize,
+                            fontWeight: FontWeight.w700,
+                            color: typeColor.withValues(alpha: 0.8),
+                            height: 1.0,
+                          ),
+                        ),
+                        ListenableBuilder(
+                          listenable: widget.amountController,
+                          builder: (context, _) {
+                            if (widget.amountController.text.trim().isEmpty) {
+                              return const SizedBox.shrink();
                             }
-                            return null;
+                            return Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: ApplePressable(
+                                scaleDown: 0.88,
+                                onTap: widget.onClear,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4),
+                                  child: Icon(
+                                    CupertinoIcons.clear_circled_solid,
+                                    size: 20,
+                                    color: typeColor.withValues(alpha: 0.7),
+                                  ),
+                                ),
+                              ),
+                            );
                           },
                         ),
-                      ),
+                      ],
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      widget.currencyInfo.symbol,
-                      style: TextStyle(
-                        fontSize: symbolFontSize,
-                        fontWeight: FontWeight.w700,
-                        color: typeColor.withValues(alpha: 0.85),
-                        height: 1.0,
+                    const SizedBox(height: 8),
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOutCubic,
+                      width: isFocused ? 56 : 28,
+                      height: 3,
+                      decoration: BoxDecoration(
+                        color: isFocused
+                            ? typeColor
+                            : typeColor.withValues(alpha: 0.22),
+                        borderRadius: BorderRadius.circular(2),
                       ),
-                    ),
-                    // Clear button inside when amount is non-empty
-                    ListenableBuilder(
-                      listenable: widget.amountController,
-                      builder: (context, _) {
-                        if (widget.amountController.text.trim().isEmpty) {
-                          return const SizedBox.shrink();
-                        }
-                        return Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: ApplePressable(
-                            scaleDown: 0.88,
-                            onTap: widget.onClear,
-                            child: Padding(
-                              padding: const EdgeInsets.all(4),
-                              child: Icon(
-                                CupertinoIcons.clear_circled_solid,
-                                size: 20,
-                                color: typeColor.withValues(alpha: 0.75),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
                     ),
                   ],
                 ),
@@ -382,9 +377,7 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
           // Lucian Balance Shield Warning Badge
           if (_wasOverBalance && widget.availableWalletBalance != null) ...[
             const SizedBox(height: 10),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              curve: LucianTokens.ease,
+            Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: LucianTokens.dangerLight
@@ -426,16 +419,17 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
             ),
           ],
 
-          // 3. Smart Zero & Quick Amount Suggestions Bar (Reactive to amountController)
+          // 3. Compact Single-Line Quick Amount & Zero Suggestions Strip
           ListenableBuilder(
             listenable: widget.amountController,
             builder: (context, _) {
               final l10n = context.l10n;
-              final rawMoney = Money.tryParse(widget.amountController.text,
-                  currencyCode: widget.currencyCode);
+              final rawMoney = Money.tryParse(
+                widget.amountController.text,
+                currencyCode: widget.currencyCode,
+              );
               final currentMinor = rawMoney?.minorUnits ?? 0;
 
-              // Quick starter chips when amount is empty (Lucian #035 quick-chips)
               if (currentMinor <= 0) {
                 final isVnd = widget.currencyCode.toUpperCase() == 'VND';
                 if (!isVnd) return const SizedBox.shrink();
@@ -448,39 +442,37 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
                   (label: '+2tr', value: 2000000),
                 ];
                 return Padding(
-                  padding: const EdgeInsets.only(top: 14),
+                  padding: const EdgeInsets.only(top: 12),
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
                         for (final chip in starterChips)
                           Padding(
-                            padding: const EdgeInsets.only(right: 8),
+                            padding: const EdgeInsets.only(right: 6),
                             child: ApplePressable(
                               scaleDown: 0.94,
                               onTap: () => widget.onSetAmount(chip.value),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 7),
+                                  horizontal: 11,
+                                  vertical: 5,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: isDark
-                                      ? AppleTokens.bgDarkSecondary
-                                      : AppleTokens.bgLightSecondary,
+                                  color: typeColor.withValues(
+                                    alpha: isDark ? 0.14 : 0.08,
+                                  ),
                                   borderRadius: BorderRadius.circular(
-                                      AppleTokens.radiusPill),
-                                  border: Border.all(
-                                    color: isDark
-                                        ? typeColor.withValues(alpha: 0.3)
-                                        : typeColor.withValues(alpha: 0.25),
-                                    width: 1.0,
+                                    AppleTokens.radiusPill,
                                   ),
                                 ),
                                 child: Text(
                                   chip.label,
                                   style: TextStyle(
-                                    fontSize: 12.5,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.w700,
                                     color: typeColor,
+                                    fontFeatures: AppTheme.tabularFigures,
                                   ),
                                 ),
                               ),
@@ -492,17 +484,15 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
                 );
               }
 
-              // Calculate suggestions for appending zeros (x10, x100, x1.000, x10.000, x100.000, x1.000.000, x10.000.000)
               final List<({String label, int value})> zeroSuggestions = [];
-
-              final List<int> multipliers = [
+              const List<int> multipliers = [
                 10,
                 100,
                 1000,
                 10000,
                 100000,
                 1000000,
-                10000000
+                10000000,
               ];
 
               for (final m in multipliers) {
@@ -522,85 +512,68 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
               if (zeroSuggestions.isEmpty) return const SizedBox.shrink();
 
               return Padding(
-                padding: const EdgeInsets.only(top: 14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          CupertinoIcons.sparkles,
-                          size: 13,
-                          color: typeColor,
+                padding: const EdgeInsets.only(top: 12),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              CupertinoIcons.sparkles,
+                              size: 12,
+                              color: typeColor,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              l10n.zeroSuggestions,
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600,
+                                color: isDark
+                                    ? const Color(0xFF98989F)
+                                    : const Color(0xFF6E6E73),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 5),
-                        Text(
-                          l10n.zeroSuggestions,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: -0.2,
-                            color: isDark
-                                ? const Color(0xFF98989F)
-                                : const Color(0xFF6E6E73),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          for (final s in zeroSuggestions)
-                            Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: ApplePressable(
-                                scaleDown: 0.94,
-                                onTap: () => widget.onSetAmount(s.value),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 7),
-                                  decoration: BoxDecoration(
-                                    color: isDark
-                                        ? AppleTokens.bgDarkSecondary
-                                        : AppleTokens.bgLightSecondary,
-                                    borderRadius: BorderRadius.circular(
-                                        AppleTokens.radiusPill),
-                                    border: Border.all(
-                                      color: isDark
-                                          ? typeColor.withValues(alpha: 0.3)
-                                          : typeColor.withValues(alpha: 0.25),
-                                      width: 1.0,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        CupertinoIcons.arrow_right,
-                                        size: 11,
-                                        color: typeColor.withValues(alpha: 0.8),
-                                      ),
-                                      const SizedBox(width: 5),
-                                      Text(
-                                        s.label,
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w700,
-                                          color: typeColor,
-                                          fontFeatures: AppTheme.tabularFigures,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                      ),
+                      for (final s in zeroSuggestions)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: ApplePressable(
+                            scaleDown: 0.94,
+                            onTap: () => widget.onSetAmount(s.value),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 11,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: typeColor.withValues(
+                                  alpha: isDark ? 0.14 : 0.08,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                  AppleTokens.radiusPill,
+                                ),
+                              ),
+                              child: Text(
+                                s.label,
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: typeColor,
+                                  fontFeatures: AppTheme.tabularFigures,
                                 ),
                               ),
                             ),
-                        ],
-                      ),
-                    ),
-                  ],
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               );
             },

@@ -34,13 +34,23 @@ class TransactionCategorySelectionCard extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final l10n = context.l10n;
 
-    final previewCategories = categories.take(8).toList();
+    final previewCategories = <Category>[];
+    for (final cat in categories) {
+      if (previewCategories.length < 6) {
+        previewCategories.add(cat);
+      }
+    }
+    if (selectedCategory != null &&
+        !previewCategories.any((c) => c.id == selectedCategory!.id) &&
+        previewCategories.isNotEmpty) {
+      previewCategories[previewCategories.length - 1] = selectedCategory!;
+    }
 
     return AppleGlassCard(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
       borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
       borderColor: isDark
-          ? Colors.white.withValues(alpha: 0.12)
+          ? Colors.white.withValues(alpha: 0.10)
           : AppleTokens.borderLight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,7 +72,7 @@ class TransactionCategorySelectionCard extends StatelessWidget {
                 iconSize: 18,
                 radius: 10,
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,6 +93,8 @@ class TransactionCategorySelectionCard extends StatelessWidget {
                               fallbackName: selectedCategory!.name,
                             )
                           : l10n.selectCategory,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
@@ -133,128 +145,125 @@ class TransactionCategorySelectionCard extends StatelessWidget {
             color:
                 isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
 
-          // Horizontal 1-Tap Category Icons Strip
-          SizedBox(
-            height: 74,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: previewCategories.length + 2,
-              separatorBuilder: (_, _) => const SizedBox(width: 10),
-              itemBuilder: (context, index) {
-                if (index < previewCategories.length) {
-                  final cat = previewCategories[index];
-                  final isSelected = cat.id == selectedId;
-                  final catColor = AppIconCatalog.contrastSafeColor(
-                    Color(cat.color),
-                    theme.brightness,
-                  );
-                  final name = DefaultCategoryLocalization.resolveName(
-                    l10n,
-                    categoryId: cat.id,
-                    fallbackName: cat.name,
-                  );
+          // Balanced 4-Column x 2-Row Quick Category Grid (6 Categories + Khác + Thêm)
+          LayoutBuilder(
+            builder: (context, constraints) {
+              const columns = 4;
+              const spacing = 8.0;
+              final itemWidth =
+                  (constraints.maxWidth - spacing * (columns - 1)) / columns;
 
-                  return ApplePressable(
-                    scaleDown: 0.92,
-                    onTap: () => onSelected(cat.id),
-                    child: SizedBox(
-                      width: 58,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              Container(
-                                width: 44,
-                                height: 44,
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? catColor.withValues(alpha: 0.22)
-                                      : (isDark
-                                          ? AppleTokens.bgDarkSecondary
-                                          : AppleTokens.bgLightSecondary),
-                                  borderRadius: BorderRadius.circular(13),
-                                  border: isSelected
-                                      ? Border.all(color: catColor, width: 1.5)
-                                      : null,
-                                ),
-                                child: Center(
+              final gridTiles = <Widget>[
+                for (final cat in previewCategories)
+                  Builder(
+                    builder: (context) {
+                      final isSelected = cat.id == selectedId;
+                      final catColor = AppIconCatalog.contrastSafeColor(
+                        Color(cat.color),
+                        theme.brightness,
+                      );
+                      final name = DefaultCategoryLocalization.resolveName(
+                        l10n,
+                        categoryId: cat.id,
+                        fallbackName: cat.name,
+                      );
+
+                      return SizedBox(
+                        width: itemWidth,
+                        child: ApplePressable(
+                          scaleDown: 0.93,
+                          onTap: () => onSelected(cat.id),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? catColor.withValues(
+                                      alpha: isDark ? 0.18 : 0.10,
+                                    )
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: isSelected
+                                    ? catColor.withValues(alpha: 0.55)
+                                    : Colors.transparent,
+                                width: 1.2,
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? catColor
+                                        : catColor.withValues(
+                                            alpha: isDark ? 0.18 : 0.12,
+                                          ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
                                   child: Icon(
                                     AppIconCatalog.resolve(cat.icon),
-                                    size: 22,
-                                    color: catColor,
+                                    size: 20,
+                                    color: isSelected ? Colors.white : catColor,
                                   ),
                                 ),
-                              ),
-                              if (isSelected)
-                                Positioned(
-                                  right: -3,
-                                  top: -3,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(2),
-                                    decoration: BoxDecoration(
-                                      color: catColor,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      CupertinoIcons.checkmark,
-                                      size: 10,
-                                      color: Colors.white,
-                                    ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w700
+                                        : FontWeight.w500,
+                                    color: isSelected
+                                        ? catColor
+                                        : theme.colorScheme.onSurface,
                                   ),
                                 ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: isSelected
-                                  ? FontWeight.w700
-                                  : FontWeight.w500,
-                              color: isSelected
-                                  ? catColor
-                                  : theme.colorScheme.onSurface,
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-
-                if (index == previewCategories.length) {
-                  // "Khác" button -> opens full picker sheet
-                  return ApplePressable(
-                    scaleDown: 0.92,
+                        ),
+                      );
+                    },
+                  ),
+                // "Khác" tile -> opens full picker sheet
+                SizedBox(
+                  width: itemWidth,
+                  child: ApplePressable(
+                    scaleDown: 0.93,
                     onTap: onOpenMore,
-                    child: SizedBox(
-                      width: 58,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 8,
+                      ),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Container(
-                            width: 44,
-                            height: 44,
+                            width: 40,
+                            height: 40,
                             decoration: BoxDecoration(
                               color: isDark
                                   ? AppleTokens.bgDarkSecondary
                                   : AppleTokens.bgLightSecondary,
-                              borderRadius: BorderRadius.circular(13),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Center(
-                              child: Icon(
-                                CupertinoIcons.ellipsis,
-                                size: 20,
-                                color: AppleTokens.systemBlue,
-                              ),
+                            child: const Icon(
+                              CupertinoIcons.ellipsis,
+                              size: 19,
+                              color: AppleTokens.systemBlue,
                             ),
                           ),
                           const SizedBox(height: 6),
@@ -264,7 +273,7 @@ class TransactionCategorySelectionCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              fontSize: 11,
+                              fontSize: 11.5,
                               fontWeight: FontWeight.w600,
                               color: AppleTokens.systemBlue,
                             ),
@@ -272,58 +281,62 @@ class TransactionCategorySelectionCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                  );
-                }
-
-                // Last item: "+ Thêm" button -> opens CategoryFormSheet directly
-                return ApplePressable(
-                  scaleDown: 0.92,
-                  onTap: onCreateNew,
-                  child: SizedBox(
-                    width: 58,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? AppleTokens.bgDarkSecondary
-                                : AppleTokens.bgLightSecondary,
-                            borderRadius: BorderRadius.circular(13),
-                            border: Border.all(
-                              color: theme.colorScheme.primary
-                                  .withValues(alpha: 0.4),
-                              width: 1,
+                  ),
+                ),
+                // "Thêm" tile -> opens CategoryFormSheet directly
+                SizedBox(
+                  width: itemWidth,
+                  child: ApplePressable(
+                    scaleDown: 0.93,
+                    onTap: onCreateNew,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 8,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary.withValues(
+                                alpha: isDark ? 0.18 : 0.10,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                          ),
-                          child: const Center(
                             child: Icon(
                               CupertinoIcons.plus,
-                              size: 20,
-                              color: AppleTokens.jadePrimary,
+                              size: 19,
+                              color: theme.colorScheme.primary,
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          l10n.txCategoryAdd,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: theme.colorScheme.primary,
+                          const SizedBox(height: 6),
+                          Text(
+                            l10n.txCategoryAdd,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.primary,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                );
-              },
-            ),
+                ),
+              ];
+
+              return Wrap(
+                spacing: spacing,
+                runSpacing: 4,
+                children: gridTiles,
+              );
+            },
           ),
         ],
       ),

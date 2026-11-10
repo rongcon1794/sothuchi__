@@ -141,13 +141,13 @@ class TransactionSmartNoteSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const AppleSquircleBadge(
-                icon: CupertinoIcons.pencil_ellipsis_rectangle,
-                backgroundColor: AppleTokens.systemYellow,
-                size: 38,
-                iconSize: 20,
+                icon: CupertinoIcons.text_alignleft,
+                backgroundColor: AppleTokens.systemTeal,
+                size: 36,
+                iconSize: 18,
                 radius: 10,
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               Expanded(
                 child: ListenableBuilder(
                   listenable: noteController,
@@ -160,9 +160,16 @@ class TransactionSmartNoteSection extends StatelessWidget {
                       ],
                       maxLines: null,
                       maxLength: 1000,
-                      style: const TextStyle(fontSize: 15),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      ),
                       decoration: InputDecoration(
                         border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        filled: false,
+                        fillColor: Colors.transparent,
                         isDense: true,
                         contentPadding: const EdgeInsets.symmetric(vertical: 8),
                         hintText: l10n.noteHint,
@@ -193,56 +200,31 @@ class TransactionSmartNoteSection extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 6),
-                  child: Row(
-                    children: [
-                      const Icon(CupertinoIcons.lightbulb,
-                          size: 12, color: AppleTokens.systemYellow),
-                      const SizedBox(width: 4),
-                      Text(
-                        l10n.suggestedNotes,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: isDark
-                              ? const Color(0xFF98989F)
-                              : const Color(0xFF6E6E73),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                    ],
-                  ),
-                ),
                 for (final note in suggestions)
                   Padding(
                     padding: const EdgeInsets.only(right: 6),
                     child: ApplePressable(
-                      scaleDown: 0.92,
+                      scaleDown: 0.93,
                       onTap: () {
                         HapticFeedback.selectionClick();
                         noteController.text = note;
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
                         decoration: BoxDecoration(
                           color: isDark
                               ? AppleTokens.bgDarkSecondary
                               : AppleTokens.bgLightSecondary,
                           borderRadius:
                               BorderRadius.circular(AppleTokens.radiusPill),
-                          border: Border.all(
-                            color: isDark
-                                ? Colors.white.withValues(alpha: 0.10)
-                                : Colors.black.withValues(alpha: 0.06),
-                            width: AppleTokens.hairline,
-                          ),
                         ),
                         child: Text(
                           note,

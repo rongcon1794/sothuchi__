@@ -60,22 +60,25 @@ class TransactionSmartTagsSection extends ConsumerWidget {
         .take(8)
         .toList();
 
+    final theme = Theme.of(context);
+    final tagColor = theme.colorScheme.primary;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const AppleSquircleBadge(
+              AppleSquircleBadge(
                 icon: CupertinoIcons.tag,
-                backgroundColor: AppleTokens.systemPink,
-                size: 38,
+                backgroundColor: tagColor,
+                size: 36,
                 iconSize: 18,
                 radius: 10,
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,14 +93,9 @@ class TransactionSmartTagsSection extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.fromLTRB(10, 4, 6, 4),
                               decoration: BoxDecoration(
-                                color: AppleTokens.systemPink
-                                    .withValues(alpha: 0.15),
+                                color: tagColor.withValues(alpha: 0.14),
                                 borderRadius: BorderRadius.circular(
-                                    AppleTokens.radiusPill),
-                                border: Border.all(
-                                  color: AppleTokens.systemPink
-                                      .withValues(alpha: 0.35),
-                                  width: AppleTokens.hairline,
+                                  AppleTokens.radiusPill,
                                 ),
                               ),
                               child: Row(
@@ -105,19 +103,19 @@ class TransactionSmartTagsSection extends ConsumerWidget {
                                 children: [
                                   Text(
                                     '#$tag',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w700,
-                                      color: AppleTokens.systemPink,
+                                      color: tagColor,
                                     ),
                                   ),
                                   const SizedBox(width: 4),
                                   GestureDetector(
                                     onTap: () => onRemoveTag(tag),
-                                    child: const Icon(
+                                    child: Icon(
                                       CupertinoIcons.xmark_circle_fill,
                                       size: 15,
-                                      color: AppleTokens.systemPink,
+                                      color: tagColor,
                                     ),
                                   ),
                                 ],
@@ -125,7 +123,7 @@ class TransactionSmartTagsSection extends ConsumerWidget {
                             ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                     ],
 
                     // Tag Input Field with + Add button
@@ -152,9 +150,16 @@ class TransactionSmartTagsSection extends ConsumerWidget {
                                 }
                               }
                             },
-                            style: const TextStyle(fontSize: 14),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
                             decoration: InputDecoration(
                               border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              filled: false,
+                              fillColor: Colors.transparent,
                               isDense: true,
                               contentPadding:
                                   const EdgeInsets.symmetric(vertical: 6),
@@ -162,7 +167,7 @@ class TransactionSmartTagsSection extends ConsumerWidget {
                                   ? l10n.tagsHint
                                   : l10n.addTagHint,
                               hintStyle: TextStyle(
-                                fontSize: 13,
+                                fontSize: 13.5,
                                 color: isDark
                                     ? const Color(0xFF6C6C70)
                                     : const Color(0xFF8E8E93),
@@ -186,11 +191,14 @@ class TransactionSmartTagsSection extends ConsumerWidget {
                               },
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 4),
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: AppleTokens.systemPink,
+                                  color: tagColor,
                                   borderRadius: BorderRadius.circular(
-                                      AppleTokens.radiusPill),
+                                    AppleTokens.radiusPill,
+                                  ),
                                 ),
                                 child: Text(
                                   l10n.addTag,
@@ -214,70 +222,38 @@ class TransactionSmartTagsSection extends ConsumerWidget {
 
           // Frequent Tags Suggestion Bar
           if (availableFrequent.isNotEmpty) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 6),
-                    child: Row(
-                      children: [
-                        const Icon(CupertinoIcons.tag_circle,
-                            size: 13, color: AppleTokens.systemPink),
-                        const SizedBox(width: 4),
-                        Text(
-                          l10n.frequentTags,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: isDark
-                                ? const Color(0xFF98989F)
-                                : const Color(0xFF6E6E73),
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                      ],
-                    ),
-                  ),
                   for (final tag in availableFrequent)
                     Padding(
                       padding: const EdgeInsets.only(right: 6),
                       child: ApplePressable(
-                        scaleDown: 0.92,
+                        scaleDown: 0.93,
                         onTap: () => onAddTag(tag),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: isDark
                                 ? AppleTokens.bgDarkSecondary
                                 : AppleTokens.bgLightSecondary,
                             borderRadius:
                                 BorderRadius.circular(AppleTokens.radiusPill),
-                            border: Border.all(
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.10)
-                                  : Colors.black.withValues(alpha: 0.06),
-                              width: AppleTokens.hairline,
-                            ),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                '#$tag',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppleTokens.systemPink
-                                      .withValues(alpha: 0.9),
-                                ),
-                              ),
-                              const SizedBox(width: 2),
-                              const Icon(CupertinoIcons.plus,
-                                  size: 10, color: AppleTokens.systemPink),
-                            ],
+                          child: Text(
+                            '#$tag',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: isDark
+                                  ? const Color(0xFFE5E5EA)
+                                  : const Color(0xFF3A3A3C),
+                            ),
                           ),
                         ),
                       ),

@@ -745,7 +745,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                     onSetAmount: (amount) => _setAmount(amount, currencyCode, locale),
                     onClear: _clearAmount,
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 12),
 
                   // 2. Category Selection Section (Only for Expense & Income)
                   if (_type != TransactionType.transfer) ...[
@@ -761,13 +761,13 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                         onOpenMore: () => _openCategoryPicker(context, categories: availableCategories),
                         onCreateNew: () => _openCreateCategorySheet(context),
                       ),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 12),
                     ] else if (categoriesAsync.isLoading) ...[
                       AppleGlassCard(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
                         borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
                         borderColor: isDark
-                            ? Colors.white.withValues(alpha: 0.12)
+                            ? Colors.white.withValues(alpha: 0.10)
                             : AppleTokens.borderLight,
                         child: Row(
                           children: [
@@ -784,14 +784,14 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 12),
                     ] else ...[
                       // Empty state: Auto-seed and provide manual recovery options
                       AppleGlassCard(
                         padding: const EdgeInsets.all(16),
                         borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
                         borderColor: isDark
-                            ? Colors.white.withValues(alpha: 0.12)
+                            ? Colors.white.withValues(alpha: 0.10)
                             : AppleTokens.borderLight,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -807,11 +807,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                                   ),
                                   child: const Icon(
                                     CupertinoIcons.square_grid_2x2,
-                                    size: 20,
+                                    size: 18,
                                     color: AppleTokens.systemOrange,
                                   ),
                                 ),
-                                const SizedBox(width: 10),
+                                const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -900,220 +900,256 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 12),
                     ],
                   ],
 
-                  // 3. Wallet Selection Section
-                  AppleListGroup(
-                    header: l10n.walletsTitle,
-                    margin: const EdgeInsets.only(bottom: 20),
-                    children: [
-                      if (_type == TransactionType.transfer) ...[
-                        // Source Wallet (From)
-                        ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                          leading: const AppleSquircleBadge(
-                            icon: CupertinoIcons.arrow_up_right,
-                            backgroundColor: AppleTokens.systemOrange,
-                            size: 38,
-                            iconSize: 18,
-                            radius: 10,
+                  // 3. Unified Wallet & Date Selection Card
+                  AppleGlassCard(
+                    padding: EdgeInsets.zero,
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                    borderColor: isDark
+                        ? Colors.white.withValues(alpha: 0.10)
+                        : AppleTokens.borderLight,
+                    child: Column(
+                      children: [
+                        if (_type == TransactionType.transfer) ...[
+                          // Source Wallet (From)
+                          ListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                            leading: const AppleSquircleBadge(
+                              icon: CupertinoIcons.arrow_up_right,
+                              backgroundColor: AppleTokens.systemOrange,
+                              size: 36,
+                              iconSize: 18,
+                              radius: 10,
+                            ),
+                            title: Text(
+                              l10n.fromWallet,
+                              style: const TextStyle(fontSize: 12, color: AppleTokens.systemGray, fontWeight: FontWeight.w500),
+                            ),
+                            subtitle: Text(
+                              selectedAccount != null
+                                  ? '${selectedAccount.name} (${selectedAccount.balanceMoney.format(locale: locale)})'
+                                  : l10n.txSourceWallet,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                            ),
+                            trailing: const Icon(CupertinoIcons.chevron_right, size: 16, color: AppleTokens.systemGray),
+                            onTap: () => _openWalletPicker(
+                              context,
+                              wallets: walletsForDropdown,
+                              isDestination: false,
+                              locale: locale,
+                            ),
                           ),
-                          title: Text(
-                            l10n.fromWallet,
-                            style: const TextStyle(fontSize: 13, color: AppleTokens.systemGray),
-                          ),
-                          subtitle: Text(
-                            selectedAccount != null
-                                ? '${selectedAccount.name} (${selectedAccount.balanceMoney.format(locale: locale)})'
-                                : l10n.txSourceWallet,
-                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                          ),
-                          trailing: const Icon(CupertinoIcons.chevron_right, size: 16, color: AppleTokens.systemGray),
-                          onTap: () => _openWalletPicker(
-                            context,
-                            wallets: walletsForDropdown,
-                            isDestination: false,
-                            locale: locale,
-                          ),
-                        ),
 
-                        // Transfer Inversion / Swap row
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                          color: isDark ? Colors.white.withValues(alpha: 0.02) : Colors.black.withValues(alpha: 0.02),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              ApplePressable(
-                                scaleDown: 0.92,
-                                onTap: _swapTransferWallets,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
-                                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                                    border: Border.all(
-                                      color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.08),
-                                      width: AppleTokens.hairline,
+                          // Transfer Inversion / Swap row
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Divider(
+                                    height: AppleTokens.hairline,
+                                    color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                                  child: ApplePressable(
+                                    scaleDown: 0.92,
+                                    onTap: _swapTransferWallets,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
+                                        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Icon(CupertinoIcons.arrow_2_squarepath, size: 13, color: AppleTokens.systemBlue),
+                                          const SizedBox(width: 5),
+                                          Text(
+                                            l10n.txSwapWallets,
+                                            style: const TextStyle(
+                                              fontSize: 11.5,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppleTokens.systemBlue,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(CupertinoIcons.arrow_2_squarepath, size: 14, color: AppleTokens.systemBlue),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        l10n.txSwapWallets,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          color: AppleTokens.systemBlue,
-                                        ),
-                                      ),
-                                    ],
+                                ),
+                                Expanded(
+                                  child: Divider(
+                                    height: AppleTokens.hairline,
+                                    color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
 
-                        // Destination Wallet (To)
+                          // Destination Wallet (To)
+                          ListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                            leading: const AppleSquircleBadge(
+                              icon: CupertinoIcons.arrow_down_left,
+                              backgroundColor: AppleTokens.systemGreen,
+                              size: 36,
+                              iconSize: 18,
+                              radius: 10,
+                            ),
+                            title: Text(
+                              l10n.toWallet,
+                              style: const TextStyle(fontSize: 12, color: AppleTokens.systemGray, fontWeight: FontWeight.w500),
+                            ),
+                            subtitle: Text(
+                              selectedToAccount != null
+                                  ? '${selectedToAccount.name} (${selectedToAccount.balanceMoney.format(locale: locale)})'
+                                  : l10n.txDestWallet,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                            ),
+                            trailing: const Icon(CupertinoIcons.chevron_right, size: 16, color: AppleTokens.systemGray),
+                            onTap: () => _openWalletPicker(
+                              context,
+                              wallets: walletsForDropdown,
+                              isDestination: true,
+                              locale: locale,
+                            ),
+                          ),
+                        ] else ...[
+                          // Source Wallet (Single Payment Wallet)
+                          ListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                            leading: AppleSquircleBadge(
+                              icon: selectedAccount != null
+                                  ? AppIconCatalog.resolve(selectedAccount.icon)
+                                  : CupertinoIcons.creditcard,
+                              backgroundColor: selectedAccount != null
+                                  ? Color(selectedAccount.color)
+                                  : AppleTokens.systemBlue,
+                              size: 36,
+                              iconSize: 18,
+                              radius: 10,
+                            ),
+                            title: Text(
+                              l10n.walletsTitle,
+                              style: const TextStyle(fontSize: 12, color: AppleTokens.systemGray, fontWeight: FontWeight.w500),
+                            ),
+                            subtitle: Text(
+                              selectedAccount != null
+                                  ? '${selectedAccount.name} (${selectedAccount.balanceMoney.format(locale: locale)})'
+                                  : l10n.txSelectWallet,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                            ),
+                            trailing: const Icon(CupertinoIcons.chevron_right, size: 16, color: AppleTokens.systemGray),
+                            onTap: () => _openWalletPicker(
+                              context,
+                              wallets: walletsForDropdown,
+                              isDestination: false,
+                              locale: locale,
+                            ),
+                          ),
+                        ],
+                        Divider(
+                          height: AppleTokens.hairline,
+                          indent: 64,
+                          color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
+                        ),
+                        // Date Selector Row
                         ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
                           leading: const AppleSquircleBadge(
-                            icon: CupertinoIcons.arrow_down_left,
-                            backgroundColor: AppleTokens.systemGreen,
-                            size: 38,
+                            icon: CupertinoIcons.calendar,
+                            backgroundColor: AppleTokens.systemBlue,
+                            size: 36,
                             iconSize: 18,
                             radius: 10,
                           ),
                           title: Text(
-                            l10n.toWallet,
-                            style: const TextStyle(fontSize: 13, color: AppleTokens.systemGray),
+                            l10n.date,
+                            style: const TextStyle(fontSize: 12, color: AppleTokens.systemGray, fontWeight: FontWeight.w500),
                           ),
                           subtitle: Text(
-                            selectedToAccount != null
-                                ? '${selectedToAccount.name} (${selectedToAccount.balanceMoney.format(locale: locale)})'
-                                : l10n.txDestWallet,
-                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                            formattedSelectedDate,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                           ),
-                          trailing: const Icon(CupertinoIcons.chevron_right, size: 16, color: AppleTokens.systemGray),
-                          onTap: () => _openWalletPicker(
-                            context,
-                            wallets: walletsForDropdown,
-                            isDestination: true,
-                            locale: locale,
-                          ),
-                        ),
-                      ] else ...[
-                        // Source Wallet (Single Payment Wallet)
-                        ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                          leading: AppleSquircleBadge(
-                            icon: selectedAccount != null
-                                ? AppIconCatalog.resolve(selectedAccount.icon)
-                                : CupertinoIcons.creditcard,
-                            backgroundColor: selectedAccount != null
-                                ? Color(selectedAccount.color)
-                                : AppleTokens.systemBlue,
-                            size: 38,
-                            iconSize: 20,
-                            radius: 10,
-                          ),
-                          title: Text(
-                            l10n.walletsTitle,
-                            style: const TextStyle(fontSize: 13, color: AppleTokens.systemGray),
-                          ),
-                          subtitle: Text(
-                            selectedAccount != null
-                                ? '${selectedAccount.name} (${selectedAccount.balanceMoney.format(locale: locale)})'
-                                : l10n.txSelectWallet,
-                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                          ),
-                          trailing: const Icon(CupertinoIcons.chevron_right, size: 16, color: AppleTokens.systemGray),
-                          onTap: () => _openWalletPicker(
-                            context,
-                            wallets: walletsForDropdown,
-                            isDestination: false,
-                            locale: locale,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-
-                  // 3. Transaction Details & Metadata Section
-                  AppleListGroup(
-                    header: l10n.txTimeAndDetails,
-                    margin: const EdgeInsets.only(bottom: 24),
-                    children: [
-                      // Date Selector Row
-                      ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                        leading: const AppleSquircleBadge(
-                          icon: CupertinoIcons.calendar,
-                          backgroundColor: AppleTokens.systemIndigo,
-                          size: 38,
-                          iconSize: 20,
-                          radius: 10,
-                        ),
-                        title: Text(
-                          l10n.date,
-                          style: const TextStyle(fontSize: 13, color: AppleTokens.systemGray),
-                        ),
-                        subtitle: Text(
-                          formattedSelectedDate,
-                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
-                                borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                              ),
-                              child: Text(
-                                _selectedDate.day == DateTime.now().day &&
-                                        _selectedDate.month == DateTime.now().month &&
-                                        _selectedDate.year == DateTime.now().year
-                                    ? l10n.today
-                                    : l10n.edit,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppleTokens.systemBlue,
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary,
+                                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                                ),
+                                child: Text(
+                                  _selectedDate.day == DateTime.now().day &&
+                                          _selectedDate.month == DateTime.now().month &&
+                                          _selectedDate.year == DateTime.now().year
+                                      ? l10n.today
+                                      : l10n.edit,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppleTokens.systemBlue,
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 4),
-                            const Icon(CupertinoIcons.chevron_right, size: 16, color: AppleTokens.systemGray),
-                          ],
+                              const SizedBox(width: 4),
+                              const Icon(CupertinoIcons.chevron_right, size: 16, color: AppleTokens.systemGray),
+                            ],
+                          ),
+                          onTap: _pickDate,
                         ),
-                        onTap: _pickDate,
-                      ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
 
-                      // Note Input Section
-                      TransactionSmartNoteSection(
-                        noteController: _noteController,
-                        type: _type,
-                        selectedCategory: selectedCategory,
-                        isDark: isDark,
-                      ),
-
-                      // Tags Input Section
-                      TransactionSmartTagsSection(
-                        selectedTags: _selectedTags,
-                        tagInputController: _tagInputController,
-                        onAddTag: _addTag,
-                        onRemoveTag: _removeTag,
-                        isDark: isDark,
-                      ),
-                    ],
+                  // 4. Unified Note & Tags Card
+                  AppleGlassCard(
+                    padding: EdgeInsets.zero,
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                    borderColor: isDark
+                        ? Colors.white.withValues(alpha: 0.10)
+                        : AppleTokens.borderLight,
+                    child: Column(
+                      children: [
+                        // Note Input Section
+                        TransactionSmartNoteSection(
+                          noteController: _noteController,
+                          type: _type,
+                          selectedCategory: selectedCategory,
+                          isDark: isDark,
+                        ),
+                        Divider(
+                          height: AppleTokens.hairline,
+                          indent: 64,
+                          color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
+                        ),
+                        // Tags Input Section
+                        TransactionSmartTagsSection(
+                          selectedTags: _selectedTags,
+                          tagInputController: _tagInputController,
+                          onAddTag: _addTag,
+                          onRemoveTag: _removeTag,
+                          isDark: isDark,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
