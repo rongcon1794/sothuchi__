@@ -277,6 +277,43 @@ void main() {
       expect(settings.defaultWalletId, isNotNull);
     });
 
+    test('checkAndRestoreIfExisting returns true for user with 0-balance cash wallet and no txs', () async {
+      final container = createContainer();
+      await accRepo.createAccount(
+        name: 'Tiền mặt',
+        type: AccountType.cash,
+        initialBalance: 0,
+        currency: 'VND',
+        icon: 'cash',
+        color: 0xFF00A86B,
+      );
+
+      final restored = await container
+          .read(initialSetupControllerProvider.notifier)
+          .checkAndRestoreIfExisting('existing_zero_balance_user');
+
+      expect(restored, isTrue);
+      final settings = await container.read(settingsControllerProvider.future);
+      expect(settings.initialSetupCompleted, isTrue);
+      expect(settings.defaultWalletId, isNotNull);
+
+      // Verify no extra wallets were created
+      final allAccs = await accRepo.getAccounts();
+      expect(allAccs.length, 1);
+    });
+
+    test('selectLedger does not auto-create phantom default_cash_wallet', () async {
+      final container = createContainer();
+      final beforeAccs = await accRepo.getAccounts();
+      expect(beforeAccs, isEmpty);
+
+      container.read(activeLedgerIdProvider.notifier).selectLedger('custom_ledger_123');
+      expect(container.read(activeLedgerIdProvider), 'custom_ledger_123');
+
+      final afterAccs = await accRepo.getAccounts();
+      expect(afterAccs, isEmpty);
+    });
+
     test('checkAndRestoreIfExisting returns false for brand-new user without data', () async {
       final container = createContainer();
       final restored = await container

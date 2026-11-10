@@ -14,7 +14,9 @@ import 'package:so_thu_chi/features/categories/domain/repositories/category_repo
 import 'package:so_thu_chi/features/debts/data/repositories/firestore_debt_repository.dart';
 import 'package:so_thu_chi/features/debts/domain/repositories/debt_repository.dart';
 import 'package:so_thu_chi/features/ledger/data/repositories/firestore_ledger_repository.dart';
+import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
 import 'package:so_thu_chi/features/ledger/domain/repositories/ledger_repository.dart';
+import 'package:so_thu_chi/features/ledger/presentation/controllers/ledgers_controller.dart';
 import 'package:so_thu_chi/features/recurring/data/repositories/firestore_recurring_repository.dart';
 import 'package:so_thu_chi/features/recurring/domain/repositories/recurring_repository.dart';
 import 'package:so_thu_chi/features/savings/data/repositories/firestore_savings_goal_repository.dart';
@@ -23,6 +25,7 @@ import 'package:so_thu_chi/features/reports/data/repositories/reports_repository
 import 'package:so_thu_chi/features/reports/domain/repositories/reports_repository.dart';
 import 'package:so_thu_chi/features/settings/data/repositories/settings_repository_impl.dart';
 import 'package:so_thu_chi/features/settings/domain/repositories/settings_repository.dart';
+import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:so_thu_chi/features/transactions/data/repositories/firestore_transaction_repository.dart';
 import 'package:so_thu_chi/features/transactions/domain/repositories/transaction_repository.dart';
 
@@ -103,14 +106,20 @@ final userBootstrapCallbackProvider = Provider<UserBootstrapCallback?>((ref) {
 
       final hasExistingData = txs.isNotEmpty ||
           budgets.isNotEmpty ||
-          accounts.any((a) =>
-              a.balance != 0 ||
-              (a.id != 'default_cash_wallet' &&
-                  !a.id.startsWith('default_cash_wallet_'))) ||
-          ledgers.length > 2;
+          accounts.any((a) => a.deletedAt == null) ||
+          ledgers.any((l) =>
+              l.id != LedgerBook.defaultPersonalId &&
+              l.id != 'default_family');
 
       if (hasExistingData) {
-        await settingsRepo.setInitialSetupCompleted(true, uid: user.uid);
+        await ref
+            .read(settingsControllerProvider.notifier)
+            .completeInitialSetup(uid: user.uid);
+        if (accounts.isNotEmpty) {
+          await ref
+              .read(settingsControllerProvider.notifier)
+              .setDefaultWalletId(accounts.first.id);
+        }
       }
     } else {
       final catRepo = FirestoreCategoryRepository(
@@ -126,6 +135,9 @@ final userBootstrapCallbackProvider = Provider<UserBootstrapCallback?>((ref) {
       QuerySnapshot<Map<String, dynamic>> accSnap;
       QuerySnapshot<Map<String, dynamic>> ledgerSnap;
       QuerySnapshot<Map<String, dynamic>> budgetSnap;
+      QuerySnapshot<Map<String, dynamic>> debtSnap;
+      QuerySnapshot<Map<String, dynamic>> savingsSnap;
+      QuerySnapshot<Map<String, dynamic>> recurringSnap;
 
       try {
         final results = await Future.wait([
@@ -133,11 +145,17 @@ final userBootstrapCallbackProvider = Provider<UserBootstrapCallback?>((ref) {
           userDoc.collection('accounts').limit(5).get(),
           userDoc.collection('ledgers').limit(5).get(),
           userDoc.collection('budgets').limit(5).get(),
-        ]).timeout(const Duration(seconds: 4));
+          userDoc.collection('debts').limit(5).get(),
+          userDoc.collection('savings_goals').limit(5).get(),
+          userDoc.collection('recurring').limit(5).get(),
+        ]).timeout(const Duration(seconds: 10));
         txSnap = results[0];
         accSnap = results[1];
         ledgerSnap = results[2];
         budgetSnap = results[3];
+        debtSnap = results[4];
+        savingsSnap = results[5];
+        recurringSnap = results[6];
       } catch (_) {
         return;
       }
@@ -151,35 +169,51 @@ final userBootstrapCallbackProvider = Provider<UserBootstrapCallback?>((ref) {
       final activeBudgetDocs = budgetSnap.docs
           .where((d) => d.data()['deletedAt'] == null)
           .toList();
+      final activeDebtDocs = debtSnap.docs
+          .where((d) => d.data()['deletedAt'] == null)
+          .toList();
+      final activeSavingsDocs = savingsSnap.docs
+          .where((d) => d.data()['deletedAt'] == null)
+          .toList();
+      final activeRecurringDocs = recurringSnap.docs
+          .where((d) => d.data()['deletedAt'] == null)
+          .toList();
+      final activeLedgerDocs = ledgerSnap.docs
+          .where((d) => d.data()['deletedAt'] == null)
+          .toList();
 
-      final hasTransactions = activeTxDocs.isNotEmpty;
-      final hasBudgets = activeBudgetDocs.isNotEmpty;
-      final hasCustomAccounts = activeAccDocs.any((d) {
-        final id = d.id;
-        final data = d.data();
-        final balance = (data['balance'] as num?)?.toInt() ?? 0;
-        return (id != 'default_cash_wallet' &&
-                !id.startsWith('default_cash_wallet_')) ||
-            balance != 0;
-      });
-      final hasMultipleAccounts = activeAccDocs.length > 1;
-      final hasMultipleLedgers = ledgerSnap.docs.length > 2;
-
-      final hasExistingData = hasTransactions ||
-          hasBudgets ||
-          hasCustomAccounts ||
-          hasMultipleAccounts ||
-          hasMultipleLedgers;
+      final hasExistingData = activeTxDocs.isNotEmpty ||
+          activeAccDocs.isNotEmpty ||
+          activeBudgetDocs.isNotEmpty ||
+          activeDebtDocs.isNotEmpty ||
+          activeSavingsDocs.isNotEmpty ||
+          activeRecurringDocs.isNotEmpty ||
+          activeLedgerDocs.any((d) =>
+              d.id != LedgerBook.defaultPersonalId &&
+              d.id != 'default_family');
 
       if (hasExistingData) {
         // User has existing data on Firebase -> restore setup state
-        await settingsRepo.setInitialSetupCompleted(true, uid: user.uid);
+        await ref
+            .read(settingsControllerProvider.notifier)
+            .completeInitialSetup(uid: user.uid);
 
         if (activeAccDocs.isNotEmpty) {
-          final settings = await settingsRepo.loadSettings();
-          if (settings.defaultWalletId == null || settings.defaultWalletId!.isEmpty) {
-            await settingsRepo.setDefaultWalletId(activeAccDocs.first.id);
+          final settings = ref.read(settingsControllerProvider).value;
+          final defaultId = settings?.defaultWalletId;
+          if (defaultId == null || defaultId.isEmpty) {
+            await ref
+                .read(settingsControllerProvider.notifier)
+                .setDefaultWalletId(activeAccDocs.first.id);
           }
+        }
+
+        if (activeLedgerDocs.isNotEmpty) {
+          final defaultLedger = activeLedgerDocs.firstWhere(
+            (d) => d.data()['isDefault'] == true,
+            orElse: () => activeLedgerDocs.first,
+          );
+          ref.read(activeLedgerIdProvider.notifier).selectLedger(defaultLedger.id);
         }
       }
     }
@@ -197,6 +231,7 @@ final demoDataCleanupCallbackProvider = Provider<Future<void> Function()?>(
     ref.read(inMemoryRecurringRepoProvider).clear();
     ref.read(inMemorySavingsGoalRepoProvider).clear();
     ref.read(inMemoryLedgerRepoProvider).clear();
+    await ref.read(settingsControllerProvider.notifier).resetInitialSetup();
   },
 );
 

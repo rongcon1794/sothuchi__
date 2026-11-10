@@ -8,6 +8,7 @@ import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/data/firebase/firebase_providers.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/accounts/data/repositories/firestore_account_repository.dart';
+import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
 import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_controller.dart';
 import 'package:so_thu_chi/features/budgets/data/repositories/firestore_budget_repository.dart';
 import 'package:so_thu_chi/features/budgets/presentation/controllers/budgets_controller.dart';
@@ -250,11 +251,28 @@ void main() {
       currentTxs = container.read(transactionsStreamProvider).value ?? [];
       expect(currentTxs, isEmpty);
 
-      // Default Cash wallet for 'default_family' was auto-provisioned
-      final familyAccounts = container.read(accountsStreamProvider).value ?? [];
+      // Switching ledgers does NOT silently auto-provision phantom wallets
+      var familyAccounts = container.read(accountsStreamProvider).value ?? [];
+      expect(familyAccounts, isEmpty);
+
+      // Create a wallet specifically for Sổ Gia Đình
+      final familyWalletRes = await accountRepo.createAccount(
+        name: 'Tiền mặt gia đình',
+        type: AccountType.cash,
+        initialBalance: 0,
+        currency: 'VND',
+        icon: 'cash',
+        color: 0xFF0D7C66,
+        ledgerId: 'default_family',
+      );
+      expect(familyWalletRes.isSuccess, isTrue);
+      final familyWallet = familyWalletRes.valueOrNull!;
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+
+      familyAccounts = container.read(accountsStreamProvider).value ?? [];
       expect(familyAccounts.length, 1);
       expect(familyAccounts.first.ledgerId, 'default_family');
-      expect(familyAccounts.first.id, 'default_cash_wallet_default_family');
+      expect(familyAccounts.first.id, familyWallet.id);
 
       // 3. Add a transaction to Sổ Gia Đình
       final familyTx = await container
@@ -263,7 +281,7 @@ void main() {
             amount: 200000,
             currency: 'VND',
             type: TransactionType.expense,
-            accountId: 'default_cash_wallet_default_family',
+            accountId: familyWallet.id,
             categoryId: 'utilities',
             note: 'Tiền điện gia đình',
             date: DateTime.now(),

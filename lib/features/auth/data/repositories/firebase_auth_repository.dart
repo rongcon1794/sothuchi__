@@ -75,17 +75,11 @@ class FirebaseAuthRepository implements AuthRepository {
           return;
         }
 
-        // Fast initial emission so UI doesn't freeze waiting for network
-        final initialUser = _mapFirebaseUser(fbUser);
-        _emit(initialUser);
-
         final synced = await _ensureUserProfileDocument(fbUser);
-        if (_currentUser?.uid == synced.uid) {
-          _emit(synced);
-        }
         if (onUserSignedIn != null) {
-          unawaited(onUserSignedIn!(synced));
+          await onUserSignedIn!(synced);
         }
+        _emit(synced);
       });
     } else if (prefs.getBool(_demoSessionKey) ?? false) {
       final demo = _buildDemoUser();
@@ -152,10 +146,10 @@ class FirebaseAuthRepository implements AuthRepository {
 
       final appUser = await _ensureUserProfileDocument(fbUser);
       await prefs.setBool(_demoSessionKey, false);
-      _emit(appUser);
       if (onUserSignedIn != null) {
         await onUserSignedIn!(appUser);
       }
+      _emit(appUser);
       return Success(appUser);
     } on AppException catch (e) {
       return Failure(e);

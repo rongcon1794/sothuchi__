@@ -4,7 +4,6 @@ import 'package:so_thu_chi/data/firebase/firebase_providers.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
 import 'package:so_thu_chi/features/ledger/domain/repositories/ledger_repository.dart';
-import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 
 final ledgersStreamProvider = StreamProvider<List<LedgerBook>>((ref) {
   final repo = ref.watch(ledgerRepositoryProvider);
@@ -55,30 +54,13 @@ class ActiveLedgerIdController extends Notifier<String> {
     return initialId;
   }
 
-  void selectLedger(String id, {bool ensureWallet = true}) {
+  void selectLedger(String id, {bool ensureWallet = false}) {
     if (state != id) {
       state = id;
     }
     try {
       final prefs = ref.read(sharedPreferencesProvider);
       prefs.setString(_prefKey, id);
-    } catch (_) {}
-    if (ensureWallet) {
-      _ensureCashWallet(id);
-    }
-  }
-
-  void _ensureCashWallet(String ledgerId) {
-    try {
-      final settings = ref.read(settingsControllerProvider).value;
-      if (settings == null || !settings.initialSetupCompleted) {
-        return;
-      }
-      final currency = settings.currencyCode;
-      ref.read(accountRepositoryProvider).ensureDefaultWallet(
-            currency: currency,
-            ledgerId: ledgerId,
-          );
     } catch (_) {}
   }
 }

@@ -43,29 +43,42 @@ class InitialSetupController extends Notifier<AsyncValue<void>> {
       final accRepo = ref.read(accountRepositoryProvider);
       final txRepo = ref.read(transactionRepositoryProvider);
       final catRepo = ref.read(categoryRepositoryProvider);
+      final budgetRepo = ref.read(budgetRepositoryProvider);
+      final debtRepo = ref.read(debtRepositoryProvider);
+      final savingsRepo = ref.read(savingsGoalRepositoryProvider);
+      final recurringRepo = ref.read(recurringRepositoryProvider);
 
       await catRepo.seedDefaultCategoriesIfNeeded();
 
       final ledgers = await ledgerRepo.getLedgers();
       final accounts = await accRepo.getAccounts();
       final txs = await txRepo.getTransactions();
-      final budgets = await ref.read(budgetRepositoryProvider).getBudgets();
+      final budgets = await budgetRepo.getBudgets();
+      final debts = await debtRepo.watchDebts().first.timeout(
+            const Duration(seconds: 3),
+            onTimeout: () => const [],
+          );
+      final savings = await savingsRepo.watchSavingsGoals().first.timeout(
+            const Duration(seconds: 3),
+            onTimeout: () => const [],
+          );
+      final recurring = await recurringRepo
+          .watchRecurringTransactions()
+          .first
+          .timeout(
+            const Duration(seconds: 3),
+            onTimeout: () => const [],
+          );
 
-      final hasTransactions = txs.isNotEmpty;
-      final hasBudgets = budgets.isNotEmpty;
-      final hasCustomAccounts = accounts.any((a) =>
-          a.id != 'default_cash_wallet' &&
-          !a.id.startsWith('default_cash_wallet_'));
-      final hasAccountWithBalance = accounts.any((a) => a.balance != 0);
-      final hasMultipleAccounts = accounts.length > 1;
-      final hasMultipleLedgers = ledgers.length > 2;
-
-      final hasExistingData = hasTransactions ||
-          hasBudgets ||
-          hasCustomAccounts ||
-          hasAccountWithBalance ||
-          hasMultipleAccounts ||
-          hasMultipleLedgers;
+      final hasExistingData = accounts.any((a) => a.deletedAt == null) ||
+          txs.any((t) => t.deletedAt == null) ||
+          budgets.any((b) => b.deletedAt == null) ||
+          debts.any((d) => d.deletedAt == null) ||
+          savings.isNotEmpty ||
+          recurring.isNotEmpty ||
+          ledgers.any((l) =>
+              l.id != LedgerBook.defaultPersonalId &&
+              l.id != 'default_family');
 
       if (hasExistingData) {
         // 1. Select user's default or primary ledger
@@ -78,11 +91,13 @@ class InitialSetupController extends Notifier<AsyncValue<void>> {
         }
 
         // 2. Select default wallet
-        if (accounts.isNotEmpty) {
+        final activeAccounts =
+            accounts.where((a) => a.deletedAt == null).toList();
+        if (activeAccounts.isNotEmpty) {
           final activeLedgerId = ref.read(activeLedgerIdProvider);
-          final targetWallet = accounts.firstWhere(
+          final targetWallet = activeAccounts.firstWhere(
             (a) => a.ledgerId == activeLedgerId,
-            orElse: () => accounts.first,
+            orElse: () => activeAccounts.first,
           );
           await ref
               .read(settingsControllerProvider.notifier)
@@ -215,15 +230,8 @@ class InitialSetupController extends Notifier<AsyncValue<void>> {
       // 1. Seed categories
       await catRepo.seedDefaultCategoriesIfNeeded();
 
-      // 2. Ensure Personal & Family ledgers (and clean up any stale random-ID empty ledgers)
+      // 2. Ensure Personal & Family ledgers exist
       final now = DateTime.now();
-      final existingLedgers = await ledgerRepo.getLedgers();
-      for (final ledger in existingLedgers) {
-        if (ledger.id != LedgerBook.defaultPersonalId &&
-            ledger.id != 'default_family') {
-          await ledgerRepo.deleteLedger(ledger.id);
-        }
-      }
 
       final personalLedger = LedgerBook(
         id: LedgerBook.defaultPersonalId,

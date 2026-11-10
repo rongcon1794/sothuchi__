@@ -125,13 +125,12 @@ void main() {
         final catRepo = InMemoryCategoryRepository();
         final txRepo = InMemoryTransactionRepository(accountRepo: accRepo);
         final budgetRepo = InMemoryBudgetRepository();
-        final debtRepo = InMemoryDebtRepository(accountRepo: accRepo);
+        final debtRepo = InMemoryDebtRepository(accountRepo: accRepo, seedDemoData: false);
         final recurringRepo = InMemoryRecurringRepository(transactionRepository: txRepo);
         final savingsRepo = InMemorySavingsGoalRepository(transactionRepository: txRepo);
         final ledgerRepo = InMemoryLedgerRepository();
 
         await catRepo.seedDefaultCategoriesIfNeeded();
-        await accRepo.ensureDefaultWallet(currency: 'VND');
 
         await tester.pumpWidget(
           ProviderScope(
