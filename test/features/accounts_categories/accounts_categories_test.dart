@@ -215,6 +215,29 @@ void main() {
       expect(find.text('Số dư ổn định 14 ngày'), findsOneWidget);
       expect(find.text('Chưa có giao dịch trên ví này'), findsOneWidget);
       expect(find.text('Thêm giao dịch'), findsAtLeastNWidgets(1));
+
+      // Verify delete buttons exist (in AppBar, Quick Actions)
+      expect(find.byIcon(CupertinoIcons.trash), findsWidgets);
+
+      // Scroll to verify bottom delete button
+      final bottomDeleteFinder = find.text('Xóa ví "Ví Tiền Mặt"');
+      await tester.scrollUntilVisible(bottomDeleteFinder, 300);
+      expect(bottomDeleteFinder, findsOneWidget);
+
+      // Tap delete button in AppBar
+      await tester.tap(find.byIcon(CupertinoIcons.trash).first);
+      await tester.pumpAndSettle();
+
+      // CupertinoActionSheet appears
+      expect(find.byType(CupertinoActionSheet), findsOneWidget);
+
+      // Tap Delete in ActionSheet
+      await tester.tap(find.widgetWithText(CupertinoActionSheetAction, 'Xóa'));
+      await tester.pumpAndSettle();
+
+      // Verify wallet was soft deleted
+      final accounts = await accRepo.getAccounts();
+      expect(accounts.any((a) => a.id == wallet.id), isFalse);
     });
 
     testWidgets('DashboardMiniWalletCard renders accurate sparkline for wallet balance', (tester) async {

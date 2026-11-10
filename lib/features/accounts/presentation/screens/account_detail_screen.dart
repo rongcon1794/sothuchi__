@@ -65,9 +65,31 @@ class AccountDetailScreen extends ConsumerWidget {
       unawaited(HapticFeedback.mediumImpact());
       final res = await ref.read(accountsActionControllerProvider.notifier).deleteWallet(account.id);
       if (!context.mounted) return;
-      res.fold(
-        onSuccess: (_) {
-          context.pop();
+      await res.fold(
+        onSuccess: (_) async {
+          final settings = ref.read(settingsControllerProvider).value;
+          if (settings?.defaultWalletId == account.id) {
+            final otherAccounts = ref
+                .read(accountsStreamProvider)
+                .value
+                ?.where((a) => a.id != account.id && a.deletedAt == null)
+                .toList();
+            final nextDefaultId =
+                (otherAccounts != null && otherAccounts.isNotEmpty)
+                    ? otherAccounts.first.id
+                    : null;
+            await ref
+                .read(settingsControllerProvider.notifier)
+                .setDefaultWalletId(nextDefaultId);
+          }
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Đã xóa ví "${account.name}"')),
+            );
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            }
+          }
         },
         onFailure: (err) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -189,6 +211,15 @@ class AccountDetailScreen extends ConsumerWidget {
               style: const TextStyle(fontWeight: FontWeight.w700),
             ),
             actions: [
+              IconButton(
+                tooltip: l10n.delete,
+                icon: const Icon(
+                  CupertinoIcons.trash,
+                  color: AppleTokens.systemRed,
+                  size: 20,
+                ),
+                onPressed: () => _handleDelete(context, ref, account),
+              ),
               ApplePopupMenuButton<String>(
                 tooltip: l10n.moreOptions,
                 onSelected: (val) async {
@@ -537,6 +568,25 @@ class AccountDetailScreen extends ConsumerWidget {
                         ),
                         onPressed: () => WalletFormSheet.show(context, existing: account),
                       ),
+                      const SizedBox(width: 10),
+                      IconButton.outlined(
+                        tooltip: 'Xóa ví',
+                        style: IconButton.styleFrom(
+                          side: BorderSide(
+                            color: AppleTokens.systemRed.withValues(alpha: isDark ? 0.4 : 0.25),
+                          ),
+                          padding: const EdgeInsets.all(12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+                          ),
+                        ),
+                        icon: const Icon(
+                          CupertinoIcons.trash,
+                          color: AppleTokens.systemRed,
+                          size: 18,
+                        ),
+                        onPressed: () => _handleDelete(context, ref, account),
+                      ),
                     ],
                   ),
 
@@ -607,6 +657,31 @@ class AccountDetailScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
+                  const SizedBox(height: 32),
+                  Center(
+                    child: TextButton.icon(
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppleTokens.systemRed,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+                          side: BorderSide(
+                            color: AppleTokens.systemRed.withValues(alpha: isDark ? 0.35 : 0.22),
+                          ),
+                        ),
+                      ),
+                      icon: const Icon(CupertinoIcons.trash, size: 16),
+                      label: Text(
+                        'Xóa ví "${account.name}"',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13.5,
+                        ),
+                      ),
+                      onPressed: () => _handleDelete(context, ref, account),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
