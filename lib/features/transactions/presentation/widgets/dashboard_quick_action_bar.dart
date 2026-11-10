@@ -234,16 +234,60 @@ class _LandscapeQuickActionItem extends StatelessWidget {
                   end: Alignment.bottomRight,
                   colors: gradient,
                 ),
-                borderRadius: BorderRadius.circular(9),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: isDark ? 0.32 : 0.45),
+                  width: 0.8,
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: accentColor.withValues(alpha: isDark ? 0.35 : 0.25),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.30 : 0.08),
+                    blurRadius: 3,
+                    offset: const Offset(0, 1),
                   ),
                 ],
               ),
-              child: Icon(icon, size: 16, color: Colors.white),
+              clipBehavior: Clip.antiAlias,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: 15,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.white.withValues(alpha: 0.35),
+                            Colors.white.withValues(alpha: 0.0),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    icon,
+                    size: 16,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withValues(alpha: 0.25),
+                        blurRadius: 2,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 4),
             FittedBox(
@@ -305,7 +349,7 @@ class _QuickActionItem extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return SizedBox(
-      width: 74,
+      width: 76,
       child: ApplePressable(
         scaleDown: 0.92,
         onTap: () {
@@ -327,21 +371,59 @@ class _QuickActionItem extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.28),
-                  width: 0.8,
+                  color: Colors.white.withValues(alpha: isDark ? 0.32 : 0.45),
+                  width: 1.0,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: accentColor.withValues(alpha: isDark ? 0.35 : 0.25),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+                    color: accentColor.withValues(alpha: isDark ? 0.38 : 0.28),
+                    blurRadius: 12,
+                    spreadRadius: -1,
+                    offset: const Offset(0, 5),
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.30 : 0.08),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: Icon(
-                icon,
-                size: 24,
-                color: Colors.white,
+              clipBehavior: Clip.antiAlias,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Specular gloss reflection overlay
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: 24,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.white.withValues(alpha: 0.35),
+                            Colors.white.withValues(alpha: 0.0),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    icon,
+                    size: 24,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withValues(alpha: 0.25),
+                        blurRadius: 3,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 6),
@@ -354,7 +436,7 @@ class _QuickActionItem extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: theme.textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.w600,
-                    fontSize: 12,
+                    fontSize: 11.5,
                     letterSpacing: -0.2,
                   ),
                 ),

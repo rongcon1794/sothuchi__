@@ -239,35 +239,92 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark
-            ? (context.isOled
-                ? AppleTokens.bgOledCard
-                : LucianTokens.surfaceDark)
-            : Colors.white,
         borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark
+              ? (context.isOled
+                  ? const [AppleTokens.bgOledCard, AppleTokens.bgOledCard]
+                  : const [Color(0xFF1C1A27), Color(0xFF12111A)])
+              : const [Colors.white, Color(0xFFF9FAFD)],
+        ),
         border: Border.all(
           color: isDark
               ? (context.isOled
                   ? AppleTokens.bgOledBorder
-                  : Colors.white.withValues(alpha: 0.12))
-              : const Color(0xFF16151B).withValues(alpha: 0.08),
-          width: AppleTokens.hairline,
+                  : accentColor.withValues(alpha: 0.28))
+              : accentColor.withValues(alpha: 0.18),
+          width: 1.0,
         ),
         boxShadow: [
           BoxShadow(
             color: isDark
-                ? Colors.black.withValues(alpha: 0.55)
+                ? Colors.black.withValues(alpha: 0.60)
                 : const Color(0xFF281E50).withValues(alpha: 0.07),
             blurRadius: 28,
             spreadRadius: 0,
             offset: const Offset(0, 8),
           ),
+          BoxShadow(
+            color: accentColor.withValues(alpha: isDark ? 0.16 : 0.08),
+            blurRadius: 36,
+            spreadRadius: -2,
+            offset: const Offset(0, 10),
+          ),
         ],
       ),
-      padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+        child: Stack(
+          children: [
+            // Ambient Radial Glow Top-Right reacting live to active metric accent
+            Positioned(
+              top: -50,
+              right: -30,
+              width: 220,
+              height: 180,
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        accentColor.withValues(alpha: isDark ? 0.22 : 0.12),
+                        accentColor.withValues(alpha: 0.0),
+                      ],
+                      stops: const [0.0, 0.75],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // Subtle Ambient Flare Bottom-Left
+            Positioned(
+              bottom: -40,
+              left: -20,
+              width: 160,
+              height: 140,
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        accentColor.withValues(alpha: isDark ? 0.10 : 0.05),
+                        accentColor.withValues(alpha: 0.0),
+                      ],
+                      stops: const [0.0, 0.80],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
           // 1. Header: Live Pulse Dot + Metric Label + Visibility Toggle
           Row(
             children: [
@@ -574,6 +631,10 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
           ),
         ],
       ),
+    ),
+    ],
+    ),
+    ),
     );
   }
 
@@ -599,21 +660,26 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
         padding: const EdgeInsets.symmetric(vertical: 7),
         decoration: BoxDecoration(
           color: isSelected
-              ? (isDark ? LucianTokens.surfaceDark : Colors.white)
+              ? (isDark ? const Color(0xFF252332) : Colors.white)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(AppleTokens.radiusControl - 2),
           border: isSelected
               ? Border.all(
-                  color: activeColor.withValues(alpha: 0.45),
+                  color: activeColor.withValues(alpha: isDark ? 0.50 : 0.35),
                   width: 1.0,
                 )
               : null,
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
                     blurRadius: 4,
                     offset: const Offset(0, 1),
+                  ),
+                  BoxShadow(
+                    color: activeColor.withValues(alpha: isDark ? 0.18 : 0.10),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
                 ]
               : null,
@@ -621,19 +687,44 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
         child: Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 11.0,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                letterSpacing: -0.2,
-                color: isSelected
-                    ? activeColor
-                    : (isDark ? LucianTokens.ink3Dark : LucianTokens.ink3Light),
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (isSelected) ...[
+                  Container(
+                    width: 4.5,
+                    height: 4.5,
+                    margin: const EdgeInsets.only(right: 4.5),
+                    decoration: BoxDecoration(
+                      color: activeColor,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: activeColor.withValues(alpha: 0.6),
+                          blurRadius: 3,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 11.0,
+                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                      letterSpacing: -0.2,
+                      color: isSelected
+                          ? activeColor
+                          : (isDark ? LucianTokens.ink3Dark : LucianTokens.ink3Light),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -815,7 +906,15 @@ class _LucianSparklinePainter extends CustomPainter {
       ..style = PaintingStyle.fill;
     canvas.drawPath(fillPath, fillPaint);
 
-    // 2. Draw smooth stroke line
+    // 2. Draw smooth stroke line with luminous neon glow halo
+    final glowLinePaint = Paint()
+      ..color = lineColor.withValues(alpha: isDark ? 0.30 : 0.18)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 5.2
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    canvas.drawPath(linePath, glowLinePaint);
+
     final linePaint = Paint()
       ..color = lineColor
       ..style = PaintingStyle.stroke
