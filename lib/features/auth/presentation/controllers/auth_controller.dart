@@ -2,6 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:so_thu_chi/core/errors/result.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/auth/domain/entities/app_user.dart';
+import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
+import 'package:so_thu_chi/features/ledger/presentation/controllers/ledgers_controller.dart';
+import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 
 export 'package:so_thu_chi/data/providers/repository_providers.dart'
     show authStateStreamProvider, currentUserProvider;
@@ -46,9 +49,18 @@ class AuthActionController extends Notifier<AsyncValue<void>> {
 
   Future<Result<void>> deleteAccountAndAllData() async {
     state = const AsyncLoading();
+    final activeUid = ref.read(currentUserProvider)?.uid;
     final res = await ref
         .read(authRepositoryProvider)
         .deleteAccountAndAllData();
+    if (res.isSuccess) {
+      await ref
+          .read(settingsControllerProvider.notifier)
+          .resetInitialSetup(uid: activeUid);
+      ref
+          .read(activeLedgerIdProvider.notifier)
+          .selectLedger(LedgerBook.defaultPersonalId, ensureWallet: false);
+    }
     state = res.fold(
       onSuccess: (_) => const AsyncData(null),
       onFailure: (err) => AsyncError(err, StackTrace.current),

@@ -272,7 +272,7 @@ class FirestoreAccountRepository implements AccountRepository {
           ? 'default_cash_wallet'
           : 'default_cash_wallet_$effectiveLedgerId';
       final defaultDoc = await _col.doc(id).get();
-      if (defaultDoc.exists) {
+      if (defaultDoc.exists && defaultDoc.data()?['deletedAt'] == null) {
         return const Success(null);
       }
       final existing = await getAccounts();
@@ -280,6 +280,13 @@ class FirestoreAccountRepository implements AccountRepository {
         return const Success(null);
       }
       final now = DateTime.now();
+      var createdAt = now;
+      if (defaultDoc.exists && defaultDoc.data() != null) {
+        createdAt = AccountDto.fromJson({
+          ...defaultDoc.data()!,
+          'id': defaultDoc.id,
+        }).createdAt;
+      }
       final entity = Account(
         id: id,
         name: 'Tiền mặt',
@@ -289,7 +296,7 @@ class FirestoreAccountRepository implements AccountRepository {
         icon: 'cash',
         color: 0xFF0D7C66,
         ledgerId: effectiveLedgerId,
-        createdAt: now,
+        createdAt: createdAt,
         updatedAt: now,
       );
       await _col.doc(id).set(AccountDto.fromDomain(entity).toJson());
@@ -502,7 +509,8 @@ class InMemoryAccountRepository implements AccountRepository {
     final id = effectiveLedgerId == LedgerBook.defaultPersonalId
         ? 'default_cash_wallet'
         : 'default_cash_wallet_$effectiveLedgerId';
-    if (_items.containsKey(id) ||
+    final existingDefault = _items[id];
+    if ((existingDefault != null && existingDefault.deletedAt == null) ||
         _snapshot(includeArchived: true).any((a) => a.ledgerId == effectiveLedgerId)) {
       return const Success(null);
     }

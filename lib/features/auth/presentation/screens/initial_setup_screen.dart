@@ -218,18 +218,28 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
       final walletName = _walletNameController.text.trim().isEmpty
           ? 'Tiền mặt'
           : _walletNameController.text.trim();
+      final effectiveWalletBalance = Money.tryParse(
+            _walletBalanceController.text,
+            currencyCode: _selectedCurrency,
+          )?.minorUnits ??
+          _walletBalance;
+      final effectiveBudgetAmount = Money.tryParse(
+            _budgetController.text,
+            currencyCode: _selectedCurrency,
+          )?.minorUnits ??
+          _budgetAmount;
 
       final res = await ref
           .read(initialSetupControllerProvider.notifier)
           .completeInitialOnboarding(
             walletName: walletName,
             walletType: _walletType,
-            initialBalance: _walletBalance,
+            initialBalance: effectiveWalletBalance,
             icon: _walletIcon,
             color: _walletColor,
             currency: _selectedCurrency,
-            monthlyBudgetAmount: includeBudget && _budgetAmount > 0
-                ? _budgetAmount
+            monthlyBudgetAmount: includeBudget && effectiveBudgetAmount > 0
+                ? effectiveBudgetAmount
                 : null,
             budgetAlertThreshold: _budgetAlertThreshold,
             uid: user?.uid,

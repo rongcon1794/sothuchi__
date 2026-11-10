@@ -1,18 +1,26 @@
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:so_thu_chi/core/errors/result.dart';
 import 'package:so_thu_chi/data/firebase/firebase_providers.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/accounts/data/repositories/firestore_account_repository.dart';
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
+import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_controller.dart';
 import 'package:so_thu_chi/features/auth/domain/entities/app_user.dart';
+import 'package:so_thu_chi/features/auth/domain/repositories/auth_repository.dart';
+import 'package:so_thu_chi/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:so_thu_chi/features/auth/presentation/controllers/initial_setup_controller.dart';
 import 'package:so_thu_chi/features/auth/presentation/screens/initial_setup_screen.dart';
 import 'package:so_thu_chi/features/budgets/data/repositories/firestore_budget_repository.dart';
+import 'package:so_thu_chi/features/budgets/presentation/controllers/budgets_controller.dart';
 import 'package:so_thu_chi/features/categories/data/repositories/firestore_category_repository.dart';
 import 'package:so_thu_chi/features/debts/data/repositories/firestore_debt_repository.dart';
 import 'package:so_thu_chi/features/ledger/data/repositories/firestore_ledger_repository.dart';
+import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
+import 'package:so_thu_chi/features/ledger/presentation/controllers/ledgers_controller.dart';
 import 'package:so_thu_chi/features/recurring/data/repositories/firestore_recurring_repository.dart';
 import 'package:so_thu_chi/features/savings/data/repositories/firestore_savings_goal_repository.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
@@ -279,5 +287,191 @@ void main() {
       final settings = await container.read(settingsControllerProvider.future);
       expect(settings.initialSetupCompleted, isFalse);
     });
+
+    test('Firestore repositories: completing initial onboarding persists wallet & budget under active ledger', () async {
+      final fakeFirestore = FakeFirebaseFirestore();
+      const uid = 'cloud_user_first_time';
+      final cloudLedgerRepo = FirestoreLedgerRepository(
+        firestore: fakeFirestore,
+        currentUserIdGetter: () => uid,
+      );
+      final cloudAccRepo = FirestoreAccountRepository(
+        firestore: fakeFirestore,
+        uid: uid,
+      );
+      final cloudBudgetRepo = FirestoreBudgetRepository(
+        firestore: fakeFirestore,
+        uid: uid,
+      );
+      final cloudCatRepo = FirestoreCategoryRepository(
+        firestore: fakeFirestore,
+        uid: uid,
+      );
+      final cloudTxRepo = FirestoreTransactionRepository(
+        firestore: fakeFirestore,
+        uid: uid,
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          ledgerRepositoryProvider.overrideWithValue(cloudLedgerRepo),
+          accountRepositoryProvider.overrideWithValue(cloudAccRepo),
+          budgetRepositoryProvider.overrideWithValue(cloudBudgetRepo),
+          categoryRepositoryProvider.overrideWithValue(cloudCatRepo),
+          transactionRepositoryProvider.overrideWithValue(cloudTxRepo),
+          currentUserProvider.overrideWithValue(
+            AppUser(
+              uid: uid,
+              email: 'cloud@sothuchi.vn',
+              displayName: 'Cloud User',
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            ),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await container.read(settingsControllerProvider.future);
+
+      final res = await container
+          .read(initialSetupControllerProvider.notifier)
+          .completeInitialOnboarding(
+            walletName: 'Ví Techcombank',
+            walletType: AccountType.bank,
+            initialBalance: 8500000,
+            icon: 'bank',
+            color: 0xFFE50914,
+            currency: 'VND',
+            monthlyBudgetAmount: 4500000,
+            budgetAlertThreshold: 80,
+            uid: uid,
+          );
+
+      expect(res.isSuccess, isTrue);
+
+      // Keep listeners active (simulating HomeDashboardScreen's ref.watch in Riverpod 3)
+      final ledgerSub = container.listen(ledgersStreamProvider, (_, _) {});
+      final accSub = container.listen(rawAccountsStreamProvider, (_, _) {});
+      final budgetSub = container.listen(rawBudgetsStreamProvider, (_, _) {});
+      addTearDown(() {
+        ledgerSub.close();
+        accSub.close();
+        budgetSub.close();
+      });
+
+      // Load ledgers stream & verify active ledger ID matches default_personal
+      final ledgers = await container.read(ledgersStreamProvider.future);
+      expect(ledgers.any((l) => l.id == LedgerBook.defaultPersonalId), isTrue);
+      expect(container.read(activeLedgerIdProvider), LedgerBook.defaultPersonalId);
+
+      // Load accounts & budgets streams and verify wallet and budget exist on active ledger
+      await container.read(rawAccountsStreamProvider.future);
+      await container.read(rawBudgetsStreamProvider.future);
+
+      final activeAccounts = container.read(activeAccountsProvider);
+      expect(activeAccounts, hasLength(1));
+      expect(activeAccounts.first.name, 'Ví Techcombank');
+      expect(activeAccounts.first.balance, 8500000);
+      expect(container.read(totalNetBalanceProvider).minorUnits, 8500000);
+
+      final monthBudgets = container.read(currentMonthBudgetProgressProvider);
+      expect(monthBudgets, hasLength(1));
+      expect(monthBudgets.first.budget.isOverall, isTrue);
+      expect(monthBudgets.first.budget.amount, 4500000);
+    });
+
+    test('deleteAccountAndAllData resets initialSetupCompleted and defaultWalletId so user restarts setup from scratch', () async {
+      final container = ProviderContainer(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          accountRepositoryProvider.overrideWithValue(accRepo),
+          categoryRepositoryProvider.overrideWithValue(catRepo),
+          transactionRepositoryProvider.overrideWithValue(txRepo),
+          ledgerRepositoryProvider.overrideWithValue(ledgerRepo),
+          budgetRepositoryProvider.overrideWithValue(budgetRepo),
+          debtRepositoryProvider.overrideWithValue(debtRepo),
+          recurringRepositoryProvider.overrideWithValue(recurringRepo),
+          savingsGoalRepositoryProvider.overrideWithValue(savingsRepo),
+          authRepositoryProvider.overrideWithValue(_ResetTestAuthRepository()),
+          currentUserProvider.overrideWithValue(
+            AppUser(
+              uid: 'user_to_reset',
+              email: 'reset@sothuchi.vn',
+              displayName: 'Reset User',
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            ),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await container.read(settingsControllerProvider.future);
+
+      // First complete initial onboarding
+      await container
+          .read(initialSetupControllerProvider.notifier)
+          .completeInitialOnboarding(
+            walletName: 'Tiền mặt',
+            walletType: AccountType.cash,
+            initialBalance: 1000000,
+            icon: 'cash',
+            color: 0xFF00A86B,
+            currency: 'VND',
+            monthlyBudgetAmount: 3000000,
+            uid: 'user_to_reset',
+          );
+
+      expect(
+        container.read(settingsControllerProvider).value?.initialSetupCompleted,
+        isTrue,
+      );
+      expect(
+        container.read(settingsControllerProvider).value?.defaultWalletId,
+        isNotNull,
+      );
+
+      // Now delete account and all data
+      final delRes = await container
+          .read(authActionControllerProvider.notifier)
+          .deleteAccountAndAllData();
+      expect(delRes.isSuccess, isTrue);
+
+      final afterSettings = container.read(settingsControllerProvider).value;
+      expect(afterSettings?.initialSetupCompleted, isFalse);
+      expect(afterSettings?.defaultWalletId, isNull);
+      expect(prefs.getBool('settings.initial_setup_completed'), isFalse);
+    });
   });
+}
+
+class _ResetTestAuthRepository implements AuthRepository {
+  @override
+  bool get isCloudAuthConfigured => true;
+
+  @override
+  AppUser? get currentUser => null;
+
+  @override
+  Stream<AppUser?> watchAuthState() => Stream.value(null);
+
+  @override
+  Future<Result<AppUser>> signInWithGoogle() => throw UnimplementedError();
+
+  @override
+  Future<Result<AppUser>> signInOfflineDemo() => throw UnimplementedError();
+
+  @override
+  Future<Result<void>> signOut() async => const Success(null);
+
+  @override
+  Future<Result<void>> deleteAccountAndAllData() async => const Success(null);
+
+  @override
+  Future<Result<void>> updateProfilePreferences({
+    String? defaultCurrency,
+    String? locale,
+  }) async => const Success(null);
 }

@@ -6,6 +6,7 @@ import 'package:so_thu_chi/core/errors/app_exception.dart';
 import 'package:so_thu_chi/core/errors/result.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
+import 'package:so_thu_chi/features/budgets/presentation/controllers/budgets_controller.dart';
 import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
 import 'package:so_thu_chi/features/ledger/presentation/controllers/ledgers_controller.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
@@ -48,22 +49,21 @@ class InitialSetupController extends Notifier<AsyncValue<void>> {
       final ledgers = await ledgerRepo.getLedgers();
       final accounts = await accRepo.getAccounts();
       final txs = await txRepo.getTransactions();
+      final budgets = await ref.read(budgetRepositoryProvider).getBudgets();
 
       final hasTransactions = txs.isNotEmpty;
+      final hasBudgets = budgets.isNotEmpty;
       final hasCustomAccounts = accounts.any((a) =>
           a.id != 'default_cash_wallet' &&
           !a.id.startsWith('default_cash_wallet_'));
       final hasAccountWithBalance = accounts.any((a) => a.balance != 0);
-      final hasCustomLedgers = ledgers.any((l) =>
-          l.id != LedgerBook.defaultPersonalId &&
-          l.id != 'default_family');
       final hasMultipleAccounts = accounts.length > 1;
       final hasMultipleLedgers = ledgers.length > 2;
 
       final hasExistingData = hasTransactions ||
+          hasBudgets ||
           hasCustomAccounts ||
           hasAccountWithBalance ||
-          hasCustomLedgers ||
           hasMultipleAccounts ||
           hasMultipleLedgers;
 
@@ -72,7 +72,9 @@ class InitialSetupController extends Notifier<AsyncValue<void>> {
         if (ledgers.isNotEmpty) {
           final targetLedger =
               ledgers.where((l) => l.isDefault).firstOrNull ?? ledgers.first;
-          ref.read(activeLedgerIdProvider.notifier).selectLedger(targetLedger.id);
+          ref
+              .read(activeLedgerIdProvider.notifier)
+              .selectLedger(targetLedger.id, ensureWallet: false);
         }
 
         // 2. Select default wallet
@@ -124,8 +126,9 @@ class InitialSetupController extends Notifier<AsyncValue<void>> {
         createdAt: now,
         updatedAt: now,
       );
-      await ledgerRepo.createLedger(personalLedger);
-      ref.read(activeLedgerIdProvider.notifier).selectLedger(personalLedger.id);
+      final personalRes = await ledgerRepo.createLedger(personalLedger);
+      final targetLedgerId =
+          personalRes.valueOrNull?.id ?? LedgerBook.defaultPersonalId;
 
       final familyLedger = LedgerBook(
         id: 'default_family',
@@ -148,7 +151,7 @@ class InitialSetupController extends Notifier<AsyncValue<void>> {
         currency: AppCurrencies.defaultCode,
         icon: 'cash',
         color: 0xFF00A86B,
-        ledgerId: personalLedger.id,
+        ledgerId: targetLedgerId,
       );
 
       await accRepo.createAccount(
@@ -158,8 +161,12 @@ class InitialSetupController extends Notifier<AsyncValue<void>> {
         currency: AppCurrencies.defaultCode,
         icon: 'bank',
         color: 0xFF007AFF,
-        ledgerId: personalLedger.id,
+        ledgerId: targetLedgerId,
       );
+
+      ref
+          .read(activeLedgerIdProvider.notifier)
+          .selectLedger(targetLedgerId, ensureWallet: false);
 
       // 4. Set default wallet ID
       final cashAccount = cashRes.valueOrNull;
@@ -208,8 +215,16 @@ class InitialSetupController extends Notifier<AsyncValue<void>> {
       // 1. Seed categories
       await catRepo.seedDefaultCategoriesIfNeeded();
 
-      // 2. Ensure Personal & Family ledgers
+      // 2. Ensure Personal & Family ledgers (and clean up any stale random-ID empty ledgers)
       final now = DateTime.now();
+      final existingLedgers = await ledgerRepo.getLedgers();
+      for (final ledger in existingLedgers) {
+        if (ledger.id != LedgerBook.defaultPersonalId &&
+            ledger.id != 'default_family') {
+          await ledgerRepo.deleteLedger(ledger.id);
+        }
+      }
+
       final personalLedger = LedgerBook(
         id: LedgerBook.defaultPersonalId,
         name: 'Sổ Cá Nhân',
@@ -221,8 +236,13 @@ class InitialSetupController extends Notifier<AsyncValue<void>> {
         createdAt: now,
         updatedAt: now,
       );
-      await ledgerRepo.createLedger(personalLedger);
-      ref.read(activeLedgerIdProvider.notifier).selectLedger(personalLedger.id);
+      final personalRes = await ledgerRepo.createLedger(personalLedger);
+      if (personalRes.isFailure) {
+        state = AsyncError(personalRes.errorOrNull!, StackTrace.current);
+        return Failure(personalRes.errorOrNull!);
+      }
+      final targetLedgerId =
+          personalRes.valueOrNull?.id ?? LedgerBook.defaultPersonalId;
 
       final familyLedger = LedgerBook(
         id: 'default_family',
@@ -237,6 +257,17 @@ class InitialSetupController extends Notifier<AsyncValue<void>> {
       );
       await ledgerRepo.createLedger(familyLedger);
 
+      // Clean up any pre-existing 0-balance placeholder cash wallet before creating the user's wallet
+      final existingAccounts = await accRepo.getAccounts(includeArchived: true);
+      for (final acc in existingAccounts) {
+        if (acc.ledgerId == targetLedgerId &&
+            (acc.id == 'default_cash_wallet' ||
+                acc.id.startsWith('default_cash_wallet_')) &&
+            acc.balance == 0) {
+          await accRepo.softDeleteAccount(acc.id);
+        }
+      }
+
       // 3. Create the user's first wallet
       final resolvedName = walletName.trim().isEmpty ? 'Tiền mặt' : walletName.trim();
       final createdWalletRes = await accRepo.createAccount(
@@ -246,36 +277,39 @@ class InitialSetupController extends Notifier<AsyncValue<void>> {
         currency: currency,
         icon: icon,
         color: color,
-        ledgerId: personalLedger.id,
+        ledgerId: targetLedgerId,
       );
-
-      final createdWallet = createdWalletRes.valueOrNull;
-      if (createdWallet != null) {
-        await ref
-            .read(settingsControllerProvider.notifier)
-            .setDefaultWalletId(createdWallet.id);
-      } else {
-        await accRepo.ensureDefaultWallet(
-          currency: currency,
-          ledgerId: personalLedger.id,
-        );
-        await ref
-            .read(settingsControllerProvider.notifier)
-            .setDefaultWalletId('default_cash_wallet_${personalLedger.id}');
+      if (createdWalletRes.isFailure) {
+        state = AsyncError(createdWalletRes.errorOrNull!, StackTrace.current);
+        return Failure(createdWalletRes.errorOrNull!);
       }
+
+      final createdWallet = createdWalletRes.valueOrNull!;
+      await ref
+          .read(settingsControllerProvider.notifier)
+          .setDefaultWalletId(createdWallet.id);
 
       // 4. Create initial monthly budget if user specified one
       if (monthlyBudgetAmount != null && monthlyBudgetAmount > 0) {
         final monthStart = DateTime(now.year, now.month, 1);
-        await budgetRepo.upsertMonthlyBudget(
+        final budgetRes = await budgetRepo.upsertMonthlyBudget(
           categoryId: null, // overall monthly budget
           amount: monthlyBudgetAmount,
           currency: currency,
           monthStart: monthStart,
           alertThreshold: budgetAlertThreshold,
-          ledgerId: personalLedger.id,
+          ledgerId: targetLedgerId,
         );
+        if (budgetRes.isFailure) {
+          state = AsyncError(budgetRes.errorOrNull!, StackTrace.current);
+          return Failure(budgetRes.errorOrNull!);
+        }
+        ref.read(selectedBudgetMonthProvider.notifier).setMonth(monthStart);
       }
+
+      ref
+          .read(activeLedgerIdProvider.notifier)
+          .selectLedger(targetLedgerId, ensureWallet: false);
 
       // 5. Complete initial setup
       await ref
@@ -335,10 +369,8 @@ class InitialSetupController extends Notifier<AsyncValue<void>> {
       await catRepo.seedDefaultCategoriesIfNeeded();
 
       // 2. Create primary ledger
-      await ledgerRepo.createLedger(primaryLedger);
-      ref
-          .read(activeLedgerIdProvider.notifier)
-          .selectLedger(primaryLedger.id);
+      final primaryRes = await ledgerRepo.createLedger(primaryLedger);
+      final targetLedgerId = primaryRes.valueOrNull?.id ?? primaryLedger.id;
 
       // Also create family ledger if primary is personal
       if (primaryLedger.type == LedgerType.personal) {
@@ -366,7 +398,7 @@ class InitialSetupController extends Notifier<AsyncValue<void>> {
           currency: primaryLedger.currency,
           icon: draft.icon,
           color: draft.color,
-          ledgerId: primaryLedger.id,
+          ledgerId: targetLedgerId,
         );
 
         if (res.isSuccess) {
@@ -382,10 +414,17 @@ class InitialSetupController extends Notifier<AsyncValue<void>> {
       if (resolvedDefaultWalletId == null) {
         await accRepo.ensureDefaultWallet(
           currency: primaryLedger.currency,
-          ledgerId: primaryLedger.id,
+          ledgerId: targetLedgerId,
         );
-        resolvedDefaultWalletId = 'default_cash_wallet_${primaryLedger.id}';
+        resolvedDefaultWalletId =
+            targetLedgerId == LedgerBook.defaultPersonalId
+                ? 'default_cash_wallet'
+                : 'default_cash_wallet_$targetLedgerId';
       }
+
+      ref
+          .read(activeLedgerIdProvider.notifier)
+          .selectLedger(targetLedgerId, ensureWallet: false);
 
       // 4. Save default wallet id
       await ref

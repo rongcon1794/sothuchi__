@@ -121,6 +121,21 @@ class SettingsController extends AsyncNotifier<AppSettings> {
     return res;
   }
 
+  Future<Result<void>> resetInitialSetup({String? uid}) async {
+    final repo = ref.read(settingsRepositoryProvider);
+    final res = await repo.setInitialSetupCompleted(false, uid: uid);
+    await repo.setDefaultWalletId(null);
+    if (res.isSuccess) {
+      state = AsyncData(
+        currentOrDefaults.copyWith(
+          initialSetupCompleted: false,
+          defaultWalletId: null,
+        ),
+      );
+    }
+    return res;
+  }
+
   Future<Result<void>> setDefaultWalletId(String? walletId) async {
     final repo = ref.read(settingsRepositoryProvider);
     final res = await repo.setDefaultWalletId(walletId);

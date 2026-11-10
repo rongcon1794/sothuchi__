@@ -27,16 +27,15 @@ class FirestoreLedgerRepository implements LedgerRepository {
   @override
   Stream<List<LedgerBook>> watchLedgers() {
     try {
-      return _collection()
-          .orderBy('createdAt', descending: false)
-          .snapshots()
-          .map((snapshot) {
+      return _collection().snapshots().map((snapshot) {
         if (snapshot.docs.isEmpty) {
           return [LedgerBook.defaultPersonal()];
         }
-        return snapshot.docs
+        final list = snapshot.docs
             .map((doc) => LedgerBookDto.fromJson(doc.data(), doc.id).toDomain())
-            .toList();
+            .toList()
+          ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        return list;
       });
     } catch (_) {
       return Stream.value([LedgerBook.defaultPersonal()]);
@@ -46,11 +45,12 @@ class FirestoreLedgerRepository implements LedgerRepository {
   @override
   Future<List<LedgerBook>> getLedgers() async {
     try {
-      final snapshot =
-          await _collection().orderBy('createdAt', descending: false).get();
-      return snapshot.docs
+      final snapshot = await _collection().get();
+      final list = snapshot.docs
           .map((doc) => LedgerBookDto.fromJson(doc.data(), doc.id).toDomain())
-          .toList();
+          .toList()
+        ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      return list;
     } catch (_) {
       return [];
     }
@@ -59,11 +59,25 @@ class FirestoreLedgerRepository implements LedgerRepository {
   @override
   Future<Result<LedgerBook>> createLedger(LedgerBook ledger) async {
     try {
-      final docRef = _collection().doc();
+      final trimmedId = ledger.id.trim();
+      final docRef = trimmedId.isNotEmpty
+          ? _collection().doc(trimmedId)
+          : _collection().doc();
+      final now = DateTime.now();
+      var createdAt = now;
+      if (trimmedId.isNotEmpty) {
+        final existingSnap = await docRef.get();
+        if (existingSnap.exists && existingSnap.data() != null) {
+          createdAt = LedgerBookDto.fromJson(
+            existingSnap.data()!,
+            existingSnap.id,
+          ).createdAt;
+        }
+      }
       final entity = ledger.copyWith(
         id: docRef.id,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+        createdAt: createdAt,
+        updatedAt: now,
       );
       await docRef.set(LedgerBookDto.fromDomain(entity).toJson());
       return Success(entity);

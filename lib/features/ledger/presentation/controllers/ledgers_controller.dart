@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/core/errors/result.dart';
 import 'package:so_thu_chi/data/firebase/firebase_providers.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
@@ -40,7 +39,7 @@ class ActiveLedgerIdController extends Notifier<String> {
     });
 
     // Check if ledgers are already loaded synchronously
-    final currentList = ref.watch(ledgersStreamProvider).value;
+    final currentList = ref.read(ledgersStreamProvider).value;
     if (currentList != null && currentList.isNotEmpty) {
       if (!currentList.any((l) => l.id == initialId)) {
         final target =
@@ -56,7 +55,7 @@ class ActiveLedgerIdController extends Notifier<String> {
     return initialId;
   }
 
-  void selectLedger(String id) {
+  void selectLedger(String id, {bool ensureWallet = true}) {
     if (state != id) {
       state = id;
     }
@@ -64,14 +63,18 @@ class ActiveLedgerIdController extends Notifier<String> {
       final prefs = ref.read(sharedPreferencesProvider);
       prefs.setString(_prefKey, id);
     } catch (_) {}
-    _ensureCashWallet(id);
+    if (ensureWallet) {
+      _ensureCashWallet(id);
+    }
   }
 
   void _ensureCashWallet(String ledgerId) {
     try {
-      final currency =
-          ref.read(settingsControllerProvider).value?.currencyCode ??
-          AppCurrencies.defaultCode;
+      final settings = ref.read(settingsControllerProvider).value;
+      if (settings == null || !settings.initialSetupCompleted) {
+        return;
+      }
+      final currency = settings.currencyCode;
       ref.read(accountRepositoryProvider).ensureDefaultWallet(
             currency: currency,
             ledgerId: ledgerId,

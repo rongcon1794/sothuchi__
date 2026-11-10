@@ -14,7 +14,6 @@ import 'package:so_thu_chi/features/categories/domain/repositories/category_repo
 import 'package:so_thu_chi/features/debts/data/repositories/firestore_debt_repository.dart';
 import 'package:so_thu_chi/features/debts/domain/repositories/debt_repository.dart';
 import 'package:so_thu_chi/features/ledger/data/repositories/firestore_ledger_repository.dart';
-import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
 import 'package:so_thu_chi/features/ledger/domain/repositories/ledger_repository.dart';
 import 'package:so_thu_chi/features/recurring/data/repositories/firestore_recurring_repository.dart';
 import 'package:so_thu_chi/features/recurring/domain/repositories/recurring_repository.dart';
@@ -100,10 +99,15 @@ final userBootstrapCallbackProvider = Provider<UserBootstrapCallback?>((ref) {
       final accounts = await accRepo.getAccounts();
       final txs = await txRepo.getTransactions();
       final ledgers = await ledgerRepo.getLedgers();
+      final budgets = await ref.read(inMemoryBudgetRepoProvider).getBudgets();
 
       final hasExistingData = txs.isNotEmpty ||
-          accounts.any((a) => a.balance != 0 || a.id != 'default_cash_wallet') ||
-          ledgers.any((l) => l.id != LedgerBook.defaultPersonalId && l.id != 'default_family');
+          budgets.isNotEmpty ||
+          accounts.any((a) =>
+              a.balance != 0 ||
+              (a.id != 'default_cash_wallet' &&
+                  !a.id.startsWith('default_cash_wallet_'))) ||
+          ledgers.length > 2;
 
       if (hasExistingData) {
         await settingsRepo.setInitialSetupCompleted(true, uid: user.uid);
@@ -121,22 +125,36 @@ final userBootstrapCallbackProvider = Provider<UserBootstrapCallback?>((ref) {
       QuerySnapshot<Map<String, dynamic>> txSnap;
       QuerySnapshot<Map<String, dynamic>> accSnap;
       QuerySnapshot<Map<String, dynamic>> ledgerSnap;
+      QuerySnapshot<Map<String, dynamic>> budgetSnap;
 
       try {
         final results = await Future.wait([
-          userDoc.collection('transactions').limit(1).get(),
+          userDoc.collection('transactions').limit(5).get(),
           userDoc.collection('accounts').limit(5).get(),
           userDoc.collection('ledgers').limit(5).get(),
+          userDoc.collection('budgets').limit(5).get(),
         ]).timeout(const Duration(seconds: 4));
         txSnap = results[0];
         accSnap = results[1];
         ledgerSnap = results[2];
+        budgetSnap = results[3];
       } catch (_) {
         return;
       }
 
-      final hasTransactions = txSnap.docs.isNotEmpty;
-      final hasCustomAccounts = accSnap.docs.any((d) {
+      final activeTxDocs = txSnap.docs
+          .where((d) => d.data()['deletedAt'] == null)
+          .toList();
+      final activeAccDocs = accSnap.docs
+          .where((d) => d.data()['deletedAt'] == null)
+          .toList();
+      final activeBudgetDocs = budgetSnap.docs
+          .where((d) => d.data()['deletedAt'] == null)
+          .toList();
+
+      final hasTransactions = activeTxDocs.isNotEmpty;
+      final hasBudgets = activeBudgetDocs.isNotEmpty;
+      final hasCustomAccounts = activeAccDocs.any((d) {
         final id = d.id;
         final data = d.data();
         final balance = (data['balance'] as num?)?.toInt() ?? 0;
@@ -144,26 +162,23 @@ final userBootstrapCallbackProvider = Provider<UserBootstrapCallback?>((ref) {
                 !id.startsWith('default_cash_wallet_')) ||
             balance != 0;
       });
-      final hasMultipleAccounts = accSnap.docs.length > 1;
-      final hasCustomLedgers = ledgerSnap.docs.any((d) =>
-          d.id != LedgerBook.defaultPersonalId &&
-          d.id != 'default_family');
+      final hasMultipleAccounts = activeAccDocs.length > 1;
       final hasMultipleLedgers = ledgerSnap.docs.length > 2;
 
       final hasExistingData = hasTransactions ||
+          hasBudgets ||
           hasCustomAccounts ||
           hasMultipleAccounts ||
-          hasCustomLedgers ||
           hasMultipleLedgers;
 
       if (hasExistingData) {
         // User has existing data on Firebase -> restore setup state
         await settingsRepo.setInitialSetupCompleted(true, uid: user.uid);
 
-        if (accSnap.docs.isNotEmpty) {
+        if (activeAccDocs.isNotEmpty) {
           final settings = await settingsRepo.loadSettings();
           if (settings.defaultWalletId == null || settings.defaultWalletId!.isEmpty) {
-            await settingsRepo.setDefaultWalletId(accSnap.docs.first.id);
+            await settingsRepo.setDefaultWalletId(activeAccDocs.first.id);
           }
         }
       }

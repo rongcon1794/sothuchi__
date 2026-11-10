@@ -4,6 +4,7 @@ import 'package:so_thu_chi/core/errors/result.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
+import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
 import 'package:so_thu_chi/features/ledger/presentation/controllers/ledgers_controller.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 
@@ -15,9 +16,18 @@ final rawAccountsStreamProvider = StreamProvider<List<Account>>((ref) {
 /// Streams all non-deleted accounts (both active and archived) for the currently active ledger.
 final accountsStreamProvider = Provider<AsyncValue<List<Account>>>((ref) {
   final activeLedgerId = ref.watch(activeLedgerIdProvider);
+  final activeLedger = ref.watch(activeLedgerProvider);
+  final isDefaultPersonal =
+      activeLedger.isDefault || activeLedgerId == LedgerBook.defaultPersonalId;
   final rawAsync = ref.watch(rawAccountsStreamProvider);
   return rawAsync.whenData(
-    (all) => all.where((a) => a.ledgerId == activeLedgerId).toList(growable: false),
+    (all) => all
+        .where(
+          (a) =>
+              a.ledgerId == activeLedgerId ||
+              (isDefaultPersonal && a.ledgerId == LedgerBook.defaultPersonalId),
+        )
+        .toList(growable: false),
   );
 });
 

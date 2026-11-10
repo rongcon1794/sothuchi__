@@ -48,6 +48,12 @@ class FirebaseAuthRepository implements AuthRepository {
       final existing = auth.currentUser;
       if (existing != null) {
         _currentUser = _mapFirebaseUser(existing);
+      } else if (prefs.getBool(_demoSessionKey) ?? false) {
+        final demo = _buildDemoUser();
+        _currentUser = demo;
+        if (onUserSignedIn != null) {
+          unawaited(onUserSignedIn!(demo));
+        }
       }
       _firebaseSub = auth.authStateChanges().listen((fbUser) async {
         if (fbUser == null) {
@@ -202,7 +208,7 @@ class FirebaseAuthRepository implements AuthRepository {
 
     try {
       if (active.isDemoUser) {
-        await prefs.setBool(_demoSessionKey, false);
+        await _resetLocalSetupPreferences(active.uid);
         if (onDemoDataCleared != null) {
           await onDemoDataCleared!();
         }
@@ -216,21 +222,32 @@ class FirebaseAuthRepository implements AuthRepository {
         await _purgeAllUserDocuments(db, active.uid);
       }
 
+      await _resetLocalSetupPreferences(active.uid);
+      if (onDemoDataCleared != null) {
+        await onDemoDataCleared!();
+      }
+
       final fbUser = auth?.currentUser;
       if (fbUser != null) {
         try {
           await fbUser.delete();
         } on FirebaseAuthException catch (e) {
           if (e.code == 'requires-recent-login' && !kIsWeb) {
-            final tokens = await googleSignInClient.authenticateInteractive();
-            final reauthCred = GoogleAuthProvider.credential(
-              idToken: tokens.idToken,
-            );
-            await fbUser.reauthenticateWithCredential(reauthCred);
-            await fbUser.delete();
+            try {
+              final tokens = await googleSignInClient.authenticateInteractive();
+              final reauthCred = GoogleAuthProvider.credential(
+                idToken: tokens.idToken,
+              );
+              await fbUser.reauthenticateWithCredential(reauthCred);
+              await fbUser.delete();
+            } catch (_) {
+              await auth?.signOut();
+            }
           } else {
-            rethrow;
+            await auth?.signOut();
           }
+        } catch (_) {
+          await auth?.signOut();
         }
       }
 
@@ -247,6 +264,16 @@ class FirebaseAuthRepository implements AuthRepository {
     } catch (e) {
       return Failure(UnexpectedException(e.toString()));
     }
+  }
+
+  Future<void> _resetLocalSetupPreferences(String uid) async {
+    await prefs.setBool(_demoSessionKey, false);
+    await prefs.setBool('settings.initial_setup_completed', false);
+    if (uid.isNotEmpty) {
+      await prefs.remove('settings.initial_setup_completed_$uid');
+    }
+    await prefs.remove('default_wallet_id');
+    await prefs.remove('active_ledger_id');
   }
 
   @override

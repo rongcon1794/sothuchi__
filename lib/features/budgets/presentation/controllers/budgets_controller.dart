@@ -6,6 +6,7 @@ import 'package:so_thu_chi/core/utils/date_formatter.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/budgets/domain/entities/budget.dart';
 import 'package:so_thu_chi/features/categories/presentation/controllers/categories_controller.dart';
+import 'package:so_thu_chi/features/ledger/domain/entities/ledger_book.dart';
 import 'package:so_thu_chi/features/ledger/presentation/controllers/ledgers_controller.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
@@ -18,10 +19,17 @@ final rawBudgetsStreamProvider = StreamProvider<List<Budget>>((ref) {
 /// Streams all active (non-deleted) budgets for the currently active ledger.
 final budgetsStreamProvider = Provider<AsyncValue<List<Budget>>>((ref) {
   final activeLedgerId = ref.watch(activeLedgerIdProvider);
+  final activeLedger = ref.watch(activeLedgerProvider);
+  final isDefaultPersonal =
+      activeLedger.isDefault || activeLedgerId == LedgerBook.defaultPersonalId;
   final rawAsync = ref.watch(rawBudgetsStreamProvider);
   return rawAsync.whenData(
     (all) => all
-        .where((b) => b.ledgerId == activeLedgerId)
+        .where(
+          (b) =>
+              b.ledgerId == activeLedgerId ||
+              (isDefaultPersonal && b.ledgerId == LedgerBook.defaultPersonalId),
+        )
         .toList(growable: false),
   );
 });

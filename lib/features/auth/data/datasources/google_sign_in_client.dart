@@ -103,17 +103,23 @@ class GoogleSignInV7Client implements GoogleSignInClient {
 
   @override
   Future<void> signOut() async {
-    if (kIsWeb || !_initialized) return;
-    await GoogleSignIn.instance.signOut();
+    if (kIsWeb) return;
+    try {
+      await ensureInitialized();
+      await GoogleSignIn.instance.signOut();
+    } catch (_) {}
   }
 
   @override
   Future<void> disconnect() async {
-    if (kIsWeb || !_initialized) return;
+    if (kIsWeb) return;
     try {
+      await ensureInitialized();
       await GoogleSignIn.instance.disconnect();
     } catch (_) {
-      await GoogleSignIn.instance.signOut();
+      try {
+        await GoogleSignIn.instance.signOut();
+      } catch (_) {}
     }
   }
 }
