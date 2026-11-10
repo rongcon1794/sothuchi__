@@ -247,7 +247,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Gam màu chủ đạo'), findsOneWidget);
+      expect(find.text('Màu ứng dụng'), findsOneWidget);
       expect(find.text('Ngọc Bích'), findsOneWidget);
 
       // Verify English locale renders English palette names

@@ -357,7 +357,7 @@ class DefaultWalletPickerSheet extends StatelessWidget {
                                     const SizedBox(width: 6),
                                     Text(
                                       w.balanceMoney.format(locale: locale),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 11.5,
                                         fontWeight: FontWeight.w600,
                                         fontFeatures: AppTheme.tabularFigures,

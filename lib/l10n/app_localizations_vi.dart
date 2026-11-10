@@ -1500,7 +1500,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get debtsTitle => 'Sổ Ghi Nợ';
 
   @override
-  String get accentColor => 'Gam màu chủ đạo';
+  String get accentColor => 'Màu ứng dụng';
 
   @override
   String get searchTransactionsTooltip => 'Tìm kiếm giao dịch';

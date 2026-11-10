@@ -2867,7 +2867,7 @@ abstract class AppLocalizations {
   /// No description provided for @accentColor.
   ///
   /// In vi, this message translates to:
-  /// **'Gam màu chủ đạo'**
+  /// **'Màu ứng dụng'**
   String get accentColor;
 
   /// No description provided for @searchTransactionsTooltip.
