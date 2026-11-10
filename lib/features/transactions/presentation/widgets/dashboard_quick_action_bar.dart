@@ -3,70 +3,21 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
-import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_controller.dart';
-import 'package:so_thu_chi/features/accounts/presentation/widgets/wallet_form_sheet.dart';
-import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
-import 'package:so_thu_chi/features/transactions/presentation/widgets/transaction_wallet_picker_sheet.dart';
 
-class DashboardQuickActionBar extends ConsumerWidget {
+class DashboardQuickActionBar extends StatelessWidget {
   const DashboardQuickActionBar({super.key});
 
-  Future<void> _handleWalletTap(
-      BuildContext context, WidgetRef ref, String locale) async {
-    final activeWallets = ref.read(activeAccountsProvider);
-    if (activeWallets.isEmpty) {
-      final created = await WalletFormSheet.show(context);
-      if (created != null && context.mounted) {
-        await context.push(AppRoutes.accountDetail(created.id));
-      }
-      return;
-    }
-    if (activeWallets.length == 1) {
-      await context.push(AppRoutes.accountDetail(activeWallets.first.id));
-      return;
-    }
-
-    final pickedWalletId = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => TransactionWalletPickerSheet(
-        wallets: activeWallets,
-        selectedId: null,
-        defaultWalletId:
-            ref.read(settingsControllerProvider).value?.defaultWalletId,
-        locale: locale,
-        title: locale.startsWith('vi')
-            ? 'Chi tiết ví & tài khoản'
-            : 'Wallet details',
-        onCreateNew: () async {
-          final created = await WalletFormSheet.show(context);
-          if (created != null && context.mounted) {
-            await context.push(AppRoutes.accountDetail(created.id));
-          }
-        },
-      ),
-    );
-
-    if (pickedWalletId != null && context.mounted) {
-      await context.push(AppRoutes.accountDetail(pickedWalletId));
-    }
-  }
-
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final primary = theme.colorScheme.primary;
-    final locale =
-        ref.watch(settingsControllerProvider).value?.localeCode ?? 'vi';
 
     final actions = [
       _ActionItemData(
@@ -84,7 +35,7 @@ class DashboardQuickActionBar extends ConsumerWidget {
         label: l10n.homeActionWallet,
         gradient: const [Color(0xFF38BDF8), Color(0xFF0284C7)],
         accentColor: const Color(0xFF0284C7),
-        onTap: () => _handleWalletTap(context, ref, locale),
+        route: AppRoutes.accounts,
       ),
       _ActionItemData(
         icon: CupertinoIcons.sparkles,
@@ -152,8 +103,7 @@ class DashboardQuickActionBar extends ConsumerWidget {
                   label: landscapeActions[i].label,
                   gradient: landscapeActions[i].gradient,
                   accentColor: landscapeActions[i].accentColor,
-                  onTap: landscapeActions[i].onTap ??
-                      () => context.push(landscapeActions[i].route!),
+                  onTap: () => context.push(landscapeActions[i].route),
                 ),
               ),
             ],
@@ -179,7 +129,7 @@ class DashboardQuickActionBar extends ConsumerWidget {
             label: action.label,
             gradient: action.gradient,
             accentColor: action.accentColor,
-            onTap: action.onTap ?? () => context.push(action.route!),
+            onTap: () => context.push(action.route),
           );
         },
       ),
@@ -316,16 +266,14 @@ class _ActionItemData {
     required this.label,
     required this.gradient,
     required this.accentColor,
-    this.route,
-    this.onTap,
+    required this.route,
   });
 
   final IconData icon;
   final String label;
   final List<Color> gradient;
   final Color accentColor;
-  final String? route;
-  final VoidCallback? onTap;
+  final String route;
 }
 
 class _QuickActionItem extends StatelessWidget {
