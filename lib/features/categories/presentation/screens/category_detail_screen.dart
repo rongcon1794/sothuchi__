@@ -176,12 +176,11 @@ class CategoryDetailScreen extends ConsumerWidget {
                   existing: category,
                 ),
               ),
-              if (!category.isDefault)
-                IconButton(
-                  tooltip: l10n.delete,
-                  icon: const Icon(CupertinoIcons.trash, color: AppleTokens.systemRed, size: 20),
-                  onPressed: () => _handleDelete(context, ref, category),
-                ),
+              IconButton(
+                tooltip: l10n.delete,
+                icon: const Icon(CupertinoIcons.trash, color: AppleTokens.systemRed, size: 20),
+                onPressed: () => _handleDelete(context, ref, category),
+              ),
               const SizedBox(width: 6),
             ],
           ),
@@ -408,10 +407,10 @@ class CategoryDetailScreen extends ConsumerWidget {
                           },
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 8),
                       OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
                           ),
@@ -426,6 +425,29 @@ class CategoryDetailScreen extends ConsumerWidget {
                           initialType: category.type,
                           existing: category,
                         ),
+                      ),
+                      const SizedBox(width: 8),
+                      OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppleTokens.systemRed,
+                          side: BorderSide(
+                            color: AppleTokens.systemRed.withValues(alpha: 0.3),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+                          ),
+                        ),
+                        icon: const Icon(CupertinoIcons.trash, size: 18, color: AppleTokens.systemRed),
+                        label: Text(
+                          l10n.delete,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13.5,
+                            color: AppleTokens.systemRed,
+                          ),
+                        ),
+                        onPressed: () => _handleDelete(context, ref, category),
                       ),
                     ],
                   ),

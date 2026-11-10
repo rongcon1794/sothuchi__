@@ -725,10 +725,90 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                 colorSectionLabel: l10n.selectColor,
               ),
             ),
+            if (widget.existing != null) ...[
+              const SizedBox(height: 16),
+              Center(
+                child: CupertinoButton(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  color: AppleTokens.systemRed.withValues(alpha: isDark ? 0.15 : 0.08),
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+                  onPressed: _confirmDelete,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(CupertinoIcons.trash, color: AppleTokens.systemRed, size: 17),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Xóa danh mục "${widget.existing!.name}"',
+                        style: const TextStyle(
+                          color: AppleTokens.systemRed,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 20),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _confirmDelete() async {
+    final cat = widget.existing;
+    if (cat == null) return;
+    final l10n = context.l10n;
+    final confirmed = await showCupertinoModalPopup<bool>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text('${l10n.delete} ${cat.name}'),
+        message: const Text(
+          'Bạn có chắc chắn muốn xóa danh mục này? Các giao dịch đã ghi nhận vẫn được bảo lưu an toàn.',
+        ),
+        actions: [
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.delete),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.of(ctx).pop(false),
+          child: Text(l10n.cancel),
+        ),
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+    unawaited(HapticFeedback.mediumImpact());
+    final messenger = ScaffoldMessenger.of(context);
+    final res = await ref
+        .read(categoriesActionControllerProvider.notifier)
+        .deleteCategory(cat.id);
+    if (!mounted) return;
+    res.fold(
+      onSuccess: (_) {
+        Navigator.of(context).pop();
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text('Đã xóa danh mục "${cat.name}"'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      },
+        onFailure: (err) {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(context.localizeError(err)),
+              backgroundColor: AppleTokens.systemRed,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        },
+      );
   }
 }

@@ -591,13 +591,12 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       icon: Icons.edit_outlined,
                       title: l10n.edit,
                     ),
-                    if (!cat.isDefault)
-                      ApplePopupMenuItem(
-                        value: 'delete',
-                        icon: Icons.delete_outline_rounded,
-                        title: l10n.delete,
-                        isDestructive: true,
-                      ),
+                    ApplePopupMenuItem(
+                      value: 'delete',
+                      icon: CupertinoIcons.trash,
+                      title: l10n.delete,
+                      isDestructive: true,
+                    ),
                   ],
                 ),
               ],
