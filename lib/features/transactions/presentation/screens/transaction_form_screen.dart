@@ -634,6 +634,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     final currencyCode = _resolveEffectiveCurrency(walletsForDropdown);
     final currencyInfo = AppCurrencies.byCode(currencyCode);
     final isSaving = ref.watch(transactionsActionControllerProvider).isLoading;
+    final isKeyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
     final formattedSelectedDate = AppDateUtils.formatDayHeader(
       _selectedDate,
@@ -674,6 +675,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         toolbarHeight: appBarHeight,
         title: Text(
           _isEditing ? l10n.editTransaction : l10n.addTransaction,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
         centerTitle: true,
@@ -695,6 +698,88 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                 size: 22,
               ),
             ),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 180),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (child, anim) => FadeTransition(
+              opacity: anim,
+              child: ScaleTransition(
+                scale: Tween<double>(begin: 0.9, end: 1.0).animate(anim),
+                child: child,
+              ),
+            ),
+            child: (isKeyboardOpen && !_loadingExisting)
+                ? Padding(
+                    key: const ValueKey('transaction_header_save_btn'),
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Center(
+                      child: Tooltip(
+                        message: l10n.save,
+                        child: ApplePressable(
+                          onTap: isSaving
+                              ? null
+                              : () {
+                                  unawaited(HapticFeedback.lightImpact());
+                                  FocusManager.instance.primaryFocus?.unfocus();
+                                  unawaited(_submit());
+                                },
+                          child: Container(
+                            height: isLandscape ? 30 : 34,
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            decoration: BoxDecoration(
+                              color: isSaving
+                                  ? theme.colorScheme.primary
+                                      .withValues(alpha: 0.6)
+                                  : theme.colorScheme.primary,
+                              borderRadius: BorderRadius.circular(
+                                AppleTokens.radiusPill,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: theme.colorScheme.primary.withValues(
+                                    alpha: 0.25,
+                                  ),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (isSaving)
+                                  const CupertinoActivityIndicator(
+                                    radius: 7,
+                                    color: Colors.white,
+                                  )
+                                else
+                                  const Icon(
+                                    CupertinoIcons.checkmark_alt,
+                                    size: 15,
+                                    color: Colors.white,
+                                  ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  l10n.save,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                    height: 1.1,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(
+                    key: ValueKey('transaction_header_save_empty'),
+                  ),
+          ),
           const SizedBox(width: 4),
         ],
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/data/firebase/firebase_providers.dart';
@@ -364,5 +365,74 @@ void main() {
       textFieldWidget = tester.widget<TextField>(amountField);
       expect(textFieldWidget.style?.fontSize, equals(17.0));
     });
+
+    testWidgets(
+      'shows header save button when keyboard opens and submits transaction on tap',
+      (tester) async {
+        addTearDown(tester.view.resetViewInsets);
+
+        final router = GoRouter(
+          initialLocation: '/new',
+          routes: [
+            GoRoute(
+              path: '/',
+              builder: (_, _) => const Scaffold(body: Text('Home')),
+              routes: [
+                GoRoute(
+                  path: 'new',
+                  builder: (_, _) => const TransactionFormScreen(),
+                ),
+              ],
+            ),
+          ],
+        );
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              sharedPreferencesProvider.overrideWithValue(prefs),
+              accountRepositoryProvider.overrideWithValue(accRepo),
+              categoryRepositoryProvider.overrideWithValue(catRepo),
+              transactionRepositoryProvider.overrideWithValue(txRepo),
+            ],
+            child: MaterialApp.router(
+              locale: const Locale('vi'),
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              theme: AppTheme.light(),
+              routerConfig: router,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Keyboard closed -> header save button must not be shown
+        expect(
+          find.byKey(const ValueKey('transaction_header_save_btn')),
+          findsNothing,
+        );
+        expect(find.text('Lưu'), findsOneWidget);
+
+        // Enter valid amount
+        await tester.enterText(find.byType(TextField).first, '120000');
+
+        // Simulate soft keyboard open
+        tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+        await tester.pumpAndSettle();
+
+        final headerSaveBtn =
+            find.byKey(const ValueKey('transaction_header_save_btn'));
+        expect(headerSaveBtn, findsOneWidget);
+
+        // Tap header save button -> creates transaction and pops back to Home
+        await tester.tap(headerSaveBtn);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Home'), findsOneWidget);
+        final savedList = await txRepo.watchTransactions().first;
+        expect(savedList.length, equals(1));
+        expect(savedList.first.amount, equals(120000));
+      },
+    );
   });
 }
