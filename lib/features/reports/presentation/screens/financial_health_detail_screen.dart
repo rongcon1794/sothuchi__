@@ -63,13 +63,6 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
         leading: const AppleBackButton(),
         title: AppleHeaderTitle(
           title: l10n.reportsFinancialHealth,
-          icon: CupertinoIcons.heart_fill,
-          accentColor: scoreData.color,
-          badgeText: '${scoreData.score}/100 • ${scoreData.rating}',
-          badgeColor: scoreData.color.withValues(
-            alpha: theme.brightness == Brightness.dark ? 0.22 : 0.12,
-          ),
-          badgeTextColor: scoreData.color,
           isLandscape: isLandscape,
         ),
       ),

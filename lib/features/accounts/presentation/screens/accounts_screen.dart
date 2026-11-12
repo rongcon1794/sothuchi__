@@ -188,6 +188,8 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
             .where((a) => a.type == _selectedTypeFilter)
             .toList(growable: false);
 
+    final canPop = Navigator.of(context).canPop();
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -196,13 +198,10 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        titleSpacing: 16,
-        leading: Navigator.of(context).canPop() ? const AppleBackButton() : null,
+        titleSpacing: canPop ? 0 : 16,
+        leading: canPop ? const AppleBackButton() : null,
         title: AppleHeaderTitle(
           title: l10n.walletsTitle,
-          icon: Icons.account_balance_wallet_rounded,
-          accentColor: const Color(0xFF0284C7),
-          badgeText: '${activeAccounts.length} ví',
           isLandscape: isLandscape,
         ),
         actions: [

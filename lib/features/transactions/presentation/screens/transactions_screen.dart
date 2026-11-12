@@ -155,9 +155,6 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
         titleSpacing: 16,
         title: AppleHeaderTitle(
           title: l10n.transactionsTitle,
-          icon: Icons.receipt_long_rounded,
-          accentColor: AppleTokens.systemBlue,
-          badgeText: totalCount > 0 ? '$totalCount' : null,
           isLandscape: isLandscape,
         ),
         actions: [

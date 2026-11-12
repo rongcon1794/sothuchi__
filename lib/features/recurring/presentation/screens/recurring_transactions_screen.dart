@@ -139,16 +139,6 @@ class _RecurringTransactionsScreenState
     final settings = ref.watch(settingsControllerProvider).value;
     final hideBalance = settings?.hideBalance ?? false;
 
-    final totalDue = dueExpenses.length + dueIncomes.length;
-    final totalRecurring = recurringAsync.value?.length ?? 0;
-    final recurringBadgeText = totalDue > 0
-        ? '$totalDue đến hạn'
-        : (totalRecurring > 0 ? '$totalRecurring mục' : null);
-    final recurringBadgeColor = totalDue > 0
-        ? AppleTokens.rubyExpense.withValues(alpha: 0.18)
-        : null;
-    final recurringBadgeTextColor = totalDue > 0 ? AppleTokens.rubyExpense : null;
-
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -161,11 +151,6 @@ class _RecurringTransactionsScreenState
         leading: const AppleBackButton(),
         title: AppleHeaderTitle(
           title: l10n.recurringTitle,
-          icon: Icons.autorenew_rounded,
-          accentColor: AppleTokens.systemPurple,
-          badgeText: recurringBadgeText,
-          badgeColor: recurringBadgeColor,
-          badgeTextColor: recurringBadgeTextColor,
           isLandscape: isLandscape,
         ),
       ),

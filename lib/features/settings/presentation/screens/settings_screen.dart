@@ -1027,9 +1027,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         titleSpacing: 16,
         title: AppleHeaderTitle(
           title: l10n.settingsTitle,
-          icon: CupertinoIcons.gear_alt_fill,
-          accentColor: AppleTokens.systemGray,
-          badgeText: 'Hệ thống',
           isLandscape: isLandscape,
         ),
       ),

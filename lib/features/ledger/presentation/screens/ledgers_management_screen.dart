@@ -150,8 +150,6 @@ class _LedgersManagementScreenState
     final ledgersAsync = ref.watch(ledgersStreamProvider);
     final activeId = ref.watch(activeLedgerIdProvider);
 
-    final totalLedgers = ledgersAsync.value?.length ?? 0;
-
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -164,9 +162,6 @@ class _LedgersManagementScreenState
         leading: const AppleBackButton(),
         title: AppleHeaderTitle(
           title: l10n.ledgersTitle,
-          icon: Icons.auto_stories_rounded,
-          accentColor: AppleTokens.systemIndigo,
-          badgeText: totalLedgers > 0 ? '$totalLedgers sổ' : null,
           isLandscape: isLandscape,
         ),
       ),

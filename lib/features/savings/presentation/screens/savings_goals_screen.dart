@@ -114,8 +114,6 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
     final locale = settings?.localeCode ?? 'vi';
     final hideBalance = settings?.hideBalance ?? false;
 
-    final totalGoals = goalsAsync.value?.length ?? 0;
-
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -128,9 +126,6 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
         leading: const AppleBackButton(),
         title: AppleHeaderTitle(
           title: l10n.savingsTitle,
-          icon: Icons.savings_rounded,
-          accentColor: AppleTokens.systemOrange,
-          badgeText: totalGoals > 0 ? '$totalGoals mục tiêu' : null,
           isLandscape: isLandscape,
         ),
         actions: [

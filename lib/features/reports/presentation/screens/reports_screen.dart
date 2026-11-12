@@ -133,9 +133,6 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
         titleSpacing: 16,
         title: AppleHeaderTitle(
           title: l10n.reportsTitle,
-          icon: Icons.insights_rounded,
-          accentColor: AppleTokens.jadePrimary,
-          badgeText: 'Th ${selectedMonth.month}/${selectedMonth.year}',
           isLandscape: isLandscape,
         ),
         actions: [
@@ -182,6 +179,54 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
                       ref.read(selectedReportMonthProvider.notifier).setMonth(month);
                     }
                   },
+                ),
+              ),
+            ),
+            // Quick Period Presets Selector Bar
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: Row(
+                  children: [
+                    _buildPeriodQuickChip(
+                      label: locale.startsWith('vi') ? 'Tháng này' : 'This Month',
+                      isSelected: AppDateUtils.isSameMonth(selectedMonth, DateTime.now()),
+                      onTap: () {
+                        ref.read(selectedReportMonthProvider.notifier).setMonth(DateTime.now());
+                      },
+                      theme: theme,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildPeriodQuickChip(
+                      label: locale.startsWith('vi') ? 'Tháng trước' : 'Last Month',
+                      isSelected: AppDateUtils.isSameMonth(
+                        selectedMonth,
+                        AppDateUtils.addMonths(DateTime.now(), -1),
+                      ),
+                      onTap: () {
+                        ref.read(selectedReportMonthProvider.notifier).setMonth(
+                              AppDateUtils.addMonths(DateTime.now(), -1),
+                            );
+                      },
+                      theme: theme,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildPeriodQuickChip(
+                      label: locale.startsWith('vi') ? '2 tháng trước' : '2 Months Ago',
+                      isSelected: AppDateUtils.isSameMonth(
+                        selectedMonth,
+                        AppDateUtils.addMonths(DateTime.now(), -2),
+                      ),
+                      onTap: () {
+                        ref.read(selectedReportMonthProvider.notifier).setMonth(
+                              AppDateUtils.addMonths(DateTime.now(), -2),
+                            );
+                      },
+                      theme: theme,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -486,5 +531,55 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
       ),
     ),
   );
+  }
+
+  Widget _buildPeriodQuickChip({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+    required ThemeData theme,
+  }) {
+    final scheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    final bgColor = isSelected
+        ? scheme.primary.withValues(alpha: isDark ? 0.22 : 0.14)
+        : (isDark
+            ? AppleTokens.bgDarkSecondary.withValues(alpha: 0.6)
+            : AppleTokens.bgLightSecondary.withValues(alpha: 0.8));
+
+    final textColor = isSelected
+        ? scheme.primary
+        : (isDark ? Colors.white70 : Colors.black87);
+
+    return ApplePressable(
+      onTap: () {
+        HapticFeedback.selectionClick();
+        onTap();
+      },
+      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+          border: Border.all(
+            color: isSelected
+                ? scheme.primary.withValues(alpha: 0.4)
+                : Colors.transparent,
+            width: 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            color: textColor,
+          ),
+        ),
+      ),
+    );
   }
 }

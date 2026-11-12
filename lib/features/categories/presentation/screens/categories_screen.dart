@@ -672,8 +672,6 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
           cat.name.toLowerCase().contains(query);
     }).toList(growable: false);
 
-    final totalCategories = expenseList.length + incomeList.length;
-
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -686,9 +684,6 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         leading: const AppleBackButton(),
         title: AppleHeaderTitle(
           title: l10n.categoriesTitle,
-          icon: Icons.category_rounded,
-          accentColor: AppleTokens.systemTeal,
-          badgeText: totalCategories > 0 ? '$totalCategories mục' : null,
           isLandscape: isLandscape,
         ),
         actions: [
