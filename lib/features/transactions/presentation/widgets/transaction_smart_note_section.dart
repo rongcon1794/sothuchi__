@@ -231,117 +231,202 @@ class TransactionSmartNoteSection extends ConsumerWidget {
   final Category? selectedCategory;
   final bool isDark;
 
-  List<String> _getCategorySuggestedNotes() {
+  List<String> _getCategorySuggestedNotes({bool isVi = true}) {
     if (type == TransactionType.income) {
-      return const [
-        'Lương tháng',
-        'Thưởng dự án',
-        'Thu nhập phụ',
-        'Được tặng',
-        'Lãi tiết kiệm',
-        'Bán đồ cũ',
-      ];
+      return isVi
+          ? const [
+              'Lương tháng',
+              'Thưởng dự án',
+              'Thu nhập phụ',
+              'Được tặng',
+              'Lãi tiết kiệm',
+              'Bán đồ cũ',
+            ]
+          : const [
+              'Monthly Salary',
+              'Project Bonus',
+              'Side Income',
+              'Gift Received',
+              'Savings Interest',
+              'Sold Items',
+            ];
     }
     if (type == TransactionType.transfer) {
-      return const [
-        'Chuyển tiền',
-        'Trả nợ',
-        'Gửi gia đình',
-        'Nạp ví điện tử',
-        'Rút tiền ATM',
-      ];
+      return isVi
+          ? const [
+              'Chuyển tiền',
+              'Trả nợ',
+              'Gửi gia đình',
+              'Nạp ví điện tử',
+              'Rút tiền ATM',
+            ]
+          : const [
+              'Transfer Money',
+              'Debt Repayment',
+              'Family Support',
+              'E-Wallet Top-up',
+              'ATM Withdrawal',
+            ];
     }
 
     final catName = selectedCategory?.name.toLowerCase() ?? '';
     if (catName.contains('ăn') ||
         catName.contains('food') ||
         catName.contains('uống') ||
+        catName.contains('drink') ||
         catName.contains('cafe')) {
-      return const [
-        'Ăn sáng',
-        'Ăn trưa',
-        'Ăn tối',
-        'Cà phê',
-        'Trà sữa',
-        'Đi chợ',
-        'Siêu thị',
-      ];
+      return isVi
+          ? const [
+              'Ăn sáng',
+              'Ăn trưa',
+              'Ăn tối',
+              'Cà phê',
+              'Trà sữa',
+              'Đi chợ',
+              'Siêu thị',
+            ]
+          : const [
+              'Breakfast',
+              'Lunch',
+              'Dinner',
+              'Coffee',
+              'Tea & Boba',
+              'Groceries',
+              'Supermarket',
+            ];
     }
     if (catName.contains('xe') ||
         catName.contains('xăng') ||
         catName.contains('di chuyển') ||
+        catName.contains('fuel') ||
+        catName.contains('transit') ||
         catName.contains('transport')) {
-      return const [
-        'Đổ xăng',
-        'Grab / Taxi',
-        'Gửi xe',
-        'Bảo dưỡng xe',
-        'Rửa xe',
-      ];
+      return isVi
+          ? const [
+              'Đổ xăng',
+              'Grab / Taxi',
+              'Gửi xe',
+              'Bảo dưỡng xe',
+              'Rửa xe',
+            ]
+          : const [
+              'Gas / Fuel',
+              'Taxi / Ride',
+              'Parking Fee',
+              'Vehicle Maintenance',
+              'Car Wash',
+            ];
     }
     if (catName.contains('mua') ||
         catName.contains('shop') ||
         catName.contains('sắm')) {
-      return const [
-        'Quần áo',
-        'Mỹ phẩm',
-        'Đồ gia dụng',
-        'Shopee',
-        'Siêu thị',
-      ];
+      return isVi
+          ? const [
+              'Quần áo',
+              'Mỹ phẩm',
+              'Đồ gia dụng',
+              'Shopee',
+              'Siêu thị',
+            ]
+          : const [
+              'Clothing',
+              'Cosmetics',
+              'Household',
+              'Online Shopping',
+              'Department Store',
+            ];
     }
     if (catName.contains('nhà') ||
         catName.contains('điện') ||
         catName.contains('nước') ||
         catName.contains('hóa đơn') ||
+        catName.contains('rent') ||
+        catName.contains('housing') ||
         catName.contains('bill')) {
-      return const [
-        'Tiền điện',
-        'Tiền nước',
-        'Internet',
-        'Tiền phòng / nhà',
-        'Dịch vụ số',
-      ];
+      return isVi
+          ? const [
+              'Tiền điện',
+              'Tiền nước',
+              'Internet',
+              'Tiền phòng / nhà',
+              'Dịch vụ số',
+            ]
+          : const [
+              'Electricity Bill',
+              'Water Bill',
+              'Internet & Wifi',
+              'Rent Payment',
+              'Digital Subscription',
+            ];
     }
     if (catName.contains('giải trí') ||
         catName.contains('chơi') ||
+        catName.contains('game') ||
+        catName.contains('movie') ||
         catName.contains('entertain')) {
-      return const [
-        'Xem phim',
-        'Du lịch',
-        'Game / Net',
-        'Sách / Khóa học',
-        'Gặp bạn bè',
-      ];
+      return isVi
+          ? const [
+              'Xem phim',
+              'Du lịch',
+              'Game / Net',
+              'Sách / Khóa học',
+              'Gặp bạn bè',
+            ]
+          : const [
+              'Movie Tickets',
+              'Travel',
+              'Games & Gaming',
+              'Books & Learning',
+              'Outing with Friends',
+            ];
     }
     if (catName.contains('sức khỏe') ||
         catName.contains('thuốc') ||
         catName.contains('y tế') ||
+        catName.contains('med') ||
+        catName.contains('gym') ||
         catName.contains('health')) {
-      return const [
-        'Mua thuốc',
-        'Khám bệnh',
-        'Gym / Thể thao',
-        'Thực phẩm bổ sung',
-      ];
+      return isVi
+          ? const [
+              'Mua thuốc',
+              'Khám bệnh',
+              'Gym / Thể thao',
+              'Thực phẩm bổ sung',
+            ]
+          : const [
+              'Pharmacy / Medicine',
+              'Doctor Visit',
+              'Gym & Fitness',
+              'Vitamins & Supplements',
+            ];
     }
 
-    return const [
-      'Ăn uống',
-      'Cà phê',
-      'Đổ xăng',
-      'Mua sắm',
-      'Gia đình',
-      'Chi tiêu khác',
-    ];
+    return isVi
+        ? const [
+            'Ăn uống',
+            'Cà phê',
+            'Đổ xăng',
+            'Mua sắm',
+            'Gia đình',
+            'Chi tiêu khác',
+          ]
+        : const [
+            'Food & Dining',
+            'Coffee',
+            'Fuel',
+            'Shopping',
+            'Family',
+            'Other Expense',
+          ];
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
     final allTxs =
         ref.watch(transactionsStreamProvider).value ?? const <TransactionEntity>[];
-    final fallbackSuggestions = _getCategorySuggestedNotes();
+    final fallbackSuggestions = _getCategorySuggestedNotes(isVi: isVi);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),

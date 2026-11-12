@@ -89,6 +89,7 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
                         report: effectiveReport,
                         scoreData: scoreData,
                         monthStr: monthStr,
+                        locale: effectiveLocale,
                       ),
                       const SizedBox(height: 16),
 
@@ -99,6 +100,7 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
                         isDark: isDark,
                         report: effectiveReport,
                         scoreData: scoreData,
+                        locale: effectiveLocale,
                       ),
                       const SizedBox(height: 16),
 
@@ -132,6 +134,7 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
                         isDark: isDark,
                         report: effectiveReport,
                         scoreData: scoreData,
+                        locale: effectiveLocale,
                       ),
                       const SizedBox(height: 24),
                     ],
@@ -153,8 +156,9 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
     required MonthlyReportData report,
     required HealthScoreData scoreData,
     required String monthStr,
+    required String locale,
   }) {
-    final isVi = Localizations.localeOf(context).languageCode == 'vi';
+    final isVi = locale.startsWith('vi');
     final score = scoreData.score;
     final rating = scoreData.rating;
     final badgeColor = scoreData.color;
@@ -291,7 +295,9 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
     required bool isDark,
     required MonthlyReportData report,
     required HealthScoreData scoreData,
+    required String locale,
   }) {
+    final isVi = locale.startsWith('vi');
     final savingsRate = scoreData.savingsRate;
     final isSavingsGood = savingsRate >= 20;
 
@@ -318,7 +324,7 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  Localizations.localeOf(context).languageCode == 'vi'
+                  isVi
                       ? 'Quy chuẩn tài chính 50/30/20'
                       : '50/30/20 Budget Rule',
                   style: const TextStyle(
@@ -331,7 +337,7 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            Localizations.localeOf(context).languageCode == 'vi'
+            isVi
                 ? 'Quy tắc 50/30/20 chia thu nhập thành 3 nhóm: 50% Nhu cầu thiết yếu, 30% Sở thích cá nhân và 20% Tích lũy dự phòng.'
                 : 'The 50/30/20 rule divides income into 3 buckets: 50% Needs, 30% Wants, and 20% Savings.',
             style: TextStyle(
@@ -380,21 +386,15 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
             children: [
               _buildDistributionLabel(
                 color: AppleTokens.systemBlue,
-                label: Localizations.localeOf(context).languageCode == 'vi'
-                    ? '50% Thiết yếu'
-                    : '50% Needs',
+                label: isVi ? '50% Thiết yếu' : '50% Needs',
               ),
               _buildDistributionLabel(
                 color: AppleTokens.systemOrange,
-                label: Localizations.localeOf(context).languageCode == 'vi'
-                    ? '30% Sở thích'
-                    : '30% Wants',
+                label: isVi ? '30% Sở thích' : '30% Wants',
               ),
               _buildDistributionLabel(
                 color: AppleTokens.systemGreen,
-                label: Localizations.localeOf(context).languageCode == 'vi'
-                    ? '20% Tích lũy'
-                    : '20% Savings',
+                label: isVi ? '20% Tích lũy' : '20% Savings',
               ),
             ],
           ),
@@ -426,7 +426,7 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    Localizations.localeOf(context).languageCode == 'vi'
+                    isVi
                         ? (isSavingsGood
                             ? 'Tỷ lệ tích lũy của bạn đạt $savingsRate% (Vượt mức chuẩn 20%)'
                             : 'Tỷ lệ tích lũy hiện là $savingsRate% (Nên phấn đấu đạt mốc 20%)')
@@ -795,8 +795,9 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
     required bool isDark,
     required MonthlyReportData report,
     required HealthScoreData scoreData,
+    required String locale,
   }) {
-    final isVi = Localizations.localeOf(context).languageCode == 'vi';
+    final isVi = locale.startsWith('vi');
     final tips = <String>[];
 
     if (scoreData.savingsRate < 20) {

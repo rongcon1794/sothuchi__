@@ -24,17 +24,25 @@ part 'savings_goal_form_sections.dart';
 class _GoalInspirationIdea {
   const _GoalInspirationIdea({
     required this.title,
+    String? titleEn,
     required this.icon,
     required this.color,
     required this.durationDays,
     required this.defaultNote,
-  });
+    String? defaultNoteEn,
+  })  : titleEn = titleEn ?? title,
+        defaultNoteEn = defaultNoteEn ?? defaultNote;
 
   final String title;
+  final String titleEn;
   final String icon;
   final int color;
   final int durationDays;
   final String defaultNote;
+  final String defaultNoteEn;
+
+  String localizedTitle(bool isVi) => isVi ? title : titleEn;
+  String localizedNote(bool isVi) => isVi ? defaultNote : defaultNoteEn;
 }
 
 /// Redesigned, state-of-the-art Apple HIG & Lucian Savings Goal Setup Bottom Sheet.
@@ -91,52 +99,66 @@ class _SavingsGoalFormSheetState extends ConsumerState<SavingsGoalFormSheet> {
   static const _inspirationIdeas = [
     _GoalInspirationIdea(
       title: 'Quỹ khẩn cấp 6 tháng',
+      titleEn: '6-Month Emergency Fund',
       icon: 'shield',
       color: 0xFF00A86B,
       durationDays: 180,
       defaultNote: 'Khoản dự phòng an tâm cho mọi tình huống bất ngờ',
+      defaultNoteEn: 'Peace of mind reserve for unexpected events',
     ),
     _GoalInspirationIdea(
       title: 'Chuyến du lịch mơ ước',
+      titleEn: 'Dream Vacation',
       icon: 'airplane',
       color: 0xFF007AFF,
       durationDays: 90,
       defaultNote: 'Tự thưởng cho bản thân một chuyến đi đáng nhớ',
+      defaultNoteEn: 'Reward yourself with an unforgettable trip',
     ),
     _GoalInspirationIdea(
       title: 'Đổi xe máy mới',
+      titleEn: 'New Vehicle',
       icon: 'car',
       color: 0xFFE11D48,
       durationDays: 365,
       defaultNote: 'Nâng cấp phương tiện đi lại an toàn & tiện nghi',
+      defaultNoteEn: 'Upgrade safe & convenient daily commute',
     ),
     _GoalInspirationIdea(
       title: 'Laptop / Thiết bị công nghệ',
+      titleEn: 'Laptop / Tech Gadget',
       icon: 'laptop',
       color: 0xFF5856D6,
       durationDays: 90,
       defaultNote: 'Công cụ làm việc và học tập đắc lực',
+      defaultNoteEn: 'Essential productivity tool for work and study',
     ),
     _GoalInspirationIdea(
       title: 'Tích lũy mua nhà',
+      titleEn: 'Home Down Payment',
       icon: 'house',
       color: 0xFFFFB020,
       durationDays: 730,
       defaultNote: 'Mục tiêu lớn cho tổ ấm gia đình tương lai',
+      defaultNoteEn: 'Major savings for our future home',
     ),
     _GoalInspirationIdea(
       title: 'Khóa học & Nâng cao kỹ năng',
+      titleEn: 'Skills & Courses',
       icon: 'book',
       color: 0xFF30B0C7,
       durationDays: 60,
       defaultNote: 'Đầu tư phát triển bản thân cho sự nghiệp',
+      defaultNoteEn: 'Invest in self-development and career growth',
     ),
     _GoalInspirationIdea(
       title: 'Quà tặng sinh nhật / kỷ niệm',
+      titleEn: 'Gifts & Celebrations',
       icon: 'gift',
       color: 0xFFAF52DE,
       durationDays: 30,
       defaultNote: 'Món quà ý nghĩa cho người thân yêu',
+      defaultNoteEn: 'Meaningful gift for loved ones',
     ),
   ];
 
@@ -260,15 +282,16 @@ class _SavingsGoalFormSheetState extends ConsumerState<SavingsGoalFormSheet> {
 
   void _applyInspirationIdea(_GoalInspirationIdea idea) {
     unawaited(HapticFeedback.selectionClick());
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
     final now = DateTime.now();
     setState(() {
-      _titleController.text = idea.title;
+      _titleController.text = idea.localizedTitle(isVi);
       _selectedIcon = idea.icon;
       _selectedColor = idea.color;
       _deadline =
           DateTime(now.year, now.month, now.day).add(Duration(days: idea.durationDays));
       if (_noteController.text.trim().isEmpty) {
-        _noteController.text = idea.defaultNote;
+        _noteController.text = idea.localizedNote(isVi);
       }
     });
   }

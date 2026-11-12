@@ -173,14 +173,15 @@ class _TransferBetweenWalletsSheetState
     final currency = _resolveFromCurrency(active);
     final currencyInfo = AppCurrencies.byCode(currency);
 
+    final isVi = locale.startsWith('vi');
     final presets = currency.toUpperCase() == 'VND'
         ? [
-            (minorUnits: 100000, label: '100k'),
-            (minorUnits: 200000, label: '200k'),
-            (minorUnits: 500000, label: '500k'),
-            (minorUnits: 1000000, label: '1 triệu'),
-            (minorUnits: 2000000, label: '2 triệu'),
-            (minorUnits: 5000000, label: '5 triệu'),
+            const (minorUnits: 100000, label: '100k'),
+            const (minorUnits: 200000, label: '200k'),
+            const (minorUnits: 500000, label: '500k'),
+            (minorUnits: 1000000, label: isVi ? '1 triệu' : '1M'),
+            (minorUnits: 2000000, label: isVi ? '2 triệu' : '2M'),
+            (minorUnits: 5000000, label: isVi ? '5 triệu' : '5M'),
           ]
         : [
             (

@@ -256,7 +256,7 @@ class _CompactCustomDatePill extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               child: Text(
-                'Đổi',
+                locale.startsWith('vi') ? 'Đổi' : 'Change',
                 style: TextStyle(
                   fontSize: 11.5,
                   fontWeight: FontWeight.w600,
@@ -406,8 +406,8 @@ class _ExpandableWalletMenu extends StatelessWidget {
                   children: [
                     Text(
                       hasSelection
-                          ? '${selectedAccountIds.length}/${wallets.length} ví'
-                          : '${wallets.length} ví',
+                          ? '${selectedAccountIds.length}/${wallets.length} ${l10n.localeName.startsWith('vi') ? 'ví' : 'wallets'}'
+                          : '${wallets.length} ${l10n.localeName.startsWith('vi') ? 'ví' : 'wallets'}',
                       style: TextStyle(
                         fontSize: 11,
                         color: isDark ? Colors.white54 : Colors.black54,
@@ -635,7 +635,9 @@ class _ExpandableCategoryMenu extends StatelessWidget {
         fallbackName: singleCat.name,
       );
     } else {
-      subtitle = '${selectedCategoryIds.length} danh mục đã chọn';
+      subtitle = l10n.localeName.startsWith('vi')
+          ? '${selectedCategoryIds.length} danh mục đã chọn'
+          : '${selectedCategoryIds.length} categories selected';
     }
 
     final hasSelection = selectedCategoryIds.isNotEmpty;
@@ -733,8 +735,8 @@ class _ExpandableCategoryMenu extends StatelessWidget {
                   children: [
                     Text(
                       hasSelection
-                          ? '${selectedCategoryIds.length}/${categories.length} mục'
-                          : '${categories.length} mục',
+                          ? '${selectedCategoryIds.length}/${categories.length} ${l10n.localeName.startsWith('vi') ? 'mục' : 'items'}'
+                          : '${categories.length} ${l10n.localeName.startsWith('vi') ? 'mục' : 'items'}',
                       style: TextStyle(
                         fontSize: 11,
                         color: isDark ? Colors.white54 : Colors.black54,
@@ -788,7 +790,9 @@ class _ExpandableCategoryMenu extends StatelessWidget {
                         padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
                         child: AppleSearchBar(
                           controller: searchController,
-                          hintText: 'Tìm danh mục...',
+                          hintText: l10n.localeName.startsWith('vi')
+                              ? 'Tìm danh mục...'
+                              : 'Search categories...',
                           height: 38,
                           onChanged: onSearchChanged,
                         ),
@@ -825,7 +829,7 @@ class _ExpandableCategoryMenu extends StatelessWidget {
                                 radius: 6,
                               ),
                               title: l10n.filterAllCategories,
-                              subtitle: '${categories.length} danh mục',
+                              subtitle: '${categories.length} ${l10n.localeName.startsWith('vi') ? 'danh mục' : 'categories'}',
                               onTap: () {
                                 HapticFeedback.selectionClick();
                                 onClearCategories();

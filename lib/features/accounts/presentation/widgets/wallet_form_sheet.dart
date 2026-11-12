@@ -1023,6 +1023,7 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
     required bool isDark,
     required Color accentColor,
   }) {
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
     const items = AppIconCatalog.walletIconItems;
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -1090,7 +1091,7 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    item.$2,
+                    AppIconCatalog.localizedWalletIconLabel(item.$1, isVi: isVi),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,

@@ -28,7 +28,7 @@ class _CategoryTemplate {
   final String subtitle;
 }
 
-const _kCategoryExpenseTemplates = [
+const _kCategoryExpenseTemplatesVi = [
   _CategoryTemplate(
     name: 'Cà phê & Đồ uống',
     type: CategoryType.expense,
@@ -143,7 +143,122 @@ const _kCategoryExpenseTemplates = [
   ),
 ];
 
-const _kCategoryIncomeTemplates = [
+const _kCategoryExpenseTemplatesEn = [
+  _CategoryTemplate(
+    name: 'Coffee & Drinks',
+    type: CategoryType.expense,
+    icon: 'coffee',
+    color: 0xFFD97706,
+    subtitle: 'Coffee, tea, smoothies',
+  ),
+  _CategoryTemplate(
+    name: 'Transport & Fuel',
+    type: CategoryType.expense,
+    icon: 'fuel',
+    color: 0xFF1D5BD6,
+    subtitle: 'Gas, parking, taxi, transit',
+  ),
+  _CategoryTemplate(
+    name: 'Groceries & Market',
+    type: CategoryType.expense,
+    icon: 'groceries',
+    color: 0xFF15803D,
+    subtitle: 'Fresh food, household goods',
+  ),
+  _CategoryTemplate(
+    name: 'Rent & Housing',
+    type: CategoryType.expense,
+    icon: 'housing',
+    color: 0xFF0D7C66,
+    subtitle: 'Apartment rent, room fee',
+  ),
+  _CategoryTemplate(
+    name: 'Utilities & Internet',
+    type: CategoryType.expense,
+    icon: 'electricity',
+    color: 0xFF0284C7,
+    subtitle: 'Power, water, wifi bills',
+  ),
+  _CategoryTemplate(
+    name: 'Shopping & Clothes',
+    type: CategoryType.expense,
+    icon: 'clothes',
+    color: 0xFFDB2777,
+    subtitle: 'Apparel, shoes, accessories',
+  ),
+  _CategoryTemplate(
+    name: 'Beauty & Personal Care',
+    type: CategoryType.expense,
+    icon: 'beauty',
+    color: 0xFFE11D48,
+    subtitle: 'Cosmetics, haircuts, spa',
+  ),
+  _CategoryTemplate(
+    name: 'Dining & Outings',
+    type: CategoryType.expense,
+    icon: 'food',
+    color: 0xFFC0352B,
+    subtitle: 'Dining out, gatherings',
+  ),
+  _CategoryTemplate(
+    name: 'Entertainment & Games',
+    type: CategoryType.expense,
+    icon: 'entertainment',
+    color: 0xFF7C3AED,
+    subtitle: 'Movies, concerts, streaming',
+  ),
+  _CategoryTemplate(
+    name: 'Medical & Pharmacy',
+    type: CategoryType.expense,
+    icon: 'health',
+    color: 0xFF0891B2,
+    subtitle: 'Doctor, prescriptions, checkups',
+  ),
+  _CategoryTemplate(
+    name: 'Books & Learning',
+    type: CategoryType.expense,
+    icon: 'books',
+    color: 0xFF4F46E5,
+    subtitle: 'Courses, textbooks, tools',
+  ),
+  _CategoryTemplate(
+    name: 'Family & Kids',
+    type: CategoryType.expense,
+    icon: 'baby',
+    color: 0xFFD97706,
+    subtitle: 'Tuition, baby care, toys',
+  ),
+  _CategoryTemplate(
+    name: 'Pet Care & Food',
+    type: CategoryType.expense,
+    icon: 'pets',
+    color: 0xFF15803D,
+    subtitle: 'Pet food, supplies, vet',
+  ),
+  _CategoryTemplate(
+    name: 'Gifts & Celebrations',
+    type: CategoryType.expense,
+    icon: 'gift',
+    color: 0xFF9333EA,
+    subtitle: 'Birthdays, weddings, holidays',
+  ),
+  _CategoryTemplate(
+    name: 'Fitness & Sports',
+    type: CategoryType.expense,
+    icon: 'fitness',
+    color: 0xFFB45309,
+    subtitle: 'Gym, running, training gear',
+  ),
+  _CategoryTemplate(
+    name: 'Travel & Vacations',
+    type: CategoryType.expense,
+    icon: 'travel',
+    color: 0xFF1D5BD6,
+    subtitle: 'Flights, hotels, tours',
+  ),
+];
+
+const _kCategoryIncomeTemplatesVi = [
   _CategoryTemplate(
     name: 'Lương cố định',
     type: CategoryType.income,
@@ -194,6 +309,59 @@ const _kCategoryIncomeTemplates = [
     subtitle: 'Cashback, bán đồ dùng cũ',
   ),
 ];
+
+const _kCategoryIncomeTemplatesEn = [
+  _CategoryTemplate(
+    name: 'Salary & Wages',
+    type: CategoryType.income,
+    icon: 'salary',
+    color: 0xFF15803D,
+    subtitle: 'Monthly primary paycheck',
+  ),
+  _CategoryTemplate(
+    name: 'Bonus & Commission',
+    type: CategoryType.income,
+    icon: 'bonus',
+    color: 0xFFD97706,
+    subtitle: 'Performance bonus, sales comms',
+  ),
+  _CategoryTemplate(
+    name: 'Investments & Interest',
+    type: CategoryType.income,
+    icon: 'stocks',
+    color: 0xFF1D5BD6,
+    subtitle: 'Savings yield, stock dividends',
+  ),
+  _CategoryTemplate(
+    name: 'Freelance & Side Gig',
+    type: CategoryType.income,
+    icon: 'freelance',
+    color: 0xFF4F46E5,
+    subtitle: 'Contract work, side projects',
+  ),
+  _CategoryTemplate(
+    name: 'Business & Sales',
+    type: CategoryType.income,
+    icon: 'business',
+    color: 0xFF0D7C66,
+    subtitle: 'Store revenue, e-commerce',
+  ),
+  _CategoryTemplate(
+    name: 'Gifts & Allowances',
+    type: CategoryType.income,
+    icon: 'gift',
+    color: 0xFFC0352B,
+    subtitle: 'Gift money, family support',
+  ),
+  _CategoryTemplate(
+    name: 'Cashback & Refunds',
+    type: CategoryType.income,
+    icon: 'refund',
+    color: 0xFF0891B2,
+    subtitle: 'Card cashback, selling used items',
+  ),
+];
+
 
 /// Apple Human Interface Guidelines form sheet for creating or editing a category.
 ///
@@ -507,9 +675,10 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
   }
 
   Widget _buildTemplateSection(ThemeData theme, bool isDark) {
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
     final templates = _type == CategoryType.expense
-        ? _kCategoryExpenseTemplates
-        : _kCategoryIncomeTemplates;
+        ? (isVi ? _kCategoryExpenseTemplatesVi : _kCategoryExpenseTemplatesEn)
+        : (isVi ? _kCategoryIncomeTemplatesVi : _kCategoryIncomeTemplatesEn);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

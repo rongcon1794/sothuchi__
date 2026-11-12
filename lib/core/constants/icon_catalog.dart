@@ -222,6 +222,39 @@ abstract final class AppIconCatalog {
   static List<String> get walletKeys =>
       walletIconItems.map((e) => e.$1).toList(growable: false);
 
+  /// Localized display label for wallet icons.
+  static String localizedWalletIconLabel(String key, {bool isVi = true}) {
+    if (isVi) {
+      for (final item in walletIconItems) {
+        if (item.$1 == key) return item.$2;
+      }
+      return key;
+    }
+    return switch (key) {
+      'cash' => 'Cash',
+      'bank' => 'Bank',
+      'ewallet' => 'E-Wallet',
+      'card' => 'Card',
+      'savings' => 'Savings',
+      'wallet' => 'Main Wallet',
+      'vault' => 'Safe Vault',
+      'gold' => 'Gold',
+      'stocks' => 'Stocks',
+      'salary' => 'Salary',
+      'investment' => 'Invest',
+      'business' => 'Business',
+      'family' => 'Family',
+      'travel' => 'Travel',
+      'housing' => 'Housing',
+      'transport' => 'Transport',
+      'allowance' => 'Allowance',
+      'refund' => 'Refund',
+      'gift' => 'Gift / Bonus',
+      'other' => 'Other',
+      _ => key,
+    };
+  }
+
   /// Curated icon options for Savings Goals (key, icon, label).
   static const List<(String key, IconData icon, String label)> savingsIcons = [
     ('piggy_bank', CupertinoIcons.cube_box, 'Heo đất'),
@@ -249,6 +282,43 @@ abstract final class AppIconCatalog {
     ('rocket', CupertinoIcons.rocket_fill, 'Ước mơ'),
     ('savings', Icons.savings_rounded, 'Tích lũy'),
   ];
+
+  /// Localized display label for savings goal icons.
+  static String localizedSavingsIconLabel(String key, {bool isVi = true}) {
+    if (isVi) {
+      for (final item in savingsIcons) {
+        if (item.$1 == key) return item.$3;
+      }
+      return key;
+    }
+    return switch (key) {
+      'piggy_bank' => 'Piggy Bank',
+      'shield' => 'Emergency',
+      'house' => 'House',
+      'car' => 'Car',
+      'bike' => 'Motorbike',
+      'airplane' => 'Travel',
+      'beach' => 'Vacation',
+      'laptop' => 'Gadgets',
+      'camera' => 'Camera',
+      'gaming' => 'Gaming',
+      'gift' => 'Gifts',
+      'wedding' => 'Wedding',
+      'baby' => 'Kids',
+      'heart' => 'Health',
+      'education' => 'Education',
+      'book' => 'Books',
+      'gold' => 'Jewelry',
+      'business' => 'Startup',
+      'pet' => 'Pets',
+      'bag' => 'Shopping',
+      'music' => 'Music',
+      'star' => 'Goal',
+      'rocket' => 'Dream',
+      'savings' => 'Savings',
+      _ => key,
+    };
+  }
 
   /// Resolves a savings goal icon key to its icon for form previews and detail headers.
   static IconData resolveSavingsIcon(String key, {bool useOutlineCard = false}) {

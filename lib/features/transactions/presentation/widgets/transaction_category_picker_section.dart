@@ -115,19 +115,19 @@ class TransactionCategorySelectionCard extends StatelessWidget {
                         : AppleTokens.bgLightSecondary,
                     borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Tất cả',
-                        style: TextStyle(
+                        l10n.all,
+                        style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: AppleTokens.systemBlue,
                         ),
                       ),
-                      SizedBox(width: 2),
-                      Icon(
+                      const SizedBox(width: 2),
+                      const Icon(
                         CupertinoIcons.chevron_right,
                         size: 12,
                         color: AppleTokens.systemBlue,

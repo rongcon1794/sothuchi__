@@ -358,7 +358,9 @@ extension _SavingsGoalFormSections on _SavingsGoalFormSheetState {
                     ),
                     const SizedBox(width: 5),
                     Text(
-                      idea.title,
+                      idea.localizedTitle(
+                        Localizations.localeOf(context).languageCode == 'vi',
+                      ),
                       style: TextStyle(
                         fontSize: 11.5,
                         fontWeight: FontWeight.w600,
@@ -1078,6 +1080,7 @@ extension _SavingsGoalFormSections on _SavingsGoalFormSheetState {
     required bool isDark,
     required Color accentColor,
   }) {
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
     const items = AppIconCatalog.savingsIcons;
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -1144,7 +1147,10 @@ extension _SavingsGoalFormSections on _SavingsGoalFormSheetState {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      item.$3,
+                      AppIconCatalog.localizedSavingsIconLabel(
+                        item.$1,
+                        isVi: isVi,
+                      ),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 8.5,

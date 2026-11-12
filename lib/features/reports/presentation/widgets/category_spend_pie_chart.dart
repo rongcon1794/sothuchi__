@@ -204,7 +204,7 @@ class _CategorySpendPieChartState extends State<CategorySpendPieChart> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            '${report.categorySlices.length} nhóm',
+                            '${report.categorySlices.length} ${locale.startsWith('vi') ? 'nhóm' : 'groups'}',
                             style: theme.textTheme.labelSmall?.copyWith(
                               fontSize: 10,
                               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),

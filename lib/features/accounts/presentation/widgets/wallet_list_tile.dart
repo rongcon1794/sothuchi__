@@ -218,18 +218,18 @@ class WalletListTile extends StatelessWidget {
                                             ),
                                           ],
                                         ),
-                                        child: const Row(
+                                        child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Icon(
+                                            const Icon(
                                               Icons.star_rounded,
                                               size: 10,
                                               color: Color(0xFF4A3500),
                                             ),
-                                            SizedBox(width: 2),
+                                            const SizedBox(width: 2),
                                             Text(
-                                              'Mặc định',
-                                              style: TextStyle(
+                                              locale.startsWith('vi') ? 'Mặc định' : 'Default',
+                                              style: const TextStyle(
                                                 fontSize: 9.5,
                                                 fontWeight: FontWeight.w800,
                                                 color: Color(0xFF4A3500),
@@ -284,7 +284,9 @@ class WalletListTile extends StatelessWidget {
                                     ApplePopupMenuItem(
                                       value: 'set_default',
                                       icon: CupertinoIcons.star_fill,
-                                      title: 'Đặt làm ví mặc định',
+                                      title: locale.startsWith('vi')
+                                          ? 'Đặt làm ví mặc định'
+                                          : 'Set as default',
                                     ),
                                   ApplePopupMenuItem(
                                     value: 'edit',

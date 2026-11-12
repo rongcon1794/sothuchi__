@@ -138,7 +138,7 @@ class TransactionDetailScreen extends ConsumerWidget {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            context.localizeError(res.errorOrNull ?? 'Lỗi không xác định'),
+            context.localizeError(res.errorOrNull ?? ''),
           ),
         ),
       );

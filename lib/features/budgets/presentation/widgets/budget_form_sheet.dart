@@ -136,14 +136,17 @@ class _BudgetFormBottomSheetState extends ConsumerState<BudgetFormBottomSheet> {
     super.dispose();
   }
 
-  List<({int minorUnits, String label})> _getQuickPresets(String currencyCode) {
+  List<({int minorUnits, String label})> _getQuickPresets(
+    String currencyCode, {
+    bool isVi = true,
+  }) {
     if (currencyCode.toUpperCase() == 'VND') {
       return [
-        (minorUnits: 1000000, label: '1 triệu'),
-        (minorUnits: 2000000, label: '2 triệu'),
-        (minorUnits: 5000000, label: '5 triệu'),
-        (minorUnits: 10000000, label: '10 triệu'),
-        (minorUnits: 20000000, label: '20 triệu'),
+        (minorUnits: 1000000, label: isVi ? '1 triệu' : '1M'),
+        (minorUnits: 2000000, label: isVi ? '2 triệu' : '2M'),
+        (minorUnits: 5000000, label: isVi ? '5 triệu' : '5M'),
+        (minorUnits: 10000000, label: isVi ? '10 triệu' : '10M'),
+        (minorUnits: 20000000, label: isVi ? '20 triệu' : '20M'),
       ];
     }
     final info = AppCurrencies.byCode(currencyCode);
@@ -242,7 +245,8 @@ class _BudgetFormBottomSheetState extends ConsumerState<BudgetFormBottomSheet> {
       currencyCode: currencyCode,
     );
 
-    final quickPresets = _getQuickPresets(currencyCode);
+    final isVi = locale.startsWith('vi');
+    final quickPresets = _getQuickPresets(currencyCode, isVi: isVi);
 
     final alertColor = _threshold >= 90
         ? LucianTokens.danger

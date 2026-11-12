@@ -359,7 +359,9 @@ class _TransactionHeroAmountCardState extends State<TransactionHeroAmountCard>
                   const SizedBox(width: 6),
                   Flexible(
                     child: Text(
-                      'Vượt số dư ví (${widget.availableWalletBalance!.format(locale: widget.locale)} khả dụng)',
+                      widget.locale.startsWith('vi')
+                          ? 'Vượt số dư ví (${widget.availableWalletBalance!.format(locale: widget.locale)} khả dụng)'
+                          : 'Exceeds wallet balance (${widget.availableWalletBalance!.format(locale: widget.locale)} available)',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(

@@ -102,16 +102,16 @@ class HeroAmountCard extends StatelessWidget {
     }
   }
 
-  List<HeroAmountPreset> _defaultPresets(CurrencyInfo currencyInfo) {
+  List<HeroAmountPreset> _defaultPresets(CurrencyInfo currencyInfo, {bool isVi = true}) {
     if (currencyCode.toUpperCase() == 'VND') {
-      return const [
-        (minorUnits: 0, label: '0₫'),
-        (minorUnits: 500000, label: '500k'),
-        (minorUnits: 1000000, label: '1 triệu'),
-        (minorUnits: 2000000, label: '2 triệu'),
-        (minorUnits: 5000000, label: '5 triệu'),
-        (minorUnits: 10000000, label: '10 triệu'),
-        (minorUnits: 20000000, label: '20 triệu'),
+      return [
+        const (minorUnits: 0, label: '0₫'),
+        const (minorUnits: 500000, label: '500k'),
+        (minorUnits: 1000000, label: isVi ? '1 triệu' : '1M'),
+        (minorUnits: 2000000, label: isVi ? '2 triệu' : '2M'),
+        (minorUnits: 5000000, label: isVi ? '5 triệu' : '5M'),
+        (minorUnits: 10000000, label: isVi ? '10 triệu' : '10M'),
+        (minorUnits: 20000000, label: isVi ? '20 triệu' : '20M'),
       ];
     } else {
       final f = currencyInfo.minorUnitFactor;
@@ -133,7 +133,8 @@ class HeroAmountCard extends StatelessWidget {
     final colors = context.semanticColors;
     final currencyInfo = AppCurrencies.byCode(currencyCode);
     final activeAccent = accentColor ?? theme.colorScheme.primary;
-    final effectivePresets = presets ?? _defaultPresets(currencyInfo);
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
+    final effectivePresets = presets ?? _defaultPresets(currencyInfo, isVi: isVi);
     final isVnd = currencyCode.toUpperCase() == 'VND';
 
     return Container(

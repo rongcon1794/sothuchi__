@@ -211,7 +211,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       ],
                     ),
                     Text(
-                      'Quản lý tài chính cá nhân',
+                      l10n.localeName.startsWith('vi')
+                          ? 'Quản lý tài chính cá nhân'
+                          : 'Personal Finance Tracker',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -593,6 +595,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   List<_OnboardingSlide> _buildSlides(AppLocalizations l10n) {
+    final isVi = l10n.localeName.startsWith('vi');
     return [
       // Slide 1: Lightning Entry & Multi-Wallet
       _OnboardingSlide(
@@ -601,10 +604,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         subtitle: l10n.onboarding1Subtitle,
         accentColor: AppleTokens.jadePrimary,
         secondaryAccent: AppleTokens.systemMint,
-        highlights: const [
-          _OnboardingHighlight(icon: CupertinoIcons.bolt_fill, label: 'Nhập liệu 3 giây'),
-          _OnboardingHighlight(icon: CupertinoIcons.creditcard_fill, label: 'Quản lý đa ví'),
-          _OnboardingHighlight(icon: CupertinoIcons.mic_fill, label: 'Giọng nói & AI Scan'),
+        highlights: [
+          _OnboardingHighlight(
+            icon: CupertinoIcons.bolt_fill,
+            label: isVi ? 'Nhập liệu 3 giây' : '3-Second Entry',
+          ),
+          _OnboardingHighlight(
+            icon: CupertinoIcons.creditcard_fill,
+            label: isVi ? 'Quản lý đa ví' : 'Multi-Wallet',
+          ),
+          _OnboardingHighlight(
+            icon: CupertinoIcons.mic_fill,
+            label: isVi ? 'Giọng nói & AI Scan' : 'Voice & AI Scan',
+          ),
         ],
         illustrationBuilder: (context, isDark) => const _Slide1TransactionWalletGraphic(),
       ),
@@ -616,10 +628,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         subtitle: l10n.onboarding2Subtitle,
         accentColor: AppleTokens.systemBlue,
         secondaryAccent: AppleTokens.systemIndigo,
-        highlights: const [
-          _OnboardingHighlight(icon: CupertinoIcons.chart_pie_fill, label: 'Hạn mức danh mục'),
-          _OnboardingHighlight(icon: CupertinoIcons.speedometer, label: 'Nhịp chi an toàn/ngày'),
-          _OnboardingHighlight(icon: CupertinoIcons.bell_fill, label: 'Cảnh báo bội chi'),
+        highlights: [
+          _OnboardingHighlight(
+            icon: CupertinoIcons.chart_pie_fill,
+            label: isVi ? 'Hạn mức danh mục' : 'Category Limits',
+          ),
+          _OnboardingHighlight(
+            icon: CupertinoIcons.speedometer,
+            label: isVi ? 'Nhịp chi an toàn/ngày' : 'Safe Daily Pace',
+          ),
+          _OnboardingHighlight(
+            icon: CupertinoIcons.bell_fill,
+            label: isVi ? 'Cảnh báo bội chi' : 'Overspend Alerts',
+          ),
         ],
         illustrationBuilder: (context, isDark) => const _Slide2SmartBudgetGraphic(),
       ),
@@ -631,10 +652,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         subtitle: l10n.onboarding3Subtitle,
         accentColor: AppleTokens.systemOrange,
         secondaryAccent: AppleTokens.systemYellow,
-        highlights: const [
-          _OnboardingHighlight(icon: CupertinoIcons.archivebox_fill, label: 'Hũ tiết kiệm mơ ước'),
-          _OnboardingHighlight(icon: CupertinoIcons.calendar_today, label: 'Hóa đơn định kỳ'),
-          _OnboardingHighlight(icon: CupertinoIcons.bell_fill, label: 'Tự động nhắc hẹn'),
+        highlights: [
+          _OnboardingHighlight(
+            icon: CupertinoIcons.archivebox_fill,
+            label: isVi ? 'Hũ tiết kiệm mơ ước' : 'Savings Piggy Bank',
+          ),
+          _OnboardingHighlight(
+            icon: CupertinoIcons.calendar_today,
+            label: isVi ? 'Hóa đơn định kỳ' : 'Recurring Bills',
+          ),
+          _OnboardingHighlight(
+            icon: CupertinoIcons.bell_fill,
+            label: isVi ? 'Tự động nhắc hẹn' : 'Auto Reminders',
+          ),
         ],
         illustrationBuilder: (context, isDark) => const _Slide3SavingsBillsGraphic(),
       ),
@@ -646,10 +676,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         subtitle: l10n.onboarding4Subtitle,
         accentColor: AppleTokens.systemPurple,
         secondaryAccent: AppleTokens.systemPink,
-        highlights: const [
-          _OnboardingHighlight(icon: CupertinoIcons.chart_bar_alt_fill, label: 'Biểu đồ dòng tiền'),
-          _OnboardingHighlight(icon: CupertinoIcons.layers_fill, label: 'Cơ cấu chi tiêu'),
-          _OnboardingHighlight(icon: CupertinoIcons.share, label: 'Xuất Excel & PDF'),
+        highlights: [
+          _OnboardingHighlight(
+            icon: CupertinoIcons.chart_bar_alt_fill,
+            label: isVi ? 'Biểu đồ dòng tiền' : 'Cashflow Trends',
+          ),
+          _OnboardingHighlight(
+            icon: CupertinoIcons.layers_fill,
+            label: isVi ? 'Cơ cấu chi tiêu' : 'Expense Breakdown',
+          ),
+          _OnboardingHighlight(
+            icon: CupertinoIcons.share,
+            label: isVi ? 'Xuất Excel & PDF' : 'Excel & PDF Export',
+          ),
         ],
         illustrationBuilder: (context, isDark) => const _Slide4ReportsAnalyticsGraphic(),
       ),
@@ -661,10 +700,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         subtitle: l10n.onboarding5Subtitle,
         accentColor: AppleTokens.emeraldIncome,
         secondaryAccent: AppleTokens.systemCyan,
-        highlights: const [
-          _OnboardingHighlight(icon: CupertinoIcons.lock_shield_fill, label: 'Face ID & PIN'),
-          _OnboardingHighlight(icon: CupertinoIcons.wifi_slash, label: '100% Ngoại tuyến'),
-          _OnboardingHighlight(icon: CupertinoIcons.cloud_upload_fill, label: 'Đồng bộ Firebase'),
+        highlights: [
+          const _OnboardingHighlight(
+            icon: CupertinoIcons.lock_shield_fill,
+            label: 'Face ID & PIN',
+          ),
+          _OnboardingHighlight(
+            icon: CupertinoIcons.wifi_slash,
+            label: isVi ? '100% Ngoại tuyến' : '100% Offline-First',
+          ),
+          _OnboardingHighlight(
+            icon: CupertinoIcons.cloud_upload_fill,
+            label: isVi ? 'Đồng bộ Firebase' : 'Firebase Cloud Sync',
+          ),
         ],
         illustrationBuilder: (context, isDark) => const _Slide5SecurityCloudGraphic(),
       ),

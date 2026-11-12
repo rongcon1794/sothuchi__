@@ -117,7 +117,9 @@ class FinancialHealthCard extends StatelessWidget {
                                     ),
                                   ),
                                   TextSpan(
-                                    text: ' • Chuẩn 50/30/20',
+                                    text: locale.startsWith('vi')
+                                        ? ' • Chuẩn 50/30/20'
+                                        : ' • 50/30/20 Rule',
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: theme.colorScheme.onSurfaceVariant,
