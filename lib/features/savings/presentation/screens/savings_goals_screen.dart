@@ -272,15 +272,9 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
 
             final summaryHeroCard = AppleGlassCard(
               borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: isDark
-                    ? const [Color(0xFF0F261C), Color(0xFF081711)]
-                    : const [Color(0xFFE8F5E9), Color(0xFFF1F8E9)],
-              ),
               borderColor: AppleTokens.jadePrimary
-                  .withValues(alpha: isDark ? 0.35 : 0.25),
+                  .withValues(alpha: isDark ? 0.32 : 0.2),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -294,17 +288,9 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
                             Container(
                               width: 8,
                               height: 8,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 color: AppleTokens.jadePrimary,
                                 shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppleTokens.jadePrimary
-                                        .withValues(alpha: 0.6),
-                                    blurRadius: 6,
-                                    spreadRadius: 1,
-                                  ),
-                                ],
                               ),
                             ),
                             const SizedBox(width: 8),

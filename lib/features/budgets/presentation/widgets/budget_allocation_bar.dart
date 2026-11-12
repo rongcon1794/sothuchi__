@@ -35,7 +35,7 @@ class BudgetAllocationBar extends StatelessWidget {
 
     return AppleGlassCard(
       padding: const EdgeInsets.all(16),
-      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+      borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -49,11 +49,20 @@ class BudgetAllocationBar extends StatelessWidget {
                   letterSpacing: -0.2,
                 ),
               ),
-              Text(
-                '${progressList.length} ${l10n.localeName.startsWith('vi') ? 'danh mục' : 'categories'}',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w500,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : Colors.black.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                ),
+                child: Text(
+                  '${progressList.length} ${l10n.localeName.startsWith('vi') ? 'danh mục' : 'categories'}',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -61,9 +70,9 @@ class BudgetAllocationBar extends StatelessWidget {
           const SizedBox(height: 12),
           // Multi-segmented proportion bar
           ClipRRect(
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(5),
             child: SizedBox(
-              height: 10,
+              height: 8,
               child: Row(
                 children: [
                   for (int i = 0; i < progressList.length; i++) ...[

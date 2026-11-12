@@ -233,14 +233,14 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
                         hideBalance: hideBalance,
                       ),
                       if (triggered.isNotEmpty) ...[
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         BudgetAlertBanner(
                           progressOverride: triggered,
                           navigateOnTap: false,
                         ),
                       ],
                       if (progressList.length >= 2) ...[
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         BudgetAllocationBar(
                           progressList: progressList,
                           categoriesMap: categoriesMap,
@@ -260,11 +260,23 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
                               letterSpacing: -0.2,
                             ),
                           ),
-                          Text(
-                            '${filteredList.length} / ${progressList.length}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: scheme.onSurfaceVariant,
-                              fontWeight: FontWeight.w600,
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 9,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: scheme.surfaceContainerHighest
+                                  .withValues(alpha: 0.6),
+                              borderRadius:
+                                  BorderRadius.circular(AppleTokens.radiusPill),
+                            ),
+                            child: Text(
+                              '${filteredList.length} / ${progressList.length}',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: scheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
                         ],
@@ -279,20 +291,17 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
                           });
                         },
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 12),
                       if (filteredList.isEmpty)
-                        Container(
+                        AppleGlassCard(
                           padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: scheme.surfaceContainerHighest
-                                .withValues(alpha: 0.35),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
+                          borderRadius:
+                              BorderRadius.circular(AppleTokens.radiusHero),
                           child: Column(
                             children: [
                               Icon(
                                 CupertinoIcons.tray,
-                                size: 36,
+                                size: 34,
                                 color: scheme.onSurfaceVariant
                                     .withValues(alpha: 0.6),
                               ),
@@ -307,7 +316,7 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
                                   color: scheme.onSurfaceVariant,
                                 ),
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 10),
                               AppleButton(
                                 label: isVi ? 'Xem tất cả' : 'Show all',
                                 variant: AppleButtonVariant.secondary,

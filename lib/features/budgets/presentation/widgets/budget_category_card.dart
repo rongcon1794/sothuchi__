@@ -114,34 +114,30 @@ class BudgetCategoryCard extends StatelessWidget {
     ).format(locale: locale, masked: hideBalance);
 
     return ApplePressable(
-      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+      borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
       onTap: () => context.push(AppRoutes.budgetDetail(progress.budget.id)),
       child: AppleGlassCard(
         padding: const EdgeInsets.all(16),
-        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+        borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
         borderColor: progress.isExceeded
             ? AppleTokens.systemRed.withValues(alpha: 0.35)
             : (progress.isWarningTriggered
-                ? AppleTokens.systemOrange.withValues(alpha: 0.3)
+                ? AppleTokens.systemOrange.withValues(alpha: 0.28)
                 : null),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header: Category Icon, Name, Scope tag, Percentage pill & popup menu
+            // Header: Category Icon, Name, Spent/Limit subtitle, Percentage pill & popup menu
             Row(
               children: [
                 Container(
-                  width: 44,
-                  height: 44,
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
-                    color: badgeColor.withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: badgeColor.withValues(alpha: 0.25),
-                      width: 1,
-                    ),
+                    color: badgeColor.withValues(alpha: isDark ? 0.20 : 0.12),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(iconData, color: badgeColor, size: 22),
+                  child: Icon(iconData, color: badgeColor, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -175,7 +171,7 @@ class BudgetCategoryCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 // Percentage badge (maintains exact '${progress.usedPercent}%' for automated tests)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
                   decoration: BoxDecoration(
                     color: pillBgColor,
                     borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
@@ -185,11 +181,12 @@ class BudgetCategoryCard extends StatelessWidget {
                     style: TextStyle(
                       color: pillFgColor,
                       fontWeight: FontWeight.w800,
-                      fontSize: 13,
+                      fontSize: 12.5,
                       fontFeatures: AppTheme.tabularFigures,
                     ),
                   ),
                 ),
+                const SizedBox(width: 2),
                 ApplePopupMenuButton<String>(
                   tooltip: l10n.moreOptions,
                   onSelected: (value) {
@@ -213,18 +210,12 @@ class BudgetCategoryCard extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 14),
-
-            // Progress Bar with Threshold Notch Marker
-            BudgetThresholdProgressBar(
-              progress: clampedRatio,
-              threshold: thresholdRatio,
-              activeColor: barColor,
-              height: 10,
-              showGlow: progress.isExceeded || progress.isWarningTriggered,
+            const SizedBox(height: 12),
+            Container(
+              height: 0.6,
+              color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
             ),
-
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
 
             // Metrics row: Remaining/Exceeded amount & Threshold label
             Row(
@@ -239,8 +230,8 @@ class BudgetCategoryCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 12.5,
-                      fontWeight: progress.isExceeded ? FontWeight.w700 : FontWeight.w600,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
                       color: progress.isExceeded ? financeColors.expense : scheme.onSurface,
                       fontFeatures: AppTheme.tabularFigures,
                     ),
@@ -258,39 +249,42 @@ class BudgetCategoryCard extends StatelessWidget {
               ],
             ),
 
+            const SizedBox(height: 10),
+
+            // Progress Bar with Threshold Notch Marker
+            BudgetThresholdProgressBar(
+              progress: clampedRatio,
+              threshold: thresholdRatio,
+              activeColor: barColor,
+              height: 8,
+              showGlow: progress.isExceeded || progress.isWarningTriggered,
+            ),
+
             // Daily Burn Rate Runway (when remaining > 0)
             if (!progress.isExceeded && progress.remainingMinorUnits > 0) ...[
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.black.withValues(alpha: 0.03),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      CupertinoIcons.flame_fill,
-                      size: 12,
-                      color: AppleTokens.systemOrange,
-                    ),
-                    const SizedBox(width: 4),
-                    Flexible(
-                      child: Text(
-                        l10n.budgetDailyRecommended(dailyText),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w600,
-                          color: scheme.onSurfaceVariant,
-                          fontFeatures: AppTheme.tabularFigures,
-                        ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  const Icon(
+                    CupertinoIcons.flame_fill,
+                    size: 12.5,
+                    color: AppleTokens.systemOrange,
+                  ),
+                  const SizedBox(width: 5),
+                  Expanded(
+                    child: Text(
+                      l10n.budgetDailyRecommended(dailyText),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                        color: scheme.onSurfaceVariant,
+                        fontFeatures: AppTheme.tabularFigures,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ],
           ],

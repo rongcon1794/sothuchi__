@@ -7,10 +7,183 @@ import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
+import 'package:so_thu_chi/core/utils/date_formatter.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
+import 'package:so_thu_chi/features/budgets/domain/entities/budget.dart';
 import 'package:so_thu_chi/features/budgets/presentation/controllers/budgets_controller.dart';
+import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
+
+enum SmartPaceSource { budget, income, balance }
+
+class SmartSpendingPaceResult {
+  const SmartSpendingPaceResult({
+    required this.safeDailyMinor,
+    required this.dailyAllowanceMinor,
+    required this.todaySpentMinor,
+    required this.remainingLimitMinor,
+    required this.daysRemaining,
+    required this.currencyCode,
+    required this.isOverPace,
+    required this.isExceeded,
+    required this.source,
+  });
+
+  final int safeDailyMinor;
+  final int dailyAllowanceMinor;
+  final int todaySpentMinor;
+  final int remainingLimitMinor;
+  final int daysRemaining;
+  final String currencyCode;
+  final bool isOverPace;
+  final bool isExceeded;
+  final SmartPaceSource source;
+}
+
+/// Computes the smart daily spending pace using:
+/// 1. Active monthly budget (overall budget or sum of category budgets),
+/// 2. Monthly income fallback when no budget is configured,
+/// 3. Current net balance fallback when neither budget nor income exists.
+///
+/// Today's expenses are deducted directly from today's daily allowance rather
+/// than amortized across remaining days, so spending today updates "safe to
+/// spend today" 1-for-1 while remaining days rebalance tomorrow.
+SmartSpendingPaceResult computeSmartSpendingPace({
+  required MonthlyCashflowSummary monthSummary,
+  required Money totalBalance,
+  required List<BudgetProgress> budgetProgressList,
+  List<TransactionEntity> transactions = const <TransactionEntity>[],
+  DateTime? now,
+}) {
+  final effectiveNow = now ?? DateTime.now();
+  final daysInMonth = DateTime(effectiveNow.year, effectiveNow.month + 1, 0).day;
+  final currentDay = effectiveNow.day;
+  final daysRemaining = math.max(1, daysInMonth - currentDay + 1);
+
+  int? effectiveLimitMinor;
+  int effectiveSpentMinor = monthSummary.expense.minorUnits;
+  String currencyCode = totalBalance.currencyCode;
+  SmartPaceSource source = SmartPaceSource.balance;
+  Set<String>? budgetedCategoryIds;
+
+  if (budgetProgressList.isNotEmpty) {
+    final overall =
+        budgetProgressList.where((p) => p.budget.isOverall).firstOrNull;
+    if (overall != null) {
+      effectiveLimitMinor = overall.budget.amount;
+      effectiveSpentMinor = overall.spentMinorUnits;
+      currencyCode = overall.budget.currency;
+      source = SmartPaceSource.budget;
+    } else {
+      currencyCode = budgetProgressList.first.budget.currency;
+      final sameCurrency = budgetProgressList
+          .where((p) => p.budget.currency == currencyCode)
+          .toList(growable: false);
+      effectiveLimitMinor =
+          sameCurrency.fold<int>(0, (acc, p) => acc + p.budget.amount);
+      effectiveSpentMinor =
+          sameCurrency.fold<int>(0, (acc, p) => acc + p.spentMinorUnits);
+      budgetedCategoryIds = sameCurrency
+          .map((p) => p.budget.categoryId)
+          .whereType<String>()
+          .toSet();
+      source = SmartPaceSource.budget;
+    }
+  } else if (monthSummary.income.minorUnits > 0) {
+    effectiveLimitMinor = monthSummary.income.minorUnits;
+    effectiveSpentMinor = monthSummary.expense.minorUnits;
+    currencyCode = monthSummary.income.currencyCode;
+    source = SmartPaceSource.income;
+  }
+
+  final todaySpentMinor = transactions
+      .where(
+        (tx) =>
+            tx.type == TransactionType.expense &&
+            tx.currency == currencyCode &&
+            AppDateUtils.isSameDay(tx.date, effectiveNow) &&
+            (budgetedCategoryIds == null ||
+                budgetedCategoryIds.contains(tx.categoryId)),
+      )
+      .fold<int>(0, (sum, tx) => sum + tx.amount);
+
+  if (effectiveLimitMinor != null && effectiveLimitMinor > 0) {
+    if (effectiveSpentMinor >= effectiveLimitMinor) {
+      return SmartSpendingPaceResult(
+        safeDailyMinor: 0,
+        dailyAllowanceMinor: 0,
+        todaySpentMinor: todaySpentMinor,
+        remainingLimitMinor: 0,
+        daysRemaining: daysRemaining,
+        currencyCode: currencyCode,
+        isOverPace: true,
+        isExceeded: true,
+        source: source,
+      );
+    }
+
+    final spentBeforeToday = math.max(0, effectiveSpentMinor - todaySpentMinor);
+    final remainingBeforeToday =
+        math.max(0, effectiveLimitMinor - spentBeforeToday);
+    final dailyAllowanceMinor = remainingBeforeToday ~/ daysRemaining;
+    final safeDailyMinor = math.max(0, dailyAllowanceMinor - todaySpentMinor);
+    final remainingLimitMinor =
+        math.max(0, effectiveLimitMinor - effectiveSpentMinor);
+    final expectedSpentSoFar = (effectiveLimitMinor * currentDay) / daysInMonth;
+    final isOverPace = effectiveSpentMinor > expectedSpentSoFar;
+
+    return SmartSpendingPaceResult(
+      safeDailyMinor: safeDailyMinor,
+      dailyAllowanceMinor: dailyAllowanceMinor,
+      todaySpentMinor: todaySpentMinor,
+      remainingLimitMinor: remainingLimitMinor,
+      daysRemaining: daysRemaining,
+      currencyCode: currencyCode,
+      isOverPace: isOverPace,
+      isExceeded: false,
+      source: source,
+    );
+  }
+
+  // Fallback 3: Neither budget nor monthly income is recorded.
+  // Note: totalBalance is already net of all recorded expenses (including
+  // this month's expenses), so we must NOT subtract effectiveSpentMinor again.
+  if (totalBalance.minorUnits <= 0) {
+    final isExceeded = effectiveSpentMinor > 0 || totalBalance.minorUnits < 0;
+    return SmartSpendingPaceResult(
+      safeDailyMinor: 0,
+      dailyAllowanceMinor: 0,
+      todaySpentMinor: todaySpentMinor,
+      remainingLimitMinor: 0,
+      daysRemaining: daysRemaining,
+      currencyCode: currencyCode,
+      isOverPace: isExceeded || effectiveSpentMinor > 0,
+      isExceeded: isExceeded,
+      source: SmartPaceSource.balance,
+    );
+  }
+
+  final balanceAtStartOfToday = totalBalance.minorUnits + todaySpentMinor;
+  final dailyAllowanceMinor = balanceAtStartOfToday ~/ daysRemaining;
+  final safeDailyMinor = math.max(0, dailyAllowanceMinor - todaySpentMinor);
+  final impliedStartingBalance = totalBalance.minorUnits + effectiveSpentMinor;
+  final expectedSpentSoFar =
+      (impliedStartingBalance * currentDay) / daysInMonth;
+  final isOverPace = effectiveSpentMinor > expectedSpentSoFar;
+
+  return SmartSpendingPaceResult(
+    safeDailyMinor: safeDailyMinor,
+    dailyAllowanceMinor: dailyAllowanceMinor,
+    todaySpentMinor: todaySpentMinor,
+    remainingLimitMinor: totalBalance.minorUnits,
+    daysRemaining: daysRemaining,
+    currencyCode: currencyCode,
+    isOverPace: isOverPace,
+    isExceeded: false,
+    source: SmartPaceSource.balance,
+  );
+}
 
 class DashboardSmartSpendingPaceCard extends ConsumerWidget {
   const DashboardSmartSpendingPaceCard({
@@ -19,12 +192,16 @@ class DashboardSmartSpendingPaceCard extends ConsumerWidget {
     required this.totalBalance,
     required this.locale,
     required this.hideBalance,
+    this.transactions = const <TransactionEntity>[],
+    this.now,
   });
 
   final MonthlyCashflowSummary monthSummary;
   final Money totalBalance;
   final String locale;
   final bool hideBalance;
+  final List<TransactionEntity> transactions;
+  final DateTime? now;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -32,85 +209,39 @@ class DashboardSmartSpendingPaceCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final now = DateTime.now();
-    final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
-    final currentDay = now.day;
-    final daysRemaining = math.max(1, daysInMonth - currentDay + 1);
-
-    // 1. Inspect current month budgets
     final budgetProgressList = ref.watch(currentMonthBudgetProgressProvider);
+    final pace = computeSmartSpendingPace(
+      monthSummary: monthSummary,
+      totalBalance: totalBalance,
+      budgetProgressList: budgetProgressList,
+      transactions: transactions,
+      now: now,
+    );
 
-    int? effectiveLimitMinor;
-    int effectiveSpentMinor = monthSummary.expense.minorUnits;
-    String currencyCode = totalBalance.currencyCode;
-    bool hasBudget = false;
+    final daysRemaining = pace.daysRemaining;
+    final safeDailyMoney = Money(
+      minorUnits: pace.safeDailyMinor,
+      currencyCode: pace.currencyCode,
+    );
 
-    if (budgetProgressList.isNotEmpty) {
-      final overall = budgetProgressList.where((p) => p.budget.isOverall).firstOrNull;
-      if (overall != null) {
-        effectiveLimitMinor = overall.budget.amount;
-        effectiveSpentMinor = overall.spentMinorUnits;
-        currencyCode = overall.budget.currency;
-        hasBudget = true;
-      } else {
-        effectiveLimitMinor = budgetProgressList.fold<int>(0, (acc, p) => acc + p.budget.amount);
-        effectiveSpentMinor = budgetProgressList.fold<int>(0, (acc, p) => acc + p.spentMinorUnits);
-        currencyCode = budgetProgressList.first.budget.currency;
-        hasBudget = true;
-      }
-    } else if (monthSummary.income.minorUnits > 0) {
-      // 2. Fallback to monthly income when no budget is configured
-      effectiveLimitMinor = monthSummary.income.minorUnits;
-      effectiveSpentMinor = monthSummary.expense.minorUnits;
-      currencyCode = monthSummary.income.currencyCode;
-    }
-
-    int safeDailyMinor;
-    bool isOverPace;
-    bool isExceeded = false;
-
-    if (effectiveLimitMinor != null && effectiveLimitMinor > 0) {
-      if (effectiveSpentMinor >= effectiveLimitMinor) {
-        // Exceeded: 0 safe spending left this month
-        safeDailyMinor = 0;
-        isOverPace = true;
-        isExceeded = true;
-      } else {
-        final remainingMinor = effectiveLimitMinor - effectiveSpentMinor;
-        safeDailyMinor = remainingMinor ~/ daysRemaining;
-
-        // Pace: Check if current spending is ahead of normal pro-rata day pace
-        final expectedSpentSoFar = (effectiveLimitMinor * currentDay) / daysInMonth;
-        isOverPace = effectiveSpentMinor > expectedSpentSoFar;
-      }
-    } else {
-      // 3. Neither budget nor income is recorded
-      if (totalBalance.minorUnits <= 0 || effectiveSpentMinor >= totalBalance.minorUnits) {
-        safeDailyMinor = 0;
-        isOverPace = effectiveSpentMinor > 0;
-        isExceeded = effectiveSpentMinor > 0 && totalBalance.minorUnits <= 0;
-      } else {
-        final remainingBalance = totalBalance.minorUnits - effectiveSpentMinor;
-        safeDailyMinor = remainingBalance ~/ daysRemaining;
-        isOverPace = false;
-      }
-    }
-
-    final safeDailyMoney = Money(minorUnits: safeDailyMinor, currencyCode: currencyCode);
-
-    final statusColor = isExceeded
+    final statusColor = pace.isExceeded
         ? AppleTokens.systemRed
-        : (isOverPace ? AppleTokens.systemOrange : AppleTokens.systemGreen);
-    final statusIcon = isExceeded
+        : (pace.isOverPace ? AppleTokens.systemOrange : AppleTokens.systemGreen);
+    final statusIcon = pace.isExceeded
         ? CupertinoIcons.exclamationmark_triangle_fill
-        : (isOverPace
+        : (pace.isOverPace
             ? CupertinoIcons.exclamationmark_circle_fill
             : CupertinoIcons.checkmark_circle_fill);
-    final statusText = isExceeded
-        ? (hasBudget
-            ? (locale.startsWith('vi') ? 'Vượt ngân sách' : 'Over budget')
-            : (locale.startsWith('vi') ? 'Vượt thu nhập' : 'Over income'))
-        : (isOverPace ? l10n.smartPaceOverPace : l10n.smartPaceOnTrack);
+    final statusText = pace.isExceeded
+        ? switch (pace.source) {
+            SmartPaceSource.budget =>
+              locale.startsWith('vi') ? 'Vượt ngân sách' : 'Over budget',
+            SmartPaceSource.income =>
+              locale.startsWith('vi') ? 'Vượt thu nhập' : 'Over income',
+            SmartPaceSource.balance =>
+              locale.startsWith('vi') ? 'Hết số dư' : 'Out of balance',
+          }
+        : (pace.isOverPace ? l10n.smartPaceOverPace : l10n.smartPaceOnTrack);
 
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final isLargeText = textScale >= 1.35;

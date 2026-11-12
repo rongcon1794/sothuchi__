@@ -1,9 +1,12 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
+import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
+import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/budgets/domain/entities/budget.dart';
 import 'package:so_thu_chi/features/budgets/presentation/controllers/budgets_controller.dart';
 import 'package:so_thu_chi/features/categories/presentation/controllers/categories_controller.dart';
@@ -61,44 +64,57 @@ class BudgetAlertBanner extends ConsumerWidget {
 
     final message = l10n.budgetWarningBanner(scopeName, top.usedPercent);
 
+    final card = AppleGlassCard(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+      backgroundColor: bgColor.withValues(alpha: theme.brightness == Brightness.dark ? 0.25 : 0.45),
+      borderColor: iconColor.withValues(alpha: 0.30),
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: Icon(
+              isExceeded
+                  ? CupertinoIcons.xmark_octagon_fill
+                  : CupertinoIcons.exclamationmark_triangle_fill,
+              color: iconColor,
+              size: 16,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              message,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: fgColor,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
+          ),
+          if (navigateOnTap)
+            Icon(CupertinoIcons.chevron_right, size: 16, color: fgColor),
+        ],
+      ),
+    );
+
     return Semantics(
       liveRegion: true,
       button: navigateOnTap,
       excludeSemantics: true,
       label: message,
-      child: Material(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(14),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: navigateOnTap ? () => context.go(AppRoutes.budgets) : null,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            child: Row(
-              children: [
-                Icon(
-                  isExceeded
-                      ? Icons.error_outline_rounded
-                      : Icons.warning_amber_rounded,
-                  color: iconColor,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    message,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: fgColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                if (navigateOnTap)
-                  Icon(Icons.chevron_right_rounded, color: fgColor),
-              ],
-            ),
-          ),
-        ),
-      ),
+      child: navigateOnTap
+          ? ApplePressable(
+              borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+              onTap: () => context.go(AppRoutes.budgets),
+              child: card,
+            )
+          : card,
     );
   }
 }

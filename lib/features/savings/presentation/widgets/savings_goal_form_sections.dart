@@ -68,463 +68,258 @@ extension _SavingsGoalFormSections on _SavingsGoalFormSheetState {
     required int? dailyNeeded,
     required Account? selectedWallet,
   }) {
-    final titleText = _titleController.text.trim().isNotEmpty
+    final hasTitle = _titleController.text.trim().isNotEmpty;
+    final titleText = hasTitle
         ? _titleController.text.trim()
         : l10n.savingsGoalNameHint;
     final noteText = _noteController.text.trim();
     final targetMinor = parsedTarget?.minorUnits ?? 0;
-    final remainingMinor = (targetMinor - currentAmount).clamp(0, double.infinity).toInt();
+    final hasTarget = targetMinor > 0;
     final progressPercent = (previewProgress * 100).round();
+    final safeColor = AppIconCatalog.contrastSafeColor(
+      accentColor,
+      isDark ? Brightness.dark : Brightness.light,
+    );
+    final formattedTarget = hasTarget
+        ? parsedTarget!.format(locale: locale)
+        : Money.zero(currency).format(locale: locale);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 4, bottom: 8),
-          child: Row(
+    return AppleGlassCard(
+      borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+      borderColor: accentColor.withValues(alpha: isDark ? 0.35 : 0.22),
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
             children: [
-              Icon(
-                Icons.remove_red_eye_outlined,
-                size: 14,
-                color: AppleTokens.systemGray,
-              ),
-              SizedBox(width: 6),
-              Text(
-                'BẢN XEM TRƯỚC MỤC TIÊU TRÊN DANH SÁCH',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.6,
-                  color: AppleTokens.systemGray,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                isDark
-                    ? Color.lerp(accentColor, const Color(0xFF1E1E22), 0.84)!
-                    : Color.lerp(accentColor, Colors.white, 0.90)!,
-                isDark
-                    ? const Color(0xFF141416)
-                    : Color.lerp(accentColor, const Color(0xFFF7F8FA), 0.96)!,
-              ],
-            ),
-            border: Border.all(
-              color: accentColor.withValues(alpha: isDark ? 0.35 : 0.22),
-              width: 1.0,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: accentColor.withValues(alpha: isDark ? 0.18 : 0.07),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
-            child: Stack(
-              children: [
-                // Subtle ambient radiant glow at top-right
-                Positioned(
-                  right: -24,
-                  top: -30,
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: [
-                          accentColor.withValues(alpha: isDark ? 0.22 : 0.12),
-                          accentColor.withValues(alpha: 0.0),
-                        ],
-                      ),
-                    ),
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: safeColor.withValues(alpha: isDark ? 0.22 : 0.14),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: safeColor.withValues(alpha: 0.3),
+                    width: 0.8,
                   ),
                 ),
-
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // --- Tier 1: Icon, Title, Badges, Menu ---
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          // Squircle Icon Badge with high-gloss gradient & shadow
-                          Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  accentColor,
-                                  Color.lerp(
-                                    accentColor,
-                                    Colors.black,
-                                    isDark ? 0.35 : 0.2,
-                                  )!,
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(13),
-                              border: Border.all(
-                                color: Colors.white.withValues(
-                                  alpha: isDark ? 0.3 : 0.45,
-                                ),
-                                width: 1.0,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: accentColor.withValues(
-                                    alpha: isDark ? 0.4 : 0.25,
-                                  ),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: Icon(
-                              _resolveIcon(_selectedIcon),
-                              color: Colors.white,
-                              size: 22,
+                alignment: Alignment.center,
+                child: Icon(
+                  _resolveIcon(_selectedIcon),
+                  color: safeColor,
+                  size: 19,
+                ),
+              ),
+              const SizedBox(width: 11),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            titleText,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15.5,
+                              letterSpacing: -0.2,
+                              color: hasTitle
+                                  ? (isDark ? Colors.white : Colors.black87)
+                                  : (isDark ? Colors.white38 : Colors.black38),
                             ),
                           ),
-                          const SizedBox(width: 12),
-
-                          // Title & Subtitle / Badges
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  titleText,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 16.5,
-                                    letterSpacing: -0.2,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Wrap(
-                                  spacing: 5,
-                                  runSpacing: 4,
-                                  crossAxisAlignment: WrapCrossAlignment.center,
-                                  children: [
-                                    if (_deadline != null)
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 7,
-                                          vertical: 2.5,
-                                        ),
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                          color: isDark
-                                              ? Colors.white.withValues(alpha: 0.08)
-                                              : Colors.black.withValues(alpha: 0.05),
-                                          borderRadius: BorderRadius.circular(
-                                            AppleTokens.radiusPill,
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              CupertinoIcons.calendar,
-                                              size: 11,
-                                              color: isDark
-                                                  ? Colors.white60
-                                                  : Colors.black54,
-                                            ),
-                                            const SizedBox(width: 3),
-                                            Text(
-                                              l10n.savingsDaysRemaining(daysRemaining ?? 0),
-                                              style: TextStyle(
-                                                fontSize: 10.5,
-                                                fontWeight: FontWeight.w600,
-                                                color: isDark
-                                                    ? Colors.white70
-                                                    : Colors.black87,
-                                                height: 1.2,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      )
-                                    else
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 7,
-                                          vertical: 2.5,
-                                        ),
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                          color: isDark
-                                              ? Colors.white.withValues(alpha: 0.08)
-                                              : Colors.black.withValues(alpha: 0.05),
-                                          borderRadius: BorderRadius.circular(
-                                            AppleTokens.radiusPill,
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              CupertinoIcons.calendar,
-                                              size: 11,
-                                              color: isDark
-                                                  ? Colors.white60
-                                                  : Colors.black54,
-                                            ),
-                                            const SizedBox(width: 3),
-                                            Text(
-                                              l10n.savingsNoDeadline,
-                                              style: TextStyle(
-                                                fontSize: 10.5,
-                                                fontWeight: FontWeight.w600,
-                                                color: isDark
-                                                    ? Colors.white70
-                                                    : Colors.black87,
-                                                height: 1.2,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    if (selectedWallet != null)
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 7,
-                                          vertical: 2.5,
-                                        ),
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                          color: Color(selectedWallet.color)
-                                              .withValues(alpha: 0.15),
-                                          borderRadius: BorderRadius.circular(
-                                            AppleTokens.radiusPill,
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              CupertinoIcons.creditcard,
-                                              size: 11,
-                                              color: Color(selectedWallet.color),
-                                            ),
-                                            const SizedBox(width: 3),
-                                            Text(
-                                              selectedWallet.name,
-                                              style: TextStyle(
-                                                fontSize: 10.5,
-                                                fontWeight: FontWeight.w600,
-                                                color: Color(selectedWallet.color),
-                                                height: 1.2,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    if (noteText.isNotEmpty)
-                                      Text(
-                                        noteText,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          fontSize: 11,
-                                          color: AppleTokens.systemGray,
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                        ),
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 2.5,
                           ),
-
-                          const SizedBox(width: 8),
-
-                          // Progress Badge
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3.5,
+                          decoration: BoxDecoration(
+                            color: safeColor.withValues(
+                              alpha: isDark ? 0.22 : 0.12,
                             ),
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: accentColor.withValues(
-                                alpha: isDark ? 0.22 : 0.12,
-                              ),
-                              borderRadius:
-                                  BorderRadius.circular(AppleTokens.radiusPill),
-                              border: Border.all(
-                                color: accentColor.withValues(alpha: 0.35),
-                                width: 0.8,
-                              ),
-                            ),
-                            child: Text(
-                              '$progressPercent%',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800,
-                                fontFeatures: AppTheme.tabularFigures,
-                                color: accentColor,
-                                height: 1.2,
-                              ),
-                            ),
+                            borderRadius:
+                                BorderRadius.circular(AppleTokens.radiusPill),
                           ),
-
-                          const SizedBox(width: 4),
-
-                          // 3-dots Menu Preview
-                          Container(
-                            width: 28,
-                            height: 28,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.08)
-                                  : Colors.black.withValues(alpha: 0.04),
-                              borderRadius:
-                                  BorderRadius.circular(AppleTokens.radiusPill),
-                            ),
-                            child: const Icon(
-                              CupertinoIcons.ellipsis,
-                              size: 16,
-                              color: AppleTokens.systemGray,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 14),
-
-                      // --- Tier 2: Balance Amounts & Progress Bar ---
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              Money(minorUnits: currentAmount, currencyCode: currency)
-                                  .format(locale: locale),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontSize: 19,
-                                fontWeight: FontWeight.w800,
-                                fontFeatures: AppTheme.tabularFigures,
-                                letterSpacing: -0.3,
-                                color: isDark
-                                    ? Colors.white
-                                    : const Color(0xFF1C1C1E),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Mục tiêu: ${parsedTarget != null && parsedTarget.minorUnits > 0 ? parsedTarget.format(locale: locale) : '0 ${AppCurrencies.byCode(currency).symbol}'}',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: AppleTokens.systemGray,
+                          child: Text(
+                            '$progressPercent%',
+                            style: TextStyle(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w800,
                               fontFeatures: AppTheme.tabularFigures,
+                              color: safeColor,
                             ),
                           ),
-                        ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      _deadline != null
+                          ? l10n.savingsDaysRemaining(daysRemaining ?? 0)
+                          : l10n.savingsNoDeadline,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: isDark ? Colors.white60 : Colors.black54,
                       ),
-
-                      const SizedBox(height: 8),
-
-                      // Smooth Capsule Progress Bar
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: Stack(
-                          children: [
-                            Container(
-                              height: 7,
-                              width: double.infinity,
-                              color: accentColor.withValues(
-                                alpha: isDark ? 0.18 : 0.10,
-                              ),
-                            ),
-                            FractionallySizedBox(
-                              widthFactor: previewProgress.clamp(0.0, 1.0),
-                              child: Container(
-                                height: 7,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      accentColor,
-                                      Color.lerp(
-                                        accentColor,
-                                        Colors.white,
-                                        0.25,
-                                      )!,
-                                    ],
-                                  ),
-                                  borderRadius: BorderRadius.circular(4),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: accentColor.withValues(alpha: 0.5),
-                                      blurRadius: 4,
-                                      offset: const Offset(0, 1),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Divider(
+            height: AppleTokens.hairline,
+            thickness: AppleTokens.hairline,
+            color:
+                isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
+          ),
+          const SizedBox(height: 10),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      l10n.savingsTargetAmount.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
+                        color: isDark ? Colors.white54 : Colors.black45,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        formattedTarget,
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.4,
+                          fontFeatures: AppTheme.tabularFigures,
+                          color: hasTarget
+                              ? (isDark
+                                  ? Colors.white
+                                  : const Color(0xFF1C1C1E))
+                              : (isDark ? Colors.white30 : Colors.black26),
                         ),
                       ),
-
-                      const SizedBox(height: 6),
-
+                    ),
+                    if (_isEditing && currentAmount > 0) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        'Đã có ${Money(minorUnits: currentAmount, currencyCode: currency).format(locale: locale)}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          fontFeatures: AppTheme.tabularFigures,
+                          color: safeColor,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (dailyNeeded != null || selectedWallet != null) ...[
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (dailyNeeded != null)
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            '$progressPercent% đã tích lũy',
-                            style: const TextStyle(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w600,
-                              color: AppleTokens.systemGray,
-                            ),
+                          Icon(
+                            CupertinoIcons.sparkles,
+                            size: 11,
+                            color: safeColor,
                           ),
+                          const SizedBox(width: 4),
                           Text(
-                            'Còn lại: ${Money(minorUnits: remainingMinor, currencyCode: currency).format(locale: locale)}',
+                            l10n.savingsDailyNeeded(
+                              Money(
+                                minorUnits: dailyNeeded,
+                                currencyCode: currency,
+                              ).format(locale: locale),
+                            ),
                             style: TextStyle(
-                              fontSize: 11.5,
+                              fontSize: 11,
                               fontWeight: FontWeight.w600,
-                              fontFeatures: AppTheme.tabularFigures,
                               color: isDark ? Colors.white70 : Colors.black87,
                             ),
                           ),
                         ],
                       ),
+                    if (selectedWallet != null) ...[
+                      if (dailyNeeded != null) const SizedBox(height: 3),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: Color(selectedWallet.color),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            selectedWallet.name,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Color(selectedWallet.color),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
-                  ),
+                  ],
                 ),
               ],
-            ),
+            ],
           ),
-        ),
-      ],
+          if (previewProgress > 0) ...[
+            const SizedBox(height: 8),
+            LucianProgressBar(
+              value: previewProgress,
+              height: 4.5,
+              activeColor: safeColor,
+              showGlow: false,
+            ),
+          ],
+          if (noteText.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              '“$noteText”',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11.5,
+                fontStyle: FontStyle.italic,
+                color: isDark ? Colors.white54 : Colors.black54,
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 
@@ -580,7 +375,7 @@ extension _SavingsGoalFormSections on _SavingsGoalFormSheetState {
     );
   }
 
-  Widget _buildHeroAmountCard({
+  Widget _buildHeroAmountSection({
     required BuildContext context,
     required bool isDark,
     required String currencyCode,
@@ -593,230 +388,221 @@ extension _SavingsGoalFormSections on _SavingsGoalFormSheetState {
     final currencyInfo = AppCurrencies.byCode(currencyCode);
     final quickPresets = _getQuickPresets(currencyCode);
 
-    return AppleGlassCard(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-      borderColor: _isAmountFocused
-          ? accentColor
-          : (isDark
-              ? Colors.white.withValues(alpha: 0.12)
-              : AppleTokens.borderLight),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    CupertinoIcons.money_dollar_circle_fill,
-                    size: 14,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  CupertinoIcons.money_dollar_circle_fill,
+                  size: 13,
+                  color: accentColor,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  l10n.savingsTargetAmount.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
                     color: accentColor,
                   ),
-                  const SizedBox(width: 6),
-                  Text(
-                    l10n.savingsTargetAmount.toUpperCase(),
+                ),
+              ],
+            ),
+            if (_targetAmountController.text.isNotEmpty)
+              ApplePressable(
+                scaleDown: 0.9,
+                onTap: () {
+                  unawaited(HapticFeedback.lightImpact());
+                  _targetAmountController.clear();
+                },
+                child: Text(
+                  l10n.clear,
+                  style: const TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: AppleTokens.systemGray,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        // Amount Input Box
+        GestureDetector(
+          onTap: () {
+            if (!_amountFocusNode.hasFocus) {
+              _amountFocusNode.requestFocus();
+            }
+            SystemChannels.textInput.invokeMethod<void>('TextInput.show');
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            constraints: const BoxConstraints(minHeight: 54),
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            decoration: BoxDecoration(
+              color: _isAmountFocused
+                  ? accentColor.withValues(alpha: isDark ? 0.14 : 0.08)
+                  : (isDark
+                      ? Colors.white.withValues(alpha: 0.04)
+                      : Colors.black.withValues(alpha: 0.025)),
+              borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+              border: Border.all(
+                color: _isAmountFocused
+                    ? accentColor
+                    : (isDark
+                        ? Colors.white.withValues(alpha: 0.1)
+                        : Colors.black.withValues(alpha: 0.06)),
+                width: _isAmountFocused ? 1.5 : 1.0,
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Center(
+                    child: TextFormField(
+                      controller: _targetAmountController,
+                      focusNode: _amountFocusNode,
+                      textAlign: TextAlign.center,
+                      keyboardType: TextInputType.numberWithOptions(
+                        decimal: currencyInfo.decimalDigits > 0,
+                      ),
+                      inputFormatters: [
+                        MoneyInputFormatter(
+                          currencyCode: currencyCode,
+                          locale: locale,
+                        ),
+                      ],
+                      style: TextStyle(
+                        fontSize: dynamicFontSize,
+                        fontWeight: FontWeight.w800,
+                        fontFeatures: AppTheme.tabularFigures,
+                        color: isDark ? Colors.white : Colors.black87,
+                        letterSpacing: -0.5,
+                      ),
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        errorBorder: InputBorder.none,
+                        focusedErrorBorder: InputBorder.none,
+                        filled: false,
+                        isDense: true,
+                        hintText: '0',
+                        hintStyle: TextStyle(
+                          fontSize: dynamicFontSize,
+                          fontWeight: FontWeight.w800,
+                          color: (isDark ? Colors.white : Colors.black)
+                              .withValues(alpha: 0.25),
+                        ),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      validator: (val) {
+                        final parsed = Money.tryParse(val ?? '',
+                            currencyCode: currencyCode);
+                        if (parsed == null || parsed.minorUnits <= 0) {
+                          return l10n.savingsAmountRequired;
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: accentColor.withValues(alpha: 0.15),
+                    borderRadius:
+                        BorderRadius.circular(AppleTokens.radiusPill),
+                  ),
+                  child: Text(
+                    currencyInfo.symbol,
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: FontWeight.w700,
-                      letterSpacing: 0.6,
                       color: accentColor,
                     ),
                   ),
-                ],
-              ),
-              if (_targetAmountController.text.isNotEmpty)
-                ApplePressable(
-                  scaleDown: 0.9,
-                  onTap: () {
-                    unawaited(HapticFeedback.lightImpact());
-                    _targetAmountController.clear();
-                  },
-                  child: Text(
-                    l10n.clear,
-                    style: const TextStyle(
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w600,
-                      color: AppleTokens.systemGray,
-                    ),
-                  ),
                 ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(height: 10),
-          // Amount Input Box
-          GestureDetector(
-            onTap: () {
-              if (!_amountFocusNode.hasFocus) {
-                _amountFocusNode.requestFocus();
-              }
-              SystemChannels.textInput.invokeMethod<void>('TextInput.show');
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              constraints: const BoxConstraints(minHeight: 56),
-              alignment: Alignment.center,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: BoxDecoration(
-                color: _isAmountFocused
-                    ? accentColor.withValues(alpha: isDark ? 0.14 : 0.08)
-                    : (isDark
-                        ? Colors.white.withValues(alpha: 0.04)
-                        : Colors.black.withValues(alpha: 0.02)),
-                borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-                border: Border.all(
-                  color: _isAmountFocused
-                      ? accentColor
-                      : (isDark
-                          ? Colors.white.withValues(alpha: 0.1)
-                          : Colors.black.withValues(alpha: 0.06)),
-                  width: _isAmountFocused ? 1.5 : 1.0,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Center(
-                      child: TextFormField(
-                        controller: _targetAmountController,
-                        focusNode: _amountFocusNode,
-                        textAlign: TextAlign.center,
-                        keyboardType: TextInputType.numberWithOptions(
-                          decimal: currencyInfo.decimalDigits > 0,
-                        ),
-                        inputFormatters: [
-                          MoneyInputFormatter(
-                            currencyCode: currencyCode,
-                            locale: locale,
-                          ),
-                        ],
-                        style: TextStyle(
-                          fontSize: dynamicFontSize,
-                          fontWeight: FontWeight.w800,
-                          fontFeatures: AppTheme.tabularFigures,
-                          color: isDark ? Colors.white : Colors.black87,
-                          letterSpacing: -0.5,
-                        ),
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          errorBorder: InputBorder.none,
-                          focusedErrorBorder: InputBorder.none,
-                          filled: false,
-                          isDense: true,
-                          hintText: '0',
-                          hintStyle: TextStyle(
-                            fontSize: dynamicFontSize,
-                            fontWeight: FontWeight.w800,
-                            color: (isDark ? Colors.white : Colors.black)
-                                .withValues(alpha: 0.25),
-                          ),
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                        validator: (val) {
-                          final parsed = Money.tryParse(val ?? '',
-                              currencyCode: currencyCode);
-                          if (parsed == null || parsed.minorUnits <= 0) {
-                            return l10n.savingsAmountRequired;
-                          }
-                          return null;
-                        },
+        ),
+        const SizedBox(height: 8),
+        // Presets & Quick Zero Adders
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          child: Row(
+            children: [
+              for (final preset in quickPresets) ...[
+                ApplePressable(
+                  scaleDown: 0.92,
+                  onTap: () => _setPresetAmount(
+                      preset.minorUnits, currencyCode, locale),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 5),
+                    margin: const EdgeInsets.only(right: 6),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.06)
+                          : Colors.black.withValues(alpha: 0.04),
+                      borderRadius:
+                          BorderRadius.circular(AppleTokens.radiusPill),
+                      border: Border.all(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : Colors.black.withValues(alpha: 0.06),
+                      ),
+                    ),
+                    child: Text(
+                      preset.label,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white70 : Colors.black87,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 6),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                ),
+              ],
+              if (currencyCode.toUpperCase() == 'VND')
+                ApplePressable(
+                  scaleDown: 0.92,
+                  onTap: () => _appendTripleZeros(currencyCode, locale),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: accentColor.withValues(alpha: 0.15),
+                      color: accentColor.withValues(alpha: 0.14),
                       borderRadius:
                           BorderRadius.circular(AppleTokens.radiusPill),
+                      border: Border.all(
+                        color: accentColor.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Text(
-                      currencyInfo.symbol,
+                      '+000',
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 11.5,
                         fontWeight: FontWeight.w700,
                         color: accentColor,
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
+                ),
+            ],
           ),
-          const SizedBox(height: 10),
-          // Presets & Quick Zero Adders
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            child: Row(
-              children: [
-                for (final preset in quickPresets) ...[
-                  ApplePressable(
-                    scaleDown: 0.92,
-                    onTap: () => _setPresetAmount(
-                        preset.minorUnits, currencyCode, locale),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
-                      margin: const EdgeInsets.only(right: 6),
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? Colors.white.withValues(alpha: 0.06)
-                            : Colors.black.withValues(alpha: 0.04),
-                        borderRadius:
-                            BorderRadius.circular(AppleTokens.radiusPill),
-                        border: Border.all(
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.08)
-                              : Colors.black.withValues(alpha: 0.06),
-                        ),
-                      ),
-                      child: Text(
-                        preset.label,
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w600,
-                          color: isDark ? Colors.white70 : Colors.black87,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-                if (currencyCode.toUpperCase() == 'VND')
-                  ApplePressable(
-                    scaleDown: 0.92,
-                    onTap: () => _appendTripleZeros(currencyCode, locale),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: accentColor.withValues(alpha: 0.14),
-                        borderRadius:
-                            BorderRadius.circular(AppleTokens.radiusPill),
-                        border: Border.all(
-                          color: accentColor.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Text(
-                        '+000',
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w700,
-                          color: accentColor,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

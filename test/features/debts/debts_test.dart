@@ -248,5 +248,69 @@ void main() {
         expect(find.textContaining('••••'), findsWidgets);
       },
     );
+
+    testWidgets(
+      'DebtFormSheet updates live preview and quick chips on portrait layout without overflow',
+      (tester) async {
+        tester.view.physicalSize = const Size(360, 780);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        SharedPreferences.setMockInitialValues({});
+        final prefs = await SharedPreferences.getInstance();
+        final inMem = InMemoryDebtRepository();
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              sharedPreferencesProvider.overrideWithValue(prefs),
+              debtRepositoryProvider.overrideWithValue(inMem),
+            ],
+            child: const MaterialApp(
+              home: DebtsScreen(),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Ghi nợ mới'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Ghi nhận nợ mới'), findsOneWidget);
+
+        // Switch debt type to Đi vay (Borrowed)
+        await tester.tap(find.text('Đi vay').last);
+        await tester.pumpAndSettle();
+        expect(
+          find.widgetWithText(TextFormField, 'Người cho vay (Bạn nợ ai?) *'),
+          findsOneWidget,
+        );
+
+        // Tap quick amount +500k and verify thousand-separator formatting
+        final quick500k = find.text('+500k');
+        await tester.ensureVisible(quick500k);
+        await tester.tap(quick500k);
+        await tester.pumpAndSettle();
+        expect(find.text('500.000'), findsOneWidget);
+
+        // Typing raw digits automatically inserts thousand separators
+        final amountField = find.widgetWithText(
+          TextFormField,
+          'Số tiền nợ (VND) *',
+        );
+        await tester.enterText(amountField, '1000000');
+        await tester.pumpAndSettle();
+        expect(find.text('1.000.000'), findsOneWidget);
+
+        // Tap quick due date preset '7 ngày'
+        final sevenDaysChip = find.text('7 ngày');
+        await tester.ensureVisible(sevenDaysChip);
+        await tester.tap(sevenDaysChip);
+        await tester.pumpAndSettle();
+        expect(find.textContaining('Còn 7 ngày'), findsWidgets);
+      },
+    );
   });
 }

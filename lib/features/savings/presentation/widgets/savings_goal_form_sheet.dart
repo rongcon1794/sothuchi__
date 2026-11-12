@@ -451,134 +451,181 @@ class _SavingsGoalFormSheetState extends ConsumerState<SavingsGoalFormSheet> {
               dailyNeeded: dailyNeeded,
               selectedWallet: selectedWallet,
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 12),
 
-            // 2. Quick Inspiration Ideas (if creating new)
-            if (!_isEditing) ...[
-              _buildSectionHeader(
-                icon: CupertinoIcons.sparkles,
-                title: 'Gợi ý mục tiêu thịnh hành',
-                accentColor: accentColor,
+            // 2. Card 1: Inspiration + Goal Name + Target Amount
+            AppleGlassCard(
+              borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (!_isEditing) ...[
+                    _buildSectionHeader(
+                      icon: CupertinoIcons.sparkles,
+                      title: 'Gợi ý mục tiêu thịnh hành',
+                      accentColor: accentColor,
+                    ),
+                    _buildInspirationIdeas(
+                      isDark: isDark,
+                      accentColor: accentColor,
+                    ),
+                    const SizedBox(height: 12),
+                    Divider(
+                      height: AppleTokens.hairline,
+                      thickness: AppleTokens.hairline,
+                      color: isDark
+                          ? AppleTokens.separatorDark
+                          : AppleTokens.separatorLight,
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  _buildSectionHeader(
+                    icon: CupertinoIcons.flag_fill,
+                    title: l10n.savingsGoalName,
+                    accentColor: accentColor,
+                  ),
+                  AppleTextField(
+                    controller: _titleController,
+                    placeholder: l10n.savingsGoalNameHint,
+                    clearable: true,
+                    prefixIcon: Icon(
+                      CupertinoIcons.flag,
+                      size: 18,
+                      color: accentColor,
+                    ),
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? l10n.savingsTargetRequired
+                        : null,
+                  ),
+                  const SizedBox(height: 12),
+                  Divider(
+                    height: AppleTokens.hairline,
+                    thickness: AppleTokens.hairline,
+                    color: isDark
+                        ? AppleTokens.separatorDark
+                        : AppleTokens.separatorLight,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildHeroAmountSection(
+                    context: context,
+                    isDark: isDark,
+                    currencyCode: currency,
+                    locale: locale,
+                    l10n: l10n,
+                    accentColor: accentColor,
+                  ),
+                ],
               ),
-              _buildInspirationIdeas(
-                isDark: isDark,
-                accentColor: accentColor,
+            ),
+            const SizedBox(height: 12),
+
+            // 3. Card 2: Deadline & Smart Pace Calculator
+            AppleGlassCard(
+              borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildSectionHeader(
+                    icon: CupertinoIcons.calendar,
+                    title: l10n.savingsDeadline,
+                    accentColor: accentColor,
+                    trailing: _deadline != null
+                        ? ApplePressable(
+                            scaleDown: 0.9,
+                            onTap: () {
+                              unawaited(HapticFeedback.lightImpact());
+                              setState(() => _deadline = null);
+                            },
+                            child: Text(
+                              l10n.clear,
+                              style: const TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600,
+                                color: AppleTokens.systemGray,
+                              ),
+                            ),
+                          )
+                        : null,
+                  ),
+                  _buildDeadlineContainer(
+                    context: context,
+                    isDark: isDark,
+                    locale: locale,
+                    currency: currency,
+                    l10n: l10n,
+                    accentColor: accentColor,
+                    daysRemaining: daysRemaining,
+                    dailyNeeded: dailyNeeded,
+                    monthlyNeeded: monthlyNeeded,
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-            ],
+            ),
+            const SizedBox(height: 12),
 
-            // 3. Goal Name & Motivation
-            _buildSectionHeader(
-              icon: CupertinoIcons.flag_fill,
-              title: l10n.savingsGoalName,
-              accentColor: accentColor,
-            ),
-            AppleTextField(
-              controller: _titleController,
-              placeholder: l10n.savingsGoalNameHint,
-              clearable: true,
-              prefixIcon: Icon(
-                CupertinoIcons.flag,
-                size: 18,
-                color: accentColor,
-              ),
-              validator: (v) => (v == null || v.trim().isEmpty)
-                  ? l10n.savingsTargetRequired
-                  : null,
-            ),
-            const SizedBox(height: 16),
-
-            // 4. Hero Target Amount Card
-            _buildHeroAmountCard(
-              context: context,
-              isDark: isDark,
-              currencyCode: currency,
-              locale: locale,
-              l10n: l10n,
-              accentColor: accentColor,
-            ),
-            const SizedBox(height: 18),
-
-            // 5. Target Deadline & Smart Pace Calculator
-            _buildSectionHeader(
-              icon: CupertinoIcons.calendar,
-              title: l10n.savingsDeadline,
-              accentColor: accentColor,
-              trailing: _deadline != null
-                  ? ApplePressable(
-                      scaleDown: 0.9,
-                      onTap: () {
-                        unawaited(HapticFeedback.lightImpact());
-                        setState(() => _deadline = null);
-                      },
-                      child: Text(
-                        l10n.clear,
-                        style: const TextStyle(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w600,
-                          color: AppleTokens.systemGray,
-                        ),
-                      ),
-                    )
-                  : null,
-            ),
-            _buildDeadlineContainer(
-              context: context,
-              isDark: isDark,
-              locale: locale,
-              currency: currency,
-              l10n: l10n,
-              accentColor: accentColor,
-              daysRemaining: daysRemaining,
-              dailyNeeded: dailyNeeded,
-              monthlyNeeded: monthlyNeeded,
-            ),
-            const SizedBox(height: 18),
-
-            // 6. Linked Wallet Picker
-            _buildSectionHeader(
-              icon: CupertinoIcons.creditcard_fill,
-              title: l10n.savingsLinkedWallet,
-              subtitle: 'Tiền tích lũy sẽ được trừ trực tiếp từ ví này',
-              accentColor: accentColor,
-            ),
-            _buildLinkedWalletSelector(
-              wallets: wallets,
-              isDark: isDark,
-              locale: locale,
-              l10n: l10n,
-              accentColor: accentColor,
-            ),
-            const SizedBox(height: 18),
-
-            // 7. Icon & Color Customization
-            _buildSectionHeader(
-              icon: CupertinoIcons.paintbrush_fill,
-              title: 'Màu sắc & Biểu tượng nhận diện',
-              accentColor: accentColor,
-            ),
-            _buildColorSelector(isDark: isDark),
-            const SizedBox(height: 10),
-            _buildIconSelector(
-              isDark: isDark,
-              accentColor: accentColor,
-            ),
-            const SizedBox(height: 18),
-
-            // 8. Motivation Note
-            _buildSectionHeader(
-              icon: CupertinoIcons.quote_bubble_fill,
-              title: l10n.savingsMotivationNote,
-              accentColor: accentColor,
-            ),
-            AppleTextField(
-              controller: _noteController,
-              placeholder: 'VD: Kiên trì mỗi ngày vì tự do tài chính...',
-              clearable: true,
-              prefixIcon: Icon(
-                CupertinoIcons.quote_bubble,
-                size: 18,
-                color: accentColor,
+            // 4. Card 3: Linked Wallet + Color & Icon + Motivation Note
+            AppleGlassCard(
+              borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildSectionHeader(
+                    icon: CupertinoIcons.creditcard_fill,
+                    title: l10n.savingsLinkedWallet,
+                    subtitle: 'Tiền tích lũy sẽ được trừ trực tiếp từ ví này',
+                    accentColor: accentColor,
+                  ),
+                  _buildLinkedWalletSelector(
+                    wallets: wallets,
+                    isDark: isDark,
+                    locale: locale,
+                    l10n: l10n,
+                    accentColor: accentColor,
+                  ),
+                  const SizedBox(height: 12),
+                  Divider(
+                    height: AppleTokens.hairline,
+                    thickness: AppleTokens.hairline,
+                    color: isDark
+                        ? AppleTokens.separatorDark
+                        : AppleTokens.separatorLight,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildSectionHeader(
+                    icon: CupertinoIcons.paintbrush_fill,
+                    title: 'Màu sắc & Biểu tượng nhận diện',
+                    accentColor: accentColor,
+                  ),
+                  _buildColorSelector(isDark: isDark),
+                  const SizedBox(height: 10),
+                  _buildIconSelector(
+                    isDark: isDark,
+                    accentColor: accentColor,
+                  ),
+                  const SizedBox(height: 12),
+                  Divider(
+                    height: AppleTokens.hairline,
+                    thickness: AppleTokens.hairline,
+                    color: isDark
+                        ? AppleTokens.separatorDark
+                        : AppleTokens.separatorLight,
+                  ),
+                  const SizedBox(height: 12),
+                  AppleTextField(
+                    controller: _noteController,
+                    label: l10n.savingsMotivationNote,
+                    placeholder: 'VD: Kiên trì mỗi ngày vì tự do tài chính...',
+                    clearable: true,
+                    prefixIcon: Icon(
+                      CupertinoIcons.quote_bubble,
+                      size: 18,
+                      color: accentColor,
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 16),

@@ -686,7 +686,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get debtFilterUnsettled => 'Chưa thanh toán';
 
   @override
-  String get debtFilterSettled => 'Đã thanh toán xong';
+  String get debtFilterSettled => 'Đã thanh toán';
 
   @override
   String get debtFilterLent => 'Cho vay';

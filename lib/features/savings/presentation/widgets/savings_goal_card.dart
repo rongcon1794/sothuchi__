@@ -65,493 +65,289 @@ class SavingsGoalCard extends ConsumerWidget {
     final l10n = context.l10n;
     final locale = Localizations.localeOf(context).languageCode;
     final accentColor = Color(goal.color);
+    final safeColor = AppIconCatalog.contrastSafeColor(
+      accentColor,
+      isDark ? Brightness.dark : Brightness.light,
+    );
+    final statusSubtitle = goal.isCompleted
+        ? l10n.savingsGoalCompleted
+        : (goal.daysRemaining != null
+            ? l10n.savingsDaysRemaining(goal.daysRemaining!)
+            : l10n.savingsNoDeadline);
 
     return ApplePressable(
       borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
       onTap: () => context.push(AppRoutes.savingsDetail(goal.id)),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              isDark
-                  ? Color.lerp(accentColor, const Color(0xFF1E1E22), 0.84)!
-                  : Color.lerp(accentColor, Colors.white, 0.90)!,
-              isDark
-                  ? const Color(0xFF141416)
-                  : Color.lerp(accentColor, const Color(0xFFF7F8FA), 0.96)!,
-            ],
-          ),
-          border: Border.all(
-            color: goal.isCompleted
-                ? AppleTokens.systemGreen.withValues(alpha: isDark ? 0.6 : 0.5)
-                : accentColor.withValues(alpha: isDark ? 0.35 : 0.22),
-            width: goal.isCompleted ? 1.4 : 1.0,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: goal.isCompleted
-                  ? AppleTokens.systemGreen.withValues(alpha: isDark ? 0.16 : 0.08)
-                  : accentColor.withValues(alpha: isDark ? 0.18 : 0.07),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
-          child: Stack(
-            children: [
-              // Subtle ambient radiant glow at top-right
-              Positioned(
-                right: -24,
-                top: -30,
-                child: Container(
-                  width: 120,
-                  height: 120,
+      child: AppleGlassCard(
+        padding: const EdgeInsets.all(14),
+        borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+        borderColor: goal.isCompleted
+            ? AppleTokens.systemGreen.withValues(alpha: isDark ? 0.55 : 0.45)
+            : safeColor.withValues(alpha: isDark ? 0.35 : 0.22),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Row 1: Soft Squircle Icon + Title & Progress Pill + Menu
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        accentColor.withValues(alpha: isDark ? 0.22 : 0.12),
-                        accentColor.withValues(alpha: 0.0),
-                      ],
+                    color: safeColor.withValues(alpha: isDark ? 0.22 : 0.14),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: safeColor.withValues(alpha: 0.3),
+                      width: 0.8,
                     ),
                   ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    _resolveIcon(goal.icon),
+                    color: safeColor,
+                    size: 19,
+                  ),
                 ),
-              ),
-
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // --- Tier 1: Icon, Title, Badges, Menu ---
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Squircle Icon Badge with high-gloss gradient & shadow
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                accentColor,
-                                Color.lerp(accentColor, Colors.black, isDark ? 0.35 : 0.2)!,
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(13),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: isDark ? 0.3 : 0.45),
-                              width: 1.0,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: accentColor.withValues(alpha: isDark ? 0.4 : 0.25),
-                                blurRadius: 10,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            _resolveIcon(goal.icon),
-                            color: Colors.white,
-                            size: 22,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-
-                        // Title & Subtitle / Badges
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                goal.title,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 16.5,
-                                  letterSpacing: -0.2,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Wrap(
-                                spacing: 5,
-                                runSpacing: 4,
-                                crossAxisAlignment: WrapCrossAlignment.center,
-                                children: [
-                                  if (goal.isCompleted)
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 7,
-                                        vertical: 2.5,
-                                      ),
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        color: AppleTokens.systemGreen
-                                            .withValues(alpha: 0.18),
-                                        borderRadius: BorderRadius.circular(
-                                          AppleTokens.radiusPill,
-                                        ),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          const Icon(
-                                            CupertinoIcons.checkmark_seal_fill,
-                                            size: 11,
-                                            color: AppleTokens.systemGreen,
-                                          ),
-                                          const SizedBox(width: 3),
-                                          Text(
-                                            l10n.savingsGoalCompleted,
-                                            style: const TextStyle(
-                                              fontSize: 10.5,
-                                              fontWeight: FontWeight.w700,
-                                              color: AppleTokens.systemGreen,
-                                              height: 1.2,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                  else if (goal.daysRemaining != null)
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 7,
-                                        vertical: 2.5,
-                                      ),
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        color: isDark
-                                            ? Colors.white.withValues(alpha: 0.08)
-                                            : Colors.black.withValues(alpha: 0.05),
-                                        borderRadius: BorderRadius.circular(
-                                          AppleTokens.radiusPill,
-                                        ),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            CupertinoIcons.calendar,
-                                            size: 11,
-                                            color: isDark ? Colors.white60 : Colors.black54,
-                                          ),
-                                          const SizedBox(width: 3),
-                                          Text(
-                                            l10n.savingsDaysRemaining(goal.daysRemaining!),
-                                            style: TextStyle(
-                                              fontSize: 10.5,
-                                              fontWeight: FontWeight.w600,
-                                              color: isDark ? Colors.white70 : Colors.black87,
-                                              height: 1.2,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  if (goal.note.isNotEmpty)
-                                    Text(
-                                      goal.note,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        color: AppleTokens.systemGray,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(width: 8),
-
-                        // Progress Badge
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3.5,
-                          ),
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: accentColor.withValues(alpha: isDark ? 0.22 : 0.12),
-                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                            border: Border.all(
-                              color: accentColor.withValues(alpha: 0.35),
-                              width: 0.8,
-                            ),
-                          ),
-                          child: Text(
-                            '${goal.progressPercent}%',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                              fontFeatures: AppTheme.tabularFigures,
-                              color: accentColor,
-                              height: 1.2,
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(width: 4),
-
-                        // 3-dots Menu
-                        ApplePopupMenuButton<String>(
-                          tooltip: l10n.moreOptions,
-                          onSelected: (val) {
-                            if (val == 'deposit') {
-                              SavingsDepositSheet.show(context, goal: goal, isWithdraw: false);
-                            } else if (val == 'withdraw') {
-                              SavingsDepositSheet.show(context, goal: goal, isWithdraw: true);
-                            } else if (val == 'edit') {
-                              SavingsGoalFormSheet.show(context, existing: goal);
-                            } else if (val == 'delete') {
-                              _confirmDelete(context, ref);
-                            }
-                          },
-                          itemBuilder: (ctx) => [
-                            ApplePopupMenuItem(
-                              value: 'deposit',
-                              icon: CupertinoIcons.plus_circle,
-                              title: l10n.savingsDeposit,
-                            ),
-                            ApplePopupMenuItem(
-                              value: 'withdraw',
-                              icon: CupertinoIcons.minus_circle,
-                              title: l10n.savingsWithdraw,
-                            ),
-                            ApplePopupMenuItem(
-                              value: 'edit',
-                              icon: CupertinoIcons.pencil,
-                              title: l10n.edit,
-                            ),
-                            ApplePopupMenuItem(
-                              value: 'delete',
-                              icon: CupertinoIcons.trash,
-                              title: l10n.savingsDeleteGoal,
-                              isDestructive: true,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    // --- Tier 2: Balance Amounts & Progress Bar ---
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            goal.currentMoney.format(locale: locale, masked: hideBalance),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontSize: 19,
-                              fontWeight: FontWeight.w800,
-                              fontFeatures: AppTheme.tabularFigures,
-                              letterSpacing: -0.3,
-                              color: isDark ? Colors.white : const Color(0xFF1C1C1E),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Mục tiêu: ${goal.targetMoney.format(locale: locale, masked: hideBalance)}',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: AppleTokens.systemGray,
-                            fontFeatures: AppTheme.tabularFigures,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    // Smooth Capsule Progress Bar
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: Stack(
+                const SizedBox(width: 11),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
                         children: [
-                          Container(
-                            height: 7,
-                            width: double.infinity,
-                            color: accentColor.withValues(
-                              alpha: isDark ? 0.18 : 0.10,
+                          Flexible(
+                            child: Text(
+                              goal.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15.5,
+                                letterSpacing: -0.2,
+                              ),
                             ),
                           ),
-                          FractionallySizedBox(
-                            widthFactor: goal.progress,
-                            child: Container(
-                              height: 7,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    accentColor,
-                                    Color.lerp(accentColor, Colors.white, 0.25)!,
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(4),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: accentColor.withValues(alpha: 0.5),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 1),
-                                  ),
-                                ],
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 7,
+                              vertical: 2.5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: (goal.isCompleted
+                                      ? AppleTokens.systemGreen
+                                      : safeColor)
+                                  .withValues(alpha: isDark ? 0.22 : 0.12),
+                              borderRadius:
+                                  BorderRadius.circular(AppleTokens.radiusPill),
+                            ),
+                            child: Text(
+                              '${goal.progressPercent}%',
+                              style: TextStyle(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w800,
+                                fontFeatures: AppTheme.tabularFigures,
+                                color: goal.isCompleted
+                                    ? AppleTokens.systemGreen
+                                    : safeColor,
                               ),
                             ),
                           ),
                         ],
                       ),
-                    ),
-
-                    const SizedBox(height: 6),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '${goal.progressPercent}% đã tích lũy',
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w600,
-                            color: accentColor,
-                            fontFeatures: AppTheme.tabularFigures,
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Icon(
+                            goal.isCompleted
+                                ? CupertinoIcons.checkmark_seal_fill
+                                : CupertinoIcons.calendar,
+                            size: 11,
+                            color: goal.isCompleted
+                                ? AppleTokens.systemGreen
+                                : (isDark ? Colors.white54 : Colors.black45),
                           ),
-                        ),
-                        if (goal.remainingAmount > 0)
-                          Text(
-                            'Còn thiếu ${goal.remainingMoney.format(locale: locale, masked: hideBalance)}',
-                            style: TextStyle(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w600,
-                              color: isDark ? Colors.white60 : Colors.black54,
-                              fontFeatures: AppTheme.tabularFigures,
-                            ),
-                          )
-                        else
-                          const Text(
-                            'Đã hoàn thành',
-                            style: TextStyle(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w700,
-                              color: AppleTokens.systemGreen,
-                            ),
-                          ),
-                      ],
-                    ),
-
-                    // --- Tier 3: Smart Insights Pill ---
-                    if (goal.daysRemaining != null && goal.remainingAmount > 0) ...[
-                      const SizedBox(height: 10),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.05)
-                              : Colors.black.withValues(alpha: 0.035),
-                          borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              CupertinoIcons.sparkles,
-                              color: AppleTokens.systemOrange,
-                              size: 13,
-                            ),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                '${l10n.savingsDaysRemaining(goal.daysRemaining!)} • ${goal.recommendedDailySavings != null ? l10n.savingsDailyNeeded(Money(minorUnits: goal.recommendedDailySavings!).format(locale: locale)) : ''}',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              statusSubtitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: goal.isCompleted
+                                    ? FontWeight.w600
+                                    : FontWeight.w500,
+                                color: goal.isCompleted
+                                    ? AppleTokens.systemGreen
+                                    : (isDark
+                                        ? Colors.white60
+                                        : Colors.black54),
                               ),
                             ),
-                          ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                ApplePopupMenuButton<String>(
+                  icon: CupertinoIcons.ellipsis_circle,
+                  iconSize: 18,
+                  size: 32,
+                  tooltip: l10n.moreOptions,
+                  onSelected: (val) {
+                    if (val == 'deposit') {
+                      SavingsDepositSheet.show(
+                        context,
+                        goal: goal,
+                        isWithdraw: false,
+                      );
+                    } else if (val == 'withdraw') {
+                      SavingsDepositSheet.show(
+                        context,
+                        goal: goal,
+                        isWithdraw: true,
+                      );
+                    } else if (val == 'edit') {
+                      SavingsGoalFormSheet.show(context, existing: goal);
+                    } else if (val == 'delete') {
+                      _confirmDelete(context, ref);
+                    }
+                  },
+                  itemBuilder: (ctx) => [
+                    ApplePopupMenuItem(
+                      value: 'deposit',
+                      icon: CupertinoIcons.plus_circle,
+                      title: l10n.savingsDeposit,
+                    ),
+                    ApplePopupMenuItem(
+                      value: 'withdraw',
+                      icon: CupertinoIcons.minus_circle,
+                      title: l10n.savingsWithdraw,
+                    ),
+                    ApplePopupMenuItem(
+                      value: 'edit',
+                      icon: CupertinoIcons.pencil,
+                      title: l10n.edit,
+                    ),
+                    ApplePopupMenuItem(
+                      value: 'delete',
+                      icon: CupertinoIcons.trash,
+                      title: l10n.savingsDeleteGoal,
+                      isDestructive: true,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+            Divider(
+              height: AppleTokens.hairline,
+              thickness: AppleTokens.hairline,
+              color:
+                  isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
+            ),
+            const SizedBox(height: 10),
+
+            // Row 2: Current Saved Amount + Target + Quick Actions
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'ĐÃ TÍCH LŨY',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                          color: isDark ? Colors.white54 : Colors.black45,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          goal.currentMoney.format(
+                            locale: locale,
+                            masked: hideBalance,
+                          ),
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.4,
+                            fontFeatures: AppTheme.tabularFigures,
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF1C1C1E),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        goal.remainingAmount > 0
+                            ? 'Mục tiêu ${goal.targetMoney.format(locale: locale, masked: hideBalance)} • Thiếu ${goal.remainingMoney.format(locale: locale, masked: hideBalance)}'
+                            : 'Mục tiêu ${goal.targetMoney.format(locale: locale, masked: hideBalance)} • Đã hoàn thành',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          fontFeatures: AppTheme.tabularFigures,
+                          color: goal.remainingAmount > 0
+                              ? (isDark ? Colors.white60 : Colors.black54)
+                              : AppleTokens.systemGreen,
                         ),
                       ),
                     ],
-
-                    const SizedBox(height: 12),
-
-                    // --- Tier 4: Quick Action Button ---
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ApplePressable(
-                            onTap: () {
-                              unawaited(HapticFeedback.lightImpact());
-                              SavingsDepositSheet.show(
-                                context,
-                                goal: goal,
-                                isWithdraw: false,
-                              );
-                            },
-                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 8.5),
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    accentColor,
-                                    Color.lerp(accentColor, Colors.black, isDark ? 0.2 : 0.1)!,
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: accentColor.withValues(alpha: isDark ? 0.35 : 0.25),
-                                    blurRadius: 6,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    CupertinoIcons.plus_circle_fill,
-                                    size: 15,
-                                    color: Colors.white,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    l10n.savingsDepositAction,
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (goal.daysRemaining != null &&
+                        goal.remainingAmount > 0 &&
+                        goal.recommendedDailySavings != null) ...[
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            CupertinoIcons.sparkles,
+                            size: 11,
+                            color: safeColor,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            l10n.savingsDailyNeeded(
+                              Money(
+                                minorUnits: goal.recommendedDailySavings!,
+                                currencyCode: goal.currency,
+                              ).format(locale: locale, masked: hideBalance),
+                            ),
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.white70 : Colors.black87,
                             ),
                           ),
-                        ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                    ],
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
                         if (goal.currentAmount > 0) ...[
-                          const SizedBox(width: 8),
                           ApplePressable(
                             onTap: () {
                               unawaited(HapticFeedback.lightImpact());
@@ -561,53 +357,110 @@ class SavingsGoalCard extends ConsumerWidget {
                                 isWithdraw: true,
                               );
                             },
-                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                            borderRadius:
+                                BorderRadius.circular(AppleTokens.radiusPill),
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 8.5,
+                                horizontal: 9,
+                                vertical: 5.5,
                               ),
-                              alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 color: isDark
                                     ? Colors.white.withValues(alpha: 0.08)
-                                    : Colors.black.withValues(alpha: 0.05),
-                                borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                                border: Border.all(
-                                  color: isDark
-                                      ? AppleTokens.separatorDark
-                                      : AppleTokens.separatorLight,
-                                  width: 0.8,
+                                    : Colors.black.withValues(alpha: 0.045),
+                                borderRadius: BorderRadius.circular(
+                                  AppleTokens.radiusPill,
                                 ),
                               ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    CupertinoIcons.minus_circle,
-                                    size: 14,
-                                    color: isDark ? Colors.white70 : Colors.black87,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    l10n.savingsWithdraw,
-                                    style: TextStyle(
-                                      fontSize: 12.5,
-                                      fontWeight: FontWeight.w600,
-                                      color: isDark ? Colors.white70 : Colors.black87,
-                                    ),
-                                  ),
-                                ],
+                              child: Icon(
+                                CupertinoIcons.minus,
+                                size: 13.5,
+                                color: isDark ? Colors.white70 : Colors.black87,
                               ),
                             ),
                           ),
+                          const SizedBox(width: 6),
                         ],
+                        ApplePressable(
+                          onTap: () {
+                            unawaited(HapticFeedback.lightImpact());
+                            SavingsDepositSheet.show(
+                              context,
+                              goal: goal,
+                              isWithdraw: false,
+                            );
+                          },
+                          borderRadius:
+                              BorderRadius.circular(AppleTokens.radiusPill),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 11,
+                              vertical: 5.5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: safeColor.withValues(
+                                alpha: isDark ? 0.22 : 0.12,
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                AppleTokens.radiusPill,
+                              ),
+                              border: Border.all(
+                                color: safeColor.withValues(alpha: 0.35),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  CupertinoIcons.plus_circle_fill,
+                                  size: 13.5,
+                                  color: safeColor,
+                                ),
+                                const SizedBox(width: 5),
+                                Text(
+                                  l10n.savingsDepositAction,
+                                  style: TextStyle(
+                                    color: safeColor,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 11.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ],
                 ),
+              ],
+            ),
+
+            const SizedBox(height: 10),
+            LucianProgressBar(
+              value: goal.progress,
+              height: 4.5,
+              activeColor: goal.isCompleted
+                  ? AppleTokens.systemGreen
+                  : safeColor,
+              showGlow: false,
+            ),
+
+            if (goal.note.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                '“${goal.note}”',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontStyle: FontStyle.italic,
+                  color: isDark ? Colors.white54 : Colors.black54,
+                ),
               ),
             ],
-          ),
+          ],
         ),
       ),
     );

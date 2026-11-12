@@ -563,6 +563,22 @@ void main() {
       filtered = container.read(filteredTransactionsProvider);
       expect(filtered.length, 4);
     });
+
+    test('extractGreetingGivenName extracts given name in both Vietnamese and Western/Google order', () {
+      // Vietnamese order: Family Middle Given -> Given
+      expect(extractGreetingGivenName('Nguyễn Văn An'), 'An');
+      expect(extractGreetingGivenName('Trần Minh Tuấn'), 'Tuấn');
+      expect(extractGreetingGivenName('Lê Thị Hoa'), 'Hoa');
+      // Western / Google order: Given Family -> Given (not surname!)
+      expect(extractGreetingGivenName('An Nguyễn'), 'An');
+      expect(extractGreetingGivenName('Thắng Nguyễn'), 'Thắng');
+      expect(extractGreetingGivenName('Văn An Nguyễn'), 'An');
+      expect(extractGreetingGivenName('Minh Tran'), 'Minh');
+      // Single name / null
+      expect(extractGreetingGivenName('Khánh'), 'Khánh');
+      expect(extractGreetingGivenName('  '), isNull);
+      expect(extractGreetingGivenName(null), isNull);
+    });
   });
 }
 

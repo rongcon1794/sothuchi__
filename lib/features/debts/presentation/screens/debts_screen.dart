@@ -554,15 +554,9 @@ class _DebtCard extends ConsumerWidget {
         ? AppleTokens.systemGray
         : (isLent ? AppleTokens.emeraldIncome : AppleTokens.systemOrange);
 
-    final initials = debt.personName.trim().isNotEmpty
-        ? debt.personName
-            .trim()
-            .split(' ')
-            .where((e) => e.isNotEmpty)
-            .map((e) => e[0])
-            .take(2)
-            .join()
-            .toUpperCase()
+    final trimmedName = debt.personName.trim();
+    final initialChar = trimmedName.isNotEmpty
+        ? trimmedName[0].toUpperCase()
         : '?';
 
     final hasPartialPayment =
@@ -570,45 +564,41 @@ class _DebtCard extends ConsumerWidget {
     final paidPercent = (debt.progress * 100).toInt();
 
     return ApplePressable(
-      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+      borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
       onTap: () => context.push(AppRoutes.debtDetail(debt.id)),
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 200),
         opacity: debt.isSettled ? 0.72 : 1.0,
         child: AppleGlassCard(
-          padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
-          borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+          padding: const EdgeInsets.all(14),
+          borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
           borderColor: debt.isOverdue
               ? AppleTokens.systemRed.withValues(alpha: isDark ? 0.55 : 0.45)
-              : (isDark
-                  ? Colors.white.withValues(alpha: 0.10)
-                  : AppleTokens.borderLight),
+              : accentColor.withValues(alpha: isDark ? 0.35 : 0.22),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Row 1: Squircle Avatar + Person Info & Metadata + Options Menu
+              // Row 1: Squircle Avatar + Person Info + Options Menu
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: 38,
-                    height: 38,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
-                      color: accentColor.withValues(alpha: isDark ? 0.22 : 0.14),
-                      borderRadius: BorderRadius.circular(11),
+                      color: accentColor.withValues(alpha: isDark ? 0.24 : 0.14),
+                      borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: accentColor.withValues(alpha: 0.35),
+                        color: accentColor.withValues(alpha: 0.3),
                         width: 0.8,
                       ),
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      initials,
+                      initialChar,
                       style: TextStyle(
                         color: accentColor,
-                        fontSize: 15,
+                        fontSize: 17,
                         fontWeight: FontWeight.w800,
-                        letterSpacing: -0.2,
                       ),
                     ),
                   ),
@@ -616,6 +606,7 @@ class _DebtCard extends ConsumerWidget {
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Row(
                           children: [
@@ -627,7 +618,7 @@ class _DebtCard extends ConsumerWidget {
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w700,
                                   fontSize: 15.5,
-                                  letterSpacing: -0.25,
+                                  letterSpacing: -0.2,
                                   color:
                                       isDark ? Colors.white : Colors.black87,
                                 ),
@@ -636,8 +627,8 @@ class _DebtCard extends ConsumerWidget {
                             const SizedBox(width: 6),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
+                                horizontal: 7,
+                                vertical: 2.5,
                               ),
                               decoration: BoxDecoration(
                                 color: accentColor.withValues(
@@ -663,89 +654,17 @@ class _DebtCard extends ConsumerWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 3),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 2,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          children: [
-                            Text(
-                              debt.phoneNumber?.isNotEmpty == true
-                                  ? debt.phoneNumber!
-                                  : (isLent ? 'Khoản cho vay' : 'Khoản đi vay'),
-                              style: TextStyle(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w500,
-                                color: isDark ? Colors.white60 : Colors.black54,
-                              ),
-                            ),
-                            if (debt.dueDate != null)
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    debt.isOverdue
-                                        ? CupertinoIcons
-                                            .exclamationmark_circle_fill
-                                        : CupertinoIcons.calendar,
-                                    size: 11,
-                                    color: debt.isOverdue
-                                        ? AppleTokens.systemRed
-                                        : (isDark
-                                            ? Colors.white60
-                                            : Colors.black54),
-                                  ),
-                                  const SizedBox(width: 3),
-                                  Flexible(
-                                    child: Text(
-                                      debt.isOverdue
-                                          ? 'Quá hạn ${AppDateUtils.formatShortDate(debt.dueDate!, locale: locale)}'
-                                          : 'Hạn ${AppDateUtils.formatShortDate(debt.dueDate!, locale: locale)}',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 11.5,
-                                        fontWeight: debt.isOverdue
-                                            ? FontWeight.w700
-                                            : FontWeight.w500,
-                                        color: debt.isOverdue
-                                            ? AppleTokens.systemRed
-                                            : (isDark
-                                                ? Colors.white60
-                                                : Colors.black54),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            if (wallet != null)
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 6,
-                                    height: 6,
-                                    decoration: BoxDecoration(
-                                      color: Color(wallet.color),
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Flexible(
-                                    child: Text(
-                                      wallet.name,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 11.5,
-                                        fontWeight: FontWeight.w600,
-                                        color: Color(wallet.color),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                          ],
+                        const SizedBox(height: 2),
+                        Text(
+                          debt.phoneNumber?.isNotEmpty == true
+                              ? debt.phoneNumber!
+                              : (isLent ? 'Khoản cho vay' : 'Khoản đi vay'),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            color: isDark ? Colors.white60 : Colors.black54,
+                          ),
                         ),
                       ],
                     ),
@@ -779,17 +698,37 @@ class _DebtCard extends ConsumerWidget {
                 ],
               ),
 
+              const SizedBox(height: 12),
+              Divider(
+                height: AppleTokens.hairline,
+                thickness: AppleTokens.hairline,
+                color: isDark
+                    ? AppleTokens.separatorDark
+                    : AppleTokens.separatorLight,
+              ),
               const SizedBox(height: 10),
 
-              // Row 2: Amount + Progress + Quick Action Button
+              // Row 2: Amount + Due Date / Wallet / Quick Action
               Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        Text(
+                          hasPartialPayment
+                              ? 'CÒN LẠI'
+                              : l10n.amount.toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                            color: isDark ? Colors.white54 : Colors.black45,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
                         FittedBox(
                           fit: BoxFit.scaleDown,
                           alignment: Alignment.centerLeft,
@@ -803,10 +742,10 @@ class _DebtCard extends ConsumerWidget {
                                     locale: locale,
                                     masked: hideBalance,
                                   ),
-                            style: TextStyle(
-                              fontSize: 18,
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              fontSize: 22,
                               fontWeight: FontWeight.w800,
-                              letterSpacing: -0.35,
+                              letterSpacing: -0.4,
                               fontFeatures: AppTheme.tabularFigures,
                               color: debt.isSettled
                                   ? AppleTokens.systemGray
@@ -843,87 +782,151 @@ class _DebtCard extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  if (!debt.isSettled) ...[
-                    const SizedBox(width: 10),
-                    ApplePressable(
-                      onTap: () {
-                        HapticFeedback.lightImpact();
-                        DebtRepaymentSheet.show(context, debt);
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6.5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: accentColor.withValues(
-                            alpha: isDark ? 0.22 : 0.12,
-                          ),
-                          borderRadius: BorderRadius.circular(
-                            AppleTokens.radiusPill,
-                          ),
-                          border: Border.all(
-                            color: accentColor.withValues(alpha: 0.35),
-                            width: 0.8,
-                          ),
-                        ),
-                        child: Row(
+                  const SizedBox(width: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (debt.dueDate != null)
+                        Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              isLent
-                                  ? CupertinoIcons.arrow_down_circle_fill
-                                  : CupertinoIcons.arrow_up_circle_fill,
-                              size: 14,
-                              color: accentColor,
+                              debt.isOverdue
+                                  ? CupertinoIcons.exclamationmark_circle_fill
+                                  : CupertinoIcons.calendar,
+                              size: 11,
+                              color: debt.isOverdue
+                                  ? AppleTokens.systemRed
+                                  : accentColor,
                             ),
-                            const SizedBox(width: 5),
+                            const SizedBox(width: 4),
                             Text(
-                              isLent ? l10n.debtCollect : l10n.debtRepay,
+                              debt.isOverdue
+                                  ? 'Quá hạn ${AppDateUtils.formatShortDate(debt.dueDate!, locale: locale)}'
+                                  : 'Hạn ${AppDateUtils.formatShortDate(debt.dueDate!, locale: locale)}',
                               style: TextStyle(
-                                color: accentColor,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 12,
+                                fontSize: 11,
+                                fontWeight: debt.isOverdue
+                                    ? FontWeight.w700
+                                    : FontWeight.w600,
+                                color: debt.isOverdue
+                                    ? AppleTokens.systemRed
+                                    : (isDark
+                                        ? Colors.white70
+                                        : Colors.black87),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ),
-                  ] else ...[
-                    const SizedBox(width: 10),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppleTokens.emeraldIncome.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(
-                          AppleTokens.radiusPill,
+                      if (wallet != null) ...[
+                        if (debt.dueDate != null) const SizedBox(height: 3),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: Color(wallet.color),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              wallet.name,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: Color(wallet.color),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            CupertinoIcons.checkmark_circle_fill,
-                            size: 13,
-                            color: AppleTokens.emeraldIncome,
-                          ),
-                          SizedBox(width: 4),
-                          Text(
-                            'Hoàn tất',
-                            style: TextStyle(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w700,
-                              color: AppleTokens.emeraldIncome,
+                      ],
+                      if (debt.dueDate != null || wallet != null)
+                        const SizedBox(height: 6),
+                      if (!debt.isSettled)
+                        ApplePressable(
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            DebtRepaymentSheet.show(context, debt);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 11,
+                              vertical: 5.5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: accentColor.withValues(
+                                alpha: isDark ? 0.22 : 0.12,
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                AppleTokens.radiusPill,
+                              ),
+                              border: Border.all(
+                                color: accentColor.withValues(alpha: 0.35),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  isLent
+                                      ? CupertinoIcons.arrow_down_circle_fill
+                                      : CupertinoIcons.arrow_up_circle_fill,
+                                  size: 13.5,
+                                  color: accentColor,
+                                ),
+                                const SizedBox(width: 5),
+                                Text(
+                                  isLent ? l10n.debtCollect : l10n.debtRepay,
+                                  style: TextStyle(
+                                    color: accentColor,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 11.5,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ],
+                        )
+                      else
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4.5,
+                          ),
+                          decoration: BoxDecoration(
+                            color:
+                                AppleTokens.emeraldIncome.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(
+                              AppleTokens.radiusPill,
+                            ),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                CupertinoIcons.checkmark_circle_fill,
+                                size: 13,
+                                color: AppleTokens.emeraldIncome,
+                              ),
+                              SizedBox(width: 4),
+                              Text(
+                                'Hoàn tất',
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppleTokens.emeraldIncome,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
                 ],
               ),
 
@@ -938,36 +941,16 @@ class _DebtCard extends ConsumerWidget {
               ],
 
               if (debt.note.isNotEmpty) ...[
-                const SizedBox(height: 9),
-                Divider(
-                  height: AppleTokens.hairline,
-                  thickness: AppleTokens.hairline,
-                  color: isDark
-                      ? AppleTokens.separatorDark
-                      : AppleTokens.separatorLight,
-                ),
-                const SizedBox(height: 7),
-                Row(
-                  children: [
-                    Icon(
-                      CupertinoIcons.doc_text,
-                      size: 12,
-                      color: isDark ? Colors.white54 : Colors.black45,
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        debt.note,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontStyle: FontStyle.italic,
-                          color: isDark ? Colors.white70 : Colors.black54,
-                        ),
-                      ),
-                    ),
-                  ],
+                const SizedBox(height: 8),
+                Text(
+                  '"${debt.note}"',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontStyle: FontStyle.italic,
+                    color: isDark ? Colors.white54 : Colors.black54,
+                  ),
                 ),
               ],
             ],

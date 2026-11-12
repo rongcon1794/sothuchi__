@@ -80,8 +80,8 @@ class BudgetHeroOverviewCard extends StatelessWidget {
     }
 
     return AppleGlassCard(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+      padding: const EdgeInsets.all(16),
+      borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
       borderColor: isExceeded ? AppleTokens.systemRed.withValues(alpha: 0.35) : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,11 +93,11 @@ class BudgetHeroOverviewCard extends StatelessWidget {
                 child: Row(
                   children: [
                     Container(
-                      width: 26,
-                      height: 26,
+                      width: 28,
+                      height: 28,
                       decoration: BoxDecoration(
                         color: barColor.withValues(alpha: isDark ? 0.22 : 0.12),
-                        borderRadius: BorderRadius.circular(7),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
                         Icons.pie_chart_rounded,
@@ -124,12 +124,12 @@ class BudgetHeroOverviewCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                 decoration: BoxDecoration(
-                  color: barColor.withValues(alpha: isDark ? 0.22 : 0.12),
+                  color: barColor.withValues(alpha: isDark ? 0.20 : 0.12),
                   borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                   border: Border.all(
-                    color: barColor.withValues(alpha: isDark ? 0.40 : 0.25),
+                    color: barColor.withValues(alpha: isDark ? 0.36 : 0.22),
                     width: 0.8,
                   ),
                 ),
@@ -152,9 +152,9 @@ class BudgetHeroOverviewCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
 
-          // 2. Hero Section: Còn lại / Bội chi + Compact Activity Ring
+          // 2. Hero Section: Remaining / Exceeded + Activity Ring
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -168,13 +168,13 @@ class BudgetHeroOverviewCard extends StatelessWidget {
                           ? (isVi ? 'ĐÃ BỘI CHI' : 'EXCEEDED BY')
                           : (isVi ? 'SỐ DƯ CÒN LẠI' : 'REMAINING BUDGET'),
                       style: TextStyle(
-                        fontSize: 10.5,
+                        fontSize: 11,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.4,
                         color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 3),
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
@@ -183,10 +183,10 @@ class BudgetHeroOverviewCard extends StatelessWidget {
                             ? totalExceededMoney.format(locale: locale, masked: hideBalance)
                             : totalRemainingMoney.format(locale: locale, masked: hideBalance),
                         style: theme.textTheme.titleLarge?.copyWith(
-                          fontSize: 24,
+                          fontSize: 26,
                           fontWeight: FontWeight.w800,
                           fontFeatures: AppTheme.tabularFigures,
-                          letterSpacing: -0.4,
+                          letterSpacing: -0.5,
                           color: isExceeded
                               ? AppleTokens.systemRed
                               : (isDark ? Colors.white : const Color(0xFF1C1C1E)),
@@ -199,62 +199,34 @@ class BudgetHeroOverviewCard extends StatelessWidget {
               const SizedBox(width: 12),
               LucianActivityRing(
                 progress: clampedRatio,
-                size: 52,
+                size: 54,
                 strokeWidth: 5.5,
                 primaryColor: barColor,
                 secondaryColor: ringSecondaryColor,
                 showGlow: isExceeded || usedPercent >= 80,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '$usedPercent%\ntổng',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w800,
-                        color: barColor,
-                        fontFeatures: AppTheme.tabularFigures,
-                        height: 1.05,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  '$usedPercent%\n${isVi ? 'tổng' : 'total'}',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w800,
+                    color: barColor,
+                    fontFeatures: AppTheme.tabularFigures,
+                    height: 1.05,
+                  ),
                 ),
               ),
             ],
           ),
 
+          const SizedBox(height: 14),
+          Container(
+            height: 0.6,
+            color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
+          ),
           const SizedBox(height: 10),
 
-          // 3. Smooth Progress Bar
-          ClipRRect(
-            borderRadius: BorderRadius.circular(3),
-            child: Stack(
-              children: [
-                Container(
-                  height: 6,
-                  width: double.infinity,
-                  color: isDark ? Colors.white12 : Colors.black.withValues(alpha: 0.06),
-                ),
-                FractionallySizedBox(
-                  widthFactor: clampedRatio,
-                  child: Container(
-                    height: 6,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [barColor, ringSecondaryColor],
-                      ),
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          // 4. Secondary Numbers: Đã chi vs Tổng hạn mức
+          // 3. Secondary Numbers: Đã chi vs Tổng hạn mức
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -263,7 +235,7 @@ class BudgetHeroOverviewCard extends StatelessWidget {
                   TextSpan(
                     text: '${isVi ? 'Đã chi' : 'Spent'}: ',
                     style: const TextStyle(
-                      fontSize: 11.5,
+                      fontSize: 12,
                       color: AppleTokens.systemGray,
                       fontWeight: FontWeight.w500,
                     ),
@@ -271,7 +243,7 @@ class BudgetHeroOverviewCard extends StatelessWidget {
                       TextSpan(
                         text: totalSpentMoney.format(locale: locale, masked: hideBalance),
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 12.5,
                           fontWeight: FontWeight.w700,
                           fontFeatures: AppTheme.tabularFigures,
                           color: financeColors.expense,
@@ -289,7 +261,7 @@ class BudgetHeroOverviewCard extends StatelessWidget {
                   TextSpan(
                     text: '${l10n.budgetLimit}: ',
                     style: const TextStyle(
-                      fontSize: 11.5,
+                      fontSize: 12,
                       color: AppleTokens.systemGray,
                       fontWeight: FontWeight.w500,
                     ),
@@ -297,7 +269,7 @@ class BudgetHeroOverviewCard extends StatelessWidget {
                       TextSpan(
                         text: totalLimitMoney.format(locale: locale, masked: hideBalance),
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 12.5,
                           fontWeight: FontWeight.w700,
                           fontFeatures: AppTheme.tabularFigures,
                           color: isDark ? Colors.white70 : Colors.black87,
@@ -314,14 +286,8 @@ class BudgetHeroOverviewCard extends StatelessWidget {
           ),
 
           if (isCurrentMonth) ...[
-            const SizedBox(height: 10),
-            Container(
-              height: 0.6,
-              color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
-            ),
             const SizedBox(height: 8),
-
-            // 5. Clean Single-line Footer (Days left & Safe Daily Spending Pace)
+            // 4. Clean Single-line Footer (Days left & Safe Daily Spending Pace)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -341,7 +307,7 @@ class BudgetHeroOverviewCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: 11.5,
                             fontWeight: FontWeight.w600,
                             color: isDark ? Colors.white70 : Colors.black87,
                           ),
@@ -375,7 +341,7 @@ class BudgetHeroOverviewCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.end,
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: 11.5,
                             fontWeight: FontWeight.w700,
                             fontFeatures: AppTheme.tabularFigures,
                             color: isExceeded ? AppleTokens.systemRed : barColor,

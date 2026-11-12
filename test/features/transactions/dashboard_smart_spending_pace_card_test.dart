@@ -5,6 +5,7 @@ import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/features/budgets/domain/entities/budget.dart';
 import 'package:so_thu_chi/features/budgets/presentation/controllers/budgets_controller.dart';
+import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
 import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
 import 'package:so_thu_chi/features/transactions/presentation/widgets/dashboard_smart_spending_pace_card.dart';
 import 'package:so_thu_chi/l10n/app_localizations.dart';
@@ -164,6 +165,120 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(expectedDailyFormatted), findsOneWidget);
+    });
+
+    test('deducts today spending 1-for-1 from today daily allowance', () {
+      // 30-day month (November 2026), day 21 => 10 days remaining (21..30)
+      final now = DateTime(2026, 11, 21, 14, 0);
+      final budget = Budget(
+        id: 'b1',
+        amount: 30000000,
+        currency: 'VND',
+        startDate: DateTime(2026, 11, 1),
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      // Spent 20M in days 1..20, plus 300k today = 20.3M total.
+      // Remaining at start of day 21 = 10M => daily allowance = 1M/day.
+      // After spending 300k today => safe to spend today = 700k.
+      final result = computeSmartSpendingPace(
+        monthSummary: const MonthlyCashflowSummary(
+          income: Money(minorUnits: 0, currencyCode: 'VND'),
+          expense: Money(minorUnits: 20300000, currencyCode: 'VND'),
+          net: Money(minorUnits: -20300000, currencyCode: 'VND'),
+        ),
+        totalBalance: const Money(minorUnits: 50000000, currencyCode: 'VND'),
+        budgetProgressList: [
+          BudgetProgress(budget: budget, spentMinorUnits: 20300000),
+        ],
+        transactions: [
+          TransactionEntity(
+            id: 't1',
+            accountId: 'a1',
+            categoryId: 'c1',
+            amount: 300000,
+            currency: 'VND',
+            type: TransactionType.expense,
+            date: now,
+            createdAt: now,
+            updatedAt: now,
+          ),
+        ],
+        now: now,
+      );
+
+      expect(result.daysRemaining, 10);
+      expect(result.dailyAllowanceMinor, 1000000);
+      expect(result.todaySpentMinor, 300000);
+      expect(result.safeDailyMinor, 700000);
+      expect(result.isExceeded, isFalse);
+      expect(result.isOverPace, isFalse);
+    });
+
+    test('clamps safeDailyMinor to 0 when today allowance is exceeded but monthly budget remains', () {
+      final now = DateTime(2026, 11, 1, 18, 0); // Day 1 of 30 => 1M/day
+      final budget = Budget(
+        id: 'b1',
+        amount: 30000000,
+        currency: 'VND',
+        startDate: DateTime(2026, 11, 1),
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      final result = computeSmartSpendingPace(
+        monthSummary: const MonthlyCashflowSummary(
+          income: Money(minorUnits: 0, currencyCode: 'VND'),
+          expense: Money(minorUnits: 1200000, currencyCode: 'VND'),
+          net: Money(minorUnits: -1200000, currencyCode: 'VND'),
+        ),
+        totalBalance: const Money(minorUnits: 50000000, currencyCode: 'VND'),
+        budgetProgressList: [
+          BudgetProgress(budget: budget, spentMinorUnits: 1200000),
+        ],
+        transactions: [
+          TransactionEntity(
+            id: 't1',
+            accountId: 'a1',
+            categoryId: 'c1',
+            amount: 1200000,
+            currency: 'VND',
+            type: TransactionType.expense,
+            date: now,
+            createdAt: now,
+            updatedAt: now,
+          ),
+        ],
+        now: now,
+      );
+
+      expect(result.dailyAllowanceMinor, 1000000);
+      expect(result.safeDailyMinor, 0);
+      expect(result.isOverPace, isTrue);
+      expect(result.isExceeded, isFalse);
+    });
+
+    test('balance fallback does not double-subtract monthly expenses from totalBalance', () {
+      // Day 15 of 30 => 16 days remaining (15..30).
+      // Started month with 10M, spent 6M earlier (0 today) => totalBalance is 4M.
+      // Safe daily should be 4M ~/ 16 = 250k (not 0!), and pace is over (6M > 5M expected).
+      final now = DateTime(2026, 11, 15, 10, 0);
+      final result = computeSmartSpendingPace(
+        monthSummary: const MonthlyCashflowSummary(
+          income: Money(minorUnits: 0, currencyCode: 'VND'),
+          expense: Money(minorUnits: 6000000, currencyCode: 'VND'),
+          net: Money(minorUnits: -6000000, currencyCode: 'VND'),
+        ),
+        totalBalance: const Money(minorUnits: 4000000, currencyCode: 'VND'),
+        budgetProgressList: const [],
+        now: now,
+      );
+
+      expect(result.source, SmartPaceSource.balance);
+      expect(result.safeDailyMinor, 250000);
+      expect(result.isOverPace, isTrue);
+      expect(result.isExceeded, isFalse);
     });
   });
 }

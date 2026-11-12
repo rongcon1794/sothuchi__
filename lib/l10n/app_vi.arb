@@ -270,7 +270,7 @@
   "debtTotalBorrowed": "Tổng đi vay",
   "debtFilterAll": "Tất cả",
   "debtFilterUnsettled": "Chưa thanh toán",
-  "debtFilterSettled": "Đã thanh toán xong",
+  "debtFilterSettled": "Đã thanh toán",
   "debtFilterLent": "Cho vay",
   "debtFilterBorrowed": "Đi vay",
   "debtRemaining": "Còn lại",

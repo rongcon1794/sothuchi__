@@ -544,9 +544,9 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
               selectedCategory: selectedCategory,
               selectedWallet: selectedWallet,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
-            // 2. High-Clarity Type Selector Tab Cards (Chi tiêu vs Thu nhập)
+            // 2. Type Selector (Chi tiêu vs Thu nhập)
             _buildTypeTabSelector(
               context: context,
               isDark: isDark,
@@ -554,137 +554,191 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
               expenseCats: expenseCats,
               incomeCats: incomeCats,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
-            // 3. Quick Bill Templates (only in add mode)
-            if (!_isEditing) ...[
-              _buildSectionHeader(
-                icon: CupertinoIcons.sparkles,
-                title: _type == TransactionType.income
-                    ? 'Mẫu thu nhập thông dụng'
-                    : 'Mẫu hóa đơn thông dụng',
-                accentColor: accentColor,
+            // 3. Card 1: Templates + Title + Amount
+            AppleGlassCard(
+              borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (!_isEditing) ...[
+                    _buildSectionHeader(
+                      icon: CupertinoIcons.sparkles,
+                      title: _type == TransactionType.income
+                          ? 'Mẫu thu nhập thông dụng'
+                          : 'Mẫu hóa đơn thông dụng',
+                      accentColor: accentColor,
+                    ),
+                    _buildTemplatesCarousel(
+                      availableCats: availableCats,
+                      isDark: isDark,
+                    ),
+                    const SizedBox(height: 12),
+                    Divider(
+                      height: AppleTokens.hairline,
+                      thickness: AppleTokens.hairline,
+                      color: isDark
+                          ? AppleTokens.separatorDark
+                          : AppleTokens.separatorLight,
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  _buildSectionHeader(
+                    icon: CupertinoIcons.tag_fill,
+                    title: isExpense
+                        ? l10n.recurringTitleLabel
+                        : 'Tên khoản thu nhập',
+                    accentColor: accentColor,
+                  ),
+                  AppleTextField(
+                    controller: _titleController,
+                    placeholder: isExpense
+                        ? 'VD: Tiền điện, Internet, Tiền nhà, Netflix...'
+                        : 'VD: Lương công ty, Cho thuê nhà, Tiền thưởng...',
+                    clearable: true,
+                    textCapitalization: TextCapitalization.sentences,
+                    prefixIcon: Icon(
+                      CupertinoIcons.tag,
+                      size: 18,
+                      color: accentColor,
+                    ),
+                    validator: (v) => (v == null || v.trim().isEmpty)
+                        ? (isExpense
+                            ? l10n.recurringTitleRequired
+                            : 'Vui lòng nhập tên nguồn thu nhập')
+                        : null,
+                  ),
+                  const SizedBox(height: 12),
+                  Divider(
+                    height: AppleTokens.hairline,
+                    thickness: AppleTokens.hairline,
+                    color: isDark
+                        ? AppleTokens.separatorDark
+                        : AppleTokens.separatorLight,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildHeroAmountSection(
+                    context: context,
+                    isDark: isDark,
+                    currencyCode: currency,
+                    locale: locale,
+                    l10n: l10n,
+                    accentColor: accentColor,
+                  ),
+                ],
               ),
-              _buildTemplatesCarousel(
-                availableCats: availableCats,
-                isDark: isDark,
+            ),
+            const SizedBox(height: 12),
+
+            // 4. Card 2: Frequency & Start Date
+            AppleGlassCard(
+              borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildSectionHeader(
+                    icon: CupertinoIcons.repeat,
+                    title: l10n.recurringFrequencyLabel,
+                    accentColor: accentColor,
+                  ),
+                  _buildIntervalSelector(
+                    isDark: isDark,
+                    l10n: l10n,
+                    accentColor: accentColor,
+                  ),
+                  const SizedBox(height: 12),
+                  Divider(
+                    height: AppleTokens.hairline,
+                    thickness: AppleTokens.hairline,
+                    color: isDark
+                        ? AppleTokens.separatorDark
+                        : AppleTokens.separatorLight,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildStartDateTile(
+                    context: context,
+                    isDark: isDark,
+                    locale: locale,
+                    accentColor: accentColor,
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-            ],
+            ),
+            const SizedBox(height: 12),
 
-            // 4. Bill Title & Note
-            _buildSectionHeader(
-              icon: CupertinoIcons.tag_fill,
-              title: isExpense ? l10n.recurringTitleLabel : 'Tên khoản thu nhập',
-              accentColor: accentColor,
-            ),
-            AppleTextField(
-              controller: _titleController,
-              placeholder: isExpense
-                  ? 'VD: Tiền điện, Internet, Tiền nhà, Netflix...'
-                  : 'VD: Lương công ty, Cho thuê nhà, Tiền thưởng, Cổ tức...',
-              clearable: true,
-              textCapitalization: TextCapitalization.sentences,
-              prefixIcon: Icon(
-                CupertinoIcons.tag,
-                size: 18,
-                color: accentColor,
-              ),
-              validator: (v) => (v == null || v.trim().isEmpty)
-                  ? (isExpense ? l10n.recurringTitleRequired : 'Vui lòng nhập tên nguồn thu nhập')
-                  : null,
-            ),
-            const SizedBox(height: 16),
-
-            // 5. Hero Amount Card
-            _buildHeroAmountCard(
-              context: context,
-              isDark: isDark,
-              currencyCode: currency,
-              locale: locale,
-              l10n: l10n,
-              accentColor: accentColor,
-            ),
-            const SizedBox(height: 18),
-
-            // 6. Recurrence Frequency / Interval Selector
-            _buildSectionHeader(
-              icon: CupertinoIcons.repeat,
-              title: l10n.recurringFrequencyLabel,
-              accentColor: accentColor,
-            ),
-            _buildIntervalSelector(
-              isDark: isDark,
-              l10n: l10n,
-              accentColor: accentColor,
-            ),
-            const SizedBox(height: 18),
-
-            // 7. Start Date & First Due Date Selector
-            _buildSectionHeader(
-              icon: CupertinoIcons.calendar,
-              title: isExpense ? l10n.recurringStartDateLabel : 'Ngày nhận tiền đầu tiên',
-              accentColor: accentColor,
-            ),
-            _buildStartDateTile(
-              context: context,
-              isDark: isDark,
-              locale: locale,
-              accentColor: accentColor,
-            ),
-            const SizedBox(height: 18),
-
-            // 8. Category Selector
-            _buildSectionHeader(
-              icon: CupertinoIcons.square_grid_2x2_fill,
-              title: isExpense ? l10n.recurringCategoryLabel : l10n.recurringCategoryIncomeLabel,
-              accentColor: accentColor,
-            ),
-            _buildCategorySelector(
-              categories: availableCats,
-              isDark: isDark,
-              accentColor: accentColor,
-            ),
-            const SizedBox(height: 18),
-
-            // 9. Wallet Selector
-            _buildSectionHeader(
-              icon: CupertinoIcons.creditcard_fill,
-              title: isExpense ? l10n.recurringWalletLabel : l10n.recurringReceiveWalletLabel,
-              accentColor: accentColor,
-            ),
-            _buildWalletSelector(
-              wallets: wallets,
-              isDark: isDark,
-              locale: locale,
-              accentColor: accentColor,
-            ),
-            const SizedBox(height: 18),
-
-            // 10. Auto Execute Switch Card
-            _buildAutoExecuteCard(
-              isDark: isDark,
-              l10n: l10n,
-            ),
-            const SizedBox(height: 16),
-
-            // 11. Motivation / Contract Note
-            _buildSectionHeader(
-              icon: CupertinoIcons.doc_text_fill,
-              title: 'Ghi chú / Mã khách hàng (Tùy chọn)',
-              accentColor: accentColor,
-            ),
-            AppleTextField(
-              controller: _noteController,
-              placeholder: isExpense
-                  ? 'VD: Mã thuê bao cáp quang, số hợp đồng...'
-                  : 'VD: Lương Techcombank, thưởng quý...',
-              clearable: true,
-              textCapitalization: TextCapitalization.sentences,
-              prefixIcon: Icon(
-                CupertinoIcons.doc_text,
-                size: 18,
-                color: accentColor,
+            // 5. Card 3: Category + Wallet + Auto Execute + Note
+            AppleGlassCard(
+              borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildSectionHeader(
+                    icon: CupertinoIcons.square_grid_2x2_fill,
+                    title: isExpense
+                        ? l10n.recurringCategoryLabel
+                        : l10n.recurringCategoryIncomeLabel,
+                    accentColor: accentColor,
+                  ),
+                  _buildCategorySelector(
+                    categories: availableCats,
+                    isDark: isDark,
+                    accentColor: accentColor,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildSectionHeader(
+                    icon: CupertinoIcons.creditcard_fill,
+                    title: isExpense
+                        ? l10n.recurringWalletLabel
+                        : l10n.recurringReceiveWalletLabel,
+                    accentColor: accentColor,
+                  ),
+                  _buildWalletSelector(
+                    wallets: wallets,
+                    isDark: isDark,
+                    locale: locale,
+                    accentColor: accentColor,
+                  ),
+                  const SizedBox(height: 12),
+                  Divider(
+                    height: AppleTokens.hairline,
+                    thickness: AppleTokens.hairline,
+                    color: isDark
+                        ? AppleTokens.separatorDark
+                        : AppleTokens.separatorLight,
+                  ),
+                  const SizedBox(height: 10),
+                  _buildAutoExecuteRow(
+                    isDark: isDark,
+                    l10n: l10n,
+                  ),
+                  const SizedBox(height: 12),
+                  Divider(
+                    height: AppleTokens.hairline,
+                    thickness: AppleTokens.hairline,
+                    color: isDark
+                        ? AppleTokens.separatorDark
+                        : AppleTokens.separatorLight,
+                  ),
+                  const SizedBox(height: 12),
+                  AppleTextField(
+                    controller: _noteController,
+                    label: 'Ghi chú / Mã khách hàng (Tùy chọn)',
+                    placeholder: isExpense
+                        ? 'VD: Mã thuê bao cáp quang, số hợp đồng...'
+                        : 'VD: Lương Techcombank, thưởng quý...',
+                    clearable: true,
+                    textCapitalization: TextCapitalization.sentences,
+                    prefixIcon: Icon(
+                      CupertinoIcons.doc_text,
+                      size: 18,
+                      color: accentColor,
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 16),

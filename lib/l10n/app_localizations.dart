@@ -1373,7 +1373,7 @@ abstract class AppLocalizations {
   /// No description provided for @debtFilterSettled.
   ///
   /// In vi, this message translates to:
-  /// **'Đã thanh toán xong'**
+  /// **'Đã thanh toán'**
   String get debtFilterSettled;
 
   /// No description provided for @debtFilterLent.

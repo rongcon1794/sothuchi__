@@ -30,6 +30,60 @@ import 'package:so_thu_chi/features/transactions/presentation/widgets/dashboard_
 import 'package:so_thu_chi/features/transactions/presentation/widgets/lucian_live_kpi_card.dart';
 import 'package:so_thu_chi/features/transactions/presentation/widgets/transaction_tile.dart';
 
+const Set<String> _vietnameseSurnames = {
+  'nguyen', 'tran', 'le', 'pham', 'hoang', 'huynh', 'phan', 'vu', 'vo',
+  'dang', 'bui', 'do', 'ho', 'ngo', 'duong', 'ly', 'dinh', 'doan', 'lam',
+  'trinh', 'mai', 'dao', 'ta', 'luu', 'cao', 'truong', 'vuong', 'phung',
+  'to', 'chau', 'thai', 'tang', 'luong', 'quach', 'nghiem', 'chu', 'ha',
+  'diep', 'kieu', 'mac', 'thach', 'tong', 'vien', 'bach', 'la', 'au', 'ton',
+  'trieu', 'nong', 'be', 'khong', 'giang', 'dong', 'khuc', 'luc', 'thieu',
+  'ung', 'nhu', 'phu', 'han', 'lu', 'mach', 'sam', 'son', 'thi', 'tieu',
+};
+
+String _stripVietnameseDiacritics(String input) {
+  const withDia =
+      'àáảãạăằắẳẵặâầấẩẫậđèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵ';
+  const withoutDia =
+      'aaaaaaaaaaaaaaaaadeeeeeeeeeeeiiiiiooooooooooooooooouuuuuuuuuuuyyyyy';
+  final lower = input.toLowerCase();
+  final buffer = StringBuffer();
+  for (var i = 0; i < lower.length; i++) {
+    final ch = lower[i];
+    final idx = withDia.indexOf(ch);
+    buffer.write(idx >= 0 ? withoutDia[idx] : ch);
+  }
+  return buffer.toString();
+}
+
+/// Extracts the user's given name ("tên") from [displayName], handling both
+/// Vietnamese order ("Nguyễn Văn An" -> "An") and Western/Google order
+/// ("An Nguyễn" / "Văn An Nguyễn" -> "An").
+String? extractGreetingGivenName(String? displayName, {String locale = 'vi'}) {
+  if (displayName == null) return null;
+  final parts = displayName
+      .trim()
+      .split(RegExp(r'\s+'))
+      .where((p) => p.isNotEmpty)
+      .toList(growable: false);
+  if (parts.isEmpty) return null;
+  if (parts.length == 1) return parts.first;
+
+  final firstNorm = _stripVietnameseDiacritics(parts.first);
+  final lastNorm = _stripVietnameseDiacritics(parts.last);
+  final firstIsSurname = _vietnameseSurnames.contains(firstNorm);
+  final lastIsSurname = _vietnameseSurnames.contains(lastNorm);
+
+  if (lastIsSurname && !firstIsSurname) {
+    // Western / Google order: "An Nguyễn" or "Văn An Nguyễn" -> "An"
+    return parts[parts.length - 2];
+  }
+  if (firstIsSurname) {
+    // Vietnamese order: "Nguyễn Văn An" -> "An"
+    return parts.last;
+  }
+  return locale.startsWith('vi') ? parts.last : parts.first;
+}
+
 class HomeDashboardScreen extends ConsumerStatefulWidget {
   const HomeDashboardScreen({super.key});
 
@@ -96,21 +150,34 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
               child: Builder(
                 builder: (context) {
                   final hour = DateTime.now().hour;
-                  final greeting = (hour >= 4 && hour < 12)
+                  final isMorning = hour >= 4 && hour < 12;
+                  final isAfternoon = hour >= 12 && hour < 18;
+                  final greeting = isMorning
                       ? l10n.greetingMorning
-                      : (hour >= 12 && hour < 18)
+                      : (isAfternoon
                           ? l10n.greetingAfternoon
-                          : l10n.greetingEvening;
-                  final userFirstName = (user?.displayName != null && user!.displayName!.trim().isNotEmpty)
-                      ? user.displayName!.trim().split(' ').last
-                      : null;
-                  final titleText = userFirstName != null
-                      ? '$greeting, $userFirstName!'
-                      : l10n.appTitle;
+                          : l10n.greetingEvening);
+                  final greetingIcon = isMorning
+                      ? CupertinoIcons.sun_max_fill
+                      : (isAfternoon
+                          ? CupertinoIcons.sun_min_fill
+                          : CupertinoIcons.moon_stars_fill);
+                  final greetingColor = (isMorning || isAfternoon)
+                      ? AppleTokens.systemOrange
+                      : AppleTokens.systemIndigo;
+
+                  final givenName = extractGreetingGivenName(
+                    user?.displayName,
+                    locale: locale,
+                  );
+
+                  final greetingLine = givenName != null
+                      ? '$greeting, $givenName!'
+                      : greeting;
 
                   if (isLandscape) {
                     return Text(
-                      titleText,
+                      '${l10n.appTitle} · $greetingLine',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleMedium?.copyWith(
@@ -121,34 +188,46 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                     );
                   }
 
-                  final subtitleText = userFirstName != null
-                      ? l10n.appTagline
-                      : (user?.displayName ?? user?.email ?? l10n.appTagline);
-
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        titleText,
+                        l10n.appTitle,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 18,
-                          letterSpacing: -0.35,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 18.5,
+                          letterSpacing: -0.4,
+                          height: 1.15,
                         ),
                       ),
-                      if (subtitleText.isNotEmpty)
-                        Text(
-                          subtitleText,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                            fontSize: 11,
+                      const SizedBox(height: 1),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            greetingIcon,
+                            size: 11.5,
+                            color: greetingColor,
                           ),
-                        ),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              greetingLine,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: scheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 11.5,
+                                letterSpacing: -0.1,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   );
                 },
@@ -215,6 +294,7 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
               totalBalance: totalBalance,
               locale: locale,
               hideBalance: hideBalance,
+              transactions: allTxs,
             );
 
             const quickActionBar = DashboardQuickActionBar();
