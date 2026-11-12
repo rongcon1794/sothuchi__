@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
+import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 
 /// Accessible icon and color selector meeting >= 48x48dp touch target standards.
-/// Enhanced with Lucian tactile bouncy rings and atmospheric squircle glow.
-class IconAndColorPicker extends StatelessWidget {
+/// Enhanced with group filter pills, Lucian tactile bouncy rings, and squircle glow.
+class IconAndColorPicker extends StatefulWidget {
   const IconAndColorPicker({
     required this.selectedIcon,
     required this.selectedColor,
@@ -22,6 +26,13 @@ class IconAndColorPicker extends StatelessWidget {
   final String colorSectionLabel;
 
   @override
+  State<IconAndColorPicker> createState() => _IconAndColorPickerState();
+}
+
+class _IconAndColorPickerState extends State<IconAndColorPicker> {
+  AppIconGroup _selectedGroup = AppIconGroup.all;
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
@@ -30,20 +41,25 @@ class IconAndColorPicker extends StatelessWidget {
       context,
     ).languageCode.toLowerCase().startsWith('vi');
     final activeColor = AppIconCatalog.contrastSafeColor(
-      Color(selectedColor),
+      Color(widget.selectedColor),
       theme.brightness,
     );
+    final activeChipTextColor =
+        ThemeData.estimateBrightnessForColor(activeColor) == Brightness.dark
+            ? Colors.white
+            : Colors.black87;
+    final visibleKeys = AppIconCatalog.keysForGroup(_selectedGroup);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(colorSectionLabel, style: theme.textTheme.labelLarge),
+        Text(widget.colorSectionLabel, style: theme.textTheme.labelLarge),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: AppIconCatalog.palette.map((colorValue) {
-            final isSelected = colorValue == selectedColor;
+            final isSelected = colorValue == widget.selectedColor;
             final color = AppIconCatalog.contrastSafeColor(
               Color(colorValue),
               theme.brightness,
@@ -60,10 +76,10 @@ class IconAndColorPicker extends StatelessWidget {
               button: true,
               selected: isSelected,
               excludeSemantics: true,
-              label: '$colorSectionLabel: $readableColor',
+              label: '${widget.colorSectionLabel}: $readableColor',
               child: InkWell(
                 borderRadius: BorderRadius.circular(24),
-                onTap: () => onColorChanged(colorValue),
+                onTap: () => widget.onColorChanged(colorValue),
                 child: SizedBox(
                   width: 48,
                   height: 48,
@@ -104,13 +120,84 @@ class IconAndColorPicker extends StatelessWidget {
           }).toList(),
         ),
         const SizedBox(height: 16),
-        Text(iconSectionLabel, style: theme.textTheme.labelLarge),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                widget.iconSectionLabel,
+                style: theme.textTheme.labelLarge,
+              ),
+            ),
+            Text(
+              '${visibleKeys.length} icon',
+              style: TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 8),
+        SizedBox(
+          height: 32,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            itemCount: AppIconGroup.values.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 6),
+            itemBuilder: (context, index) {
+              final group = AppIconGroup.values[index];
+              final isActive = group == _selectedGroup;
+              return GestureDetector(
+                onTap: () {
+                  unawaited(HapticFeedback.selectionClick());
+                  setState(() => _selectedGroup = group);
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 11,
+                    vertical: 5,
+                  ),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: isActive
+                        ? activeColor
+                        : (isDark
+                            ? Colors.white.withValues(alpha: 0.07)
+                            : Colors.black.withValues(alpha: 0.05)),
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                    border: Border.all(
+                      color: isActive
+                          ? activeColor
+                          : (isDark
+                              ? Colors.white.withValues(alpha: 0.08)
+                              : Colors.black.withValues(alpha: 0.06)),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Text(
+                    AppIconCatalog.groupLabel(group, isVi: isVi),
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                      color: isActive
+                          ? activeChipTextColor
+                          : (isDark ? Colors.white70 : Colors.black87),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 10),
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: AppIconCatalog.keys.map((key) {
-            final isSelected = key == selectedIcon;
+          children: visibleKeys.map((key) {
+            final isSelected = key == widget.selectedIcon;
             final readableIcon = AppIconCatalog.iconAccessibilityLabel(
               key,
               isVi: isVi,
@@ -119,10 +206,10 @@ class IconAndColorPicker extends StatelessWidget {
               button: true,
               selected: isSelected,
               excludeSemantics: true,
-              label: '$iconSectionLabel: $readableIcon',
+              label: '${widget.iconSectionLabel}: $readableIcon',
               child: InkWell(
                 borderRadius: BorderRadius.circular(14),
-                onTap: () => onIconChanged(key),
+                onTap: () => widget.onIconChanged(key),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 220),
                   curve: Curves.easeOutCubic,
