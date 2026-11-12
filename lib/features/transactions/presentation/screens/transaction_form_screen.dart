@@ -1138,6 +1138,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                           // Note Input Section
                           TransactionSmartNoteSection(
                             noteController: _noteController,
+                            amountController: _amountController,
+                            currencyCode: currencyCode,
                             type: _type,
                             selectedCategory: selectedCategory,
                             isDark: isDark,

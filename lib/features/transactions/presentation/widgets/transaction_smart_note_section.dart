@@ -1,23 +1,232 @@
+import 'dart:math' as math;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
+import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/categories/domain/entities/category.dart';
 import 'package:so_thu_chi/features/transactions/domain/entities/transaction_entity.dart';
+import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
 
-/// Smart Note Section with TextCapitalization.sentences, quick clear, and category-aware suggested notes.
-class TransactionSmartNoteSection extends StatelessWidget {
+/// Represents a suggested transaction description/note item.
+class SmartNoteSuggestion {
+  const SmartNoteSuggestion({
+    required this.note,
+    required this.isFromHistory,
+    this.isExactMatch = false,
+  });
+
+  final String note;
+  final bool isFromHistory;
+  final bool isExactMatch;
+}
+
+class _NoteAccumulator {
+  _NoteAccumulator({
+    required this.displayNote,
+    required this.bestContextScore,
+    required this.isExactMatch,
+    required this.mostRecentIndex,
+  });
+
+  final String displayNote;
+  double bestContextScore;
+  bool isExactMatch;
+  final int mostRecentIndex;
+  int count = 1;
+}
+
+/// Builds ranked note suggestions from user transaction history based on
+/// transaction type, selected category, entered amount, frequency, and recency,
+/// padded with category-aware fallback defaults.
+List<SmartNoteSuggestion> buildSmartNoteSuggestions({
+  required List<TransactionEntity> transactions,
+  required TransactionType type,
+  required Category? selectedCategory,
+  required int enteredAmountMinor,
+  required String currencyCode,
+  required String currentQuery,
+  required List<String> fallbackSuggestions,
+  int maxSuggestions = 10,
+}) {
+  final queryLower = currentQuery.trim().toLowerCase();
+  final Map<String, _NoteAccumulator> historyMap = {};
+
+  final scanLimit = math.min(transactions.length, 1000);
+  for (var i = 0; i < scanLimit; i++) {
+    final tx = transactions[i];
+    if (tx.type != type) continue;
+
+    final note = tx.note.trim();
+    if (note.isEmpty || note.length > 80 || note.contains('\n')) continue;
+
+    final key = note.toLowerCase();
+    final isSameCurrency = tx.currency == currencyCode;
+    final isExactAmount =
+        enteredAmountMinor > 0 && isSameCurrency && tx.amount == enteredAmountMinor;
+    final isCloseAmount = enteredAmountMinor > 0 &&
+        isSameCurrency &&
+        !isExactAmount &&
+        (tx.amount - enteredAmountMinor).abs() <= enteredAmountMinor * 0.25;
+
+    final isTransfer = type == TransactionType.transfer;
+    final isSameCategory = !isTransfer &&
+        selectedCategory != null &&
+        tx.categoryId == selectedCategory.id;
+
+    double contextScore = 0;
+    bool exactContextMatch = false;
+
+    if (isTransfer) {
+      contextScore = 200;
+      if (isExactAmount) {
+        contextScore += 450;
+        exactContextMatch = true;
+      } else if (isCloseAmount) {
+        contextScore += 200;
+      }
+    } else if (selectedCategory != null) {
+      if (isSameCategory) {
+        contextScore = 300;
+        if (isExactAmount) {
+          contextScore += 450;
+          exactContextMatch = true;
+        } else if (isCloseAmount) {
+          contextScore += 200;
+        }
+      } else if (isExactAmount) {
+        // Exact amount match from another category of the same type.
+        contextScore = 280;
+      } else if (queryLower.isNotEmpty && key.contains(queryLower)) {
+        // Active query matches a note previously used in another category.
+        contextScore = 50;
+      } else {
+        continue;
+      }
+    } else {
+      contextScore = 150;
+      if (isExactAmount) {
+        contextScore += 450;
+        exactContextMatch = true;
+      } else if (isCloseAmount) {
+        contextScore += 200;
+      }
+    }
+
+    final existing = historyMap[key];
+    if (existing == null) {
+      historyMap[key] = _NoteAccumulator(
+        displayNote: note,
+        bestContextScore: contextScore,
+        isExactMatch: exactContextMatch,
+        mostRecentIndex: i,
+      );
+    } else {
+      existing.count += 1;
+      if (contextScore > existing.bestContextScore) {
+        existing.bestContextScore = contextScore;
+      }
+      if (exactContextMatch) {
+        existing.isExactMatch = true;
+      }
+    }
+  }
+
+  final scoredEntries = historyMap.entries.map((entry) {
+    final acc = entry.value;
+    final key = entry.key;
+
+    double queryBonus = 0;
+    if (queryLower.isNotEmpty) {
+      if (key.startsWith(queryLower)) {
+        queryBonus = 600;
+      } else if (key.contains(queryLower)) {
+        queryBonus = 350;
+      }
+    }
+
+    final frequencyBonus = math.min(acc.count, 10) * 18.0;
+    final recencyBonus = 100.0 / (1.0 + acc.mostRecentIndex * 0.15);
+    final totalScore =
+        acc.bestContextScore + queryBonus + frequencyBonus + recencyBonus;
+
+    return (acc: acc, score: totalScore);
+  }).toList();
+
+  scoredEntries.sort((a, b) {
+    final cmp = b.score.compareTo(a.score);
+    if (cmp != 0) return cmp;
+    return a.acc.mostRecentIndex.compareTo(b.acc.mostRecentIndex);
+  });
+
+  final results = <SmartNoteSuggestion>[];
+  final seenKeys = <String>{};
+
+  for (final item in scoredEntries) {
+    if (results.length >= maxSuggestions) break;
+    final note = item.acc.displayNote;
+    final key = note.toLowerCase();
+    if (seenKeys.add(key)) {
+      results.add(
+        SmartNoteSuggestion(
+          note: note,
+          isFromHistory: true,
+          isExactMatch: item.acc.isExactMatch,
+        ),
+      );
+    }
+  }
+
+  if (results.length < maxSuggestions) {
+    final matchingFallbacks = <String>[];
+    final otherFallbacks = <String>[];
+    for (final fb in fallbackSuggestions) {
+      if (seenKeys.contains(fb.toLowerCase())) continue;
+      if (queryLower.isNotEmpty && fb.toLowerCase().contains(queryLower)) {
+        matchingFallbacks.add(fb);
+      } else {
+        otherFallbacks.add(fb);
+      }
+    }
+
+    for (final fb in [...matchingFallbacks, ...otherFallbacks]) {
+      if (results.length >= maxSuggestions) break;
+      if (seenKeys.add(fb.toLowerCase())) {
+        results.add(
+          SmartNoteSuggestion(
+            note: fb,
+            isFromHistory: false,
+            isExactMatch: false,
+          ),
+        );
+      }
+    }
+  }
+
+  return results;
+}
+
+/// Smart Note Section with TextCapitalization.sentences, quick clear,
+/// and dynamic history-aware suggestions based on category and amount.
+class TransactionSmartNoteSection extends ConsumerWidget {
   const TransactionSmartNoteSection({
     super.key,
     required this.noteController,
     required this.type,
     required this.selectedCategory,
     required this.isDark,
+    this.amountController,
+    this.currencyCode = AppCurrencies.defaultCode,
   });
 
   final TextEditingController noteController;
+  final TextEditingController? amountController;
+  final String currencyCode;
   final TransactionType type;
   final Category? selectedCategory;
   final bool isDark;
@@ -128,9 +337,11 @@ class TransactionSmartNoteSection extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final suggestions = _getCategorySuggestedNotes();
+    final allTxs =
+        ref.watch(transactionsStreamProvider).value ?? const <TransactionEntity>[];
+    final fallbackSuggestions = _getCategorySuggestedNotes();
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
@@ -207,48 +418,146 @@ class TransactionSmartNoteSection extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                for (final note in suggestions)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 6),
-                    child: ApplePressable(
-                      scaleDown: 0.93,
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        noteController.text = note;
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? AppleTokens.bgDarkSecondary
-                              : AppleTokens.bgLightSecondary,
-                          borderRadius:
-                              BorderRadius.circular(AppleTokens.radiusPill),
-                        ),
-                        child: Text(
-                          note,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: isDark
-                                ? const Color(0xFFE5E5EA)
-                                : const Color(0xFF3A3A3C),
-                          ),
+          ListenableBuilder(
+            listenable: Listenable.merge([
+              noteController,
+              ?amountController,
+            ]),
+            builder: (context, _) {
+              final enteredAmountMinor = amountController != null
+                  ? (Money.tryParse(
+                        amountController!.text,
+                        currencyCode: currencyCode,
+                      )?.minorUnits ??
+                      0)
+                  : 0;
+              final suggestions = buildSmartNoteSuggestions(
+                transactions: allTxs,
+                type: type,
+                selectedCategory: selectedCategory,
+                enteredAmountMinor: enteredAmountMinor,
+                currencyCode: currencyCode,
+                currentQuery: noteController.text,
+                fallbackSuggestions: fallbackSuggestions,
+              );
+              final currentNoteLower = noteController.text.trim().toLowerCase();
+
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    for (final item in suggestions)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: _SuggestionChip(
+                          suggestion: item,
+                          isSelected: currentNoteLower.isNotEmpty &&
+                              currentNoteLower == item.note.toLowerCase(),
+                          isDark: isDark,
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            noteController.value = TextEditingValue(
+                              text: item.note,
+                              selection: TextSelection.collapsed(
+                                offset: item.note.length,
+                              ),
+                            );
+                          },
                         ),
                       ),
-                    ),
-                  ),
-              ],
-            ),
+                  ],
+                ),
+              );
+            },
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SuggestionChip extends StatelessWidget {
+  const _SuggestionChip({
+    required this.suggestion,
+    required this.isSelected,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  final SmartNoteSuggestion suggestion;
+  final bool isSelected;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color bgColor;
+    final Color? borderColor;
+    final Color textColor;
+
+    if (isSelected) {
+      bgColor = AppleTokens.systemTeal.withValues(alpha: isDark ? 0.26 : 0.14);
+      borderColor = AppleTokens.systemTeal.withValues(alpha: 0.55);
+      textColor = isDark ? const Color(0xFF5CE1E6) : const Color(0xFF0A8494);
+    } else if (suggestion.isExactMatch) {
+      bgColor = AppleTokens.systemTeal.withValues(alpha: isDark ? 0.16 : 0.08);
+      borderColor = AppleTokens.systemTeal.withValues(alpha: 0.28);
+      textColor = isDark ? const Color(0xFFE5E5EA) : const Color(0xFF1C1C1E);
+    } else {
+      bgColor = isDark
+          ? AppleTokens.bgDarkSecondary
+          : AppleTokens.bgLightSecondary;
+      borderColor = suggestion.isFromHistory
+          ? (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08)
+          : null;
+      textColor = isDark
+          ? const Color(0xFFE5E5EA)
+          : const Color(0xFF3A3A3C);
+    }
+
+    return ApplePressable(
+      scaleDown: 0.93,
+      onTap: onTap,
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 220),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+          border: borderColor != null
+              ? Border.all(color: borderColor, width: 0.7)
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (suggestion.isFromHistory) ...[
+              Icon(
+                Icons.history_rounded,
+                size: 12,
+                color: isSelected || suggestion.isExactMatch
+                    ? AppleTokens.systemTeal
+                    : AppleTokens.systemGray,
+              ),
+              const SizedBox(width: 4),
+            ],
+            Flexible(
+              child: Text(
+                suggestion.note,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight:
+                      isSelected || suggestion.isExactMatch
+                          ? FontWeight.w600
+                          : FontWeight.w500,
+                  color: textColor,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
