@@ -7,8 +7,10 @@ import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/features/budgets/domain/entities/budget.dart';
 
-/// Hero visual card presenting the overall monthly budget health,
-/// an Apple Activity Ring indicator, key financial metrics, and spending pace.
+/// Redesigned, state-of-the-art Apple HIG Monthly Budget Overview Hero Card.
+///
+/// Features a prominent Hero Amount, interactive Activity Ring, dynamic
+/// status pill, sleek progress indicator, and an integrated 3-metric KPI strip.
 class BudgetHeroOverviewCard extends StatelessWidget {
   const BudgetHeroOverviewCard({
     super.key,
@@ -56,7 +58,7 @@ class BudgetHeroOverviewCard extends StatelessWidget {
     final totalRemainingMoney = Money(minorUnits: totalRemaining, currencyCode: currency);
     final totalExceededMoney = Money(minorUnits: totalExceeded, currencyCode: currency);
 
-    // Dynamic semantic styling based on health status
+    // Dynamic semantic styling based on budget health status
     final Color barColor;
     final Color ringSecondaryColor;
     final String statusText;
@@ -82,41 +84,49 @@ class BudgetHeroOverviewCard extends StatelessWidget {
     return AppleGlassCard(
       padding: const EdgeInsets.all(16),
       borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
-      borderColor: isExceeded ? AppleTokens.systemRed.withValues(alpha: 0.35) : null,
+      borderColor: isExceeded
+          ? AppleTokens.systemRed.withValues(alpha: 0.35)
+          : (usedPercent >= 80 ? AppleTokens.systemOrange.withValues(alpha: 0.28) : null),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 1. Header Bar: Title + Health Status Pill
           Row(
             children: [
+              AppleSquircleBadge(
+                icon: CupertinoIcons.chart_pie_fill,
+                backgroundColor: barColor,
+                size: 32,
+                iconSize: 16,
+                radius: 9,
+              ),
+              const SizedBox(width: 10),
               Expanded(
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: barColor.withValues(alpha: isDark ? 0.22 : 0.12),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        Icons.pie_chart_rounded,
-                        size: 15,
-                        color: barColor,
+                    Text(
+                      l10n.overallMonthlyBudget.toUpperCase(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.6,
+                        color: AppleTokens.systemGray,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        l10n.overallMonthlyBudget.toUpperCase(),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
-                          color: AppleTokens.systemGray,
-                        ),
+                    const SizedBox(height: 1),
+                    Text(
+                      isCurrentMonth
+                          ? l10n.budgetRemainingDays(daysLeft)
+                          : (isVi
+                              ? 'Tháng ${selectedMonth.month}/${selectedMonth.year}'
+                              : 'Month ${selectedMonth.month}/${selectedMonth.year}'),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: scheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -152,7 +162,7 @@ class BudgetHeroOverviewCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
 
           // 2. Hero Section: Remaining / Exceeded + Activity Ring
           Row(
@@ -170,11 +180,11 @@ class BudgetHeroOverviewCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        letterSpacing: 0.4,
+                        letterSpacing: 0.5,
                         color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
                       ),
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 4),
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
@@ -183,10 +193,10 @@ class BudgetHeroOverviewCard extends StatelessWidget {
                             ? totalExceededMoney.format(locale: locale, masked: hideBalance)
                             : totalRemainingMoney.format(locale: locale, masked: hideBalance),
                         style: theme.textTheme.titleLarge?.copyWith(
-                          fontSize: 26,
+                          fontSize: 27,
                           fontWeight: FontWeight.w800,
                           fontFeatures: AppTheme.tabularFigures,
-                          letterSpacing: -0.5,
+                          letterSpacing: -0.6,
                           color: isExceeded
                               ? AppleTokens.systemRed
                               : (isDark ? Colors.white : const Color(0xFF1C1C1E)),
@@ -199,7 +209,7 @@ class BudgetHeroOverviewCard extends StatelessWidget {
               const SizedBox(width: 12),
               LucianActivityRing(
                 progress: clampedRatio,
-                size: 54,
+                size: 56,
                 strokeWidth: 5.5,
                 primaryColor: barColor,
                 secondaryColor: ringSecondaryColor,
@@ -220,30 +230,61 @@ class BudgetHeroOverviewCard extends StatelessWidget {
           ),
 
           const SizedBox(height: 14),
-          Container(
-            height: 0.6,
-            color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
-          ),
-          const SizedBox(height: 10),
 
-          // 3. Secondary Numbers: Đã chi vs Tổng hạn mức
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(
-                child: Text.rich(
-                  TextSpan(
-                    text: '${isVi ? 'Đã chi' : 'Spent'}: ',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppleTokens.systemGray,
-                      fontWeight: FontWeight.w500,
-                    ),
+          // 3. Smooth Progress Bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+            child: SizedBox(
+              height: 6,
+              child: LinearProgressIndicator(
+                value: clampedRatio,
+                backgroundColor: isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.black.withValues(alpha: 0.06),
+                valueColor: AlwaysStoppedAnimation<Color>(barColor),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 14),
+
+          // 4. Integrated 3-Metric KPI Mini Strip
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.black.withValues(alpha: 0.03),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.07)
+                    : Colors.black.withValues(alpha: 0.04),
+              ),
+            ),
+            child: Row(
+              children: [
+                // Cell 1: Đã chi
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      TextSpan(
-                        text: totalSpentMoney.format(locale: locale, masked: hideBalance),
+                      Text(
+                        isVi ? 'Đã chi' : 'Spent',
+                        style: const TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w500,
+                          color: AppleTokens.systemGray,
+                        ),
+                      ),
+                      const SizedBox(height: 1.5),
+                      Text(
+                        totalSpentMoney.format(locale: locale, masked: hideBalance),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 12.5,
+                          fontSize: 12,
                           fontWeight: FontWeight.w700,
                           fontFeatures: AppTheme.tabularFigures,
                           color: financeColors.expense,
@@ -251,25 +292,39 @@ class BudgetHeroOverviewCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text.rich(
-                  TextSpan(
-                    text: '${l10n.budgetLimit}: ',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppleTokens.systemGray,
-                      fontWeight: FontWeight.w500,
-                    ),
+
+                // Vertical Divider
+                Container(
+                  width: 1,
+                  height: 24,
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : Colors.black.withValues(alpha: 0.06),
+                ),
+
+                // Cell 2: Hạn mức
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      TextSpan(
-                        text: totalLimitMoney.format(locale: locale, masked: hideBalance),
+                      Text(
+                        l10n.budgetLimit,
+                        style: const TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w500,
+                          color: AppleTokens.systemGray,
+                        ),
+                      ),
+                      const SizedBox(height: 1.5),
+                      Text(
+                        totalLimitMoney.format(locale: locale, masked: hideBalance),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 12.5,
+                          fontSize: 12,
                           fontWeight: FontWeight.w700,
                           fontFeatures: AppTheme.tabularFigures,
                           color: isDark ? Colors.white70 : Colors.black87,
@@ -277,75 +332,48 @@ class BudgetHeroOverviewCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  textAlign: TextAlign.end,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-            ],
-          ),
 
-          if (isCurrentMonth) ...[
-            const SizedBox(height: 8),
-            // 4. Clean Single-line Footer (Days left & Safe Daily Spending Pace)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: Row(
+                // Vertical Divider
+                Container(
+                  width: 1,
+                  height: 24,
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : Colors.black.withValues(alpha: 0.06),
+                ),
+
+                // Cell 3: Nhịp chi ngày
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
-                        CupertinoIcons.calendar,
-                        size: 12,
-                        color: AppleTokens.systemBlue,
-                      ),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          l10n.budgetRemainingDays(daysLeft),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.white70 : Colors.black87,
-                          ),
+                      Text(
+                        isVi ? 'Nhịp chi/ngày' : 'Daily Pace',
+                        style: const TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w500,
+                          color: AppleTokens.systemGray,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Icon(
+                      const SizedBox(height: 1.5),
+                      Text(
                         isExceeded
-                            ? CupertinoIcons.exclamationmark_triangle_fill
-                            : CupertinoIcons.flame_fill,
-                        size: 12,
-                        color: isExceeded ? AppleTokens.systemRed : AppleTokens.systemOrange,
-                      ),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          isExceeded
-                              ? (isVi ? 'Đã vượt' : 'Exceeded')
-                              : l10n.budgetDailyRecommended(
-                                  safeDailyMoney.format(locale: locale, masked: hideBalance),
-                                ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.end,
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w700,
-                            fontFeatures: AppTheme.tabularFigures,
-                            color: isExceeded ? AppleTokens.systemRed : barColor,
-                          ),
+                            ? (isVi ? 'Đã vượt' : 'Exceeded')
+                            : safeDailyMoney.format(locale: locale, masked: hideBalance),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          fontFeatures: AppTheme.tabularFigures,
+                          color: isExceeded
+                              ? AppleTokens.systemRed
+                              : (usedPercent >= 80
+                                  ? AppleTokens.systemOrange
+                                  : AppleTokens.jadePrimary),
                         ),
                       ),
                     ],
@@ -353,7 +381,7 @@ class BudgetHeroOverviewCard extends StatelessWidget {
                 ),
               ],
             ),
-          ],
+          ),
         ],
       ),
     );

@@ -131,14 +131,14 @@ class AppShellScaffold extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: RepaintBoundary(
-        child: isOled || Theme.of(context).platform == TargetPlatform.android
-            ? navBarContent
-            : ClipRect(
-                child: BackdropFilter(
+        child: ClipRect(
+          child: isOled || Theme.of(context).platform == TargetPlatform.android
+              ? navBarContent
+              : BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
                   child: navBarContent,
                 ),
-              ),
+        ),
       ),
     );
   }

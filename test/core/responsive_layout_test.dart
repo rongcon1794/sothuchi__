@@ -135,6 +135,7 @@ void main() {
       SharedPreferences.setMockInitialValues({
         'settings.onboarding_completed': true,
         'settings.initial_setup_completed': true,
+        'settings.locale': 'vi',
       });
       FlutterSecureStorage.setMockInitialValues({});
       prefs = await SharedPreferences.getInstance();

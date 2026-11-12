@@ -88,6 +88,7 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     final isVi = l10n.localeName.startsWith('vi');
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final isLargeText = textScale >= 1.35;
@@ -253,21 +254,35 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            isVi ? 'Danh sách ngân sách' : 'Budget Categories',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: -0.2,
-                            ),
+                          Row(
+                            children: [
+                              AppleSquircleBadge(
+                                icon: CupertinoIcons.square_grid_2x2_fill,
+                                backgroundColor: scheme.primary,
+                                size: 26,
+                                iconSize: 13,
+                                radius: 7,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                isVi ? 'Danh mục ngân sách' : 'Budget Categories',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 15,
+                                  letterSpacing: -0.2,
+                                ),
+                              ),
+                            ],
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 9,
+                              horizontal: 8.5,
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              color: scheme.surfaceContainerHighest
-                                  .withValues(alpha: 0.6),
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.08)
+                                  : Colors.black.withValues(alpha: 0.05),
                               borderRadius:
                                   BorderRadius.circular(AppleTokens.radiusPill),
                             ),
@@ -350,7 +365,7 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
                                   _deleteBudget(context, item.budget.id),
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 10),
                         ],
                     ];
 
@@ -395,7 +410,7 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
                               )
                             else ...[
                               ...overviewWidgets,
-                              const SizedBox(height: 20),
+                              const SizedBox(height: 16),
                               ...categoryListSection,
                             ],
                           ],

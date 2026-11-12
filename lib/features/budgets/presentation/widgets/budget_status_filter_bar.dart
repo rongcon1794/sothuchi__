@@ -94,7 +94,7 @@ class _FilterChip extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     final bgColor = isSelected
-        ? activeColor.withValues(alpha: 0.16)
+        ? activeColor.withValues(alpha: isDark ? 0.22 : 0.14)
         : (isDark ? Colors.white.withValues(alpha: 0.06) : Colors.black.withValues(alpha: 0.04));
 
     final textColor = isSelected
@@ -102,6 +102,7 @@ class _FilterChip extends StatelessWidget {
         : scheme.onSurfaceVariant;
 
     return ApplePressable(
+      scaleDown: 0.94,
       onTap: () {
         HapticFeedback.selectionClick();
         onTap();
@@ -110,13 +111,13 @@ class _FilterChip extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
           border: Border.all(
             color: isSelected
-                ? activeColor.withValues(alpha: 0.35)
+                ? activeColor.withValues(alpha: isDark ? 0.40 : 0.25)
                 : Colors.transparent,
             width: 1,
           ),
@@ -127,7 +128,7 @@ class _FilterChip extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                fontSize: 12.5,
+                fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 color: textColor,
               ),
@@ -137,14 +138,14 @@ class _FilterChip extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? activeColor.withValues(alpha: 0.22)
+                    ? activeColor.withValues(alpha: isDark ? 0.30 : 0.18)
                     : (isDark ? Colors.white12 : Colors.black12),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
                 '$count',
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 10.5,
                   fontWeight: FontWeight.w700,
                   color: textColor,
                 ),

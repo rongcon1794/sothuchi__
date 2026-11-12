@@ -13,7 +13,8 @@ import 'package:so_thu_chi/features/budgets/presentation/widgets/budget_threshol
 import 'package:so_thu_chi/features/categories/domain/entities/category.dart';
 
 /// Redesigned Category Budget Card featuring Apple glassmorphism,
-/// visual threshold notch progress track, and live spending metrics.
+/// contrast-safe squircle icon badge, visual threshold notch progress track,
+/// and neat responsive metric strip.
 class BudgetCategoryCard extends StatelessWidget {
   const BudgetCategoryCard({
     super.key,
@@ -117,7 +118,7 @@ class BudgetCategoryCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
       onTap: () => context.push(AppRoutes.budgetDetail(progress.budget.id)),
       child: AppleGlassCard(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(15),
         borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
         borderColor: progress.isExceeded
             ? AppleTokens.systemRed.withValues(alpha: 0.35)
@@ -127,19 +128,17 @@ class BudgetCategoryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header: Category Icon, Name, Spent/Limit subtitle, Percentage pill & popup menu
+            // Header Row: Category Squircle Badge, Name & Subtitle, Percentage Pill & Popup Menu
             Row(
               children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: badgeColor.withValues(alpha: isDark ? 0.20 : 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(iconData, color: badgeColor, size: 20),
+                AppleSquircleBadge(
+                  icon: iconData,
+                  backgroundColor: badgeColor,
+                  size: 38,
+                  iconSize: 19,
+                  radius: 10,
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 11),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,6 +149,7 @@ class BudgetCategoryCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
+                          fontSize: 14.5,
                           letterSpacing: -0.2,
                         ),
                       ),
@@ -160,6 +160,7 @@ class BudgetCategoryCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall?.copyWith(
+                          fontSize: 11.5,
                           color: scheme.onSurfaceVariant,
                           fontFeatures: AppTheme.tabularFigures,
                           fontWeight: FontWeight.w500,
@@ -171,7 +172,7 @@ class BudgetCategoryCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 // Percentage badge (maintains exact '${progress.usedPercent}%' for automated tests)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                   decoration: BoxDecoration(
                     color: pillBgColor,
                     borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
@@ -181,7 +182,7 @@ class BudgetCategoryCard extends StatelessWidget {
                     style: TextStyle(
                       color: pillFgColor,
                       fontWeight: FontWeight.w800,
-                      fontSize: 12.5,
+                      fontSize: 12,
                       fontFeatures: AppTheme.tabularFigures,
                     ),
                   ),
@@ -211,13 +212,8 @@ class BudgetCategoryCard extends StatelessWidget {
             ),
 
             const SizedBox(height: 12),
-            Container(
-              height: 0.6,
-              color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
-            ),
-            const SizedBox(height: 12),
 
-            // Metrics row: Remaining/Exceeded amount & Threshold label
+            // Metrics Row: Remaining / Exceeded amount & Alert Threshold Label
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -230,7 +226,7 @@ class BudgetCategoryCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 12.5,
                       fontWeight: FontWeight.w700,
                       color: progress.isExceeded ? financeColors.expense : scheme.onSurface,
                       fontFeatures: AppTheme.tabularFigures,
@@ -241,7 +237,7 @@ class BudgetCategoryCard extends StatelessWidget {
                 Text(
                   l10n.alertThresholdLabel(progress.budget.alertThreshold),
                   style: TextStyle(
-                    fontSize: 11.5,
+                    fontSize: 11,
                     fontWeight: FontWeight.w500,
                     color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
                   ),
@@ -249,42 +245,51 @@ class BudgetCategoryCard extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
 
             // Progress Bar with Threshold Notch Marker
             BudgetThresholdProgressBar(
               progress: clampedRatio,
               threshold: thresholdRatio,
               activeColor: barColor,
-              height: 8,
+              height: 7,
               showGlow: progress.isExceeded || progress.isWarningTriggered,
             ),
 
             // Daily Burn Rate Runway (when remaining > 0)
             if (!progress.isExceeded && progress.remainingMinorUnits > 0) ...[
               const SizedBox(height: 10),
-              Row(
-                children: [
-                  const Icon(
-                    CupertinoIcons.flame_fill,
-                    size: 12.5,
-                    color: AppleTokens.systemOrange,
-                  ),
-                  const SizedBox(width: 5),
-                  Expanded(
-                    child: Text(
-                      l10n.budgetDailyRecommended(dailyText),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w600,
-                        color: scheme.onSurfaceVariant,
-                        fontFeatures: AppTheme.tabularFigures,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.04)
+                      : Colors.black.withValues(alpha: 0.025),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      CupertinoIcons.flame_fill,
+                      size: 12,
+                      color: AppleTokens.systemOrange,
+                    ),
+                    const SizedBox(width: 5),
+                    Expanded(
+                      child: Text(
+                        l10n.budgetDailyRecommended(dailyText),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: scheme.onSurfaceVariant,
+                          fontFeatures: AppTheme.tabularFigures,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ],
