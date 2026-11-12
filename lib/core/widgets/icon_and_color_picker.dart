@@ -5,8 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 
-/// Accessible icon and color selector meeting >= 48x48dp touch target standards.
-/// Enhanced with group filter pills, Lucian tactile bouncy rings, and squircle glow.
+/// Accessible, balanced grid icon and color selector meeting >= 48x48dp touch targets.
+/// Enhanced with group filter pills, symmetrical responsive grids, and squircle glow.
 class IconAndColorPicker extends StatefulWidget {
   const IconAndColorPicker({
     required this.selectedIcon,
@@ -49,77 +49,88 @@ class _IconAndColorPickerState extends State<IconAndColorPicker> {
             ? Colors.white
             : Colors.black87;
     final visibleKeys = AppIconCatalog.keysForGroup(_selectedGroup);
+    final useBoundedScroll = visibleKeys.length > 24;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(widget.colorSectionLabel, style: theme.textTheme.labelLarge),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: AppIconCatalog.palette.map((colorValue) {
-            final isSelected = colorValue == widget.selectedColor;
-            final color = AppIconCatalog.contrastSafeColor(
-              Color(colorValue),
-              theme.brightness,
-            );
-            final checkColor =
-                ThemeData.estimateBrightnessForColor(color) == Brightness.dark
-                ? Colors.white
-                : Colors.black87;
-            final readableColor = AppIconCatalog.colorAccessibilityLabel(
-              colorValue,
-              isVi: isVi,
-            );
-            return Semantics(
-              button: true,
-              selected: isSelected,
-              excludeSemantics: true,
-              label: '${widget.colorSectionLabel}: $readableColor',
-              child: InkWell(
-                borderRadius: BorderRadius.circular(24),
-                onTap: () => widget.onColorChanged(colorValue),
-                child: SizedBox(
-                  width: 48,
-                  height: 48,
-                  child: Center(
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 220),
-                      curve: Curves.easeOutCubic,
-                      width: isSelected ? 38 : 32,
-                      height: isSelected ? 38 : 32,
-                      decoration: BoxDecoration(
-                        color: color,
-                        shape: BoxShape.circle,
-                        border: isSelected
-                            ? Border.all(color: Colors.white, width: 2.5)
-                            : null,
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: color.withValues(alpha: 0.55),
-                                  blurRadius: 10,
-                                  spreadRadius: 1,
-                                ),
-                              ]
+        const SizedBox(height: 10),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final colorCols = constraints.maxWidth >= 580 ? 14 : 7;
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: AppIconCatalog.palette.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: colorCols,
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
+                childAspectRatio: 1.0,
+              ),
+              itemBuilder: (context, index) {
+                final colorValue = AppIconCatalog.palette[index];
+                final isSelected = colorValue == widget.selectedColor;
+                final color = AppIconCatalog.contrastSafeColor(
+                  Color(colorValue),
+                  theme.brightness,
+                );
+                final checkColor =
+                    ThemeData.estimateBrightnessForColor(color) ==
+                            Brightness.dark
+                        ? Colors.white
+                        : Colors.black87;
+                final readableColor = AppIconCatalog.colorAccessibilityLabel(
+                  colorValue,
+                  isVi: isVi,
+                );
+                return Semantics(
+                  button: true,
+                  selected: isSelected,
+                  excludeSemantics: true,
+                  label: '${widget.colorSectionLabel}: $readableColor',
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(24),
+                    onTap: () => widget.onColorChanged(colorValue),
+                    child: Center(
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 220),
+                        curve: Curves.easeOutCubic,
+                        width: isSelected ? 36 : 30,
+                        height: isSelected ? 36 : 30,
+                        decoration: BoxDecoration(
+                          color: color,
+                          shape: BoxShape.circle,
+                          border: isSelected
+                              ? Border.all(color: Colors.white, width: 2.5)
+                              : null,
+                          boxShadow: isSelected
+                              ? [
+                                  BoxShadow(
+                                    color: color.withValues(alpha: 0.55),
+                                    blurRadius: 10,
+                                    spreadRadius: 1,
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        child: isSelected
+                            ? Icon(
+                                Icons.check_rounded,
+                                size: 17,
+                                color: checkColor,
+                              )
                             : null,
                       ),
-                      child: isSelected
-                          ? Icon(
-                              Icons.check_rounded,
-                              size: 18,
-                              color: checkColor,
-                            )
-                          : null,
                     ),
                   ),
-                ),
-              ),
+                );
+              },
             );
-          }).toList(),
+          },
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 18),
         Row(
           children: [
             Expanded(
@@ -192,63 +203,87 @@ class _IconAndColorPickerState extends State<IconAndColorPicker> {
             },
           ),
         ),
-        const SizedBox(height: 10),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: visibleKeys.map((key) {
-            final isSelected = key == widget.selectedIcon;
-            final readableIcon = AppIconCatalog.iconAccessibilityLabel(
-              key,
-              isVi: isVi,
-            );
-            return Semantics(
-              button: true,
-              selected: isSelected,
-              excludeSemantics: true,
-              label: '${widget.iconSectionLabel}: $readableIcon',
-              child: InkWell(
-                borderRadius: BorderRadius.circular(14),
-                onTap: () => widget.onIconChanged(key),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 220),
-                  curve: Curves.easeOutCubic,
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? activeColor.withValues(alpha: isDark ? 0.28 : 0.16)
-                        : (isDark
-                            ? Colors.white.withValues(alpha: 0.06)
-                            : Colors.black.withValues(alpha: 0.04)),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: isSelected
-                          ? activeColor
-                          : (isDark
-                              ? Colors.white.withValues(alpha: 0.08)
-                              : Colors.black.withValues(alpha: 0.06)),
-                      width: isSelected ? 2.0 : 0.8,
-                    ),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: activeColor.withValues(alpha: 0.35),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
-                            )
-                          ]
-                        : null,
-                  ),
-                  child: Icon(
-                    AppIconCatalog.resolve(key),
-                    color: isSelected ? activeColor : scheme.onSurfaceVariant,
-                    size: 22,
-                  ),
-                ),
+        const SizedBox(height: 12),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final iconCols = (constraints.maxWidth / 58).floor().clamp(5, 10);
+            final grid = GridView.builder(
+              shrinkWrap: !useBoundedScroll,
+              physics: useBoundedScroll
+                  ? const BouncingScrollPhysics()
+                  : const NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.zero,
+              itemCount: visibleKeys.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: iconCols,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: 1.0,
               ),
+              itemBuilder: (context, index) {
+                final key = visibleKeys[index];
+                final isSelected = key == widget.selectedIcon;
+                final readableIcon = AppIconCatalog.iconAccessibilityLabel(
+                  key,
+                  isVi: isVi,
+                );
+                return Semantics(
+                  button: true,
+                  selected: isSelected,
+                  excludeSemantics: true,
+                  label: '${widget.iconSectionLabel}: $readableIcon',
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: () => widget.onIconChanged(key),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 220),
+                      curve: Curves.easeOutCubic,
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? activeColor.withValues(
+                                alpha: isDark ? 0.28 : 0.16,
+                              )
+                            : (isDark
+                                ? Colors.white.withValues(alpha: 0.06)
+                                : Colors.black.withValues(alpha: 0.04)),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: isSelected
+                              ? activeColor
+                              : (isDark
+                                  ? Colors.white.withValues(alpha: 0.08)
+                                  : Colors.black.withValues(alpha: 0.06)),
+                          width: isSelected ? 2.0 : 0.8,
+                        ),
+                        boxShadow: isSelected
+                            ? [
+                                BoxShadow(
+                                  color: activeColor.withValues(alpha: 0.35),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: Icon(
+                        AppIconCatalog.resolve(key),
+                        color: isSelected
+                            ? activeColor
+                            : scheme.onSurfaceVariant,
+                        size: 22,
+                      ),
+                    ),
+                  ),
+                );
+              },
             );
-          }).toList(),
+
+            if (!useBoundedScroll) return grid;
+            return ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 268),
+              child: grid,
+            );
+          },
         ),
       ],
     );

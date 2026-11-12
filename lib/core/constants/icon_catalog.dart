@@ -213,6 +213,8 @@ abstract final class AppIconCatalog {
     ('travel', 'Du lịch'),
     ('housing', 'Nhà ở'),
     ('transport', 'Xe cộ'),
+    ('allowance', 'Phụ cấp'),
+    ('refund', 'Hoàn tiền'),
     ('gift', 'Quà / Thưởng'),
     ('other', 'Khác'),
   ];
@@ -290,6 +292,8 @@ abstract final class AppIconCatalog {
     ('camera', CupertinoIcons.camera_fill, 'Sở thích'),
     ('game', CupertinoIcons.gamecontroller_fill, 'Giải trí'),
     ('shield', CupertinoIcons.shield_fill, 'Dự phòng'),
+    ('club', CupertinoIcons.flag_fill, 'Nhóm / CLB'),
+    ('other', CupertinoIcons.square_grid_2x2_fill, 'Khác'),
   ];
 
   /// Resolves a ledger icon key to its icon across pills, switcher sheets, and cards.

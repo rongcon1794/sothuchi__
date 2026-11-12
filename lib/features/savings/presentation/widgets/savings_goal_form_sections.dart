@@ -1263,80 +1263,92 @@ extension _SavingsGoalFormSections on _SavingsGoalFormSheetState {
     required bool isDark,
     required Color accentColor,
   }) {
-    return SizedBox(
-      height: 52,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        itemCount: AppIconCatalog.savingsIcons.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
-          final item = AppIconCatalog.savingsIcons[index];
-          final isSelected = _selectedIcon == item.$1;
-          return ApplePressable(
-            scaleDown: 0.92,
-            onTap: () {
-              unawaited(HapticFeedback.selectionClick());
-              setState(() => _selectedIcon = item.$1);
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? accentColor
-                    : (isDark
-                        ? Colors.white.withValues(alpha: 0.05)
-                        : Colors.black.withValues(alpha: 0.03)),
-                borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                border: Border.all(
+    const items = AppIconCatalog.savingsIcons;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cols = constraints.maxWidth >= 520
+            ? 8
+            : (constraints.maxWidth >= 330 ? 6 : 4);
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
+          itemCount: items.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: cols,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            childAspectRatio: 0.96,
+          ),
+          itemBuilder: (context, index) {
+            final item = items[index];
+            final isSelected = _selectedIcon == item.$1;
+            return ApplePressable(
+              scaleDown: 0.92,
+              onTap: () {
+                unawaited(HapticFeedback.selectionClick());
+                setState(() => _selectedIcon = item.$1);
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                decoration: BoxDecoration(
                   color: isSelected
                       ? accentColor
                       : (isDark
-                          ? Colors.white.withValues(alpha: 0.08)
-                          : Colors.black.withValues(alpha: 0.06)),
-                  width: isSelected ? 1.5 : 1.0,
-                ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: accentColor.withValues(alpha: 0.35),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
-                        ),
-                      ]
-                    : null,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    item.$2,
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : Colors.black.withValues(alpha: 0.03)),
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                  border: Border.all(
                     color: isSelected
-                        ? Colors.white
-                        : (isDark ? Colors.white70 : Colors.black87),
-                    size: 20,
+                        ? accentColor
+                        : (isDark
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : Colors.black.withValues(alpha: 0.06)),
+                    width: isSelected ? 1.5 : 1.0,
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    item.$3,
-                    style: TextStyle(
-                      fontSize: 8.5,
-                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: accentColor.withValues(alpha: 0.35),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      item.$2,
                       color: isSelected
                           ? Colors.white
-                          : (isDark ? Colors.white54 : Colors.black54),
+                          : (isDark ? Colors.white70 : Colors.black87),
+                      size: 20,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+                    const SizedBox(height: 2),
+                    Text(
+                      item.$3,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 8.5,
+                        fontWeight:
+                            isSelected ? FontWeight.w700 : FontWeight.w500,
+                        color: isSelected
+                            ? Colors.white
+                            : (isDark ? Colors.white54 : Colors.black54),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
-            ),
-          );
-        },
-      ),
+            );
+          },
+        );
+      },
     );
   }
 }

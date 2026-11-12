@@ -752,128 +752,156 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
     required bool isDark,
     required Color accentColor,
   }) {
-    return SizedBox(
-      height: 72,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        itemCount: AppIconCatalog.ledgerIcons.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 10),
-        itemBuilder: (context, index) {
-          final item = AppIconCatalog.ledgerIcons[index];
-          final isSelected = _selectedIcon == item.$1;
-          return ApplePressable(
-            onTap: () {
-              unawaited(HapticFeedback.selectionClick());
-              setState(() => _selectedIcon = item.$1);
-            },
-            borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? accentColor
-                        : (isDark
-                            ? AppleTokens.bgDarkSecondary
-                            : AppleTokens.bgLightSecondary),
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                    border: Border.all(
+    const items = AppIconCatalog.ledgerIcons;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cols = constraints.maxWidth >= 420 ? 6 : 4;
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
+          itemCount: items.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: cols,
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 8,
+            childAspectRatio: 0.92,
+          ),
+          itemBuilder: (context, index) {
+            final item = items[index];
+            final isSelected = _selectedIcon == item.$1;
+            return ApplePressable(
+              onTap: () {
+                unawaited(HapticFeedback.selectionClick());
+                setState(() => _selectedIcon = item.$1);
+              },
+              borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? accentColor
+                          : (isDark
+                              ? AppleTokens.bgDarkSecondary
+                              : AppleTokens.bgLightSecondary),
+                      borderRadius:
+                          BorderRadius.circular(AppleTokens.radiusCard),
+                      border: Border.all(
+                        color: isSelected
+                            ? Colors.white
+                            : (isDark
+                                ? AppleTokens.separatorDark
+                                : AppleTokens.separatorLight),
+                        width: isSelected ? 2 : 1,
+                      ),
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                color: accentColor.withValues(alpha: 0.4),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: Icon(
+                      item.$2,
                       color: isSelected
                           ? Colors.white
-                          : (isDark
-                              ? AppleTokens.separatorDark
-                              : AppleTokens.separatorLight),
-                      width: isSelected ? 2 : 1,
+                          : (isDark ? Colors.white70 : Colors.black87),
+                      size: 21,
                     ),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: accentColor.withValues(alpha: 0.4),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ]
-                        : null,
                   ),
-                  child: Icon(
-                    item.$2,
-                    color: isSelected
-                        ? Colors.white
-                        : (isDark ? Colors.white70 : Colors.black87),
-                    size: 22,
+                  const SizedBox(height: 4),
+                  Text(
+                    item.$3,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight:
+                          isSelected ? FontWeight.w700 : FontWeight.w500,
+                      color: isSelected
+                          ? (isDark ? Colors.white : accentColor)
+                          : (isDark ? Colors.white60 : Colors.black54),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  item.$3,
-                  style: TextStyle(
-                    fontSize: 10.5,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                    color: isSelected
-                        ? (isDark ? Colors.white : accentColor)
-                        : (isDark ? Colors.white60 : Colors.black54),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
   Widget _buildColorSelector({required bool isDark}) {
-    return SizedBox(
-      height: 46,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        itemCount: _availableColors.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 12),
-        itemBuilder: (context, index) {
-          final colorVal = _availableColors[index];
-          final isSelected = _selectedColor == colorVal;
-          final color = Color(colorVal);
-          return ApplePressable(
-            onTap: () {
-              unawaited(HapticFeedback.selectionClick());
-              setState(() => _selectedColor = colorVal);
-            },
-            borderRadius: BorderRadius.circular(23),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected
-                      ? (isDark ? Colors.white : Colors.black87)
-                      : Colors.transparent,
-                  width: 3,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: color.withValues(alpha: isSelected ? 0.45 : 0.2),
-                    blurRadius: isSelected ? 8 : 4,
-                    offset: const Offset(0, 2),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cols = constraints.maxWidth >= 480 ? 10 : 5;
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
+          itemCount: _availableColors.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: cols,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            childAspectRatio: 1.0,
+          ),
+          itemBuilder: (context, index) {
+            final colorVal = _availableColors[index];
+            final isSelected = _selectedColor == colorVal;
+            final color = Color(colorVal);
+            return ApplePressable(
+              onTap: () {
+                unawaited(HapticFeedback.selectionClick());
+                setState(() => _selectedColor = colorVal);
+              },
+              borderRadius: BorderRadius.circular(22),
+              child: Center(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: isSelected ? 36 : 30,
+                  height: isSelected ? 36 : 30,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isSelected
+                          ? (isDark ? Colors.white : Colors.black87)
+                          : Colors.transparent,
+                      width: 2.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color:
+                            color.withValues(alpha: isSelected ? 0.45 : 0.2),
+                        blurRadius: isSelected ? 8 : 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                ],
+                  child: isSelected
+                      ? const Icon(
+                          CupertinoIcons.checkmark,
+                          color: Colors.white,
+                          size: 17,
+                        )
+                      : null,
+                ),
               ),
-              child: isSelected
-                  ? const Icon(CupertinoIcons.checkmark,
-                      color: Colors.white, size: 20)
-                  : null,
-            ),
-          );
-        },
-      ),
+            );
+          },
+        );
+      },
     );
   }
 }

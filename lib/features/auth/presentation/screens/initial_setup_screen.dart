@@ -624,10 +624,20 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: AppIconCatalog.walletKeys.map((iconKey) {
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.zero,
+                      itemCount: AppIconCatalog.walletKeys.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 5,
+                        mainAxisSpacing: 8,
+                        crossAxisSpacing: 8,
+                        childAspectRatio: 1.0,
+                      ),
+                      itemBuilder: (context, index) {
+                        final iconKey = AppIconCatalog.walletKeys[index];
                         final isSelected = _walletIcon == iconKey;
                         return GestureDetector(
                           onTap: () {
@@ -635,26 +645,30 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
                             setState(() => _walletIcon = iconKey);
                           },
                           child: Container(
-                            width: 32,
-                            height: 32,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? scheme.primary.withValues(alpha: 0.2)
-                                  : scheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                                  : scheme.surfaceContainerHighest
+                                      .withValues(alpha: 0.5),
+                              borderRadius:
+                                  BorderRadius.circular(AppleTokens.radiusPill),
                               border: isSelected
-                                  ? Border.all(color: scheme.primary, width: 1.5)
+                                  ? Border.all(
+                                      color: scheme.primary,
+                                      width: 1.5,
+                                    )
                                   : null,
                             ),
                             child: Icon(
                               AppIconCatalog.resolve(iconKey),
                               size: 18,
-                              color: isSelected ? scheme.primary : scheme.onSurface,
+                              color:
+                                  isSelected ? scheme.primary : scheme.onSurface,
                             ),
                           ),
                         );
-                      }).toList(),
+                      },
                     ),
                   ],
                 ),
