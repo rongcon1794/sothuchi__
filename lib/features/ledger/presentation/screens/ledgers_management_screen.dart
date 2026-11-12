@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
@@ -26,33 +27,8 @@ class _LedgersManagementScreenState
   bool _isFabExpanded = true;
   bool _isFabVisible = true;
 
-  IconData _resolveIcon(String iconKey) {
-    switch (iconKey) {
-      case 'family':
-        return CupertinoIcons.person_3_fill;
-      case 'briefcase':
-        return CupertinoIcons.briefcase_fill;
-      case 'wallet':
-        return CupertinoIcons.creditcard_fill;
-      case 'star':
-        return CupertinoIcons.star_fill;
-      case 'airplane':
-        return CupertinoIcons.airplane;
-      case 'cart':
-        return CupertinoIcons.cart_fill;
-      case 'home':
-        return CupertinoIcons.house_fill;
-      case 'school':
-        return CupertinoIcons.book_fill;
-      case 'chart':
-        return CupertinoIcons.chart_bar_alt_fill;
-      case 'heart':
-        return CupertinoIcons.heart_fill;
-      case 'person':
-      default:
-        return CupertinoIcons.person_crop_circle_fill;
-    }
-  }
+  IconData _resolveIcon(String iconKey) =>
+      AppIconCatalog.resolveLedgerIcon(iconKey);
 
   String _typeLabel(LedgerType type, AppLocalizations l10n) {
     switch (type) {

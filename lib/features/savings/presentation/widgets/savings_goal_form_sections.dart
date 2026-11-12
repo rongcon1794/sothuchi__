@@ -1268,10 +1268,10 @@ extension _SavingsGoalFormSections on _SavingsGoalFormSheetState {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
-        itemCount: _SavingsGoalFormSheetState._availableIcons.length,
+        itemCount: AppIconCatalog.savingsIcons.length,
         separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
-          final item = _SavingsGoalFormSheetState._availableIcons[index];
+          final item = AppIconCatalog.savingsIcons[index];
           final isSelected = _selectedIcon == item.$1;
           return ApplePressable(
             scaleDown: 0.92,

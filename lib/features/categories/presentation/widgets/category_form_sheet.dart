@@ -39,9 +39,16 @@ const _kCategoryExpenseTemplates = [
   _CategoryTemplate(
     name: 'Xăng xe & Đi lại',
     type: CategoryType.expense,
-    icon: 'transport',
+    icon: 'fuel',
     color: 0xFF1D5BD6, // Cobalt
     subtitle: 'Xăng, gửi xe, taxi',
+  ),
+  _CategoryTemplate(
+    name: 'Đi chợ & Siêu thị',
+    type: CategoryType.expense,
+    icon: 'groceries',
+    color: 0xFF15803D, // Forest
+    subtitle: 'Thực phẩm tươi, đồ bếp',
   ),
   _CategoryTemplate(
     name: 'Tiền trọ & Tiện ích',
@@ -51,11 +58,25 @@ const _kCategoryExpenseTemplates = [
     subtitle: 'Thuê phòng, điện nước, mạng',
   ),
   _CategoryTemplate(
+    name: 'Điện, Nước & Wifi',
+    type: CategoryType.expense,
+    icon: 'electricity',
+    color: 0xFF0284C7, // Sky blue
+    subtitle: 'Hóa đơn điện, nước, internet',
+  ),
+  _CategoryTemplate(
     name: 'Mua sắm & Quần áo',
     type: CategoryType.expense,
-    icon: 'shopping',
+    icon: 'clothes',
     color: 0xFFDB2777, // Berry
-    subtitle: 'Trang phục, mỹ phẩm',
+    subtitle: 'Trang phục, giày dép, phụ kiện',
+  ),
+  _CategoryTemplate(
+    name: 'Làm đẹp & Spa',
+    type: CategoryType.expense,
+    icon: 'beauty',
+    color: 0xFFE11D48, // Crimson rose
+    subtitle: 'Mỹ phẩm, cắt tóc, chăm sóc da',
   ),
   _CategoryTemplate(
     name: 'Ăn vặt & Tiệc tùng',
@@ -81,9 +102,16 @@ const _kCategoryExpenseTemplates = [
   _CategoryTemplate(
     name: 'Sách vở & Khóa học',
     type: CategoryType.expense,
-    icon: 'education',
+    icon: 'books',
     color: 0xFF4F46E5, // Indigo
     subtitle: 'Học tập, kỹ năng mới',
+  ),
+  _CategoryTemplate(
+    name: 'Con cái & Gia đình',
+    type: CategoryType.expense,
+    icon: 'baby',
+    color: 0xFFD97706, // Amber
+    subtitle: 'Bỉm sữa, học phí, chăm sóc bé',
   ),
   _CategoryTemplate(
     name: 'Thú cưng & Thức ăn',
@@ -133,16 +161,23 @@ const _kCategoryIncomeTemplates = [
   _CategoryTemplate(
     name: 'Lãi tiết kiệm & Đầu tư',
     type: CategoryType.income,
-    icon: 'investment',
+    icon: 'stocks',
     color: 0xFF1D5BD6, // Cobalt
-    subtitle: 'Lãi gửi góp, cổ tức, trái phiếu',
+    subtitle: 'Lãi gửi góp, cổ tức, chứng khoán',
   ),
   _CategoryTemplate(
     name: 'Dự án Freelance',
     type: CategoryType.income,
-    icon: 'salary',
+    icon: 'freelance',
     color: 0xFF4F46E5, // Indigo
     subtitle: 'Công việc nhận ngoài giờ',
+  ),
+  _CategoryTemplate(
+    name: 'Kinh doanh & Bán hàng',
+    type: CategoryType.income,
+    icon: 'business',
+    color: 0xFF0D7C66, // Jade
+    subtitle: 'Doanh thu cửa hàng, bán online',
   ),
   _CategoryTemplate(
     name: 'Lì xì & Được tặng',
@@ -152,11 +187,11 @@ const _kCategoryIncomeTemplates = [
     subtitle: 'Tiền biếu tặng, lì xì Tết',
   ),
   _CategoryTemplate(
-    name: 'Thanh lý đồ cũ',
+    name: 'Hoàn tiền & Thanh lý',
     type: CategoryType.income,
-    icon: 'shopping',
+    icon: 'refund',
     color: 0xFF0891B2, // Cyan
-    subtitle: 'Bán đồ dùng, điện máy cũ',
+    subtitle: 'Cashback, bán đồ dùng cũ',
   ),
 ];
 

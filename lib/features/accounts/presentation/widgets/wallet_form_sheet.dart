@@ -98,17 +98,6 @@ const _kWalletTemplates = [
   ),
 ];
 
-const _kWalletIcons = [
-  ('cash', 'Tiền mặt'),
-  ('bank', 'Ngân hàng'),
-  ('ewallet', 'Ví điện tử'),
-  ('card', 'Thẻ'),
-  ('savings', 'Tiết kiệm'),
-  ('wallet', 'Ví chính'),
-  ('salary', 'Lương'),
-  ('investment', 'Đầu tư'),
-];
-
 class WalletFormSheet extends ConsumerStatefulWidget {
   const WalletFormSheet({super.key, this.existing});
 
@@ -973,15 +962,16 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
     required bool isDark,
     required Color accentColor,
   }) {
+    const items = AppIconCatalog.walletIconItems;
     return SizedBox(
-      height: 72,
+      height: 74,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
-        itemCount: _kWalletIcons.length,
+        itemCount: items.length,
         separatorBuilder: (_, _) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
-          final item = _kWalletIcons[index];
+          final item = items[index];
           final isSelected = _icon == item.$1;
           return ApplePressable(
             onTap: () {

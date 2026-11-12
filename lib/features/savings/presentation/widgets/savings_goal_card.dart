@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
@@ -25,35 +26,8 @@ class SavingsGoalCard extends ConsumerWidget {
   final SavingsGoal goal;
   final bool hideBalance;
 
-  IconData _resolveIcon(String key) {
-    switch (key) {
-      case 'house':
-        return CupertinoIcons.house;
-      case 'car':
-        return CupertinoIcons.car;
-      case 'airplane':
-        return CupertinoIcons.airplane;
-      case 'shield':
-        return CupertinoIcons.shield_fill;
-      case 'laptop':
-        return CupertinoIcons.device_laptop;
-      case 'gift':
-        return CupertinoIcons.gift;
-      case 'heart':
-        return CupertinoIcons.heart_fill;
-      case 'star':
-        return CupertinoIcons.star_fill;
-      case 'bag':
-        return CupertinoIcons.bag;
-      case 'book':
-        return CupertinoIcons.book_fill;
-      case 'music':
-        return CupertinoIcons.music_note_2;
-      case 'piggy_bank':
-      default:
-        return Icons.savings_rounded;
-    }
-  }
+  IconData _resolveIcon(String key) =>
+      AppIconCatalog.resolveSavingsIcon(key, useOutlineCard: true);
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
     final l10n = context.l10n;

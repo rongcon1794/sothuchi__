@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
@@ -16,21 +17,8 @@ class LedgerSelectorPill extends ConsumerWidget {
 
   final bool compact;
 
-  IconData _resolveIcon(String iconKey) {
-    switch (iconKey) {
-      case 'family':
-        return CupertinoIcons.person_3_fill;
-      case 'briefcase':
-        return CupertinoIcons.briefcase_fill;
-      case 'wallet':
-        return CupertinoIcons.creditcard_fill;
-      case 'star':
-        return CupertinoIcons.star_fill;
-      case 'person':
-      default:
-        return CupertinoIcons.person_crop_circle_fill;
-    }
-  }
+  IconData _resolveIcon(String iconKey) =>
+      AppIconCatalog.resolveLedgerIcon(iconKey);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

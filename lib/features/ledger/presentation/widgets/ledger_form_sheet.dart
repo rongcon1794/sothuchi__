@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
+import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
@@ -98,20 +99,6 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
 
   bool get _isEditing => widget.existing != null;
 
-  static const _availableIcons = [
-    ('person', CupertinoIcons.person_crop_circle_fill, 'Cá nhân'),
-    ('family', CupertinoIcons.person_3_fill, 'Gia đình'),
-    ('briefcase', CupertinoIcons.briefcase_fill, 'Công việc'),
-    ('wallet', CupertinoIcons.creditcard_fill, 'Quỹ riêng'),
-    ('star', CupertinoIcons.star_fill, 'Đặc biệt'),
-    ('airplane', CupertinoIcons.airplane, 'Du lịch'),
-    ('cart', CupertinoIcons.cart_fill, 'Mua sắm'),
-    ('home', CupertinoIcons.house_fill, 'Nhà cửa'),
-    ('school', CupertinoIcons.book_fill, 'Học tập'),
-    ('chart', CupertinoIcons.chart_bar_alt_fill, 'Đầu tư'),
-    ('heart', CupertinoIcons.heart_fill, 'Sức khỏe'),
-  ];
-
   static const _availableColors = [
     0xFF00A86B, // Jade Green
     0xFF007AFF, // iOS Blue
@@ -155,12 +142,8 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
     super.dispose();
   }
 
-  IconData _resolveIcon(String iconKey) {
-    for (final opt in _availableIcons) {
-      if (opt.$1 == iconKey) return opt.$2;
-    }
-    return CupertinoIcons.book_fill;
-  }
+  IconData _resolveIcon(String iconKey) =>
+      AppIconCatalog.resolveLedgerIcon(iconKey);
 
   String _typeLabel(LedgerType type, AppLocalizations l10n) {
     switch (type) {
@@ -774,10 +757,10 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
-        itemCount: _availableIcons.length,
+        itemCount: AppIconCatalog.ledgerIcons.length,
         separatorBuilder: (_, _) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
-          final item = _availableIcons[index];
+          final item = AppIconCatalog.ledgerIcons[index];
           final isSelected = _selectedIcon == item.$1;
           return ApplePressable(
             onTap: () {

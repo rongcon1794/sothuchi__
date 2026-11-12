@@ -85,15 +85,6 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
     0xFF00C7BE, // Teal
   ];
 
-  static const List<String> _selectableIcons = [
-    'cash',
-    'bank',
-    'ewallet',
-    'card',
-    'savings',
-    'wallet',
-  ];
-
   late final PageController _pageController;
   int _currentStep = 0; // 0 = Tạo ví, 1 = Thiết lập ngân sách
   bool _isCheckingExistingData = true;
@@ -635,7 +626,8 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
-                      children: _selectableIcons.map((iconKey) {
+                      runSpacing: 8,
+                      children: AppIconCatalog.walletKeys.map((iconKey) {
                         final isSelected = _walletIcon == iconKey;
                         return GestureDetector(
                           onTap: () {

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
+import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
@@ -75,21 +76,6 @@ class _SavingsGoalFormSheetState extends ConsumerState<SavingsGoalFormSheet> {
   bool _isSubmitting = false;
 
   bool get _isEditing => widget.existing != null;
-
-  static const _availableIcons = [
-    ('piggy_bank', CupertinoIcons.cube_box, 'Heo đất'),
-    ('shield', CupertinoIcons.shield_fill, 'Khẩn cấp'),
-    ('house', CupertinoIcons.house_fill, 'Nhà cửa'),
-    ('car', CupertinoIcons.car_detailed, 'Xe cộ'),
-    ('airplane', CupertinoIcons.airplane, 'Du lịch'),
-    ('laptop', CupertinoIcons.device_laptop, 'Thiết bị'),
-    ('gift', CupertinoIcons.gift_fill, 'Quà tặng'),
-    ('heart', CupertinoIcons.heart_fill, 'Sức khỏe'),
-    ('star', CupertinoIcons.star_fill, 'Mục tiêu'),
-    ('bag', CupertinoIcons.bag_fill, 'Mua sắm'),
-    ('book', CupertinoIcons.book_fill, 'Học tập'),
-    ('music', CupertinoIcons.music_note_2, 'Giải trí'),
-  ];
 
   static const _availableColors = [
     0xFF00A86B, // Jade Green
@@ -212,35 +198,7 @@ class _SavingsGoalFormSheetState extends ConsumerState<SavingsGoalFormSheet> {
     super.dispose();
   }
 
-  IconData _resolveIcon(String key) {
-    switch (key) {
-      case 'house':
-        return CupertinoIcons.house_fill;
-      case 'car':
-        return CupertinoIcons.car_detailed;
-      case 'airplane':
-        return CupertinoIcons.airplane;
-      case 'shield':
-        return CupertinoIcons.shield_fill;
-      case 'laptop':
-        return CupertinoIcons.device_laptop;
-      case 'gift':
-        return CupertinoIcons.gift_fill;
-      case 'heart':
-        return CupertinoIcons.heart_fill;
-      case 'star':
-        return CupertinoIcons.star_fill;
-      case 'bag':
-        return CupertinoIcons.bag_fill;
-      case 'book':
-        return CupertinoIcons.book_fill;
-      case 'music':
-        return CupertinoIcons.music_note_2;
-      case 'piggy_bank':
-      default:
-        return CupertinoIcons.cube_box;
-    }
-  }
+  IconData _resolveIcon(String key) => AppIconCatalog.resolveSavingsIcon(key);
 
   double _getDynamicFontSize(int textLength) {
     if (textLength <= 7) return 32.0;
