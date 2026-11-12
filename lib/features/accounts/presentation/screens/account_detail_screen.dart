@@ -42,11 +42,16 @@ class AccountDetailScreen extends ConsumerWidget {
 
   Future<void> _handleDelete(BuildContext context, WidgetRef ref, Account account) async {
     final l10n = context.l10n;
+    final isVi = l10n.localeName.startsWith('vi');
     final confirmed = await showCupertinoModalPopup<bool>(
       context: context,
       builder: (ctx) => CupertinoActionSheet(
         title: Text('${l10n.delete} ${account.name}'),
-        message: const Text('Bạn có chắc chắn muốn xóa ví này? Giao dịch liên quan sẽ không bị mất.'),
+        message: Text(
+          isVi
+              ? 'Bạn có chắc chắn muốn xóa ví này? Giao dịch liên quan sẽ không bị mất.'
+              : 'Are you sure you want to delete this wallet? Related transactions will not be lost.',
+        ),
         actions: [
           CupertinoActionSheetAction(
             isDestructiveAction: true,
@@ -84,7 +89,13 @@ class AccountDetailScreen extends ConsumerWidget {
           }
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Đã xóa ví "${account.name}"')),
+              SnackBar(
+                content: Text(
+                  isVi
+                      ? 'Đã xóa ví "${account.name}"'
+                      : 'Deleted wallet "${account.name}"',
+                ),
+              ),
             );
             if (Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
@@ -221,7 +232,13 @@ class AccountDetailScreen extends ConsumerWidget {
                     await ref.read(settingsControllerProvider.notifier).setDefaultWalletId(account.id);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Đã chọn "${account.name}" làm ví mặc định chi tiêu')),
+                        SnackBar(
+                          content: Text(
+                            locale.startsWith('vi')
+                                ? 'Đã chọn "${account.name}" làm ví mặc định chi tiêu'
+                                : 'Selected "${account.name}" as default spending wallet',
+                          ),
+                        ),
                       );
                     }
                   } else if (val == 'archive') {
@@ -235,7 +252,9 @@ class AccountDetailScreen extends ConsumerWidget {
                     ApplePopupMenuItem(
                       value: 'set_default',
                       icon: CupertinoIcons.star_fill,
-                      title: 'Đặt làm ví mặc định',
+                      title: locale.startsWith('vi')
+                          ? 'Đặt làm ví mặc định'
+                          : 'Set as default wallet',
                     ),
                   ApplePopupMenuItem(
                     value: 'edit',
@@ -354,14 +373,14 @@ class AccountDetailScreen extends ConsumerWidget {
                                               width: 0.8,
                                             ),
                                           ),
-                                          child: const Row(
+                                          child: Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              Icon(Icons.star_rounded, size: 11, color: Color(0xFFFFB800)),
-                                              SizedBox(width: 3),
+                                              const Icon(Icons.star_rounded, size: 11, color: Color(0xFFFFB800)),
+                                              const SizedBox(width: 3),
                                               Text(
-                                                'Mặc định',
-                                                style: TextStyle(
+                                                locale.startsWith('vi') ? 'Mặc định' : 'Default',
+                                                style: const TextStyle(
                                                   fontSize: 10,
                                                   fontWeight: FontWeight.w700,
                                                   color: Color(0xFFFFB800),
@@ -567,7 +586,7 @@ class AccountDetailScreen extends ConsumerWidget {
                       ),
                       const SizedBox(width: 10),
                       IconButton.outlined(
-                        tooltip: 'Xóa ví',
+                        tooltip: l10n.delete,
                         style: IconButton.styleFrom(
                           side: BorderSide(
                             color: AppleTokens.systemRed.withValues(alpha: isDark ? 0.4 : 0.25),
@@ -609,8 +628,12 @@ class AccountDetailScreen extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(vertical: 32),
                       child: EmptyStateView(
                         icon: CupertinoIcons.tray,
-                        title: 'Chưa có giao dịch trên ví này',
-                        subtitle: 'Mọi giao dịch thu/chi hoặc chuyển tiền liên quan đến ${account.name} sẽ hiển thị ở đây.',
+                        title: locale.startsWith('vi')
+                            ? 'Chưa có giao dịch trên ví này'
+                            : 'No transactions on this wallet yet',
+                        subtitle: locale.startsWith('vi')
+                            ? 'Mọi giao dịch thu/chi hoặc chuyển tiền liên quan đến ${account.name} sẽ hiển thị ở đây.'
+                            : 'All income, expense, or transfer transactions for ${account.name} will appear here.',
                         actionLabel: l10n.quickAddTransaction,
                         onAction: () {
                           context.push(
@@ -799,22 +822,23 @@ class _WalletBalanceTrendSparklineState
     final lastBalance = points.last.balanceMinor;
     final delta = lastBalance - firstBalance;
 
+    final isVi = widget.locale.toLowerCase().startsWith('vi');
     final String trendLabel;
     final Color trendColor;
     if (delta > 0) {
       final pct = firstBalance > 0
           ? ((delta / firstBalance) * 100).round()
           : 100;
-      trendLabel = '+$pct% trong 14 ngày';
+      trendLabel = isVi ? '+$pct% trong 14 ngày' : '+$pct% in 14 days';
       trendColor = AppleTokens.emeraldIncome;
     } else if (delta < 0) {
       final pct = firstBalance > 0
           ? ((delta.abs() / firstBalance) * 100).round()
           : 100;
-      trendLabel = '-$pct% trong 14 ngày';
+      trendLabel = isVi ? '-$pct% trong 14 ngày' : '-$pct% in 14 days';
       trendColor = AppleTokens.rubyExpense;
     } else {
-      trendLabel = 'Số dư ổn định 14 ngày';
+      trendLabel = isVi ? 'Số dư ổn định 14 ngày' : 'Stable balance (14d)';
       trendColor = widget.walletColor;
     }
 
@@ -857,7 +881,7 @@ class _WalletBalanceTrendSparklineState
               ),
             ] else ...[
               Text(
-                'Biến động 14 ngày qua',
+                isVi ? 'Biến động 14 ngày qua' : '14-day balance trend',
                 style: TextStyle(
                   fontSize: 11.5,
                   fontWeight: FontWeight.w600,

@@ -49,7 +49,6 @@ class _IconAndColorPickerState extends State<IconAndColorPicker> {
             ? Colors.white
             : Colors.black87;
     final visibleKeys = AppIconCatalog.keysForGroup(_selectedGroup);
-    final useBoundedScroll = visibleKeys.length > 24;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,11 +206,9 @@ class _IconAndColorPickerState extends State<IconAndColorPicker> {
         LayoutBuilder(
           builder: (context, constraints) {
             final iconCols = (constraints.maxWidth / 58).floor().clamp(5, 10);
-            final grid = GridView.builder(
-              shrinkWrap: !useBoundedScroll,
-              physics: useBoundedScroll
-                  ? const BouncingScrollPhysics()
-                  : const NeverScrollableScrollPhysics(),
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
               padding: EdgeInsets.zero,
               itemCount: visibleKeys.length,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -276,12 +273,6 @@ class _IconAndColorPickerState extends State<IconAndColorPicker> {
                   ),
                 );
               },
-            );
-
-            if (!useBoundedScroll) return grid;
-            return ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 268),
-              child: grid,
             );
           },
         ),

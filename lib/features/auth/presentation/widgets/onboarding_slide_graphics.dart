@@ -1,4 +1,4 @@
-﻿part of '../screens/onboarding_screen.dart';
+part of '../screens/onboarding_screen.dart';
 
 class _OnboardingHighlight {
   const _OnboardingHighlight({required this.icon, required this.label});
@@ -135,7 +135,9 @@ class _Slide1TransactionWalletGraphic extends StatelessWidget {
               child: _buildFloatingTransactionPill(
                 icon: Icons.local_cafe_rounded,
                 iconColor: AppleTokens.systemOrange,
-                title: 'Cà phê sáng',
+                title: Localizations.localeOf(context).languageCode == 'vi'
+                    ? 'Cà phê sáng'
+                    : 'Morning coffee',
                 amount: '-45.000 ₫',
                 isIncome: false,
                 isDark: isDark,
@@ -149,7 +151,9 @@ class _Slide1TransactionWalletGraphic extends StatelessWidget {
               child: _buildFloatingTransactionPill(
                 icon: Icons.arrow_downward_rounded,
                 iconColor: AppleTokens.jadePrimary,
-                title: 'Lương tháng 11',
+                title: Localizations.localeOf(context).languageCode == 'vi'
+                    ? 'Lương tháng 11'
+                    : 'Nov Salary',
                 amount: '+25.000.000 ₫',
                 isIncome: true,
                 isDark: isDark,
@@ -289,7 +293,9 @@ class _Slide2SmartBudgetGraphic extends StatelessWidget {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      'NGÂN SÁCH THÁNG',
+                      Localizations.localeOf(context).languageCode == 'vi'
+                          ? 'NGÂN SÁCH THÁNG'
+                          : 'MONTHLY BUDGET',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -390,10 +396,12 @@ class _Slide2SmartBudgetGraphic extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 7),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Chi tiêu an toàn hôm nay:',
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                        Localizations.localeOf(context).languageCode == 'vi'
+                            ? 'Chi tiêu an toàn hôm nay:'
+                            : 'Safe to spend today:',
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
                       ),
                     ),
                     const Text(
@@ -588,9 +596,11 @@ class _Slide3SavingsBillsGraphic extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text(
-                          'Hóa đơn điện EVN',
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                        Text(
+                          Localizations.localeOf(context).languageCode == 'vi'
+                              ? 'Hóa đơn điện EVN'
+                              : 'Electricity Bill',
+                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
                         ),
                         Row(
                           children: [
@@ -609,9 +619,11 @@ class _Slide3SavingsBillsGraphic extends StatelessWidget {
                                 color: AppleTokens.rubyExpense.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                               ),
-                              child: const Text(
-                                'Còn 3 ngày',
-                                style: TextStyle(
+                              child: Text(
+                                Localizations.localeOf(context).languageCode == 'vi'
+                                    ? 'Còn 3 ngày'
+                                    : '3 days left',
+                                style: const TextStyle(
                                   fontSize: 9.5,
                                   fontWeight: FontWeight.w700,
                                   color: AppleTokens.rubyExpense,
@@ -694,7 +706,9 @@ class _Slide4ReportsAnalyticsGraphic extends StatelessWidget {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      'DÒNG TIỀN THÁNG',
+                      Localizations.localeOf(context).languageCode == 'vi'
+                          ? 'DÒNG TIỀN THÁNG'
+                          : 'MONTHLY CASHFLOW',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -735,9 +749,33 @@ class _Slide4ReportsAnalyticsGraphic extends StatelessWidget {
               // Cashflow Split Row
               Row(
                 children: [
-                  Expanded(child: _buildMetricCell('Thu nhập', '+35.000.000 ₫', AppleTokens.emeraldIncome)),
-                  Expanded(child: _buildMetricCell('Chi tiêu', '-19.500.000 ₫', AppleTokens.rubyExpense)),
-                  Expanded(child: _buildMetricCell('Dư ròng', '+15.500.000 ₫', AppleTokens.jadePrimary)),
+                  Expanded(
+                    child: _buildMetricCell(
+                      Localizations.localeOf(context).languageCode == 'vi'
+                          ? 'Thu nhập'
+                          : 'Income',
+                      '+35.000.000 ₫',
+                      AppleTokens.emeraldIncome,
+                    ),
+                  ),
+                  Expanded(
+                    child: _buildMetricCell(
+                      Localizations.localeOf(context).languageCode == 'vi'
+                          ? 'Chi tiêu'
+                          : 'Expense',
+                      '-19.500.000 ₫',
+                      AppleTokens.rubyExpense,
+                    ),
+                  ),
+                  Expanded(
+                    child: _buildMetricCell(
+                      Localizations.localeOf(context).languageCode == 'vi'
+                          ? 'Dư ròng'
+                          : 'Net',
+                      '+15.500.000 ₫',
+                      AppleTokens.jadePrimary,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
@@ -766,10 +804,38 @@ class _Slide4ReportsAnalyticsGraphic extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Flexible(child: _buildMiniLegendDot(AppleTokens.systemPurple, 'Ăn uống 42%')),
-                  Flexible(child: _buildMiniLegendDot(AppleTokens.systemPink, 'Nhà ở 28%')),
-                  Flexible(child: _buildMiniLegendDot(AppleTokens.systemBlue, 'Mua sắm 18%')),
-                  Flexible(child: _buildMiniLegendDot(AppleTokens.systemOrange, 'Khác 12%')),
+                  Flexible(
+                    child: _buildMiniLegendDot(
+                      AppleTokens.systemPurple,
+                      Localizations.localeOf(context).languageCode == 'vi'
+                          ? 'Ăn uống 42%'
+                          : 'Food 42%',
+                    ),
+                  ),
+                  Flexible(
+                    child: _buildMiniLegendDot(
+                      AppleTokens.systemPink,
+                      Localizations.localeOf(context).languageCode == 'vi'
+                          ? 'Nhà ở 28%'
+                          : 'Home 28%',
+                    ),
+                  ),
+                  Flexible(
+                    child: _buildMiniLegendDot(
+                      AppleTokens.systemBlue,
+                      Localizations.localeOf(context).languageCode == 'vi'
+                          ? 'Mua sắm 18%'
+                          : 'Shop 18%',
+                    ),
+                  ),
+                  Flexible(
+                    child: _buildMiniLegendDot(
+                      AppleTokens.systemOrange,
+                      Localizations.localeOf(context).languageCode == 'vi'
+                          ? 'Khác 12%'
+                          : 'Other 12%',
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -911,7 +977,9 @@ class _Slide5SecurityCloudGraphic extends StatelessWidget {
               left: 10,
               child: _buildSecurityPill(
                 icon: CupertinoIcons.wifi_slash,
-                label: 'Ngoại tuyến 100%',
+                label: Localizations.localeOf(context).languageCode == 'vi'
+                    ? 'Ngoại tuyến 100%'
+                    : '100% Offline',
                 color: AppleTokens.systemTeal,
                 isDark: isDark,
               ),
@@ -923,7 +991,9 @@ class _Slide5SecurityCloudGraphic extends StatelessWidget {
               right: 10,
               child: _buildSecurityPill(
                 icon: CupertinoIcons.cloud_upload_fill,
-                label: 'Đồng bộ tức thì',
+                label: Localizations.localeOf(context).languageCode == 'vi'
+                    ? 'Đồng bộ tức thì'
+                    : 'Instant Sync',
                 color: AppleTokens.emeraldIncome,
                 isDark: isDark,
               ),

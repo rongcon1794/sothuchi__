@@ -239,15 +239,19 @@ class TransactionWalletPickerSheet extends StatelessWidget {
                                         width: 0.8,
                                       ),
                                     ),
-                                    child: const Row(
+                                    child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Icon(Icons.star_rounded,
+                                        const Icon(Icons.star_rounded,
                                             size: 10, color: Color(0xFFFFB800)),
-                                        SizedBox(width: 2),
+                                        const SizedBox(width: 2),
                                         Text(
-                                          'Mặc định',
-                                          style: TextStyle(
+                                          Localizations.localeOf(context)
+                                                  .languageCode ==
+                                              'vi'
+                                              ? 'Mặc định'
+                                              : 'Default',
+                                          style: const TextStyle(
                                             fontSize: 10,
                                             fontWeight: FontWeight.w700,
                                             color: Color(0xFFFFB800),

@@ -14,7 +14,7 @@ class AppleDatePickerTile extends StatelessWidget {
     super.key,
     required this.selectedDate,
     required this.onDateSelected,
-    this.label = 'Ngày',
+    this.label,
     this.firstDate,
     this.lastDate,
     this.locale = 'vi',
@@ -25,7 +25,7 @@ class AppleDatePickerTile extends StatelessWidget {
 
   final DateTime selectedDate;
   final ValueChanged<DateTime> onDateSelected;
-  final String label;
+  final String? label;
   final DateTime? firstDate;
   final DateTime? lastDate;
   final String locale;
@@ -78,8 +78,12 @@ class AppleDatePickerTile extends StatelessWidget {
         selectedDate.month == now.month &&
         selectedDate.day == now.day;
 
+    final isVi = locale.toLowerCase().startsWith('vi');
+    final effectiveLabel = label ?? (isVi ? 'Ngày' : 'Date');
     final formattedDate = AppDateUtils.formatFullDate(selectedDate, locale: locale);
-    final displayText = isToday ? 'Hôm nay, $formattedDate' : formattedDate;
+    final displayText = isToday
+        ? '${isVi ? 'Hôm nay' : 'Today'}, $formattedDate'
+        : formattedDate;
 
     final bg = backgroundColor ??
         (isDark ? AppleTokens.bgDarkSecondary : AppleTokens.bgLightSecondary);
@@ -118,7 +122,7 @@ class AppleDatePickerTile extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    label,
+                    effectiveLabel,
                     style: theme.textTheme.labelSmall?.copyWith(
                       fontSize: 11.5,
                       fontWeight: FontWeight.w500,

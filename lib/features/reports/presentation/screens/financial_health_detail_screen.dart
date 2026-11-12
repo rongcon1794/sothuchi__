@@ -154,17 +154,26 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
     required HealthScoreData scoreData,
     required String monthStr,
   }) {
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
     final score = scoreData.score;
     final rating = scoreData.rating;
     final badgeColor = scoreData.color;
 
     final summaryText = score >= 80
-        ? 'Tài chính của bạn đang ở trạng thái rất lành mạnh! Tỷ lệ tích lũy và kỷ luật chi tiêu đều đạt chuẩn cao.'
+        ? (isVi
+            ? 'Tài chính của bạn đang ở trạng thái rất lành mạnh! Tỷ lệ tích lũy và kỷ luật chi tiêu đều đạt chuẩn cao.'
+            : 'Your finances are in great shape! Both your savings rate and spending discipline meet high standards.')
         : score >= 60
-            ? 'Tình hình tài chính khá ổn định và có tích lũy. Dòng tiền ròng trong tháng duy trì mức dương.'
+            ? (isVi
+                ? 'Tình hình tài chính khá ổn định và có tích lũy. Dòng tiền ròng trong tháng duy trì mức dương.'
+                : 'Your finances are fairly stable with positive savings. Monthly net cashflow remains positive.')
             : score >= 40
-                ? 'Sức khỏe tài chính ở mức trung bình. Bạn nên theo dõi sát các khoản chi để gia tăng tỷ lệ tích lũy.'
-                : 'Cần chú ý cân đối chi tiêu! Tổng chi đang tiệm cận hoặc vượt mức thu nhập trong tháng.';
+                ? (isVi
+                    ? 'Sức khỏe tài chính ở mức trung bình. Bạn nên theo dõi sát các khoản chi để gia tăng tỷ lệ tích lũy.'
+                    : 'Your financial health is moderate. Track expenses closely to improve your savings rate.')
+                : (isVi
+                    ? 'Cần chú ý cân đối chi tiêu! Tổng chi đang tiệm cận hoặc vượt mức thu nhập trong tháng.'
+                    : 'Watch your spending! Total expenses are approaching or exceeding your monthly income.');
 
     return AppleGlassCard(
       padding: const EdgeInsets.all(20),
@@ -176,7 +185,7 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Báo cáo $monthStr',
+                  isVi ? 'Báo cáo $monthStr' : 'Report: $monthStr',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -248,7 +257,7 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '/100 điểm',
+                  isVi ? '/100 điểm' : '/100 pts',
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
@@ -307,10 +316,12 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Quy chuẩn tài chính 50/30/20',
-                  style: TextStyle(
+                  Localizations.localeOf(context).languageCode == 'vi'
+                      ? 'Quy chuẩn tài chính 50/30/20'
+                      : '50/30/20 Budget Rule',
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                   ),
@@ -320,7 +331,9 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'Quy tắc 50/30/20 chia thu nhập thành 3 nhóm: 50% Nhu cầu thiết yếu, 30% Sở thích cá nhân và 20% Tích lũy dự phòng.',
+            Localizations.localeOf(context).languageCode == 'vi'
+                ? 'Quy tắc 50/30/20 chia thu nhập thành 3 nhóm: 50% Nhu cầu thiết yếu, 30% Sở thích cá nhân và 20% Tích lũy dự phòng.'
+                : 'The 50/30/20 rule divides income into 3 buckets: 50% Needs, 30% Wants, and 20% Savings.',
             style: TextStyle(
               fontSize: 12.5,
               color: theme.colorScheme.onSurfaceVariant,
@@ -367,15 +380,21 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
             children: [
               _buildDistributionLabel(
                 color: AppleTokens.systemBlue,
-                label: '50% Thiết yếu',
+                label: Localizations.localeOf(context).languageCode == 'vi'
+                    ? '50% Thiết yếu'
+                    : '50% Needs',
               ),
               _buildDistributionLabel(
                 color: AppleTokens.systemOrange,
-                label: '30% Sở thích',
+                label: Localizations.localeOf(context).languageCode == 'vi'
+                    ? '30% Sở thích'
+                    : '30% Wants',
               ),
               _buildDistributionLabel(
                 color: AppleTokens.systemGreen,
-                label: '20% Tích lũy',
+                label: Localizations.localeOf(context).languageCode == 'vi'
+                    ? '20% Tích lũy'
+                    : '20% Savings',
               ),
             ],
           ),
@@ -407,9 +426,13 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    isSavingsGood
-                        ? 'Tỷ lệ tích lũy của bạn đạt $savingsRate% (Vượt mức chuẩn 20%)'
-                        : 'Tỷ lệ tích lũy hiện là $savingsRate% (Nên phấn đấu đạt mốc 20%)',
+                    Localizations.localeOf(context).languageCode == 'vi'
+                        ? (isSavingsGood
+                            ? 'Tỷ lệ tích lũy của bạn đạt $savingsRate% (Vượt mức chuẩn 20%)'
+                            : 'Tỷ lệ tích lũy hiện là $savingsRate% (Nên phấn đấu đạt mốc 20%)')
+                        : (isSavingsGood
+                            ? 'Your savings rate is $savingsRate% (Above the 20% benchmark)'
+                            : 'Current savings rate is $savingsRate% (Aim for the 20% target)'),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -458,6 +481,8 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
     required String locale,
     required bool hideBalance,
   }) {
+    final isVi = locale == 'vi';
+    final ptsLabel = isVi ? 'điểm' : 'pts';
     return AppleGlassCard(
       padding: const EdgeInsets.all(16),
       borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
@@ -479,10 +504,12 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Chi tiết các tiêu chí chấm điểm',
-                  style: TextStyle(
+                  isVi
+                      ? 'Chi tiết các tiêu chí chấm điểm'
+                      : 'Scoring Criteria Breakdown',
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                   ),
@@ -498,14 +525,18 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
             isDark: isDark,
             icon: CupertinoIcons.sparkles,
             iconColor: AppleTokens.systemGreen,
-            title: '1. Tỷ lệ tích lũy',
-            pointsText: '${scoreData.savingsScoreImpact > 0 ? '+${scoreData.savingsScoreImpact}' : scoreData.savingsScoreImpact} điểm',
+            title: isVi ? '1. Tỷ lệ tích lũy' : '1. Savings Rate',
+            pointsText: '${scoreData.savingsScoreImpact > 0 ? '+${scoreData.savingsScoreImpact}' : scoreData.savingsScoreImpact} $ptsLabel',
             pointsColor: scoreData.savingsScoreImpact > 0
                 ? AppleTokens.systemGreen
                 : AppleTokens.systemRed,
             description: report.totalIncomeMinor > 0
-                ? 'Bạn đã tích lũy ${scoreData.savingsRate}% tổng thu nhập tháng này.'
-                : 'Chưa có dữ liệu thu nhập để tính tỷ lệ tích lũy.',
+                ? (isVi
+                    ? 'Bạn đã tích lũy ${scoreData.savingsRate}% tổng thu nhập tháng này.'
+                    : 'You saved ${scoreData.savingsRate}% of your total income this month.')
+                : (isVi
+                    ? 'Chưa có dữ liệu thu nhập để tính tỷ lệ tích lũy.'
+                    : 'No income data yet to calculate savings rate.'),
           ),
           const SizedBox(height: 10),
 
@@ -515,14 +546,20 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
             isDark: isDark,
             icon: CupertinoIcons.chart_pie_fill,
             iconColor: AppleTokens.systemBlue,
-            title: '2. Kỷ luật chi tiêu theo danh mục',
-            pointsText: '${scoreData.disciplineScoreImpact > 0 ? '+${scoreData.disciplineScoreImpact}' : scoreData.disciplineScoreImpact} điểm',
+            title: isVi
+                ? '2. Kỷ luật chi tiêu theo danh mục'
+                : '2. Category Spending Discipline',
+            pointsText: '${scoreData.disciplineScoreImpact > 0 ? '+${scoreData.disciplineScoreImpact}' : scoreData.disciplineScoreImpact} $ptsLabel',
             pointsColor: scoreData.disciplineScoreImpact > 0
                 ? AppleTokens.systemGreen
                 : AppleTokens.systemRed,
             description: scoreData.topCategoryName != null
-                ? 'Danh mục cao nhất là "${scoreData.topCategoryName}" chiếm ${scoreData.topCategoryPercent}% tổng chi ${scoreData.isDisciplinePassed ? '(an toàn ≤70%)' : '(vượt quá 70%)'}.'
-                : 'Không có chi tiêu danh mục nào vượt mức chi phối.',
+                ? (isVi
+                    ? 'Danh mục cao nhất là "${scoreData.topCategoryName}" chiếm ${scoreData.topCategoryPercent}% tổng chi ${scoreData.isDisciplinePassed ? '(an toàn ≤70%)' : '(vượt quá 70%)'}.'
+                    : 'Top category "${scoreData.topCategoryName}" accounts for ${scoreData.topCategoryPercent}% of spending ${scoreData.isDisciplinePassed ? '(safe ≤70%)' : '(over 70%)'}.')
+                : (isVi
+                    ? 'Không có chi tiêu danh mục nào vượt mức chi phối.'
+                    : 'No single category dominates your spending.'),
           ),
           const SizedBox(height: 10),
 
@@ -532,14 +569,20 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
             isDark: isDark,
             icon: CupertinoIcons.arrow_up_down_circle_fill,
             iconColor: AppleTokens.systemOrange,
-            title: '3. Dòng tiền ròng (Net Cashflow)',
-            pointsText: '${scoreData.cashflowScoreImpact > 0 ? '+${scoreData.cashflowScoreImpact}' : '0'} điểm',
+            title: isVi
+                ? '3. Dòng tiền ròng (Net Cashflow)'
+                : '3. Net Cashflow',
+            pointsText: '${scoreData.cashflowScoreImpact > 0 ? '+${scoreData.cashflowScoreImpact}' : '0'} $ptsLabel',
             pointsColor: scoreData.isNetPositive
                 ? AppleTokens.systemGreen
                 : AppleTokens.systemOrange,
             description: scoreData.isNetPositive
-                ? 'Thu nhập lớn hơn chi tiêu: Thặng dư ${Money(minorUnits: report.netMinor, currencyCode: report.currencyCode).format(locale: locale, masked: hideBalance)}.'
-                : 'Dòng tiền chưa thặng dư trong tháng: ${Money(minorUnits: report.netMinor, currencyCode: report.currencyCode).format(locale: locale, masked: hideBalance)}.',
+                ? (isVi
+                    ? 'Thu nhập lớn hơn chi tiêu: Thặng dư ${Money(minorUnits: report.netMinor, currencyCode: report.currencyCode).format(locale: locale, masked: hideBalance)}.'
+                    : 'Income exceeds expenses: Surplus of ${Money(minorUnits: report.netMinor, currencyCode: report.currencyCode).format(locale: locale, masked: hideBalance)}.')
+                : (isVi
+                    ? 'Dòng tiền chưa thặng dư trong tháng: ${Money(minorUnits: report.netMinor, currencyCode: report.currencyCode).format(locale: locale, masked: hideBalance)}.'
+                    : 'No positive cashflow surplus this month: ${Money(minorUnits: report.netMinor, currencyCode: report.currencyCode).format(locale: locale, masked: hideBalance)}.'),
           ),
         ],
       ),
@@ -641,10 +684,12 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Nhịp độ & Điểm nhấn chi tiêu',
-                  style: TextStyle(
+                  locale == 'vi'
+                      ? 'Nhịp độ & Điểm nhấn chi tiêu'
+                      : 'Spending Pace & Highlights',
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                   ),
@@ -659,9 +704,11 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
                 child: _buildMetricMiniCard(
                   theme: theme,
                   isDark: isDark,
-                  label: 'Ngày chi nhiều nhất',
+                  label: locale == 'vi' ? 'Ngày chi nhiều nhất' : 'Peak Spending Day',
                   value: report.peakSpendingDay > 0
-                      ? 'Ngày ${report.peakSpendingDay}'
+                      ? (locale == 'vi'
+                          ? 'Ngày ${report.peakSpendingDay}'
+                          : 'Day ${report.peakSpendingDay}')
                       : '—',
                   subValue: report.peakSpendingDay > 0
                       ? Money(
@@ -676,12 +723,14 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
                 child: _buildMetricMiniCard(
                   theme: theme,
                   isDark: isDark,
-                  label: 'Chi tiêu TB/ngày',
+                  label: locale == 'vi' ? 'Chi tiêu TB/ngày' : 'Avg Daily Spend',
                   value: Money(
                     minorUnits: report.averageDailyExpenseMinor,
                     currencyCode: report.currencyCode,
                   ).format(locale: locale, masked: hideBalance),
-                  subValue: '${report.activeSpendingDaysCount} ngày có chi',
+                  subValue: locale == 'vi'
+                      ? '${report.activeSpendingDaysCount} ngày có chi'
+                      : '${report.activeSpendingDaysCount} active days',
                 ),
               ),
             ],
@@ -747,32 +796,43 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
     required MonthlyReportData report,
     required HealthScoreData scoreData,
   }) {
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
     final tips = <String>[];
 
     if (scoreData.savingsRate < 20) {
       tips.add(
-        'Tập thói quen "trả cho mình trước" (Pay yourself first): Chuyển thẳng 10% - 20% thu nhập vào quỹ tiết kiệm ngay khi nhận lương.',
+        isVi
+            ? 'Tập thói quen "trả cho mình trước" (Pay yourself first): Chuyển thẳng 10% - 20% thu nhập vào quỹ tiết kiệm ngay khi nhận lương.'
+            : 'Build a "pay yourself first" habit: move 10%–20% of your income to savings right when you get paid.',
       );
     } else {
       tips.add(
-        'Bạn đang duy trì tỷ lệ tiết kiệm rất tốt! Hãy cân nhắc phân bổ quỹ dư vào các mục tiêu tài chính dài hạn.',
+        isVi
+            ? 'Bạn đang duy trì tỷ lệ tiết kiệm rất tốt! Hãy cân nhắc phân bổ quỹ dư vào các mục tiêu tài chính dài hạn.'
+            : 'You are maintaining a strong savings rate! Consider allocating surplus funds toward long-term goals.',
       );
     }
 
     if (!scoreData.isDisciplinePassed && scoreData.topCategoryName != null) {
       tips.add(
-        'Danh mục "${scoreData.topCategoryName}" đang chiếm hơn 70% tổng chi. Bạn nên thiết lập ngân sách riêng cho danh mục này để kiểm soát chặt chẽ.',
+        isVi
+            ? 'Danh mục "${scoreData.topCategoryName}" đang chiếm hơn 70% tổng chi. Bạn nên thiết lập ngân sách riêng cho danh mục này để kiểm soát chặt chẽ.'
+            : '"${scoreData.topCategoryName}" accounts for over 70% of your spending. Set a dedicated budget to keep it under control.',
       );
     }
 
     if (!scoreData.isNetPositive) {
       tips.add(
-        'Dòng tiền tháng này đang thâm hụt. Hãy rà soát lại các khoản chi phát sinh lớn bất thường và cắt giảm các khoản chi không cấp thiết.',
+        isVi
+            ? 'Dòng tiền tháng này đang thâm hụt. Hãy rà soát lại các khoản chi phát sinh lớn bất thường và cắt giảm các khoản chi không cấp thiết.'
+            : 'Cashflow is negative this month. Review unusually large expenses and trim non-essential spending.',
       );
     }
 
     tips.add(
-      'Ghi chép đều đặn các khoản chi tiêu mỗi ngày giúp ứng dụng phân tích chính xác nhất nhịp độ dòng tiền của bạn.',
+      isVi
+          ? 'Ghi chép đều đặn các khoản chi tiêu mỗi ngày giúp ứng dụng phân tích chính xác nhất nhịp độ dòng tiền của bạn.'
+          : 'Logging expenses consistently each day helps the app analyze your cashflow pace accurately.',
     );
 
     return AppleGlassCard(
@@ -796,10 +856,10 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Gợi ý tối ưu tài chính',
-                  style: TextStyle(
+                  isVi ? 'Gợi ý tối ưu tài chính' : 'Financial Optimization Tips',
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                   ),

@@ -223,7 +223,7 @@ extension _SavingsGoalFormSections on _SavingsGoalFormSheetState {
                     if (_isEditing && currentAmount > 0) ...[
                       const SizedBox(height: 2),
                       Text(
-                        'Đã có ${Money(minorUnits: currentAmount, currencyCode: currency).format(locale: locale)}',
+                        '${locale == 'vi' ? 'Đã có' : 'Saved'} ${Money(minorUnits: currentAmount, currencyCode: currency).format(locale: locale)}',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
@@ -626,10 +626,30 @@ extension _SavingsGoalFormSections on _SavingsGoalFormSheetState {
           physics: const BouncingScrollPhysics(),
           child: Row(
             children: [
-              _buildDurationChip(30, '1 tháng', isDark, accentColor),
-              _buildDurationChip(90, '3 tháng', isDark, accentColor),
-              _buildDurationChip(180, '6 tháng', isDark, accentColor),
-              _buildDurationChip(365, '1 năm', isDark, accentColor),
+              _buildDurationChip(
+                30,
+                locale == 'vi' ? '1 tháng' : '1 month',
+                isDark,
+                accentColor,
+              ),
+              _buildDurationChip(
+                90,
+                locale == 'vi' ? '3 tháng' : '3 months',
+                isDark,
+                accentColor,
+              ),
+              _buildDurationChip(
+                180,
+                locale == 'vi' ? '6 tháng' : '6 months',
+                isDark,
+                accentColor,
+              ),
+              _buildDurationChip(
+                365,
+                locale == 'vi' ? '1 năm' : '1 year',
+                isDark,
+                accentColor,
+              ),
               ApplePressable(
                 scaleDown: 0.92,
                 onTap: _pickDeadline,
@@ -667,7 +687,9 @@ extension _SavingsGoalFormSections on _SavingsGoalFormSheetState {
                       Text(
                         _deadline != null
                             ? DateFormat('dd/MM/yyyy').format(_deadline!)
-                            : 'Tùy chọn ngày...',
+                            : (locale == 'vi'
+                                ? 'Tùy chọn ngày...'
+                                : 'Custom date...'),
                         style: TextStyle(
                           fontSize: 11.5,
                           fontWeight: _deadline != null && !_isPredefinedDuration(daysRemaining)
@@ -714,7 +736,10 @@ extension _SavingsGoalFormSections on _SavingsGoalFormSheetState {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Nhịp độ tích lũy thông minh'.toUpperCase(),
+                        (locale == 'vi'
+                                ? 'Nhịp độ tích lũy thông minh'
+                                : 'Smart Savings Pace')
+                            .toUpperCase(),
                         style: TextStyle(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w700,
@@ -724,7 +749,9 @@ extension _SavingsGoalFormSections on _SavingsGoalFormSheetState {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '~ ${Money(minorUnits: dailyNeeded, currencyCode: currency).format(locale: locale)} / ngày  (hoặc ~ ${Money(minorUnits: monthlyNeeded ?? 0, currencyCode: currency).format(locale: locale)} / tháng)',
+                        locale == 'vi'
+                            ? '~ ${Money(minorUnits: dailyNeeded, currencyCode: currency).format(locale: locale)} / ngày  (hoặc ~ ${Money(minorUnits: monthlyNeeded ?? 0, currencyCode: currency).format(locale: locale)} / tháng)'
+                            : '~ ${Money(minorUnits: dailyNeeded, currencyCode: currency).format(locale: locale)} / day  (or ~ ${Money(minorUnits: monthlyNeeded ?? 0, currencyCode: currency).format(locale: locale)} / month)',
                         style: TextStyle(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w700,
@@ -762,7 +789,9 @@ extension _SavingsGoalFormSections on _SavingsGoalFormSheetState {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Mẹo: Chọn hạn hoàn thành giúp bạn chia nhỏ số tiền cần tiết kiệm mỗi ngày/tháng để dễ dàng hoàn thành mục tiêu.',
+                    locale == 'vi'
+                        ? 'Mẹo: Chọn hạn hoàn thành giúp bạn chia nhỏ số tiền cần tiết kiệm mỗi ngày/tháng để dễ dàng hoàn thành mục tiêu.'
+                        : 'Tip: Setting a target date helps break down how much to save daily/monthly to reach your goal.',
                     style: TextStyle(
                       fontSize: 11,
                       color: isDark ? Colors.white60 : Colors.black54,

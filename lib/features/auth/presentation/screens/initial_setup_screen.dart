@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/constants/currency_constants.dart';
 import 'package:so_thu_chi/core/constants/icon_catalog.dart';
+import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/money.dart';
@@ -179,7 +180,8 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
   void _goToStep2() {
     unawaited(HapticFeedback.lightImpact());
     if (_walletNameController.text.trim().isEmpty) {
-      _walletNameController.text = 'Tiền mặt';
+      final isVi = Localizations.localeOf(context).languageCode == 'vi';
+      _walletNameController.text = isVi ? 'Tiền mặt' : 'Cash';
     }
     setState(() => _currentStep = 1);
     _pageController.animateToPage(
@@ -204,10 +206,11 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
     unawaited(HapticFeedback.mediumImpact());
     setState(() => _isSaving = true);
 
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
     try {
       final user = ref.read(currentUserProvider);
       final walletName = _walletNameController.text.trim().isEmpty
-          ? 'Tiền mặt'
+          ? (isVi ? 'Tiền mặt' : 'Cash')
           : _walletNameController.text.trim();
       final effectiveWalletBalance = Money.tryParse(
             _walletBalanceController.text,
@@ -243,13 +246,17 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
         } catch (_) {}
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi: ${res.errorOrNull}')),
+          SnackBar(content: Text(context.localizeError(res.errorOrNull!))),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi thiết lập: $e')),
+          SnackBar(
+            content: Text(
+              isVi ? 'Lỗi thiết lập: $e' : 'Setup error: $e',
+            ),
+          ),
         );
       }
     } finally {
@@ -274,7 +281,7 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
       } catch (_) {}
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi: ${res.errorOrNull}')),
+        SnackBar(content: Text(context.localizeError(res.errorOrNull!))),
       );
       setState(() => _isSaving = false);
     }
@@ -284,6 +291,7 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
 
     if (_isCheckingExistingData) {
       return Scaffold(
@@ -295,7 +303,9 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
               const CupertinoActivityIndicator(radius: 14),
               const SizedBox(height: 16),
               Text(
-                'Đang kiểm tra dữ liệu tài khoản...',
+                isVi
+                    ? 'Đang kiểm tra dữ liệu tài khoản...'
+                    : 'Checking account data...',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -332,7 +342,7 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
                 ? IconButton(
                     icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
                     onPressed: _isSaving ? null : _goBackToStep1,
-                    tooltip: 'Quay lại ví',
+                    tooltip: isVi ? 'Quay lại ví' : 'Back to wallet',
                   )
                 : null,
             title: _buildStepIndicator(),
@@ -342,7 +352,7 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
                 TextButton(
                   onPressed: _isSaving ? null : _skipAndUseDefaults,
                   child: Text(
-                    'Bỏ qua',
+                    isVi ? 'Bỏ qua' : 'Skip',
                     style: TextStyle(
                       color: theme.colorScheme.primary,
                       fontWeight: FontWeight.w600,
@@ -420,7 +430,9 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
               borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
             ),
             child: Text(
-              'Bước 1 / 2 • Tạo ví tiền đầu tiên',
+              Localizations.localeOf(context).languageCode == 'vi'
+                  ? 'Bước 1 / 2 • Tạo ví tiền đầu tiên'
+                  : 'Step 1 / 2 • Create your first wallet',
               style: TextStyle(
                 color: scheme.primary,
                 fontWeight: FontWeight.w700,
@@ -430,7 +442,9 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
           ),
           const SizedBox(height: 10),
           Text(
-            'Tạo ví tiền đầu tiên',
+            Localizations.localeOf(context).languageCode == 'vi'
+                ? 'Tạo ví tiền đầu tiên'
+                : 'Create your first wallet',
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w800,
               letterSpacing: -0.5,
@@ -438,7 +452,9 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Bắt đầu ghi chép chi tiêu bằng cách thêm ví hoặc tài khoản chính bạn đang sử dụng.',
+            Localizations.localeOf(context).languageCode == 'vi'
+                ? 'Bắt đầu ghi chép chi tiêu bằng cách thêm ví hoặc tài khoản chính bạn đang sử dụng.'
+                : 'Start tracking your finances by adding your main wallet or bank account.',
             style: TextStyle(
               fontSize: 13.5,
               color: scheme.onSurface.withValues(alpha: 0.65),
@@ -453,7 +469,9 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
 
           // Quick templates
           Text(
-            'Gợi ý nhanh',
+            Localizations.localeOf(context).languageCode == 'vi'
+                ? 'Gợi ý nhanh'
+                : 'Quick suggestions',
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -492,8 +510,12 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
           // Wallet Name
           AppleTextField(
             controller: _walletNameController,
-            label: 'Tên ví',
-            placeholder: 'Ví dụ: Tiền mặt, Techcombank, MoMo...',
+            label: Localizations.localeOf(context).languageCode == 'vi'
+                ? 'Tên ví'
+                : 'Wallet name',
+            placeholder: Localizations.localeOf(context).languageCode == 'vi'
+                ? 'Ví dụ: Tiền mặt, Techcombank, MoMo...'
+                : 'e.g. Cash, Bank, E-Wallet...',
             clearable: true,
             onChanged: (_) => setState(() {}),
           ),
@@ -501,7 +523,9 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
 
           // Wallet Type
           Text(
-            'Loại ví',
+            Localizations.localeOf(context).languageCode == 'vi'
+                ? 'Loại ví'
+                : 'Wallet type',
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -511,11 +535,29 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
           const SizedBox(height: 8),
           Row(
             children: [
-              _buildTypeChip('Tiền mặt', AccountType.cash, 'cash'),
+              _buildTypeChip(
+                Localizations.localeOf(context).languageCode == 'vi'
+                    ? 'Tiền mặt'
+                    : 'Cash',
+                AccountType.cash,
+                'cash',
+              ),
               const SizedBox(width: 8),
-              _buildTypeChip('Ngân hàng', AccountType.bank, 'bank'),
+              _buildTypeChip(
+                Localizations.localeOf(context).languageCode == 'vi'
+                    ? 'Ngân hàng'
+                    : 'Bank',
+                AccountType.bank,
+                'bank',
+              ),
               const SizedBox(width: 8),
-              _buildTypeChip('Ví điện tử', AccountType.ewallet, 'ewallet'),
+              _buildTypeChip(
+                Localizations.localeOf(context).languageCode == 'vi'
+                    ? 'Ví điện tử'
+                    : 'E-Wallet',
+                AccountType.ewallet,
+                'ewallet',
+              ),
             ],
           ),
           const SizedBox(height: 14),
@@ -523,11 +565,16 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
           // Initial Balance
           AppleTextField(
             controller: _walletBalanceController,
-            label: 'Số dư ban đầu',
+            label: Localizations.localeOf(context).languageCode == 'vi'
+                ? 'Số dư ban đầu'
+                : 'Initial balance',
             placeholder: '0',
             keyboardType: TextInputType.number,
             inputFormatters: [
-              MoneyInputFormatter(currencyCode: _selectedCurrency),
+              MoneyInputFormatter(
+                currencyCode: _selectedCurrency,
+                locale: Localizations.localeOf(context).languageCode,
+              ),
             ],
             suffix: Text(
               AppCurrencies.byCode(_selectedCurrency).symbol,
@@ -566,7 +613,9 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Màu sắc',
+                      Localizations.localeOf(context).languageCode == 'vi'
+                          ? 'Màu sắc'
+                          : 'Color',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -616,7 +665,9 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Biểu tượng',
+                      Localizations.localeOf(context).languageCode == 'vi'
+                          ? 'Biểu tượng'
+                          : 'Icon',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -679,7 +730,9 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
 
           // Continue Button to Step 2
           AppleButton.primary(
-            label: 'Tiếp tục: Thiết lập ngân sách',
+            label: Localizations.localeOf(context).languageCode == 'vi'
+                ? 'Tiếp tục: Thiết lập ngân sách'
+                : 'Continue: Set up budget',
             icon: const Icon(Icons.arrow_forward_rounded, size: 20),
             onPressed: _goToStep2,
           ),
@@ -688,7 +741,9 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
             child: TextButton(
               onPressed: _isSaving ? null : _skipAndUseDefaults,
               child: Text(
-                'Bỏ qua & Sử dụng cấu hình cơ bản',
+                Localizations.localeOf(context).languageCode == 'vi'
+                    ? 'Bỏ qua & Sử dụng cấu hình cơ bản'
+                    : 'Skip & Use default setup',
                 style: TextStyle(
                   fontSize: 13,
                   color: scheme.onSurface.withValues(alpha: 0.6),
@@ -703,20 +758,21 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
   }
 
   Widget _buildWalletPreviewCard(bool isDark) {
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
     final currencyInfo = AppCurrencies.byCode(_selectedCurrency);
     final walletName = _walletNameController.text.trim().isEmpty
-        ? 'Tên ví'
+        ? (isVi ? 'Tên ví' : 'Wallet name')
         : _walletNameController.text.trim();
     final balanceText = Money(
       minorUnits: _walletBalance,
       currencyCode: _selectedCurrency,
-    ).format();
+    ).format(locale: Localizations.localeOf(context).languageCode);
 
     final typeLabel = switch (_walletType) {
-      AccountType.cash => 'Tiền mặt',
-      AccountType.bank => 'Tài khoản Ngân hàng',
-      AccountType.ewallet => 'Ví điện tử',
-      _ => 'Tài khoản',
+      AccountType.cash => isVi ? 'Tiền mặt' : 'Cash',
+      AccountType.bank => isVi ? 'Tài khoản Ngân hàng' : 'Bank Account',
+      AccountType.ewallet => isVi ? 'Ví điện tử' : 'E-Wallet',
+      _ => isVi ? 'Tài khoản' : 'Account',
     };
 
     return Container(
@@ -896,7 +952,9 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
               borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
             ),
             child: Text(
-              'Bước 2 / 2 • Thiết lập ngân sách',
+              Localizations.localeOf(context).languageCode == 'vi'
+                  ? 'Bước 2 / 2 • Thiết lập ngân sách'
+                  : 'Step 2 / 2 • Set up budget',
               style: TextStyle(
                 color: LucianTokens.resolveMint(isDark),
                 fontWeight: FontWeight.w700,
@@ -906,7 +964,9 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
           ),
           const SizedBox(height: 10),
           Text(
-            'Thiết lập ngân sách tháng',
+            Localizations.localeOf(context).languageCode == 'vi'
+                ? 'Thiết lập ngân sách tháng'
+                : 'Set monthly budget',
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w800,
               letterSpacing: -0.5,
@@ -914,7 +974,9 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Đặt hạn mức chi tiêu hàng tháng để ứng dụng nhắc nhở và giữ nhịp chi an toàn mỗi ngày.',
+            Localizations.localeOf(context).languageCode == 'vi'
+                ? 'Đặt hạn mức chi tiêu hàng tháng để ứng dụng nhắc nhở và giữ nhịp chi an toàn mỗi ngày.'
+                : 'Set a monthly spending limit so the app can remind you and keep a safe daily pace.',
             style: TextStyle(
               fontSize: 13.5,
               color: scheme.onSurface.withValues(alpha: 0.65),
@@ -947,18 +1009,24 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Kiểm soát chi tiêu thông minh',
-                        style: TextStyle(
+                      Text(
+                        Localizations.localeOf(context).languageCode == 'vi'
+                            ? 'Kiểm soát chi tiêu thông minh'
+                            : 'Smart spending control',
+                        style: const TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '• Tính toán số tiền an toàn bạn có thể tiêu mỗi ngày\n'
-                        '• Cảnh báo tức thì khi chi tiêu chạm $_budgetAlertThreshold% hạn mức\n'
-                        '• Tránh tình trạng thâm hụt trước khi hết tháng',
+                        Localizations.localeOf(context).languageCode == 'vi'
+                            ? '• Tính toán số tiền an toàn bạn có thể tiêu mỗi ngày\n'
+                                '• Cảnh báo tức thì khi chi tiêu chạm $_budgetAlertThreshold% hạn mức\n'
+                                '• Tránh tình trạng thâm hụt trước khi hết tháng'
+                            : '• Calculate a safe daily spending allowance\n'
+                                '• Instant alert when spending hits $_budgetAlertThreshold% of limit\n'
+                                '• Avoid running into deficit before month end',
                         style: TextStyle(
                           fontSize: 12.5,
                           color: scheme.onSurface.withValues(alpha: 0.75),
@@ -976,11 +1044,16 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
           // Monthly Limit Input
           AppleTextField(
             controller: _budgetController,
-            label: 'Hạn mức chi tiêu tháng này',
+            label: Localizations.localeOf(context).languageCode == 'vi'
+                ? 'Hạn mức chi tiêu tháng này'
+                : 'This month\'s spending limit',
             placeholder: '5.000.000',
             keyboardType: TextInputType.number,
             inputFormatters: [
-              MoneyInputFormatter(currencyCode: _selectedCurrency),
+              MoneyInputFormatter(
+                currencyCode: _selectedCurrency,
+                locale: Localizations.localeOf(context).languageCode,
+              ),
             ],
             suffix: Text(
               AppCurrencies.byCode(_selectedCurrency).symbol,
@@ -1000,7 +1073,9 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
 
           // Quick Presets
           Text(
-            'Mức ngân sách phổ biến',
+            Localizations.localeOf(context).languageCode == 'vi'
+                ? 'Mức ngân sách phổ biến'
+                : 'Popular budget presets',
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -1012,11 +1087,36 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _buildBudgetPresetChip(3000000, '3 triệu (Tiết kiệm)'),
-                _buildBudgetPresetChip(5000000, '5 triệu (Cơ bản)'),
-                _buildBudgetPresetChip(10000000, '10 triệu (Tiêu chuẩn)'),
-                _buildBudgetPresetChip(15000000, '15 triệu (Thoải mái)'),
-                _buildBudgetPresetChip(20000000, '20 triệu'),
+                _buildBudgetPresetChip(
+                  3000000,
+                  Localizations.localeOf(context).languageCode == 'vi'
+                      ? '3 triệu (Tiết kiệm)'
+                      : '3M (Saver)',
+                ),
+                _buildBudgetPresetChip(
+                  5000000,
+                  Localizations.localeOf(context).languageCode == 'vi'
+                      ? '5 triệu (Cơ bản)'
+                      : '5M (Basic)',
+                ),
+                _buildBudgetPresetChip(
+                  10000000,
+                  Localizations.localeOf(context).languageCode == 'vi'
+                      ? '10 triệu (Tiêu chuẩn)'
+                      : '10M (Standard)',
+                ),
+                _buildBudgetPresetChip(
+                  15000000,
+                  Localizations.localeOf(context).languageCode == 'vi'
+                      ? '15 triệu (Thoải mái)'
+                      : '15M (Comfort)',
+                ),
+                _buildBudgetPresetChip(
+                  20000000,
+                  Localizations.localeOf(context).languageCode == 'vi'
+                      ? '20 triệu'
+                      : '20M',
+                ),
               ],
             ),
           ),
@@ -1024,7 +1124,9 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
 
           // Alert Threshold
           Text(
-            'Ngưỡng phát tín hiệu cảnh báo',
+            Localizations.localeOf(context).languageCode == 'vi'
+                ? 'Ngưỡng phát tín hiệu cảnh báo'
+                : 'Alert threshold',
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -1036,14 +1138,21 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
             children: [
               _buildThresholdChip(70, '70%'),
               const SizedBox(width: 8),
-              _buildThresholdChip(80, '80% (Khuyên dùng)'),
+              _buildThresholdChip(
+                80,
+                Localizations.localeOf(context).languageCode == 'vi'
+                    ? '80% (Khuyên dùng)'
+                    : '80% (Recommended)',
+              ),
               const SizedBox(width: 8),
               _buildThresholdChip(90, '90%'),
             ],
           ),
           const SizedBox(height: 6),
           Text(
-            'Ứng dụng sẽ đổi màu cảnh báo trên biểu đồ khi tổng chi tiêu trong tháng chạm $_budgetAlertThreshold% ngân sách.',
+            Localizations.localeOf(context).languageCode == 'vi'
+                ? 'Ứng dụng sẽ đổi màu cảnh báo trên biểu đồ khi tổng chi tiêu trong tháng chạm $_budgetAlertThreshold% ngân sách.'
+                : 'Charts will highlight a warning color when monthly spending reaches $_budgetAlertThreshold% of your budget.',
             style: TextStyle(
               fontSize: 12,
               color: scheme.onSurface.withValues(alpha: 0.55),
@@ -1053,7 +1162,9 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
 
           // Action: Complete with Budget
           AppleButton.primary(
-            label: 'Hoàn tất & Bắt đầu sử dụng',
+            label: Localizations.localeOf(context).languageCode == 'vi'
+                ? 'Hoàn tất & Bắt đầu sử dụng'
+                : 'Complete & Start using',
             icon: const Icon(Icons.check_circle_rounded, size: 20),
             isLoading: _isSaving,
             onPressed: () => _completeSetup(includeBudget: true),
@@ -1065,7 +1176,9 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
             child: TextButton(
               onPressed: _isSaving ? null : () => _completeSetup(includeBudget: false),
               child: Text(
-                'Để sau (Bỏ qua bước này)',
+                Localizations.localeOf(context).languageCode == 'vi'
+                    ? 'Để sau (Bỏ qua bước này)'
+                    : 'Maybe later (Skip this step)',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,

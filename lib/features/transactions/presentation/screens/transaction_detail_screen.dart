@@ -38,12 +38,15 @@ class TransactionDetailScreen extends ConsumerWidget {
     TransactionEntity tx,
   ) async {
     final l10n = context.l10n;
+    final isVi = l10n.localeName.startsWith('vi');
     final confirmed = await showCupertinoModalPopup<bool>(
       context: context,
       builder: (ctx) => CupertinoActionSheet(
-        title: const Text('Xóa giao dịch'),
-        message: const Text(
-          'Bạn có chắc chắn muốn xóa giao dịch này? Bạn có thể hoàn tác ngay sau khi xóa.',
+        title: Text(isVi ? 'Xóa giao dịch' : 'Delete transaction'),
+        message: Text(
+          isVi
+              ? 'Bạn có chắc chắn muốn xóa giao dịch này? Bạn có thể hoàn tác ngay sau khi xóa.'
+              : 'Are you sure you want to delete this transaction? You can undo right after deleting.',
         ),
         actions: [
           CupertinoActionSheetAction(
@@ -90,7 +93,9 @@ class TransactionDetailScreen extends ConsumerWidget {
         messenger.showSnackBar(
           SnackBar(
             content: Text(
-              context.localizeError(res.errorOrNull ?? 'Lỗi không xác định'),
+              context.localizeError(
+                res.errorOrNull ?? (isVi ? 'Đã có lỗi xảy ra' : 'Unknown error'),
+              ),
             ),
           ),
         );
@@ -174,6 +179,7 @@ class TransactionDetailScreen extends ConsumerWidget {
     final categoriesMap = ref.watch(categoriesMapProvider);
     final settings = ref.watch(settingsControllerProvider).value;
     final locale = settings?.localeCode ?? 'vi';
+    final isVi = locale.toLowerCase().startsWith('vi');
     final hideBalance = settings?.hideBalance ?? false;
 
     return txsAsync.when(
@@ -204,7 +210,7 @@ class TransactionDetailScreen extends ConsumerWidget {
               bottom: false,
               child: Center(
                 child: Text(
-                  'Không tìm thấy giao dịch',
+                  isVi ? 'Không tìm thấy giao dịch' : 'Transaction not found',
                   style: theme.textTheme.titleMedium,
                 ),
               ),
@@ -239,7 +245,7 @@ class TransactionDetailScreen extends ConsumerWidget {
         };
 
         final formattedAmount = hideBalance
-            ? '•••••• ₫'
+            ? tx.money.format(locale: locale, masked: true)
             : switch (tx.type) {
                 TransactionType.expense =>
                   '- ${tx.money.format(locale: locale)}',
@@ -266,13 +272,13 @@ class TransactionDetailScreen extends ConsumerWidget {
               icon: const Icon(CupertinoIcons.chevron_left, size: 24),
               onPressed: () => context.pop(),
             ),
-            title: const Text(
-              'Chi tiết giao dịch',
-              style: TextStyle(fontWeight: FontWeight.w700),
+            title: Text(
+              isVi ? 'Chi tiết giao dịch' : 'Transaction Details',
+              style: const TextStyle(fontWeight: FontWeight.w700),
             ),
             actions: [
               IconButton(
-                tooltip: 'Sao chép giao dịch',
+                tooltip: isVi ? 'Sao chép giao dịch' : 'Duplicate transaction',
                 icon: const Icon(CupertinoIcons.doc_on_doc, size: 20),
                 onPressed: () => _handleDuplicate(context, tx),
               ),
@@ -421,8 +427,12 @@ class TransactionDetailScreen extends ConsumerWidget {
                             iconColor: Color(category.color),
                             iconBgColor:
                                 Color(category.color).withValues(alpha: 0.16),
-                            title: 'Danh mục',
-                            value: category.name,
+                            title: isVi ? 'Danh mục' : 'Category',
+                            value: DefaultCategoryLocalization.resolveName(
+                              l10n,
+                              categoryId: category.id,
+                              fallbackName: category.name,
+                            ),
                             trailingChevron: true,
                             onTap: () => context.push(
                               AppRoutes.categoryDetail(category.id),
@@ -439,12 +449,12 @@ class TransactionDetailScreen extends ConsumerWidget {
                             iconBgColor:
                                 Color(sourceAccount.color).withValues(alpha: 0.16),
                             title: tx.type == TransactionType.transfer
-                                ? 'Ví chuyển (nguồn)'
-                                : 'Ví thanh toán',
+                                ? (isVi ? 'Ví chuyển (nguồn)' : 'Source wallet')
+                                : (isVi ? 'Ví thanh toán' : 'Wallet'),
                             value: sourceAccount.name,
                             subtitle: hideBalance
                                 ? null
-                                : 'Số dư hiện tại: ${sourceAccount.balanceMoney.format(locale: locale)}',
+                                : '${isVi ? 'Số dư hiện tại' : 'Current balance'}: ${sourceAccount.balanceMoney.format(locale: locale)}',
                             trailingChevron: true,
                             onTap: () => context.push(
                               AppRoutes.accountDetail(sourceAccount.id),
@@ -461,11 +471,11 @@ class TransactionDetailScreen extends ConsumerWidget {
                             iconColor: Color(destAccount.color),
                             iconBgColor:
                                 Color(destAccount.color).withValues(alpha: 0.16),
-                            title: 'Ví nhận (đích)',
+                            title: isVi ? 'Ví nhận (đích)' : 'Destination wallet',
                             value: destAccount.name,
                             subtitle: hideBalance
                                 ? null
-                                : 'Số dư hiện tại: ${destAccount.balanceMoney.format(locale: locale)}',
+                                : '${isVi ? 'Số dư hiện tại' : 'Current balance'}: ${destAccount.balanceMoney.format(locale: locale)}',
                             trailingChevron: true,
                             onTap: () => context.push(
                               AppRoutes.accountDetail(destAccount.id),
@@ -480,7 +490,7 @@ class TransactionDetailScreen extends ConsumerWidget {
                           iconColor: theme.colorScheme.primary,
                           iconBgColor: theme.colorScheme.primary
                               .withValues(alpha: 0.14),
-                          title: 'Thời gian giao dịch',
+                          title: isVi ? 'Thời gian giao dịch' : 'Transaction time',
                           value: fullDateStr,
                         ),
 
@@ -514,7 +524,7 @@ class TransactionDetailScreen extends ConsumerWidget {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Nhãn đã gắn',
+                                        isVi ? 'Nhãn đã gắn' : 'Tags',
                                         style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w500,
@@ -574,7 +584,7 @@ class TransactionDetailScreen extends ConsumerWidget {
                       // Sửa button
                       Expanded(
                         child: AppleButton(
-                          label: 'Chỉnh sửa',
+                          label: l10n.edit,
                           icon: const Icon(CupertinoIcons.pencil, size: 18),
                           onPressed: () =>
                               context.push(AppRoutes.transactionEdit(tx.id)),
@@ -586,8 +596,8 @@ class TransactionDetailScreen extends ConsumerWidget {
                       Expanded(
                         child: LucianHoldToDeleteButton(
                           label: l10n.delete,
-                          holdingLabel: 'Giữ...',
-                          confirmedLabel: 'Đã xóa!',
+                          holdingLabel: isVi ? 'Giữ...' : 'Hold...',
+                          confirmedLabel: isVi ? 'Đã xóa!' : 'Deleted!',
                           onTap: () => _handleDelete(context, ref, tx),
                           onConfirmed: () =>
                               _handleDirectHoldDelete(context, ref, tx),
@@ -599,7 +609,9 @@ class TransactionDetailScreen extends ConsumerWidget {
 
                   // Duplicate action button
                   AppleButton(
-                    label: 'Sao chép thành giao dịch mới',
+                    label: isVi
+                        ? 'Sao chép thành giao dịch mới'
+                        : 'Duplicate as new transaction',
                     icon: const Icon(CupertinoIcons.doc_on_doc, size: 16),
                     variant: AppleButtonVariant.outline,
                     onPressed: () => _handleDuplicate(context, tx),
@@ -609,7 +621,7 @@ class TransactionDetailScreen extends ConsumerWidget {
                   // 4. Subtle Metadata Footer
                   Center(
                     child: Text(
-                      'Mã giao dịch: #${tx.id.substring(0, math.min(10, tx.id.length))}',
+                      '${isVi ? 'Mã giao dịch' : 'Transaction ID'}: #${tx.id.substring(0, math.min(10, tx.id.length))}',
                       style: TextStyle(
                         fontSize: 11,
                         color: theme.colorScheme.onSurfaceVariant

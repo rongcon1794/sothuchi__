@@ -173,6 +173,7 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
     final expenseUnits = widget.monthSummary.expense.minorUnits;
     final netUnits = widget.monthSummary.net.minorUnits;
 
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
     final String deltaLabel;
     final bool isDeltaPositive;
     if (_activeMetric == LucianKpiMetric.balance) {
@@ -180,35 +181,37 @@ class _LucianLiveKpiCardState extends State<LucianLiveKpiCard>
         final rate = incomeUnits > 0
             ? ((netUnits / incomeUnits) * 100).round()
             : 100;
-        deltaLabel = '+$rate% tích lũy tháng';
+        deltaLabel = isVi ? '+$rate% tích lũy tháng' : '+$rate% monthly saved';
         isDeltaPositive = true;
       } else if (netUnits < 0) {
         if (incomeUnits > 0) {
           final rate = ((netUnits.abs() / incomeUnits) * 100).round();
-          deltaLabel = '-$rate% thâm hụt';
+          deltaLabel = isVi ? '-$rate% thâm hụt' : '-$rate% deficit';
         } else {
-          deltaLabel = 'Chi ròng tháng này';
+          deltaLabel = isVi ? 'Chi ròng tháng này' : 'Net monthly expense';
         }
         isDeltaPositive = false;
       } else {
-        deltaLabel = hasFlow ? 'Thu chi cân bằng' : 'Số dư ổn định';
+        deltaLabel = hasFlow
+            ? (isVi ? 'Thu chi cân bằng' : 'Balanced cashflow')
+            : (isVi ? 'Số dư ổn định' : 'Stable balance');
         isDeltaPositive = true;
       }
     } else if (_activeMetric == LucianKpiMetric.income) {
       if (incomeUnits > 0 && totalFlow > 0) {
         final incShare = ((incomeUnits / totalFlow) * 100).round();
-        deltaLabel = '$incShare% dòng tiền vào';
+        deltaLabel = isVi ? '$incShare% dòng tiền vào' : '$incShare% total inflow';
       } else {
-        deltaLabel = 'Chưa có thu nhập tháng';
+        deltaLabel = isVi ? 'Chưa có thu nhập tháng' : 'No monthly income yet';
       }
       isDeltaPositive = true;
     } else {
       if (expenseUnits > 0 && totalFlow > 0) {
         final expShare = ((expenseUnits / totalFlow) * 100).round();
-        deltaLabel = '$expShare% tổng chi xuất';
+        deltaLabel = isVi ? '$expShare% tổng chi xuất' : '$expShare% total outflow';
         isDeltaPositive = false;
       } else {
-        deltaLabel = 'Chưa có chi tiêu tháng';
+        deltaLabel = isVi ? 'Chưa có chi tiêu tháng' : 'No monthly expense yet';
         isDeltaPositive = true;
       }
     }

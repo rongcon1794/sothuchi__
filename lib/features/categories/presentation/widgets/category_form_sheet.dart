@@ -338,28 +338,33 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
     );
     final isIncome = _type == CategoryType.income;
     final isDefault = widget.existing?.isDefault ?? false;
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
     final trimmedName = _nameController.text.trim();
     final displayName = trimmedName.isEmpty
-        ? (isIncome ? 'Khoản thu mới' : 'Khoản chi mới')
+        ? (isIncome
+            ? (isVi ? 'Khoản thu mới' : 'New income')
+            : (isVi ? 'Khoản chi mới' : 'New expense'))
         : trimmedName;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 4, bottom: 8),
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
           child: Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.remove_red_eye_outlined,
                 size: 14,
                 color: AppleTokens.systemGray,
               ),
-              SizedBox(width: 6),
+              const SizedBox(width: 6),
               Text(
-                'BẢN XEM TRƯỚC DANH MỤC TRÊN DANH SÁCH',
-                style: TextStyle(
+                isVi
+                    ? 'BẢN XEM TRƯỚC DANH MỤC TRÊN DANH SÁCH'
+                    : 'CATEGORY LIST PREVIEW',
+                style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.6,
@@ -429,7 +434,9 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                             borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                           ),
                           child: Text(
-                            isDefault ? 'Mặc định' : 'Tùy chỉnh',
+                            isDefault
+                                ? (isVi ? 'Mặc định' : 'Default')
+                                : (isVi ? 'Tùy chỉnh' : 'Custom'),
                             style: TextStyle(
                               fontSize: 10.5,
                               fontWeight: FontWeight.w700,
@@ -441,10 +448,10 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                         ),
                         const SizedBox(width: 6),
                         // Transaction count indicator
-                        const Flexible(
+                        Flexible(
                           child: Text(
-                            'Chưa dùng',
-                            style: TextStyle(
+                            isVi ? 'Chưa dùng' : 'Unused',
+                            style: const TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w500,
                               fontFeatures: AppTheme.tabularFigures,
@@ -510,7 +517,9 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
         Row(
           children: [
             Text(
-              'MẪU DANH MỤC GỢI Ý',
+              Localizations.localeOf(context).languageCode == 'vi'
+                  ? 'MẪU DANH MỤC GỢI Ý'
+                  : 'SUGGESTED TEMPLATES',
               style: theme.textTheme.labelSmall?.copyWith(
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.6,
@@ -634,15 +643,20 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
 
     return AppleModalSheetLayout(
       title: widget.existing == null ? l10n.addCategory : l10n.editCategory,
       subtitle: widget.existing == null
-          ? 'Tạo danh mục để theo dõi ngân sách và báo cáo chuẩn xác'
-          : 'Cập nhật tên, biểu tượng hoặc màu sắc nhận diện',
+          ? (isVi
+              ? 'Tạo danh mục để theo dõi ngân sách và báo cáo chuẩn xác'
+              : 'Create a category for accurate budgets and reports')
+          : (isVi
+              ? 'Cập nhật tên, biểu tượng hoặc màu sắc nhận diện'
+              : 'Update name, icon, or accent color'),
       bottomAction: AppleButton.primary(
         onPressed: _isSubmitting ? null : _submit,
-        label: _isSubmitting ? 'Đang lưu...' : l10n.save,
+        label: _isSubmitting ? (isVi ? 'Đang lưu...' : 'Saving...') : l10n.save,
       ),
       child: Form(
         key: _formKey,
@@ -691,7 +705,9 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
               const SizedBox(height: 8),
               Center(
                 child: Text(
-                  'Không thể thay đổi loại Thu / Chi khi đang sửa danh mục',
+                  isVi
+                      ? 'Không thể thay đổi loại Thu / Chi khi đang sửa danh mục'
+                      : 'Cannot change Income / Expense type while editing',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: AppleTokens.systemGray,
                     fontSize: 11,
@@ -714,13 +730,17 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
               maxLength: 100,
               label: l10n.categoryName,
               placeholder: _type == CategoryType.expense
-                  ? 'VD: Cà phê, Xăng xe, Tiền trọ...'
-                  : 'VD: Lương, Thưởng, Bán hàng...',
+                  ? (isVi
+                      ? 'VD: Cà phê, Xăng xe, Tiền trọ...'
+                      : 'e.g. Coffee, Fuel, Rent...')
+                  : (isVi
+                      ? 'VD: Lương, Thưởng, Bán hàng...'
+                      : 'e.g. Salary, Bonus, Sales...'),
               prefixIcon: const Icon(CupertinoIcons.tag, size: 20),
               suffixIcon: _nameController.text.isNotEmpty
                   ? IconButton(
                       icon: const Icon(CupertinoIcons.clear_thick_circled, size: 18),
-                      tooltip: 'Xóa tên',
+                      tooltip: isVi ? 'Xóa tên' : 'Clear name',
                       onPressed: () {
                         unawaited(HapticFeedback.lightImpact());
                         _nameController.clear();
@@ -730,7 +750,9 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
               validator: (v) {
                 final trimmed = v?.trim() ?? '';
                 if (trimmed.isEmpty) {
-                  return 'Vui lòng nhập tên danh mục';
+                  return isVi
+                      ? 'Vui lòng nhập tên danh mục'
+                      : 'Please enter a category name';
                 }
                 if (trimmed.length > 100) {
                   return l10n.errorValidation;
@@ -774,7 +796,9 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
                       const Icon(CupertinoIcons.trash, color: AppleTokens.systemRed, size: 17),
                       const SizedBox(width: 6),
                       Text(
-                        'Xóa danh mục "${widget.existing!.name}"',
+                        isVi
+                            ? 'Xóa danh mục "${widget.existing!.name}"'
+                            : 'Delete "${widget.existing!.name}"',
                         style: const TextStyle(
                           color: AppleTokens.systemRed,
                           fontWeight: FontWeight.w600,
@@ -797,12 +821,15 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
     final cat = widget.existing;
     if (cat == null) return;
     final l10n = context.l10n;
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
     final confirmed = await showCupertinoModalPopup<bool>(
       context: context,
       builder: (ctx) => CupertinoActionSheet(
         title: Text('${l10n.delete} ${cat.name}'),
-        message: const Text(
-          'Bạn có chắc chắn muốn xóa danh mục này? Các giao dịch đã ghi nhận vẫn được bảo lưu an toàn.',
+        message: Text(
+          isVi
+              ? 'Bạn có chắc chắn muốn xóa danh mục này? Các giao dịch đã ghi nhận vẫn được bảo lưu an toàn.'
+              : 'Are you sure you want to delete this category? Existing transactions will be preserved.',
         ),
         actions: [
           CupertinoActionSheetAction(
@@ -830,7 +857,11 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
         Navigator.of(context).pop();
         messenger.showSnackBar(
           SnackBar(
-            content: Text('Đã xóa danh mục "${cat.name}"'),
+            content: Text(
+              isVi
+                  ? 'Đã xóa danh mục "${cat.name}"'
+                  : 'Deleted category "${cat.name}"',
+            ),
             behavior: SnackBarBehavior.floating,
           ),
         );

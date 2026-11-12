@@ -54,7 +54,13 @@ class _LedgersManagementScreenState
             const Icon(CupertinoIcons.checkmark_alt_circle_fill,
                 color: Colors.white, size: 20),
             const SizedBox(width: 8),
-            Expanded(child: Text('Đã chuyển sang sổ: ${item.name}')),
+            Expanded(
+              child: Text(
+                context.l10n.localeName.startsWith('vi')
+                    ? 'Đã chuyển sang sổ: ${item.name}'
+                    : 'Switched to ledger: ${item.name}',
+              ),
+            ),
           ],
         ),
         backgroundColor: AppleTokens.jadeDark,
@@ -94,7 +100,11 @@ class _LedgersManagementScreenState
           onSuccess: (_) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Đã xóa sổ: ${ledger.name}'),
+                content: Text(
+                  l10n.localeName.startsWith('vi')
+                      ? 'Đã xóa sổ: ${ledger.name}'
+                      : 'Deleted ledger: ${ledger.name}',
+                ),
                 backgroundColor: AppleTokens.rubyExpense,
               ),
             );
@@ -385,18 +395,22 @@ class _LedgersManagementScreenState
                                 ),
                               ],
                             ),
-                            child: const Row(
+                            child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(
+                                const Icon(
                                   CupertinoIcons.circle_fill,
                                   color: Colors.white,
                                   size: 7,
                                 ),
-                                SizedBox(width: 5),
+                                const SizedBox(width: 5),
                                 Text(
-                                  'ĐANG HOẠT ĐỘNG',
-                                  style: TextStyle(
+                                  Localizations.localeOf(context)
+                                          .languageCode
+                                          .startsWith('vi')
+                                      ? 'ĐANG HOẠT ĐỘNG'
+                                      : 'ACTIVE',
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 10.5,
                                     fontWeight: FontWeight.w800,
@@ -444,7 +458,9 @@ class _LedgersManagementScreenState
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Toàn bộ ví tiền, thu chi và báo cáo hiện tại được lưu riêng trong sổ này.',
+                    Localizations.localeOf(context).languageCode.startsWith('vi')
+                        ? 'Toàn bộ ví tiền, thu chi và báo cáo hiện tại được lưu riêng trong sổ này.'
+                        : 'All wallets, transactions, and reports are isolated inside this ledger.',
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.85),
                       fontSize: 12.5,
@@ -467,38 +483,44 @@ class _LedgersManagementScreenState
     required String currency,
     required bool isDark,
   }) {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildMetricTile(
-            icon: CupertinoIcons.book_fill,
-            color: AppleTokens.systemBlue,
-            title: '$ledgersCount Sổ',
-            label: 'Tổng số sổ',
-            isDark: isDark,
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _buildMetricTile(
-            icon: CupertinoIcons.tag_fill,
-            color: AppleTokens.systemIndigo,
-            title: activeTypeLabel,
-            label: 'Loại hiện tại',
-            isDark: isDark,
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _buildMetricTile(
-            icon: CupertinoIcons.money_dollar_circle_fill,
-            color: AppleTokens.jadePrimary,
-            title: currency,
-            label: 'Tiền tệ hạch toán',
-            isDark: isDark,
-          ),
-        ),
-      ],
+    return Builder(
+      builder: (context) {
+        final isVi =
+            Localizations.localeOf(context).languageCode.startsWith('vi');
+        return Row(
+          children: [
+            Expanded(
+              child: _buildMetricTile(
+                icon: CupertinoIcons.book_fill,
+                color: AppleTokens.systemBlue,
+                title: isVi ? '$ledgersCount Sổ' : '$ledgersCount Ledgers',
+                label: isVi ? 'Tổng số sổ' : 'Total ledgers',
+                isDark: isDark,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildMetricTile(
+                icon: CupertinoIcons.tag_fill,
+                color: AppleTokens.systemIndigo,
+                title: activeTypeLabel,
+                label: isVi ? 'Loại hiện tại' : 'Current type',
+                isDark: isDark,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildMetricTile(
+                icon: CupertinoIcons.money_dollar_circle_fill,
+                color: AppleTokens.jadePrimary,
+                title: currency,
+                label: isVi ? 'Tiền tệ hạch toán' : 'Currency',
+                isDark: isDark,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -663,9 +685,11 @@ class _LedgersManagementScreenState
                                         : Colors.black.withValues(alpha: 0.06),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
-                                  child: const Text(
-                                    'Mặc định',
-                                    style: TextStyle(
+                                  child: Text(
+                                    l10n.localeName.startsWith('vi')
+                                        ? 'Mặc định'
+                                        : 'Default',
+                                    style: const TextStyle(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w600,
                                       color: AppleTokens.systemGray,
@@ -698,7 +722,9 @@ class _LedgersManagementScreenState
                             BorderRadius.circular(AppleTokens.radiusPill),
                         onPressed: () => _switchLedger(context, item),
                         child: Text(
-                          'Chọn sổ',
+                          l10n.localeName.startsWith('vi')
+                              ? 'Chọn sổ'
+                              : 'Switch',
                           style: TextStyle(
                             fontSize: 11.5,
                             fontWeight: FontWeight.w700,

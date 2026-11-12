@@ -34,11 +34,16 @@ class BudgetDetailScreen extends ConsumerWidget {
 
   Future<void> _handleDelete(BuildContext context, WidgetRef ref, Budget budget) async {
     final l10n = context.l10n;
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
     final confirmed = await showCupertinoModalPopup<bool>(
       context: context,
       builder: (ctx) => CupertinoActionSheet(
         title: Text(l10n.delete),
-        message: const Text('Bạn có chắc chắn muốn xóa ngân sách này? Các giao dịch chi tiêu vẫn được giữ nguyên.'),
+        message: Text(
+          isVi
+              ? 'Bạn có chắc chắn muốn xóa ngân sách này? Các giao dịch chi tiêu vẫn được giữ nguyên.'
+              : 'Are you sure you want to delete this budget? Your expense transactions will remain intact.',
+        ),
         actions: [
           CupertinoActionSheetAction(
             isDestructiveAction: true,
@@ -104,7 +109,9 @@ class BudgetDetailScreen extends ConsumerWidget {
               bottom: false,
               child: Center(
                 child: Text(
-                  'Không tìm thấy ngân sách',
+                  Localizations.localeOf(context).languageCode == 'vi'
+                      ? 'Không tìm thấy ngân sách'
+                      : 'Budget not found',
                   style: theme.textTheme.titleMedium,
                 ),
               ),
@@ -458,8 +465,12 @@ class BudgetDetailScreen extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(vertical: 32),
                       child: EmptyStateView(
                         icon: CupertinoIcons.tray,
-                        title: 'Chưa có khoản chi nào',
-                        subtitle: 'Các giao dịch chi tiêu trong tháng áp dụng vào ngân sách này sẽ hiển thị ở đây.',
+                        title: Localizations.localeOf(context).languageCode == 'vi'
+                            ? 'Chưa có khoản chi nào'
+                            : 'No expenses yet',
+                        subtitle: Localizations.localeOf(context).languageCode == 'vi'
+                            ? 'Các giao dịch chi tiêu trong tháng áp dụng vào ngân sách này sẽ hiển thị ở đây.'
+                            : 'Monthly expense transactions matching this budget will appear here.',
                         actionLabel: l10n.quickAddTransaction,
                         onAction: () {
                           context.push(

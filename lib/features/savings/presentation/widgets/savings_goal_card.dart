@@ -263,7 +263,7 @@ class SavingsGoalCard extends ConsumerWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'ĐÃ TÍCH LŨY',
+                        locale == 'vi' ? 'ĐÃ TÍCH LŨY' : 'SAVED',
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
@@ -293,9 +293,13 @@ class SavingsGoalCard extends ConsumerWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        goal.remainingAmount > 0
-                            ? 'Mục tiêu ${goal.targetMoney.format(locale: locale, masked: hideBalance)} • Thiếu ${goal.remainingMoney.format(locale: locale, masked: hideBalance)}'
-                            : 'Mục tiêu ${goal.targetMoney.format(locale: locale, masked: hideBalance)} • Đã hoàn thành',
+                        locale == 'vi'
+                            ? (goal.remainingAmount > 0
+                                ? 'Mục tiêu ${goal.targetMoney.format(locale: locale, masked: hideBalance)} • Thiếu ${goal.remainingMoney.format(locale: locale, masked: hideBalance)}'
+                                : 'Mục tiêu ${goal.targetMoney.format(locale: locale, masked: hideBalance)} • Đã hoàn thành')
+                            : (goal.remainingAmount > 0
+                                ? 'Target ${goal.targetMoney.format(locale: locale, masked: hideBalance)} • ${goal.remainingMoney.format(locale: locale, masked: hideBalance)} left'
+                                : 'Target ${goal.targetMoney.format(locale: locale, masked: hideBalance)} • Completed'),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(

@@ -624,7 +624,11 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
           parts.add(accountsMap[accId]!.name);
         }
       } else {
-        parts.add('${effectiveAccounts.length} ví');
+        parts.add(
+          locale.startsWith('vi')
+              ? '${effectiveAccounts.length} ví'
+              : '${effectiveAccounts.length} wallets',
+        );
       }
     }
 
@@ -633,10 +637,20 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
       if (effectiveCategories.length == 1) {
         final catId = effectiveCategories.first;
         if (categoriesMap.containsKey(catId)) {
-          parts.add(categoriesMap[catId]!.name);
+          parts.add(
+            DefaultCategoryLocalization.resolveName(
+              l10n,
+              categoryId: catId,
+              fallbackName: categoriesMap[catId]!.name,
+            ),
+          );
         }
       } else {
-        parts.add('${effectiveCategories.length} danh mục');
+        parts.add(
+          locale.startsWith('vi')
+              ? '${effectiveCategories.length} danh mục'
+              : '${effectiveCategories.length} categories',
+        );
       }
     }
 

@@ -28,7 +28,7 @@ class _LedgerTemplate {
   final String subtitle;
 }
 
-const _kLedgerTemplates = [
+const _kLedgerTemplatesVi = [
   _LedgerTemplate(
     name: 'Sổ Gia Đình',
     type: LedgerType.family,
@@ -70,6 +70,51 @@ const _kLedgerTemplates = [
     icon: 'home',
     color: 0xFFFA5050,
     subtitle: 'Sửa nhà, mua sắm nội thất',
+  ),
+];
+
+const _kLedgerTemplatesEn = [
+  _LedgerTemplate(
+    name: 'Family Ledger',
+    type: LedgerType.family,
+    icon: 'family',
+    color: 0xFF007AFF,
+    subtitle: 'Household & kids expenses',
+  ),
+  _LedgerTemplate(
+    name: 'Business & Projects',
+    type: LedgerType.business,
+    icon: 'briefcase',
+    color: 0xFF5856D6,
+    subtitle: 'Sales & project cashflow',
+  ),
+  _LedgerTemplate(
+    name: 'Travel & Vacation Fund',
+    type: LedgerType.custom,
+    icon: 'airplane',
+    color: 0xFFFF9500,
+    subtitle: 'Trips, flights & hotels',
+  ),
+  _LedgerTemplate(
+    name: 'Investments & Savings',
+    type: LedgerType.custom,
+    icon: 'chart',
+    color: 0xFF00A86B,
+    subtitle: 'Stocks, gold & assets',
+  ),
+  _LedgerTemplate(
+    name: 'Education & Kids',
+    type: LedgerType.family,
+    icon: 'school',
+    color: 0xFF30B0C7,
+    subtitle: 'Tuition, books & courses',
+  ),
+  _LedgerTemplate(
+    name: 'Home Renovation',
+    type: LedgerType.custom,
+    icon: 'home',
+    color: 0xFFFA5050,
+    subtitle: 'Repairs & furniture',
   ),
 ];
 
@@ -266,7 +311,9 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
             if (!_isEditing) ...[
               _buildSectionHeader(
                 icon: CupertinoIcons.sparkles,
-                title: 'Mẫu sổ thu chi phổ biến',
+                title: Localizations.localeOf(context).languageCode == 'vi'
+                    ? 'Mẫu sổ thu chi phổ biến'
+                    : 'Popular ledger templates',
                 accentColor: accentColor,
               ),
               _buildTemplatesCarousel(isDark: isDark),
@@ -402,19 +449,21 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 4, bottom: 8),
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
           child: Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.remove_red_eye_outlined,
                 size: 14,
                 color: AppleTokens.systemGray,
               ),
-              SizedBox(width: 6),
+              const SizedBox(width: 6),
               Text(
-                'BẢN XEM TRƯỚC SỔ TRÊN DANH SÁCH',
-                style: TextStyle(
+                Localizations.localeOf(context).languageCode == 'vi'
+                    ? 'BẢN XEM TRƯỚC SỔ TRÊN DANH SÁCH'
+                    : 'LEDGER LIST PREVIEW',
+                style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.6,
@@ -483,9 +532,11 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
                                           : Colors.black.withValues(alpha: 0.06),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
-                                    child: const Text(
-                                      'Mặc định',
-                                      style: TextStyle(
+                                    child: Text(
+                                      Localizations.localeOf(context).languageCode == 'vi'
+                                          ? 'Mặc định'
+                                          : 'Default',
+                                      style: const TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.w600,
                                         color: AppleTokens.systemGray,
@@ -537,15 +588,17 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
   }
 
   Widget _buildTemplatesCarousel({required bool isDark}) {
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
+    final templates = isVi ? _kLedgerTemplatesVi : _kLedgerTemplatesEn;
     return SizedBox(
       height: 72,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
-        itemCount: _kLedgerTemplates.length,
+        itemCount: templates.length,
         separatorBuilder: (_, _) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
-          final tpl = _kLedgerTemplates[index];
+          final tpl = templates[index];
           final tplColor = Color(tpl.color);
           return ApplePressable(
             onTap: () {
@@ -622,29 +675,30 @@ class _LedgerFormSheetState extends ConsumerState<LedgerFormSheet> {
     required AppLocalizations l10n,
     required Color accentColor,
   }) {
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
     final types = [
       (
         type: LedgerType.personal,
         title: l10n.ledgerPersonal,
-        desc: 'Thu chi cá nhân',
+        desc: isVi ? 'Thu chi cá nhân' : 'Personal finances',
         icon: CupertinoIcons.person_crop_circle_fill,
       ),
       (
         type: LedgerType.family,
         title: l10n.ledgerFamily,
-        desc: 'Sinh hoạt chung',
+        desc: isVi ? 'Sinh hoạt chung' : 'Shared household',
         icon: CupertinoIcons.person_3_fill,
       ),
       (
         type: LedgerType.business,
         title: l10n.ledgerBusiness,
-        desc: 'Kinh doanh & dự án',
+        desc: isVi ? 'Kinh doanh & dự án' : 'Business & projects',
         icon: CupertinoIcons.briefcase_fill,
       ),
       (
         type: LedgerType.custom,
         title: l10n.ledgerCustom,
-        desc: 'Quỹ riêng & sự kiện',
+        desc: isVi ? 'Quỹ riêng & sự kiện' : 'Funds & events',
         icon: CupertinoIcons.star_fill,
       ),
     ];

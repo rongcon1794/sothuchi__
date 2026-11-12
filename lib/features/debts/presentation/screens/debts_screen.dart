@@ -159,7 +159,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
                         ),
                       ),
                       child: Text(
-                        '${filteredDebts.length} khoản',
+                        '${filteredDebts.length} ${locale == 'vi' ? 'khoản' : (filteredDebts.length == 1 ? 'item' : 'items')}',
                         style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
@@ -386,7 +386,9 @@ class _DebtSummaryCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Chênh lệch ròng:',
+                        locale.startsWith('vi')
+                            ? 'Chênh lệch ròng:'
+                            : 'Net balance:',
                         style: TextStyle(
                           fontSize: 11.5,
                           fontWeight: FontWeight.w600,
@@ -435,7 +437,9 @@ class _DebtSummaryCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            '${summary.overdueCount} quá hạn',
+                            locale.startsWith('vi')
+                                ? '${summary.overdueCount} quá hạn'
+                                : '${summary.overdueCount} overdue',
                             style: const TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
@@ -447,7 +451,9 @@ class _DebtSummaryCard extends StatelessWidget {
                     )
                   else
                     Text(
-                      '$activeCount đang theo dõi',
+                      locale.startsWith('vi')
+                          ? '$activeCount đang theo dõi'
+                          : '$activeCount active',
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
@@ -658,7 +664,9 @@ class _DebtCard extends ConsumerWidget {
                         Text(
                           debt.phoneNumber?.isNotEmpty == true
                               ? debt.phoneNumber!
-                              : (isLent ? 'Khoản cho vay' : 'Khoản đi vay'),
+                              : (isLent
+                                ? (locale.startsWith('vi') ? 'Khoản cho vay' : 'Lent')
+                                : (locale.startsWith('vi') ? 'Khoản đi vay' : 'Borrowed')),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -719,7 +727,7 @@ class _DebtCard extends ConsumerWidget {
                       children: [
                         Text(
                           hasPartialPayment
-                              ? 'CÒN LẠI'
+                              ? (locale.startsWith('vi') ? 'CÒN LẠI' : 'REMAINING')
                               : l10n.amount.toUpperCase(),
                           style: TextStyle(
                             fontSize: 10,
@@ -758,7 +766,9 @@ class _DebtCard extends ConsumerWidget {
                         if (hasPartialPayment) ...[
                           const SizedBox(height: 2),
                           Text(
-                            'Tổng ${debt.totalMoney.format(locale: locale, masked: hideBalance)} • Đã trả $paidPercent%',
+                            locale.startsWith('vi')
+                                ? 'Tổng ${debt.totalMoney.format(locale: locale, masked: hideBalance)} • Đã trả $paidPercent%'
+                                : 'Total ${debt.totalMoney.format(locale: locale, masked: hideBalance)} • Paid $paidPercent%',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -770,9 +780,11 @@ class _DebtCard extends ConsumerWidget {
                           ),
                         ] else if (debt.isSettled) ...[
                           const SizedBox(height: 2),
-                          const Text(
-                            'Đã tất toán xong',
-                            style: TextStyle(
+                          Text(
+                            locale.startsWith('vi')
+                                ? 'Đã tất toán xong'
+                                : 'Settled',
+                            style: const TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                               color: AppleTokens.systemGray,
@@ -803,8 +815,8 @@ class _DebtCard extends ConsumerWidget {
                             const SizedBox(width: 4),
                             Text(
                               debt.isOverdue
-                                  ? 'Quá hạn ${AppDateUtils.formatShortDate(debt.dueDate!, locale: locale)}'
-                                  : 'Hạn ${AppDateUtils.formatShortDate(debt.dueDate!, locale: locale)}',
+                                  ? '${locale.startsWith('vi') ? 'Quá hạn' : 'Overdue'} ${AppDateUtils.formatShortDate(debt.dueDate!, locale: locale)}'
+                                  : '${locale.startsWith('vi') ? 'Hạn' : 'Due'} ${AppDateUtils.formatShortDate(debt.dueDate!, locale: locale)}',
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: debt.isOverdue
@@ -905,18 +917,18 @@ class _DebtCard extends ConsumerWidget {
                               AppleTokens.radiusPill,
                             ),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
+                              const Icon(
                                 CupertinoIcons.checkmark_circle_fill,
                                 size: 13,
                                 color: AppleTokens.emeraldIncome,
                               ),
-                              SizedBox(width: 4),
+                              const SizedBox(width: 4),
                               Text(
-                                'Hoàn tất',
-                                style: TextStyle(
+                                l10n.debtFilterSettled,
+                                style: const TextStyle(
                                   fontSize: 11.5,
                                   fontWeight: FontWeight.w700,
                                   color: AppleTokens.emeraldIncome,

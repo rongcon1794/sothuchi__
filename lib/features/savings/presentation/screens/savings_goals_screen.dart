@@ -33,10 +33,11 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
     required int completedCount,
     required bool isDark,
   }) {
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
     final filters = [
-      (index: 0, label: 'Tất cả ($totalCount)'),
-      (index: 1, label: 'Đang nuôi ($activeCount)'),
-      (index: 2, label: 'Hoàn thành ($completedCount)'),
+      (index: 0, label: '${isVi ? 'Tất cả' : 'All'} ($totalCount)'),
+      (index: 1, label: '${isVi ? 'Đang nuôi' : 'Active'} ($activeCount)'),
+      (index: 2, label: '${isVi ? 'Hoàn thành' : 'Completed'} ($completedCount)'),
     ];
 
     return SizedBox(
@@ -424,9 +425,13 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 32),
                   child: Center(
                     child: Text(
-                      _selectedFilter == 1
-                          ? 'Không có mục tiêu nào đang tích lũy'
-                          : 'Chưa có mục tiêu nào hoàn thành',
+                      Localizations.localeOf(context).languageCode == 'vi'
+                          ? (_selectedFilter == 1
+                              ? 'Không có mục tiêu nào đang tích lũy'
+                              : 'Chưa có mục tiêu nào hoàn thành')
+                          : (_selectedFilter == 1
+                              ? 'No active savings goals'
+                              : 'No completed savings goals yet'),
                       style: const TextStyle(color: AppleTokens.systemGray),
                     ),
                   ),

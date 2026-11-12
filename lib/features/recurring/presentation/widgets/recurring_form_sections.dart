@@ -80,7 +80,9 @@ extension _RecurringFormSections on _RecurringFormSheetState {
             child: _buildTypeCard(
               type: TransactionType.expense,
               label: l10n.expense,
-              subtitle: 'Hóa đơn & dịch vụ',
+              subtitle: Localizations.localeOf(context).languageCode == 'vi'
+                  ? 'Hóa đơn & dịch vụ'
+                  : 'Bills & services',
               icon: CupertinoIcons.arrow_up_right,
               accentColor: AppleTokens.rubyExpense,
               isSelected: isExpense,
@@ -105,7 +107,9 @@ extension _RecurringFormSections on _RecurringFormSheetState {
             child: _buildTypeCard(
               type: TransactionType.income,
               label: l10n.income,
-              subtitle: 'Lương & thu nhập',
+              subtitle: Localizations.localeOf(context).languageCode == 'vi'
+                  ? 'Lương & thu nhập'
+                  : 'Salary & income',
               icon: CupertinoIcons.arrow_down_left,
               accentColor: AppleTokens.jadePrimary,
               isSelected: !isExpense,
@@ -282,12 +286,13 @@ extension _RecurringFormSections on _RecurringFormSheetState {
     required Category? selectedCategory,
     required Account? selectedWallet,
   }) {
+    final isVi = locale == 'vi';
     final hasTitle = _titleController.text.trim().isNotEmpty;
     final titleText = hasTitle
         ? _titleController.text.trim()
         : (_type == TransactionType.expense
             ? l10n.recurringTitleLabel
-            : 'Tên khoản thu nhập');
+            : (isVi ? 'Tên khoản thu nhập' : 'Income source name'));
     final noteText = _noteController.text.trim();
     final isExpense = _type == TransactionType.expense;
     final rawIconColor =
@@ -397,9 +402,9 @@ extension _RecurringFormSections on _RecurringFormSheetState {
                           child: Text(
                             _autoExecute
                                 ? (isExpense
-                                    ? 'Tự động thanh toán'
-                                    : 'Tự động nhận tiền')
-                                : 'Xác nhận thủ công',
+                                    ? (isVi ? 'Tự động thanh toán' : 'Auto-pay')
+                                    : (isVi ? 'Tự động nhận tiền' : 'Auto-receive'))
+                                : (isVi ? 'Xác nhận thủ công' : 'Manual confirm'),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -550,9 +555,12 @@ extension _RecurringFormSections on _RecurringFormSheetState {
     required List<Category> availableCats,
     required bool isDark,
   }) {
-    final filteredTemplates = _RecurringFormSheetState._popularTemplates
-        .where((t) => t.type == _type)
-        .toList();
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
+    final templates = isVi
+        ? _RecurringFormSheetState._popularTemplatesVi
+        : _RecurringFormSheetState._popularTemplatesEn;
+    final filteredTemplates =
+        templates.where((t) => t.type == _type).toList();
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -980,9 +988,13 @@ extension _RecurringFormSections on _RecurringFormSheetState {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    isExpense
-                        ? 'Kỳ hạn thanh toán đầu tiên'
-                        : 'Ngày nhận tiền đầu tiên',
+                    locale == 'vi'
+                        ? (isExpense
+                            ? 'Kỳ hạn thanh toán đầu tiên'
+                            : 'Ngày nhận tiền đầu tiên')
+                        : (isExpense
+                            ? 'First due date'
+                            : 'First payout date'),
                     style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
@@ -1024,7 +1036,11 @@ extension _RecurringFormSections on _RecurringFormSheetState {
           color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
           borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
         ),
-        child: const Text('Đang tải danh mục...'),
+        child: Text(
+          Localizations.localeOf(context).languageCode == 'vi'
+              ? 'Đang tải danh mục...'
+              : 'Loading categories...',
+        ),
       );
     }
 
@@ -1120,7 +1136,11 @@ extension _RecurringFormSections on _RecurringFormSheetState {
           color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
           borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
         ),
-        child: const Text('Chưa có ví nào khả dụng'),
+        child: Text(
+          Localizations.localeOf(context).languageCode == 'vi'
+              ? 'Chưa có ví nào khả dụng'
+              : 'No wallets available',
+        ),
       );
     }
 

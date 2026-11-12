@@ -40,14 +40,24 @@ class TransactionSmartTagsSection extends ConsumerWidget {
     }
 
     // Default suggestions fallback
-    const defaultTags = [
-      'thiết yếu',
-      'cố định',
-      'gia đình',
-      'công việc',
-      'bạn bè',
-      'phát sinh'
-    ];
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
+    final defaultTags = isVi
+        ? const [
+            'thiết yếu',
+            'cố định',
+            'gia đình',
+            'công việc',
+            'bạn bè',
+            'phát sinh',
+          ]
+        : const [
+            'essential',
+            'fixed',
+            'family',
+            'work',
+            'friends',
+            'extra',
+          ];
     for (final dt in defaultTags) {
       tagCounts.putIfAbsent(dt, () => 0);
     }

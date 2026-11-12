@@ -67,6 +67,7 @@ class DebtDetailScreen extends ConsumerWidget {
     final accountsMap = ref.watch(accountsMapProvider);
     final settings = ref.watch(settingsControllerProvider).value;
     final locale = settings?.localeCode ?? 'vi';
+    final isVi = locale == 'vi';
     final hideBalance = settings?.hideBalance ?? false;
 
     return debtsAsync.when(
@@ -87,7 +88,7 @@ class DebtDetailScreen extends ConsumerWidget {
               bottom: false,
               child: Center(
                 child: Text(
-                  'Không tìm thấy khoản nợ',
+                  isVi ? 'Không tìm thấy khoản nợ' : 'Debt not found',
                   style: theme.textTheme.titleMedium,
                 ),
               ),
@@ -266,14 +267,16 @@ class DebtDetailScreen extends ConsumerWidget {
                               color: AppleTokens.systemRed.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
                             ),
-                            child: const Row(
+                            child: Row(
                               children: [
-                                Icon(CupertinoIcons.exclamationmark_triangle_fill, color: AppleTokens.systemRed, size: 16),
-                                SizedBox(width: 6),
+                                const Icon(CupertinoIcons.exclamationmark_triangle_fill, color: AppleTokens.systemRed, size: 16),
+                                const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
-                                    'Khoản nợ đã quá hạn cần thanh toán!',
-                                    style: TextStyle(color: AppleTokens.systemRed, fontWeight: FontWeight.w700, fontSize: 12),
+                                    isVi
+                                        ? 'Khoản nợ đã quá hạn cần thanh toán!'
+                                        : 'This debt is overdue for payment!',
+                                    style: const TextStyle(color: AppleTokens.systemRed, fontWeight: FontWeight.w700, fontSize: 12),
                                   ),
                                 ),
                               ],
@@ -318,7 +321,7 @@ class DebtDetailScreen extends ConsumerWidget {
                           children: [
                             Flexible(
                               child: Text(
-                                'Đã trả: ${debt.paidMoney.format(locale: locale, masked: hideBalance)}',
+                                '${isVi ? 'Đã trả' : 'Paid'}: ${debt.paidMoney.format(locale: locale, masked: hideBalance)}',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, fontFeatures: AppTheme.tabularFigures),
@@ -327,7 +330,7 @@ class DebtDetailScreen extends ConsumerWidget {
                             const SizedBox(width: 8),
                             Flexible(
                               child: Text(
-                                'Tổng: ${debt.totalMoney.format(locale: locale, masked: hideBalance)}',
+                                '${isVi ? 'Tổng' : 'Total'}: ${debt.totalMoney.format(locale: locale, masked: hideBalance)}',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 textAlign: TextAlign.end,
@@ -357,7 +360,7 @@ class DebtDetailScreen extends ConsumerWidget {
                             ),
                             icon: const Icon(CupertinoIcons.checkmark_circle, size: 18),
                             label: Text(
-                              isLent ? 'Thu nợ' : 'Trả nợ',
+                              isLent ? l10n.debtCollect : l10n.debtRepay,
                               style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5),
                             ),
                             onPressed: () => DebtRepaymentSheet.show(context, debt),
@@ -394,7 +397,7 @@ class DebtDetailScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Chi tiết khoản nợ',
+                          isVi ? 'Chi tiết khoản nợ' : 'Debt details',
                           style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                         ),
                         const SizedBox(height: 12),
@@ -402,7 +405,10 @@ class DebtDetailScreen extends ConsumerWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('Ngày hẹn thanh toán', style: TextStyle(color: AppleTokens.systemGray)),
+                              Text(
+                                isVi ? 'Ngày hẹn thanh toán' : 'Due date',
+                                style: const TextStyle(color: AppleTokens.systemGray),
+                              ),
                               Text(
                                 AppDateUtils.formatFullDate(debt.dueDate!, locale: locale),
                                 style: TextStyle(
@@ -418,7 +424,10 @@ class DebtDetailScreen extends ConsumerWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('Ví ghi nhận', style: TextStyle(color: AppleTokens.systemGray)),
+                              Text(
+                                isVi ? 'Ví ghi nhận' : 'Recorded wallet',
+                                style: const TextStyle(color: AppleTokens.systemGray),
+                              ),
                               Text(
                                 linkedAccount.name,
                                 style: const TextStyle(fontWeight: FontWeight.w600),
@@ -432,7 +441,10 @@ class DebtDetailScreen extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('Ghi chú', style: TextStyle(color: AppleTokens.systemGray)),
+                              Text(
+                                isVi ? 'Ghi chú' : 'Note',
+                                style: const TextStyle(color: AppleTokens.systemGray),
+                              ),
                               const SizedBox(width: 16),
                               Expanded(
                                 child: Text(
@@ -448,7 +460,10 @@ class DebtDetailScreen extends ConsumerWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Ngày tạo', style: TextStyle(color: AppleTokens.systemGray)),
+                            Text(
+                              isVi ? 'Ngày tạo' : 'Created date',
+                              style: const TextStyle(color: AppleTokens.systemGray),
+                            ),
                             Text(
                               AppDateUtils.formatFullDate(debt.createdAt, locale: locale),
                               style: const TextStyle(fontWeight: FontWeight.w600),

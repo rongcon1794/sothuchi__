@@ -60,6 +60,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
     required bool archived,
   }) async {
     final messenger = ScaffoldMessenger.of(context);
+    final isVi = context.l10n.localeName.startsWith('vi');
     final res = await ref
         .read(accountsActionControllerProvider.notifier)
         .toggleArchive(accountId: accountId, archived: archived);
@@ -69,7 +70,9 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
         messenger.showSnackBar(
           SnackBar(
             content: Text(
-              archived ? 'Đã lưu trữ ví' : 'Đã khôi phục ví hoạt động',
+              archived
+                  ? (isVi ? 'Đã lưu trữ ví' : 'Wallet archived')
+                  : (isVi ? 'Đã khôi phục ví hoạt động' : 'Wallet restored'),
             ),
             duration: const Duration(seconds: 2),
           ),
@@ -88,11 +91,16 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
     Account account,
   ) async {
     final l10n = context.l10n;
+    final isVi = l10n.localeName.startsWith('vi');
     final confirmed = await showCupertinoModalPopup<bool>(
       context: context,
       builder: (ctx) => CupertinoActionSheet(
         title: Text('${l10n.delete} ${account.name}'),
-        message: const Text('Bạn có chắc chắn muốn xóa ví này? Giao dịch liên quan sẽ không bị mất.'),
+        message: Text(
+          isVi
+              ? 'Bạn có chắc chắn muốn xóa ví này? Giao dịch liên quan sẽ không bị mất.'
+              : 'Are you sure you want to delete this wallet? Related transactions will not be lost.',
+        ),
         actions: [
           CupertinoActionSheetAction(
             isDestructiveAction: true,
@@ -130,7 +138,13 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
           }
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Đã xóa ví "${account.name}"')),
+              SnackBar(
+                content: Text(
+                  isVi
+                      ? 'Đã xóa ví "${account.name}"'
+                      : 'Deleted wallet "${account.name}"',
+                ),
+              ),
             );
           }
         },
@@ -153,8 +167,15 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
         .setDefaultWalletId(account.id);
     if (!context.mounted) return;
     if (res.isSuccess) {
+      final isVi = context.l10n.localeName.startsWith('vi');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Đã chọn "${account.name}" làm ví mặc định chi tiêu')),
+        SnackBar(
+          content: Text(
+            isVi
+                ? 'Đã chọn "${account.name}" làm ví mặc định chi tiêu'
+                : 'Selected "${account.name}" as default spending wallet',
+          ),
+        ),
       );
     }
   }
@@ -329,7 +350,9 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                           borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                         ),
                         child: Text(
-                          '${filteredAccounts.length} ví',
+                          l10n.localeName.startsWith('vi')
+                              ? '${filteredAccounts.length} ví'
+                              : '${filteredAccounts.length} wallets',
                           style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
@@ -581,7 +604,9 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                       borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                     ),
                     child: Text(
-                      '${activeAccounts.length} ví',
+                      l10n.localeName.startsWith('vi')
+                          ? '${activeAccounts.length} ví'
+                          : '${activeAccounts.length} wallets',
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
@@ -685,7 +710,10 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
     required AppLocalizations l10n,
   }) {
     final filters = [
-      (type: null, label: 'Tất cả (${activeAccounts.length})'),
+      (
+        type: null,
+        label: '${l10n.localeName.startsWith('vi') ? 'Tất cả' : 'All'} (${activeAccounts.length})'
+      ),
       (
         type: AccountType.cash,
         label:

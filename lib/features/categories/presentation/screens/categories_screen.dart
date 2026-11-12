@@ -70,12 +70,15 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
 
   Future<void> _deleteCategory(Category cat) async {
     final l10n = context.l10n;
+    final isVi = l10n.localeName.startsWith('vi');
     final confirmed = await showCupertinoModalPopup<bool>(
       context: context,
       builder: (ctx) => CupertinoActionSheet(
         title: Text('${l10n.delete} ${cat.name}'),
-        message: const Text(
-          'Bạn có chắc chắn muốn xóa danh mục này? Các giao dịch đã ghi nhận vẫn được bảo lưu an toàn.',
+        message: Text(
+          isVi
+              ? 'Bạn có chắc chắn muốn xóa danh mục này? Các giao dịch đã ghi nhận vẫn được bảo lưu an toàn.'
+              : 'Are you sure you want to delete this category? Existing transactions will remain safe.',
         ),
         actions: [
           CupertinoActionSheetAction(
@@ -102,7 +105,11 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         onSuccess: (_) {
           messenger.showSnackBar(
             SnackBar(
-              content: Text('Đã xóa danh mục "${cat.name}"'),
+              content: Text(
+                isVi
+                    ? 'Đã xóa danh mục "${cat.name}"'
+                    : 'Deleted category "${cat.name}"',
+              ),
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -129,8 +136,12 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     res.fold(
       onSuccess: (_) {
         messenger.showSnackBar(
-          const SnackBar(
-            content: Text('Đã khôi phục các danh mục mẫu mặc định.'),
+          SnackBar(
+            content: Text(
+              context.l10n.localeName.startsWith('vi')
+                  ? 'Đã khôi phục các danh mục mẫu mặc định.'
+                  : 'Default categories restored.',
+            ),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -196,7 +207,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'TỔNG QUAN PHÂN LOẠI',
+                      locale.startsWith('vi')
+                          ? 'TỔNG QUAN PHÂN LOẠI'
+                          : 'CATEGORIES OVERVIEW',
                       style: theme.textTheme.labelSmall?.copyWith(
                         letterSpacing: 0.8,
                         fontWeight: FontWeight.w700,
@@ -206,7 +219,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '$totalCategories danh mục khả dụng',
+                      locale.startsWith('vi')
+                          ? '$totalCategories danh mục khả dụng'
+                          : '$totalCategories categories available',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w800,
                         fontSize: 16.5,
@@ -245,7 +260,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       const SizedBox(width: 6),
                       Flexible(
                         child: Text(
-                          '$expenseCount Khoản chi',
+                          locale.startsWith('vi')
+                              ? '$expenseCount Khoản chi'
+                              : '$expenseCount Expense',
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
@@ -284,7 +301,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       const SizedBox(width: 6),
                       Flexible(
                         child: Text(
-                          '$incomeCount Khoản thu',
+                          locale.startsWith('vi')
+                              ? '$incomeCount Khoản thu'
+                              : '$incomeCount Income',
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
@@ -317,9 +336,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Chi tháng này',
-                        style: TextStyle(
+                      Text(
+                        locale.startsWith('vi') ? 'Chi tháng này' : 'Month expense',
+                        style: const TextStyle(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w600,
                           color: AppleTokens.systemGray,
@@ -350,9 +369,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Thu tháng này',
-                        style: TextStyle(
+                      Text(
+                        locale.startsWith('vi') ? 'Thu tháng này' : 'Month income',
+                        style: const TextStyle(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w600,
                           color: AppleTokens.systemGray,
@@ -384,9 +403,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Đã phân loại',
-                          style: TextStyle(
+                        Text(
+                          locale.startsWith('vi') ? 'Đã phân loại' : 'Categorized',
+                          style: const TextStyle(
                             fontSize: 10.5,
                             fontWeight: FontWeight.w600,
                             color: AppleTokens.systemGray,
@@ -509,7 +528,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                           borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                         ),
                         child: Text(
-                          cat.isDefault ? l10n.defaultCategoryBadge : 'Tùy chỉnh',
+                          cat.isDefault
+                              ? l10n.defaultCategoryBadge
+                              : (locale.startsWith('vi') ? 'Tùy chỉnh' : 'Custom'),
                           style: TextStyle(
                             fontSize: 10.5,
                             fontWeight: FontWeight.w700,
@@ -523,7 +544,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       // Transaction count indicator
                       Flexible(
                         child: Text(
-                          txCount > 0 ? '$txCount GD' : 'Chưa dùng',
+                          txCount > 0
+                              ? (locale.startsWith('vi') ? '$txCount GD' : '$txCount tx')
+                              : (locale.startsWith('vi') ? 'Chưa dùng' : 'Unused'),
                           style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
@@ -584,7 +607,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                     ApplePopupMenuItem(
                       value: 'detail',
                       icon: CupertinoIcons.chart_bar_alt_fill,
-                      title: 'Xem báo cáo chi tiết',
+                      title: locale.startsWith('vi')
+                          ? 'Xem báo cáo chi tiết'
+                          : 'View detailed report',
                     ),
                     ApplePopupMenuItem(
                       value: 'edit',
@@ -688,7 +713,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
         ),
         actions: [
           ApplePopupMenuButton<String>(
-            tooltip: 'Tùy chọn danh mục',
+            tooltip: l10n.moreOptions,
             icon: CupertinoIcons.ellipsis_circle,
             iconSize: 22,
             size: 38,
@@ -708,7 +733,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               ApplePopupMenuItem(
                 value: 'restore',
                 icon: Icons.restart_alt_rounded,
-                title: 'Khôi phục mẫu mặc định',
+                title: l10n.localeName.startsWith('vi')
+                    ? 'Khôi phục mẫu mặc định'
+                    : 'Restore default templates',
               ),
             ],
           ),
@@ -840,7 +867,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                               child: Row(
                                 children: [
                                   Text(
-                                    'Tìm thấy ${items.length} danh mục phù hợp',
+                                    l10n.localeName.startsWith('vi')
+                                        ? 'Tìm thấy ${items.length} danh mục phù hợp'
+                                        : 'Found ${items.length} matching categories',
                                     style: theme.textTheme.labelMedium?.copyWith(
                                       fontWeight: FontWeight.w600,
                                       color: AppleTokens.systemGray,
@@ -864,10 +893,12 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                                   ? EmptyStateView(
                                       icon: CupertinoIcons.search,
                                       title: l10n.noCategoriesFound,
-                                      subtitle:
-                                          'Không tìm thấy danh mục nào phù hợp với từ khóa "$_searchQuery".',
-                                      actionLabel:
-                                          'Tạo danh mục "$_searchQuery"',
+                                      subtitle: l10n.localeName.startsWith('vi')
+                                          ? 'Không tìm thấy danh mục nào phù hợp với từ khóa "$_searchQuery".'
+                                          : 'No categories found matching "$_searchQuery".',
+                                      actionLabel: l10n.localeName.startsWith('vi')
+                                          ? 'Tạo danh mục "$_searchQuery"'
+                                          : 'Create "$_searchQuery"',
                                       onAction: () => _openCategorySheet(
                                         initialName: _searchQuery,
                                       ),
@@ -877,8 +908,12 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                                       title: l10n.noCategories,
                                       subtitle:
                                           _selectedType == CategoryType.expense
-                                              ? 'Chưa có danh mục chi tiêu nào.'
-                                              : 'Chưa có danh mục thu nhập nào.',
+                                              ? (l10n.localeName.startsWith('vi')
+                                                  ? 'Chưa có danh mục chi tiêu nào.'
+                                                  : 'No expense categories yet.')
+                                              : (l10n.localeName.startsWith('vi')
+                                                  ? 'Chưa có danh mục thu nhập nào.'
+                                                  : 'No income categories yet.'),
                                       actionLabel: l10n.addCategory,
                                       onAction: _openCategorySheet,
                                     ),

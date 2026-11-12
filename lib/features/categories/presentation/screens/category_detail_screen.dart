@@ -38,7 +38,11 @@ class CategoryDetailScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => CupertinoActionSheet(
         title: Text('${l10n.delete} ${category.name}'),
-        message: const Text('Bạn có chắc chắn muốn xóa danh mục này? Các giao dịch trước đó vẫn được lưu giữ.'),
+        message: Text(
+          l10n.localeName.startsWith('vi')
+              ? 'Bạn có chắc chắn muốn xóa danh mục này? Các giao dịch trước đó vẫn được lưu giữ.'
+              : 'Are you sure you want to delete this category? Existing transactions will be kept.',
+        ),
         actions: [
           CupertinoActionSheetAction(
             isDestructiveAction: true,
@@ -106,7 +110,9 @@ class CategoryDetailScreen extends ConsumerWidget {
               bottom: false,
               child: Center(
                 child: Text(
-                  'Không tìm thấy danh mục',
+                  locale.startsWith('vi')
+                      ? 'Không tìm thấy danh mục'
+                      : 'Category not found',
                   style: theme.textTheme.titleMedium,
                 ),
               ),
@@ -294,7 +300,13 @@ class CategoryDetailScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 18),
                         Text(
-                          isIncome ? 'Thu nhập tháng này' : 'Chi tiêu tháng này',
+                          isIncome
+                              ? (locale.startsWith('vi')
+                                  ? 'Thu nhập tháng này'
+                                  : 'Income this month')
+                              : (locale.startsWith('vi')
+                                  ? 'Chi tiêu tháng này'
+                                  : 'Expense this month'),
                           style: TextStyle(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w600,
@@ -327,9 +339,11 @@ class CategoryDetailScreen extends ConsumerWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      'Tổng tích lũy',
-                                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppleTokens.systemGray),
+                                    Text(
+                                      locale.startsWith('vi')
+                                          ? 'Tổng tích lũy'
+                                          : 'All-time total',
+                                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppleTokens.systemGray),
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
@@ -352,13 +366,17 @@ class CategoryDetailScreen extends ConsumerWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      'Số lần giao dịch',
-                                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppleTokens.systemGray),
+                                    Text(
+                                      locale.startsWith('vi')
+                                          ? 'Số lần giao dịch'
+                                          : 'Transactions',
+                                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppleTokens.systemGray),
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      '${categoryTxs.length} giao dịch',
+                                      locale.startsWith('vi')
+                                          ? '${categoryTxs.length} giao dịch'
+                                          : '${categoryTxs.length} transactions',
                                       style: const TextStyle(
                                         fontSize: 13,
                                         fontWeight: FontWeight.w700,
@@ -469,8 +487,12 @@ class CategoryDetailScreen extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(vertical: 32),
                       child: EmptyStateView(
                         icon: CupertinoIcons.tray,
-                        title: 'Chưa có giao dịch',
-                        subtitle: 'Chưa có khoản thu chi nào được phân loại vào danh mục $displayName.',
+                        title: locale.startsWith('vi')
+                            ? 'Chưa có giao dịch'
+                            : 'No transactions yet',
+                        subtitle: locale.startsWith('vi')
+                            ? 'Chưa có khoản thu chi nào được phân loại vào danh mục $displayName.'
+                            : 'No transactions have been categorized under $displayName yet.',
                         actionLabel: l10n.quickAddTransaction,
                         onAction: () {
                           context.push(

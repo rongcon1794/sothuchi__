@@ -54,13 +54,22 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
 
   bool get _isEditing => widget.initialDebt != null;
 
-  static const _relationshipTags = [
+  static const _relationshipTagsVi = [
     'Bạn bè',
     'Đồng nghiệp',
     'Người thân',
     'Khách hàng',
     'Hàng xóm',
     'Đối tác',
+  ];
+
+  static const _relationshipTagsEn = [
+    'Friends',
+    'Colleagues',
+    'Family',
+    'Clients',
+    'Neighbors',
+    'Partners',
   ];
 
   static const _amountDeltas = [
@@ -344,10 +353,13 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
     final accentColor =
         isLent ? AppleTokens.emeraldIncome : AppleTokens.systemOrange;
 
+    final isVi = locale == 'vi';
     final personName = _nameController.text.trim();
     final displayName = personName.isNotEmpty
         ? personName
-        : (isLent ? 'Người vay tiền' : 'Chủ nợ');
+        : (isLent
+            ? (isVi ? 'Người vay tiền' : 'Borrower')
+            : (isVi ? 'Chủ nợ' : 'Lender'));
     final phone = _phoneController.text.trim();
     final note = _noteController.text.trim();
 
@@ -452,7 +464,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                     Text(
                       phone.isNotEmpty
                           ? phone
-                          : (isLent ? 'Khoản cho vay' : 'Khoản đi vay'),
+                          : (isLent ? l10n.debtLent : l10n.debtBorrowed),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -529,7 +541,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            'Hạn ${AppDateUtils.formatShortDate(_dueDate!, locale: locale)}',
+                            '${isVi ? 'Hạn' : 'Due'} ${AppDateUtils.formatShortDate(_dueDate!, locale: locale)}',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
@@ -586,13 +598,17 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
     );
   }
 
-  String _dueStatusText(DateTime dueDate) {
+  String _dueStatusText(DateTime dueDate, {required bool isVi}) {
     final today = _dateOnly(DateTime.now());
     final target = _dateOnly(dueDate);
     final diff = target.difference(today).inDays;
-    if (diff == 0) return 'Hạn là hôm nay';
-    if (diff > 0) return 'Còn $diff ngày nữa';
-    return 'Đã quá hạn ${diff.abs()} ngày';
+    if (diff == 0) return isVi ? 'Hạn là hôm nay' : 'Due today';
+    if (diff > 0) {
+      return isVi ? 'Còn $diff ngày nữa' : '$diff days left';
+    }
+    return isVi
+        ? 'Đã quá hạn ${diff.abs()} ngày'
+        : 'Overdue by ${diff.abs()} days';
   }
 
   @override
@@ -605,6 +621,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
     final currency =
         widget.initialDebt?.currency ?? (settings?.currencyCode ?? 'VND');
     final locale = settings?.localeCode ?? 'vi';
+    final isVi = locale == 'vi';
 
     final isLent = _selectedType == DebtType.lent;
     final accentColor =
@@ -628,8 +645,10 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
     return AppleModalSheetLayout(
       title: _isEditing ? l10n.debtEditTitle : l10n.debtNewTitle,
       subtitle: _isEditing
-          ? 'Cập nhật thông tin nợ'
-          : (isLent ? 'Ghi nhận khoản cho vay' : 'Ghi nhận khoản đi vay'),
+          ? (isVi ? 'Cập nhật thông tin nợ' : 'Update debt details')
+          : (isLent
+              ? (isVi ? 'Ghi nhận khoản cho vay' : 'Record money you lent')
+              : (isVi ? 'Ghi nhận khoản đi vay' : 'Record money you borrowed')),
       bottomAction: AppleButton.primary(
         label: _isEditing ? l10n.save : l10n.debtSubmitNew,
         color: accentColor,
@@ -686,7 +705,9 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                 children: [
                   _buildSectionTitle(
                     icon: CupertinoIcons.person_2_fill,
-                    title: isLent ? 'Thông tin người vay' : 'Thông tin chủ nợ',
+                    title: isLent
+                        ? (isVi ? 'Thông tin người vay' : 'Borrower details')
+                        : (isVi ? 'Thông tin chủ nợ' : 'Lender details'),
                     accentColor: accentColor,
                   ),
                   const SizedBox(height: 10),
@@ -716,7 +737,9 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                     physics: const BouncingScrollPhysics(),
                     child: Row(
                       children: [
-                        for (final tag in _relationshipTags)
+                        for (final tag in (isVi
+                            ? _relationshipTagsVi
+                            : _relationshipTagsEn))
                           _buildQuickChip(
                             label: tag,
                             isDark: isDark,
@@ -732,7 +755,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
                     label: l10n.debtPhoneNumber,
-                    placeholder: 'VD: 0912 345 678',
+                    placeholder: isVi ? 'VD: 0912 345 678' : 'e.g. +1 555 0199',
                     clearable: true,
                     prefixIcon: Icon(
                       CupertinoIcons.phone_fill,
@@ -754,7 +777,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                 children: [
                   _buildSectionTitle(
                     icon: CupertinoIcons.money_dollar_circle_fill,
-                    title: 'Số tiền & Kỳ hạn',
+                    title: isVi ? 'Số tiền & Kỳ hạn' : 'Amount & Due Date',
                     accentColor: accentColor,
                   ),
                   const SizedBox(height: 10),
@@ -762,7 +785,10 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                     controller: _amountController,
                     keyboardType: TextInputType.number,
                     inputFormatters: [
-                      MoneyInputFormatter(currencyCode: currency),
+                      MoneyInputFormatter(
+                        currencyCode: currency,
+                        locale: locale,
+                      ),
                     ],
                     label: l10n.debtAmountLabel(currency),
                     placeholder: '0',
@@ -824,28 +850,28 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                     child: Row(
                       children: [
                         _buildQuickChip(
-                          label: '7 ngày',
+                          label: isVi ? '7 ngày' : '7 days',
                           isDark: isDark,
                           accentColor: accentColor,
                           isSelected: _isSameDay(_dueDate, preset7d),
                           onTap: () => _setDueDate(preset7d),
                         ),
                         _buildQuickChip(
-                          label: '15 ngày',
+                          label: isVi ? '15 ngày' : '15 days',
                           isDark: isDark,
                           accentColor: accentColor,
                           isSelected: _isSameDay(_dueDate, preset15d),
                           onTap: () => _setDueDate(preset15d),
                         ),
                         _buildQuickChip(
-                          label: 'Cuối tháng',
+                          label: isVi ? 'Cuối tháng' : 'Month end',
                           isDark: isDark,
                           accentColor: accentColor,
                           isSelected: _isSameDay(_dueDate, presetMonthEnd),
                           onTap: () => _setDueDate(presetMonthEnd),
                         ),
                         _buildQuickChip(
-                          label: '1 tháng',
+                          label: isVi ? '1 tháng' : '1 month',
                           isDark: isDark,
                           accentColor: accentColor,
                           isSelected: _isSameDay(_dueDate, preset30d),
@@ -895,8 +921,10 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                               children: [
                                 Text(
                                   _dueDate != null
-                                      ? 'Hạn trả: ${AppDateUtils.formatShortDate(_dueDate!, locale: locale)}'
-                                      : 'Chưa hẹn hạn trả (Tùy chọn)',
+                                      ? '${isVi ? 'Hạn trả' : 'Due'}: ${AppDateUtils.formatShortDate(_dueDate!, locale: locale)}'
+                                      : (isVi
+                                          ? 'Chưa hẹn hạn trả (Tùy chọn)'
+                                          : 'No due date set (Optional)'),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
@@ -912,7 +940,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                                 if (_dueDate != null) ...[
                                   const SizedBox(height: 2),
                                   Text(
-                                    _dueStatusText(_dueDate!),
+                                    _dueStatusText(_dueDate!, isVi: isVi),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
@@ -967,7 +995,7 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                   if (activeAccounts.isNotEmpty) ...[
                     _buildSectionTitle(
                       icon: CupertinoIcons.creditcard_fill,
-                      title: 'Ví tiền liên kết',
+                      title: isVi ? 'Ví tiền liên kết' : 'Linked wallet',
                       accentColor: accentColor,
                     ),
                     const SizedBox(height: 10),
@@ -1109,14 +1137,16 @@ class _DebtFormSheetState extends ConsumerState<DebtFormSheet> {
                   ],
                   _buildSectionTitle(
                     icon: CupertinoIcons.doc_text_fill,
-                    title: 'Ghi chú',
+                    title: l10n.note,
                     accentColor: accentColor,
                   ),
                   const SizedBox(height: 10),
                   AppleTextField(
                     controller: _noteController,
                     label: l10n.note,
-                    placeholder: 'Nhập ghi chú hoặc lý do...',
+                    placeholder: isVi
+                        ? 'Nhập ghi chú hoặc lý do...'
+                        : 'Enter a note or reason...',
                     maxLines: 2,
                     clearable: true,
                     prefixIcon: Icon(

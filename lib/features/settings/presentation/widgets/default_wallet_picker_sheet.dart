@@ -58,13 +58,16 @@ class DefaultWalletPickerSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final isVi = locale.toLowerCase().startsWith('vi');
     const goldColor = Color(0xFFFFB800);
 
     final currentDefault = wallets.where((w) => w.id == currentDefaultId).firstOrNull;
 
     return AppleModalSheetLayout(
-      title: 'Ví mặc định chi tiêu',
-      subtitle: 'Tự động chọn sẵn mỗi khi bạn thêm khoản thu chi mới',
+      title: isVi ? 'Ví mặc định chi tiêu' : 'Default Spending Wallet',
+      subtitle: isVi
+          ? 'Tự động chọn sẵn mỗi khi bạn thêm khoản thu chi mới'
+          : 'Automatically pre-selected whenever you add a transaction',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
@@ -111,16 +114,18 @@ class DefaultWalletPickerSheet extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Tiết kiệm thao tác nhập liệu',
-                        style: TextStyle(
+                      Text(
+                        isVi ? 'Tiết kiệm thao tác nhập liệu' : 'Save entry time',
+                        style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Các giao dịch mới sẽ tự động dùng số dư và tiền tệ của ví này giúp bạn ghi chép nhanh hơn.',
+                        isVi
+                            ? 'Các giao dịch mới sẽ tự động dùng số dư và tiền tệ của ví này giúp bạn ghi chép nhanh hơn.'
+                            : 'New transactions will automatically use this wallet balance and currency for faster logging.',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: AppleTokens.systemGray,
                           fontSize: 11.5,
@@ -137,7 +142,7 @@ class DefaultWalletPickerSheet extends StatelessWidget {
           // Active Default Hero Card
           if (currentDefault != null) ...[
             Text(
-              'VÍ ĐANG ĐƯỢC CHỌN MẶC ĐỊNH',
+              isVi ? 'VÍ ĐANG ĐƯỢC CHỌN MẶC ĐỊNH' : 'CURRENT DEFAULT WALLET',
               style: theme.textTheme.labelSmall?.copyWith(
                 letterSpacing: 0.8,
                 fontWeight: FontWeight.w700,
@@ -216,14 +221,14 @@ class DefaultWalletPickerSheet extends StatelessWidget {
                                   width: 1,
                                 ),
                               ),
-                              child: const Row(
+                              child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.star_rounded, size: 12, color: goldColor),
-                                  SizedBox(width: 3),
+                                  const Icon(Icons.star_rounded, size: 12, color: goldColor),
+                                  const SizedBox(width: 3),
                                   Text(
-                                    'MẶC ĐỊNH',
-                                    style: TextStyle(
+                                    isVi ? 'MẶC ĐỊNH' : 'DEFAULT',
+                                    style: const TextStyle(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w800,
                                       color: goldColor,
@@ -237,7 +242,7 @@ class DefaultWalletPickerSheet extends StatelessWidget {
                         ),
                         const SizedBox(height: 3),
                         Text(
-                          'Số dư: ${currentDefault.balanceMoney.format(locale: locale)}',
+                          '${isVi ? 'Số dư' : 'Balance'}: ${currentDefault.balanceMoney.format(locale: locale)}',
                           style: TextStyle(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w600,
@@ -256,7 +261,7 @@ class DefaultWalletPickerSheet extends StatelessWidget {
 
           // Wallets List Header
           Text(
-            'TẤT CẢ VÍ & TÀI KHOẢN (${wallets.length})',
+            '${isVi ? 'TẤT CẢ VÍ & TÀI KHOẢN' : 'ALL WALLETS & ACCOUNTS'} (${wallets.length})',
             style: theme.textTheme.labelSmall?.copyWith(
               letterSpacing: 0.8,
               fontWeight: FontWeight.w700,
@@ -286,7 +291,11 @@ class DefaultWalletPickerSheet extends StatelessWidget {
                       Navigator.of(context).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Đã chọn "${w.name}" làm ví mặc định chi tiêu'),
+                          content: Text(
+                            isVi
+                                ? 'Đã chọn "${w.name}" làm ví mặc định chi tiêu'
+                                : 'Selected "${w.name}" as default spending wallet',
+                          ),
                           behavior: SnackBarBehavior.floating,
                         ),
                       );
@@ -421,8 +430,12 @@ class DefaultWalletPickerSheet extends StatelessWidget {
                   onSelected(null);
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Đã hủy ví mặc định. Bạn sẽ chọn ví thủ công khi tạo giao dịch.'),
+                    SnackBar(
+                      content: Text(
+                        isVi
+                            ? 'Đã hủy ví mặc định. Bạn sẽ chọn ví thủ công khi tạo giao dịch.'
+                            : 'Default wallet cleared. You will select a wallet manually.',
+                      ),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
@@ -447,21 +460,23 @@ class DefaultWalletPickerSheet extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      const Expanded(
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Không đặt ví mặc định',
-                              style: TextStyle(
+                              isVi ? 'Không đặt ví mặc định' : 'No default wallet',
+                              style: const TextStyle(
                                 fontSize: 14.5,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
-                            SizedBox(height: 2),
+                            const SizedBox(height: 2),
                             Text(
-                              'Chọn thủ công ví tiền mỗi khi ghi chép',
-                              style: TextStyle(
+                              isVi
+                                  ? 'Chọn thủ công ví tiền mỗi khi ghi chép'
+                                  : 'Choose wallet manually for each entry',
+                              style: const TextStyle(
                                 fontSize: 11,
                                 color: AppleTokens.systemGray,
                               ),
@@ -501,14 +516,18 @@ class DefaultWalletPickerSheet extends StatelessWidget {
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Đã tạo và đặt "${created.name}" làm ví mặc định chi tiêu'),
+                    content: Text(
+                      isVi
+                          ? 'Đã tạo và đặt "${created.name}" làm ví mặc định chi tiêu'
+                          : 'Created and set "${created.name}" as default spending wallet',
+                    ),
                     behavior: SnackBarBehavior.floating,
                   ),
                 );
               }
             },
             icon: const Icon(CupertinoIcons.plus, size: 16),
-            label: '+ Thêm ví mới...',
+            label: isVi ? '+ Thêm ví mới...' : '+ Add new wallet...',
           ),
           const SizedBox(height: 12),
         ],

@@ -136,7 +136,9 @@ class RecurringDetailScreen extends ConsumerWidget {
               bottom: false,
               child: Center(
                 child: Text(
-                  'Không tìm thấy giao dịch định kỳ',
+                  locale == 'vi'
+                      ? 'Không tìm thấy giao dịch định kỳ'
+                      : 'Recurring transaction not found',
                   style: theme.textTheme.titleMedium,
                 ),
               ),
@@ -262,7 +264,11 @@ class RecurringDetailScreen extends ConsumerWidget {
                                           borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                                         ),
                                         child: Text(
-                                          item.isPaused ? l10n.recurringPause : 'Đang theo dõi',
+                                          item.isPaused
+                                              ? l10n.recurringPause
+                                              : (locale == 'vi'
+                                                  ? 'Đang theo dõi'
+                                                  : 'Active'),
                                           style: TextStyle(
                                             fontSize: 11,
                                             fontWeight: FontWeight.w700,
@@ -286,14 +292,16 @@ class RecurringDetailScreen extends ConsumerWidget {
                               color: AppleTokens.systemOrange.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
                             ),
-                            child: const Row(
+                            child: Row(
                               children: [
-                                Icon(CupertinoIcons.exclamationmark_triangle_fill, color: AppleTokens.systemOrange, size: 16),
-                                SizedBox(width: 6),
+                                const Icon(CupertinoIcons.exclamationmark_triangle_fill, color: AppleTokens.systemOrange, size: 16),
+                                const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
-                                    'Giao dịch đã đến hạn cần thanh toán / ghi sổ!',
-                                    style: TextStyle(color: AppleTokens.systemOrange, fontWeight: FontWeight.w700, fontSize: 12),
+                                    locale == 'vi'
+                                        ? 'Giao dịch đã đến hạn cần thanh toán / ghi sổ!'
+                                        : 'Transaction is due for payment / recording!',
+                                    style: const TextStyle(color: AppleTokens.systemOrange, fontWeight: FontWeight.w700, fontSize: 12),
                                   ),
                                 ),
                               ],
@@ -303,7 +311,9 @@ class RecurringDetailScreen extends ConsumerWidget {
 
                         const SizedBox(height: 20),
                         Text(
-                          isIncome ? 'KHOẢN THU NHẬP ĐỊNH KỲ' : 'HÓA ĐƠN CHI TIÊU ĐỊNH KỲ',
+                          locale == 'vi'
+                              ? (isIncome ? 'KHOẢN THU NHẬP ĐỊNH KỲ' : 'HÓA ĐƠN CHI TIÊU ĐỊNH KỲ')
+                              : (isIncome ? 'RECURRING INCOME' : 'RECURRING BILL'),
                           style: TextStyle(
                             fontSize: 12.5,
                             fontWeight: FontWeight.w700,
@@ -384,7 +394,7 @@ class RecurringDetailScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Thông tin lịch trình',
+                          locale == 'vi' ? 'Thông tin lịch trình' : 'Schedule details',
                           style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                         ),
                         const SizedBox(height: 12),
@@ -392,7 +402,9 @@ class RecurringDetailScreen extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              isIncome ? 'Ngày nhận tiếp theo' : 'Kỳ thanh toán tiếp theo',
+                              locale == 'vi'
+                                  ? (isIncome ? 'Ngày nhận tiếp theo' : 'Kỳ thanh toán tiếp theo')
+                                  : (isIncome ? 'Next receive date' : 'Next due date'),
                               style: const TextStyle(color: AppleTokens.systemGray),
                             ),
                             Text(
@@ -443,7 +455,10 @@ class RecurringDetailScreen extends ConsumerWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('Ví nhận', style: TextStyle(color: AppleTokens.systemGray)),
+                              Text(
+                                locale == 'vi' ? 'Ví nhận' : 'Destination wallet',
+                                style: const TextStyle(color: AppleTokens.systemGray),
+                              ),
                               Text(
                                 toAccount.name,
                                 style: const TextStyle(fontWeight: FontWeight.w600),
@@ -457,7 +472,9 @@ class RecurringDetailScreen extends ConsumerWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                isIncome ? 'Lần nhận gần nhất' : 'Lần thanh toán gần nhất',
+                                locale == 'vi'
+                                    ? (isIncome ? 'Lần nhận gần nhất' : 'Lần thanh toán gần nhất')
+                                    : (isIncome ? 'Last received' : 'Last paid'),
                                 style: const TextStyle(color: AppleTokens.systemGray),
                               ),
                               Text(
@@ -473,7 +490,10 @@ class RecurringDetailScreen extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('Ghi chú', style: TextStyle(color: AppleTokens.systemGray)),
+                              Text(
+                                l10n.note,
+                                style: const TextStyle(color: AppleTokens.systemGray),
+                              ),
                               const SizedBox(width: 16),
                               Expanded(
                                 child: Text(

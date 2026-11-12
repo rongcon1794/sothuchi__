@@ -81,7 +81,7 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
 
   bool get _isEditing => widget.existing != null;
 
-  static const _popularTemplates = [
+  static const _popularTemplatesVi = [
     // --- Chi tiêu định kỳ (Expenses) ---
     _RecurringTemplate(
       title: 'Tiền điện sinh hoạt',
@@ -185,6 +185,110 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
     ),
   ];
 
+  static const _popularTemplatesEn = [
+    // --- Recurring Expenses ---
+    _RecurringTemplate(
+      title: 'Electricity Bill',
+      type: TransactionType.expense,
+      categoryKeyword: 'bills',
+      icon: Icons.bolt_rounded,
+      defaultNote: 'Monthly household electricity bill',
+    ),
+    _RecurringTemplate(
+      title: 'Water Bill',
+      type: TransactionType.expense,
+      categoryKeyword: 'bills',
+      icon: Icons.water_drop_rounded,
+      defaultNote: 'Monthly household water bill',
+    ),
+    _RecurringTemplate(
+      title: 'Internet & Fiber',
+      type: TransactionType.expense,
+      categoryKeyword: 'bills',
+      icon: Icons.wifi_rounded,
+      defaultNote: 'Home fiber internet subscription',
+    ),
+    _RecurringTemplate(
+      title: 'Mobile Data Plan',
+      type: TransactionType.expense,
+      categoryKeyword: 'bills',
+      icon: Icons.phone_iphone_rounded,
+      defaultNote: 'Monthly mobile voice & data plan',
+    ),
+    _RecurringTemplate(
+      title: 'Rent / Condo Fee',
+      type: TransactionType.expense,
+      categoryKeyword: 'housing',
+      icon: Icons.home_rounded,
+      defaultNote: 'Monthly rent or apartment service fee',
+    ),
+    _RecurringTemplate(
+      title: 'Netflix / Spotify',
+      type: TransactionType.expense,
+      categoryKeyword: 'entertainment',
+      icon: Icons.tv_rounded,
+      defaultNote: 'Online streaming subscription',
+    ),
+    _RecurringTemplate(
+      title: 'Gym / Yoga Membership',
+      type: TransactionType.expense,
+      categoryKeyword: 'fitness',
+      icon: Icons.fitness_center_rounded,
+      defaultNote: 'Recurring fitness membership',
+    ),
+    _RecurringTemplate(
+      title: 'Tuition / Course',
+      type: TransactionType.expense,
+      categoryKeyword: 'education',
+      icon: Icons.school_rounded,
+      defaultNote: 'Recurring tuition or skill class fee',
+    ),
+    _RecurringTemplate(
+      title: 'Insurance Premium',
+      type: TransactionType.expense,
+      categoryKeyword: 'insurance',
+      icon: Icons.health_and_safety_rounded,
+      defaultNote: 'Recurring life / health insurance premium',
+    ),
+
+    // --- Recurring Income ---
+    _RecurringTemplate(
+      title: 'Fixed Salary',
+      type: TransactionType.income,
+      categoryKeyword: 'salary',
+      icon: Icons.payments_rounded,
+      defaultNote: 'Regular monthly salary income',
+    ),
+    _RecurringTemplate(
+      title: 'Recurring Bonus',
+      type: TransactionType.income,
+      categoryKeyword: 'bonus',
+      icon: Icons.card_giftcard_rounded,
+      defaultNote: 'Periodic KPI bonus or allowance',
+    ),
+    _RecurringTemplate(
+      title: 'Rental Income',
+      type: TransactionType.income,
+      categoryKeyword: 'rental',
+      icon: Icons.real_estate_agent_rounded,
+      defaultNote: 'Property rental income',
+    ),
+    _RecurringTemplate(
+      title: 'Savings & Investment Interest',
+      type: TransactionType.income,
+      categoryKeyword: 'investment',
+      icon: Icons.trending_up_rounded,
+      defaultNote: 'Savings interest or investment returns',
+    ),
+    _RecurringTemplate(
+      title: 'Freelance / Side Income',
+      type: TransactionType.income,
+      categoryKeyword: 'freelance',
+      icon: Icons.laptop_mac_rounded,
+      defaultNote: 'Recurring freelance project income',
+    ),
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -267,33 +371,49 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
   }
 
   String _getScheduleExplanation(RecurringInterval interval, DateTime date) {
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
     switch (interval) {
       case RecurringInterval.daily:
-        return 'Lặp lại tự động mỗi ngày một lần';
+        return isVi
+            ? 'Lặp lại tự động mỗi ngày một lần'
+            : 'Repeats automatically once every day';
       case RecurringInterval.weekly:
-        const weekdayNames = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'];
+        final weekdayNames = isVi
+            ? const ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật']
+            : const ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
         final dayName = weekdayNames[(date.weekday - 1).clamp(0, 6)];
-        return 'Lặp lại vào $dayName hàng tuần';
+        return isVi
+            ? 'Lặp lại vào $dayName hàng tuần'
+            : 'Repeats every $dayName';
       case RecurringInterval.biweekly:
-        const weekdayNames = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'];
+        final weekdayNames = isVi
+            ? const ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật']
+            : const ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
         final dayName = weekdayNames[(date.weekday - 1).clamp(0, 6)];
-        return 'Lặp lại 2 tuần một lần vào $dayName';
+        return isVi
+            ? 'Lặp lại 2 tuần một lần vào $dayName'
+            : 'Repeats every 2 weeks on $dayName';
       case RecurringInterval.monthly:
-        return 'Lặp lại vào ngày ${date.day} hàng tháng';
+        return isVi
+            ? 'Lặp lại vào ngày ${date.day} hàng tháng'
+            : 'Repeats monthly on day ${date.day}';
       case RecurringInterval.yearly:
-        return 'Lặp lại vào ngày ${date.day}/${date.month} hàng năm';
+        return isVi
+            ? 'Lặp lại vào ngày ${date.day}/${date.month} hàng năm'
+            : 'Repeats yearly on ${date.month}/${date.day}';
     }
   }
 
   String _formatDaysUntilStart(DateTime date) {
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final target = DateTime(date.year, date.month, date.day);
     final diff = target.difference(today).inDays;
-    if (diff == 0) return 'Hôm nay';
-    if (diff == 1) return 'Ngày mai';
-    if (diff > 1) return 'Còn $diff ngày';
-    return 'Quá hạn ${-diff} ngày';
+    if (diff == 0) return isVi ? 'Hôm nay' : 'Today';
+    if (diff == 1) return isVi ? 'Ngày mai' : 'Tomorrow';
+    if (diff > 1) return isVi ? 'Còn $diff ngày' : 'In $diff days';
+    return isVi ? 'Quá hạn ${-diff} ngày' : 'Overdue by ${-diff} days';
   }
 
   double _getDynamicFontSize(int textLength) {
@@ -479,6 +599,7 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
     final availableCats = _type == TransactionType.income ? incomeCats : expenseCats;
     final settings = ref.watch(settingsControllerProvider).value;
     final locale = settings?.localeCode ?? 'vi';
+    final isVi = locale == 'vi';
     final currency = wallets.isNotEmpty
         ? wallets.first.currency
         : (settings?.currencyCode ?? AppCurrencies.defaultCode);
@@ -513,10 +634,16 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
     return AppleModalSheetLayout(
       title: _isEditing ? l10n.recurringEditTitle : l10n.recurringNewTitle,
       subtitle: _isEditing
-          ? 'Cập nhật chu kỳ & thông tin gói định kỳ'
+          ? (isVi
+              ? 'Cập nhật chu kỳ & thông tin gói định kỳ'
+              : 'Update cycle & recurring item details')
           : (isExpense
-              ? 'Thiết lập hóa đơn lặp lại & nhắc nhở thanh toán'
-              : 'Thiết lập nguồn thu nhập lặp lại & nhắc nhở ngày nhận tiền'),
+              ? (isVi
+                  ? 'Thiết lập hóa đơn lặp lại & nhắc nhở thanh toán'
+                  : 'Set up recurring bills & payment reminders')
+              : (isVi
+                  ? 'Thiết lập nguồn thu nhập lặp lại & nhắc nhở ngày nhận tiền'
+                  : 'Set up recurring income & payout reminders')),
       bottomAction: AppleButton.primary(
         color: accentColor,
         isLoading: _isSubmitting,
@@ -567,8 +694,8 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                     _buildSectionHeader(
                       icon: CupertinoIcons.sparkles,
                       title: _type == TransactionType.income
-                          ? 'Mẫu thu nhập thông dụng'
-                          : 'Mẫu hóa đơn thông dụng',
+                          ? (isVi ? 'Mẫu thu nhập thông dụng' : 'Popular income templates')
+                          : (isVi ? 'Mẫu hóa đơn thông dụng' : 'Popular bill templates'),
                       accentColor: accentColor,
                     ),
                     _buildTemplatesCarousel(
@@ -589,14 +716,18 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                     icon: CupertinoIcons.tag_fill,
                     title: isExpense
                         ? l10n.recurringTitleLabel
-                        : 'Tên khoản thu nhập',
+                        : (isVi ? 'Tên khoản thu nhập' : 'Income source name'),
                     accentColor: accentColor,
                   ),
                   AppleTextField(
                     controller: _titleController,
                     placeholder: isExpense
-                        ? 'VD: Tiền điện, Internet, Tiền nhà, Netflix...'
-                        : 'VD: Lương công ty, Cho thuê nhà, Tiền thưởng...',
+                        ? (isVi
+                            ? 'VD: Tiền điện, Internet, Tiền nhà, Netflix...'
+                            : 'e.g. Electricity, Internet, Rent, Netflix...')
+                        : (isVi
+                            ? 'VD: Lương công ty, Cho thuê nhà, Tiền thưởng...'
+                            : 'e.g. Monthly salary, Rental, Bonus...'),
                     clearable: true,
                     textCapitalization: TextCapitalization.sentences,
                     prefixIcon: Icon(
@@ -607,7 +738,9 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                     validator: (v) => (v == null || v.trim().isEmpty)
                         ? (isExpense
                             ? l10n.recurringTitleRequired
-                            : 'Vui lòng nhập tên nguồn thu nhập')
+                            : (isVi
+                                ? 'Vui lòng nhập tên nguồn thu nhập'
+                                : 'Please enter an income source name'))
                         : null,
                   ),
                   const SizedBox(height: 12),
@@ -726,10 +859,16 @@ class _RecurringFormSheetState extends ConsumerState<RecurringFormSheet> {
                   const SizedBox(height: 12),
                   AppleTextField(
                     controller: _noteController,
-                    label: 'Ghi chú / Mã khách hàng (Tùy chọn)',
+                    label: isVi
+                        ? 'Ghi chú / Mã khách hàng (Tùy chọn)'
+                        : 'Note / Customer ID (Optional)',
                     placeholder: isExpense
-                        ? 'VD: Mã thuê bao cáp quang, số hợp đồng...'
-                        : 'VD: Lương Techcombank, thưởng quý...',
+                        ? (isVi
+                            ? 'VD: Mã thuê bao cáp quang, số hợp đồng...'
+                            : 'e.g. Account number, contract ID...')
+                        : (isVi
+                            ? 'VD: Lương Techcombank, thưởng quý...'
+                            : 'e.g. Company payroll, quarterly bonus...'),
                     clearable: true,
                     textCapitalization: TextCapitalization.sentences,
                     prefixIcon: Icon(

@@ -223,6 +223,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           '${AppCurrencies.supported[i].code} (${AppCurrencies.supported[i].symbol})',
                           style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
+                        subtitle: Text(
+                          l10n.localeName.startsWith('vi')
+                              ? AppCurrencies.supported[i].nameVi
+                              : AppCurrencies.supported[i].nameEn,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
                         trailing: current == AppCurrencies.supported[i].code
                             ? Icon(CupertinoIcons.checkmark_alt_circle_fill, color: theme.colorScheme.primary)
                             : null,
@@ -319,9 +328,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     String locale,
   ) async {
     if (wallets.isEmpty) {
+      final isVi = locale.toLowerCase().startsWith('vi');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Chưa có ví tiền nào để chọn'),
+        SnackBar(
+          content: Text(
+            isVi ? 'Chưa có ví tiền nào để chọn' : 'No wallets available to select',
+          ),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -344,6 +356,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final isVi = l10n.localeName.startsWith('vi');
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
@@ -489,7 +502,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                 ),
                 child: Text(
-                  '${activeWallets.length} ví',
+                  isVi ? '${activeWallets.length} ví' : '${activeWallets.length} wallets',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -509,16 +522,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             icon: Icons.star_rounded,
             backgroundColor: Color(0xFFFFB800),
           ),
-          title: const Text(
-            'Ví mặc định chi tiêu',
-            style: TextStyle(fontWeight: FontWeight.w600),
+          title: Text(
+            isVi ? 'Ví mặc định chi tiêu' : 'Default Spending Wallet',
+            style: const TextStyle(fontWeight: FontWeight.w600),
           ),
           subtitle: Text(
             activeWallets
                     .where((w) => w.id == settings.defaultWalletId)
                     .firstOrNull
                     ?.name ??
-                (activeWallets.isNotEmpty ? 'Chưa thiết lập' : 'Chưa có ví'),
+                (activeWallets.isNotEmpty
+                    ? (isVi ? 'Chưa thiết lập' : 'Not set')
+                    : (isVi ? 'Chưa có ví' : 'No wallets')),
             style: TextStyle(
               fontSize: 12.5,
               color: theme.colorScheme.onSurfaceVariant,
@@ -540,7 +555,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           title: Text(l10n.categoriesTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
           subtitle: Text(
-            '${expenseCategories.length} khoản chi • ${incomeCategories.length} khoản thu',
+            isVi
+                ? '${expenseCategories.length} khoản chi • ${incomeCategories.length} khoản thu'
+                : '${expenseCategories.length} expense • ${incomeCategories.length} income',
             style: TextStyle(
               fontSize: 12.5,
               color: theme.colorScheme.onSurfaceVariant,
@@ -556,7 +573,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                 ),
                 child: Text(
-                  '${categoriesMap.length} mục',
+                  isVi ? '${categoriesMap.length} mục' : '${categoriesMap.length} items',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -589,7 +606,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                   ),
                   child: Text(
-                    '$unsettledDebtsCount nợ',
+                    isVi ? '$unsettledDebtsCount nợ' : '$unsettledDebtsCount open',
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
@@ -736,7 +753,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               backgroundColor: Colors.black,
             ),
             title: const Text('OLED True Black', style: TextStyle(fontWeight: FontWeight.w600)),
-            subtitle: const Text('Màu đen sâu (#000000) tối ưu pin cho màn hình AMOLED', style: TextStyle(fontSize: 12)),
+            subtitle: Text(
+              isVi
+                  ? 'Màu đen sâu (#000000) tối ưu pin cho màn hình AMOLED'
+                  : 'True black (#000000) saves battery on AMOLED displays',
+              style: const TextStyle(fontSize: 12),
+            ),
             trailing: CupertinoSwitch(
               value: settings.oledMode,
               activeTrackColor: AppleTokens.systemGreen,

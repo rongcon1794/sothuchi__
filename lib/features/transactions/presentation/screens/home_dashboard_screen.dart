@@ -319,7 +319,9 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              'Bạn có ${dueBills.length} hóa đơn định kỳ cần thanh toán',
+                              locale.startsWith('vi')
+                                  ? 'Bạn có ${dueBills.length} hóa đơn định kỳ cần thanh toán'
+                                  : 'You have ${dueBills.length} recurring bills due',
                               style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                             ),
                           ),

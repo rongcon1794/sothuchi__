@@ -5,6 +5,7 @@ import 'package:so_thu_chi/core/utils/money.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/savings/domain/entities/savings_goal.dart';
 import 'package:so_thu_chi/features/savings/domain/repositories/savings_goal_repository.dart';
+import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 
 final savingsGoalsStreamProvider = StreamProvider<List<SavingsGoal>>((ref) {
   final repo = ref.watch(savingsGoalRepositoryProvider);
@@ -44,16 +45,21 @@ class SavingsSummary {
 
 final savingsSummaryProvider = Provider<SavingsSummary>((ref) {
   final all = ref.watch(savingsGoalsStreamProvider).value ?? const [];
+  final defaultCurrency = ref.watch(
+    settingsControllerProvider.select(
+      (s) => s.value?.currencyCode ?? AppCurrencies.defaultCode,
+    ),
+  );
   int totalTarget = 0;
   int totalSaved = 0;
-  String currency = AppCurrencies.defaultCode;
+  final String currency = defaultCurrency;
   int active = 0;
   int completed = 0;
 
   for (final g in all) {
+    if (g.currency != defaultCurrency) continue;
     totalTarget += g.targetAmount;
     totalSaved += g.currentAmount;
-    currency = g.currency;
     if (g.isCompleted) {
       completed++;
     } else {

@@ -32,7 +32,7 @@ class _WalletTemplate {
   final String subtitle;
 }
 
-const _kWalletTemplates = [
+const _kWalletTemplatesVi = [
   _WalletTemplate(
     name: 'Tiền mặt',
     type: AccountType.cash,
@@ -95,6 +95,58 @@ const _kWalletTemplates = [
     icon: 'savings',
     color: 0xFFB45309,
     subtitle: 'Tích lũy sinh lời',
+  ),
+];
+
+const _kWalletTemplatesEn = [
+  _WalletTemplate(
+    name: 'Cash',
+    type: AccountType.cash,
+    icon: 'cash',
+    color: 0xFF0D7C66,
+    subtitle: 'Daily cash',
+  ),
+  _WalletTemplate(
+    name: 'Checking Bank',
+    type: AccountType.bank,
+    icon: 'bank',
+    color: 0xFF15803D,
+    subtitle: 'Main bank account',
+  ),
+  _WalletTemplate(
+    name: 'Digital Bank',
+    type: AccountType.bank,
+    icon: 'bank',
+    color: 0xFF1D5BD6,
+    subtitle: 'Online banking',
+  ),
+  _WalletTemplate(
+    name: 'E-Wallet',
+    type: AccountType.ewallet,
+    icon: 'ewallet',
+    color: 0xFFDB2777,
+    subtitle: 'Mobile wallet',
+  ),
+  _WalletTemplate(
+    name: 'PayPal / Apple Pay',
+    type: AccountType.ewallet,
+    icon: 'ewallet',
+    color: 0xFF0891B2,
+    subtitle: 'Digital payments',
+  ),
+  _WalletTemplate(
+    name: 'Credit Card',
+    type: AccountType.card,
+    icon: 'card',
+    color: 0xFF4F46E5,
+    subtitle: 'Visa / MasterCard',
+  ),
+  _WalletTemplate(
+    name: 'Savings Account',
+    type: AccountType.bank,
+    icon: 'savings',
+    color: 0xFFB45309,
+    subtitle: 'Interest savings',
   ),
 ];
 
@@ -285,7 +337,9 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
             if (widget.existing == null) ...[
               _buildSectionHeader(
                 icon: CupertinoIcons.sparkles,
-                title: 'Mẫu tài khoản & ví phổ biến',
+                title: locale == 'vi'
+                    ? 'Mẫu tài khoản & ví phổ biến'
+                    : 'Popular wallet templates',
                 accentColor: walletColor,
               ),
               _buildTemplatesCarousel(isDark: isDark),
@@ -372,7 +426,7 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
             // 8. Default Wallet Setting (Đặt làm ví mặc định)
             _buildSectionHeader(
               icon: CupertinoIcons.star_fill,
-              title: 'Cài đặt ví',
+              title: locale == 'vi' ? 'Cài đặt ví' : 'Wallet settings',
               accentColor: walletColor,
             ),
             AppleGlassCard(
@@ -402,16 +456,20 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Đặt làm ví mặc định',
-                          style: TextStyle(
+                        Text(
+                          locale == 'vi'
+                              ? 'Đặt làm ví mặc định'
+                              : 'Set as default wallet',
+                          style: const TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 14.5,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Tự động chọn ví này khi thêm giao dịch mới',
+                          locale == 'vi'
+                              ? 'Tự động chọn ví này khi thêm giao dịch mới'
+                              : 'Auto-select this wallet for new transactions',
                           style: TextStyle(
                             fontSize: 12,
                             color: isDark ? Colors.white60 : Colors.black54,
@@ -645,18 +703,18 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
                                           ),
                                         ],
                                       ),
-                                      child: const Row(
+                                      child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          Icon(
+                                          const Icon(
                                             Icons.star_rounded,
                                             size: 10,
                                             color: Color(0xFF4A3500),
                                           ),
-                                          SizedBox(width: 2),
+                                          const SizedBox(width: 2),
                                           Text(
-                                            'Mặc định',
-                                            style: TextStyle(
+                                            locale == 'vi' ? 'Mặc định' : 'Default',
+                                            style: const TextStyle(
                                               fontSize: 9.5,
                                               fontWeight: FontWeight.w800,
                                               color: Color(0xFF4A3500),
@@ -743,15 +801,17 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
   }
 
   Widget _buildTemplatesCarousel({required bool isDark}) {
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
+    final templates = isVi ? _kWalletTemplatesVi : _kWalletTemplatesEn;
     return SizedBox(
       height: 72,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
-        itemCount: _kWalletTemplates.length,
+        itemCount: templates.length,
         separatorBuilder: (_, _) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
-          final tpl = _kWalletTemplates[index];
+          final tpl = templates[index];
           final tplColor = Color(tpl.color);
           return ApplePressable(
             onTap: () {
@@ -829,30 +889,31 @@ class _WalletFormSheetState extends ConsumerState<WalletFormSheet> {
     required Color accentColor,
     required AppLocalizations l10n,
   }) {
+    final isVi = Localizations.localeOf(context).languageCode == 'vi';
     final types = [
       (
         type: AccountType.cash,
         label: l10n.walletTypeCash,
         icon: Icons.payments_rounded,
-        desc: 'Tiền mặt hàng ngày',
+        desc: isVi ? 'Tiền mặt hàng ngày' : 'Daily cash',
       ),
       (
         type: AccountType.bank,
         label: l10n.walletTypeBank,
         icon: Icons.account_balance_rounded,
-        desc: 'Tài khoản ngân hàng',
+        desc: isVi ? 'Tài khoản ngân hàng' : 'Bank account',
       ),
       (
         type: AccountType.ewallet,
         label: l10n.walletTypeEwallet,
         icon: Icons.qr_code_2_rounded,
-        desc: 'MoMo, ZaloPay...',
+        desc: isVi ? 'MoMo, ZaloPay...' : 'Digital wallets...',
       ),
       (
         type: AccountType.card,
         label: l10n.walletTypeCard,
         icon: Icons.credit_card_rounded,
-        desc: 'Thẻ tín dụng / visa',
+        desc: isVi ? 'Thẻ tín dụng / visa' : 'Credit / debit card',
       ),
     ];
 

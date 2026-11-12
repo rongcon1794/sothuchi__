@@ -17,9 +17,9 @@ class LucianHoldToDeleteButton extends StatefulWidget {
     super.key,
     required this.onConfirmed,
     this.onTap,
-    this.label = 'Giữ để xóa',
-    this.holdingLabel = 'Đang giữ để xóa...',
-    this.confirmedLabel = 'Đã xóa!',
+    this.label,
+    this.holdingLabel,
+    this.confirmedLabel,
     this.duration = const Duration(milliseconds: 1200),
     this.height = 46.0,
     this.borderRadius,
@@ -29,9 +29,9 @@ class LucianHoldToDeleteButton extends StatefulWidget {
 
   final FutureOr<void> Function() onConfirmed;
   final VoidCallback? onTap;
-  final String label;
-  final String holdingLabel;
-  final String confirmedLabel;
+  final String? label;
+  final String? holdingLabel;
+  final String? confirmedLabel;
   final Duration duration;
   final double height;
   final BorderRadius? borderRadius;
@@ -189,21 +189,35 @@ class _LucianHoldToDeleteButtonState extends State<LucianHoldToDeleteButton>
                           ),
                           const SizedBox(width: 8),
                           Flexible(
-                            child: Text(
-                              _isCompleted
-                                  ? widget.confirmedLabel
-                                  : _isHolding
-                                      ? '${widget.holdingLabel} ${(progress * 100).toInt()}%'
-                                      : widget.label,
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: progress > 0.4
-                                    ? Colors.white
-                                    : dangerColor,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            child: Builder(
+                              builder: (context) {
+                                final isVi = Localizations.localeOf(context)
+                                    .languageCode
+                                    .toLowerCase()
+                                    .startsWith('vi');
+                                final defaultLabel =
+                                    widget.label ?? (isVi ? 'Giữ để xóa' : 'Hold to delete');
+                                final defaultHolding = widget.holdingLabel ??
+                                    (isVi ? 'Đang giữ để xóa...' : 'Keep holding...');
+                                final defaultConfirmed =
+                                    widget.confirmedLabel ?? (isVi ? 'Đã xóa!' : 'Deleted!');
+                                return Text(
+                                  _isCompleted
+                                      ? defaultConfirmed
+                                      : _isHolding
+                                          ? '$defaultHolding ${(progress * 100).toInt()}%'
+                                          : defaultLabel,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: progress > 0.4
+                                        ? Colors.white
+                                        : dangerColor,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                );
+                              },
                             ),
                           ),
                         ],

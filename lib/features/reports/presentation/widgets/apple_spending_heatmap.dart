@@ -134,7 +134,9 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        'Đỉnh: Ngày ${report.peakSpendingDay}',
+                        widget.locale == 'vi'
+                            ? 'Đỉnh: Ngày ${report.peakSpendingDay}'
+                            : 'Peak: Day ${report.peakSpendingDay}',
                         style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
@@ -363,8 +365,10 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
             child: _buildPillarItem(
               icon: CupertinoIcons.flame_fill,
               iconColor: AppleTokens.systemRed,
-              label: 'Đỉnh chi',
-              value: report.peakSpendingDay > 0 ? 'N${report.peakSpendingDay}' : '—',
+              label: widget.locale == 'vi' ? 'Đỉnh chi' : 'Peak Day',
+              value: report.peakSpendingDay > 0
+                  ? '${widget.locale == 'vi' ? 'N' : 'D'}${report.peakSpendingDay}'
+                  : '—',
               theme: theme,
             ),
           ),
@@ -373,7 +377,7 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
             child: _buildPillarItem(
               icon: CupertinoIcons.chart_bar_alt_fill,
               iconColor: AppleTokens.systemOrange,
-              label: 'TB/ngày',
+              label: widget.locale == 'vi' ? 'TB/ngày' : 'Avg/day',
               value: Money(minorUnits: avgMinor, currencyCode: report.currencyCode)
                   .format(locale: widget.locale, masked: widget.hideBalance),
               theme: theme,
@@ -384,8 +388,8 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
             child: _buildPillarItem(
               icon: CupertinoIcons.calendar,
               iconColor: AppleTokens.systemBlue,
-              label: 'Có chi',
-              value: '${report.activeSpendingDaysCount} ngày',
+              label: widget.locale == 'vi' ? 'Có chi' : 'Active',
+              value: '${report.activeSpendingDaysCount} ${widget.locale == 'vi' ? 'ngày' : 'days'}',
               theme: theme,
             ),
           ),
@@ -394,8 +398,8 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
             child: _buildPillarItem(
               icon: CupertinoIcons.shield_fill,
               iconColor: AppleTokens.jadePrimary,
-              label: 'Tiết kiệm',
-              value: '$frugalDays ngày',
+              label: widget.locale == 'vi' ? 'Tiết kiệm' : 'Frugal',
+              value: '$frugalDays ${widget.locale == 'vi' ? 'ngày' : 'days'}',
               theme: theme,
             ),
           ),
@@ -627,7 +631,9 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Ngày $_selectedDay/${report.selectedMonth.month}:',
+                  widget.locale == 'vi'
+                      ? 'Ngày $_selectedDay/${report.selectedMonth.month}:'
+                      : 'Day $_selectedDay/${report.selectedMonth.month}:',
                   style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
                 ),
                 const Spacer(),
@@ -643,7 +649,7 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
             ),
             const SizedBox(height: 10),
             Text(
-              'Tổng chi trong ngày:',
+              widget.locale == 'vi' ? 'Tổng chi trong ngày:' : 'Total day spending:',
               style: TextStyle(
                 fontSize: 11,
                 color: theme.colorScheme.onSurfaceVariant,
@@ -710,12 +716,16 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
                 color: AppleTokens.jadePrimary,
               ),
               const SizedBox(width: 6),
-              Text(
-                context.l10n.heatmapMonthlySummary,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: theme.colorScheme.onSurface,
+              Expanded(
+                child: Text(
+                  context.l10n.heatmapMonthlySummary,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.onSurface,
+                  ),
                 ),
               ),
             ],
@@ -724,37 +734,37 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
           if (dailyBudget != null && dailyBudget > 0) ...[
             _buildStatRow(
               theme,
-              'Ngân sách TB/ngày:',
+              widget.locale == 'vi' ? 'Ngân sách TB/ngày:' : 'Avg daily budget:',
               '${Money(minorUnits: dailyBudget, currencyCode: report.currencyCode).format(
                 locale: widget.locale,
                 masked: widget.hideBalance,
-              )}/ngày',
+              )}/${widget.locale == 'vi' ? 'ngày' : 'day'}',
             ),
             const SizedBox(height: 4),
           ],
           _buildStatRow(
             theme,
-            'Chi tiêu TB/ngày:',
+            widget.locale == 'vi' ? 'Chi tiêu TB/ngày:' : 'Avg daily spending:',
             '${Money(minorUnits: avgMinor, currencyCode: report.currencyCode).format(
               locale: widget.locale,
               masked: widget.hideBalance,
-            )}${report.elapsedDaysInMonth < report.daysInMonth ? ' (${report.elapsedDaysInMonth} ngày đã qua)' : ''}',
+            )}${report.elapsedDaysInMonth < report.daysInMonth ? (widget.locale == 'vi' ? ' (${report.elapsedDaysInMonth} ngày đã qua)' : ' (${report.elapsedDaysInMonth} days elapsed)') : ''}',
           ),
           const SizedBox(height: 4),
           _buildStatRow(
             theme,
-            'Ngày chi nhiều nhất:',
+            widget.locale == 'vi' ? 'Ngày chi nhiều nhất:' : 'Peak spending day:',
             report.peakSpendingDay > 0
-                ? 'Ngày ${report.peakSpendingDay} (${Money(minorUnits: report.peakSpendingAmountMinor, currencyCode: report.currencyCode).format(locale: widget.locale, masked: widget.hideBalance)})'
+                ? '${widget.locale == 'vi' ? 'Ngày' : 'Day'} ${report.peakSpendingDay} (${Money(minorUnits: report.peakSpendingAmountMinor, currencyCode: report.currencyCode).format(locale: widget.locale, masked: widget.hideBalance)})'
                 : context.l10n.heatmapNone,
           ),
           const SizedBox(height: 4),
           _buildStatRow(
             theme,
-            'Số ngày phát sinh chi:',
+            widget.locale == 'vi' ? 'Số ngày phát sinh chi:' : 'Active spending days:',
             report.elapsedDaysInMonth < report.daysInMonth
-                ? '${report.activeSpendingDaysCount} / ${report.elapsedDaysInMonth} ngày'
-                : '${report.activeSpendingDaysCount} / ${report.daysInMonth} ngày',
+                ? '${report.activeSpendingDaysCount} / ${report.elapsedDaysInMonth} ${widget.locale == 'vi' ? 'ngày' : 'days'}'
+                : '${report.activeSpendingDaysCount} / ${report.daysInMonth} ${widget.locale == 'vi' ? 'ngày' : 'days'}',
           ),
         ],
       ),
@@ -764,17 +774,22 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
   Widget _buildStatRow(ThemeData theme, String label, String value) {
     return Row(
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            color: theme.colorScheme.onSurfaceVariant,
+        Flexible(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 11,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             value,
+            maxLines: 1,
             textAlign: TextAlign.end,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
@@ -804,11 +819,17 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
           borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
         ),
         child: Text(
-          isOverBudget
-              ? 'Vượt NS ngày +$diffPercent%'
-              : (diffPercent == 0
-                  ? 'Đạt đúng 100% NS ngày'
-                  : 'Trong NS ngày (${diffPercent.abs()}%)'),
+          widget.locale == 'vi'
+              ? (isOverBudget
+                  ? 'Vượt NS ngày +$diffPercent%'
+                  : (diffPercent == 0
+                      ? 'Đạt đúng 100% NS ngày'
+                      : 'Trong NS ngày (${diffPercent.abs()}%)'))
+              : (isOverBudget
+                  ? 'Over daily budget +$diffPercent%'
+                  : (diffPercent == 0
+                      ? 'Exactly 100% of daily budget'
+                      : 'Within daily budget (${diffPercent.abs()}%)')),
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w600,
@@ -831,9 +852,13 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
         borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
       ),
       child: Text(
-        isHigher
-            ? 'Cao hơn TB ngày +$diffPercent%'
-            : 'Thấp hơn TB ngày ${diffPercent.abs()}%',
+        widget.locale == 'vi'
+            ? (isHigher
+                ? 'Cao hơn TB ngày +$diffPercent%'
+                : 'Thấp hơn TB ngày ${diffPercent.abs()}%')
+            : (isHigher
+                ? 'Above daily avg +$diffPercent%'
+                : 'Below daily avg ${diffPercent.abs()}%'),
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w600,
@@ -880,7 +905,9 @@ class _AppleSpendingHeatmapState extends State<AppleSpendingHeatmap> {
               ),
               const SizedBox(width: 8),
               Text(
-                'Ngày $_selectedDay/${report.selectedMonth.month}:',
+                widget.locale == 'vi'
+                    ? 'Ngày $_selectedDay/${report.selectedMonth.month}:'
+                    : 'Day $_selectedDay/${report.selectedMonth.month}:',
                 style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
               ),
               const Spacer(),

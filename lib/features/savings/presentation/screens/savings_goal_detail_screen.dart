@@ -93,7 +93,7 @@ class SavingsGoalDetailScreen extends ConsumerWidget {
               bottom: false,
               child: Center(
                 child: Text(
-                  'Không tìm thấy mục tiêu',
+                  locale == 'vi' ? 'Không tìm thấy mục tiêu' : 'Goal not found',
                   style: theme.textTheme.titleMedium,
                 ),
               ),
@@ -392,7 +392,7 @@ class SavingsGoalDetailScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Kế hoạch tích lũy',
+                          locale == 'vi' ? 'Kế hoạch tích lũy' : 'Savings plan',
                           style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                         ),
                         const SizedBox(height: 12),
@@ -412,9 +412,12 @@ class SavingsGoalDetailScreen extends ConsumerWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text('Thời gian còn lại', style: TextStyle(color: AppleTokens.systemGray)),
                                 Text(
-                                  '${goal.daysRemaining} ngày',
+                                  locale == 'vi' ? 'Thời gian còn lại' : 'Time remaining',
+                                  style: const TextStyle(color: AppleTokens.systemGray),
+                                ),
+                                Text(
+                                  '${goal.daysRemaining} ${locale == 'vi' ? 'ngày' : 'days'}',
                                   style: const TextStyle(fontWeight: FontWeight.w600),
                                 ),
                               ],
@@ -425,7 +428,10 @@ class SavingsGoalDetailScreen extends ConsumerWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text('Cần gom / ngày', style: TextStyle(color: AppleTokens.systemGray)),
+                                Text(
+                                  locale == 'vi' ? 'Cần gom / ngày' : 'Needed / day',
+                                  style: const TextStyle(color: AppleTokens.systemGray),
+                                ),
                                 Text(
                                   Money(minorUnits: goal.recommendedDailySavings!, currencyCode: goal.currency).format(locale: locale),
                                   style: TextStyle(fontWeight: FontWeight.w700, color: accentColor),
@@ -438,7 +444,10 @@ class SavingsGoalDetailScreen extends ConsumerWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text('Cần gom / tháng', style: TextStyle(color: AppleTokens.systemGray)),
+                                Text(
+                                  locale == 'vi' ? 'Cần gom / tháng' : 'Needed / month',
+                                  style: const TextStyle(color: AppleTokens.systemGray),
+                                ),
                                 Text(
                                   Money(minorUnits: goal.recommendedMonthlySavings!, currencyCode: goal.currency).format(locale: locale),
                                   style: TextStyle(fontWeight: FontWeight.w700, color: accentColor),
@@ -464,7 +473,10 @@ class SavingsGoalDetailScreen extends ConsumerWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Ngày tạo', style: TextStyle(color: AppleTokens.systemGray)),
+                            Text(
+                              locale == 'vi' ? 'Ngày tạo' : 'Created date',
+                              style: const TextStyle(color: AppleTokens.systemGray),
+                            ),
                             Text(
                               AppDateUtils.formatFullDate(goal.createdAt, locale: locale),
                               style: const TextStyle(fontWeight: FontWeight.w600),
