@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -208,5 +209,44 @@ void main() {
       // Form sheet should close and list should now have "Chị Lan"
       expect(find.text('Chị Lan'), findsOneWidget);
     });
+
+    testWidgets(
+      'displays net balance, section count, and toggles balance masking on portrait layout',
+      (tester) async {
+        tester.view.physicalSize = const Size(360, 780);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        SharedPreferences.setMockInitialValues({});
+        final prefs = await SharedPreferences.getInstance();
+        final inMem = InMemoryDebtRepository();
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              sharedPreferencesProvider.overrideWithValue(prefs),
+              debtRepositoryProvider.overrideWithValue(inMem),
+            ],
+            child: const MaterialApp(
+              home: DebtsScreen(),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(find.text('Chênh lệch ròng:'), findsOneWidget);
+        expect(find.text('2 khoản'), findsOneWidget);
+        expect(find.byIcon(CupertinoIcons.eye), findsOneWidget);
+
+        // Toggle hide balance
+        await tester.tap(find.byIcon(CupertinoIcons.eye));
+        await tester.pumpAndSettle();
+
+        expect(find.byIcon(CupertinoIcons.eye_slash), findsOneWidget);
+        expect(find.textContaining('••••'), findsWidgets);
+      },
+    );
   });
 }
