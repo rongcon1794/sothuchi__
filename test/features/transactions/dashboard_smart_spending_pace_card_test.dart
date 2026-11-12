@@ -216,7 +216,7 @@ void main() {
       expect(result.isOverPace, isFalse);
     });
 
-    test('clamps safeDailyMinor to 0 when today allowance is exceeded but monthly budget remains', () {
+    test('returns negative safeDailyMinor when today allowance is exceeded', () {
       final now = DateTime(2026, 11, 1, 18, 0); // Day 1 of 30 => 1M/day
       final budget = Budget(
         id: 'b1',
@@ -254,9 +254,75 @@ void main() {
       );
 
       expect(result.dailyAllowanceMinor, 1000000);
-      expect(result.safeDailyMinor, 0);
+      expect(result.safeDailyMinor, -200000);
       expect(result.isOverPace, isTrue);
       expect(result.isExceeded, isFalse);
+    });
+
+    testWidgets('displays negative amount when today spending exceeds daily allowance', (
+      tester,
+    ) async {
+      final now = DateTime(2026, 11, 1, 18, 0); // Day 1 of 30 => 1M/day
+      final budget = Budget(
+        id: 'b1',
+        amount: 30000000,
+        currency: 'VND',
+        startDate: DateTime(2026, 11, 1),
+        createdAt: now,
+        updatedAt: now,
+      );
+      final progress = BudgetProgress(
+        budget: budget,
+        spentMinorUnits: 1200000,
+      );
+      final expectedNegativeFormatted =
+          const Money(minorUnits: -200000, currencyCode: 'VND')
+              .format(locale: 'vi');
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            currentMonthBudgetProgressProvider.overrideWithValue([progress]),
+          ],
+          child: MaterialApp(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: AppTheme.light(),
+            home: Scaffold(
+              body: DashboardSmartSpendingPaceCard(
+                monthSummary: const MonthlyCashflowSummary(
+                  income: Money(minorUnits: 0, currencyCode: 'VND'),
+                  expense: Money(minorUnits: 1200000, currencyCode: 'VND'),
+                  net: Money(minorUnits: -1200000, currencyCode: 'VND'),
+                ),
+                totalBalance:
+                    const Money(minorUnits: 50000000, currencyCode: 'VND'),
+                transactions: [
+                  TransactionEntity(
+                    id: 't1',
+                    accountId: 'a1',
+                    categoryId: 'c1',
+                    amount: 1200000,
+                    currency: 'VND',
+                    type: TransactionType.expense,
+                    date: now,
+                    createdAt: now,
+                    updatedAt: now,
+                  ),
+                ],
+                now: now,
+                locale: 'vi',
+                hideBalance: false,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Vượt mức chi hôm nay'), findsOneWidget);
+      expect(find.text(expectedNegativeFormatted), findsOneWidget);
     });
 
     test('balance fallback does not double-subtract monthly expenses from totalBalance', () {

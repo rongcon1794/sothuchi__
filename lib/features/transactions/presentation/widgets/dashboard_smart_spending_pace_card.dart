@@ -109,10 +109,16 @@ SmartSpendingPaceResult computeSmartSpendingPace({
       .fold<int>(0, (sum, tx) => sum + tx.amount);
 
   if (effectiveLimitMinor != null && effectiveLimitMinor > 0) {
+    final spentBeforeToday = math.max(0, effectiveSpentMinor - todaySpentMinor);
+    final remainingBeforeToday =
+        math.max(0, effectiveLimitMinor - spentBeforeToday);
+    final dailyAllowanceMinor = remainingBeforeToday ~/ daysRemaining;
+    final safeDailyMinor = dailyAllowanceMinor - todaySpentMinor;
+
     if (effectiveSpentMinor >= effectiveLimitMinor) {
       return SmartSpendingPaceResult(
-        safeDailyMinor: 0,
-        dailyAllowanceMinor: 0,
+        safeDailyMinor: safeDailyMinor,
+        dailyAllowanceMinor: dailyAllowanceMinor,
         todaySpentMinor: todaySpentMinor,
         remainingLimitMinor: 0,
         daysRemaining: daysRemaining,
@@ -123,15 +129,11 @@ SmartSpendingPaceResult computeSmartSpendingPace({
       );
     }
 
-    final spentBeforeToday = math.max(0, effectiveSpentMinor - todaySpentMinor);
-    final remainingBeforeToday =
-        math.max(0, effectiveLimitMinor - spentBeforeToday);
-    final dailyAllowanceMinor = remainingBeforeToday ~/ daysRemaining;
-    final safeDailyMinor = math.max(0, dailyAllowanceMinor - todaySpentMinor);
     final remainingLimitMinor =
         math.max(0, effectiveLimitMinor - effectiveSpentMinor);
     final expectedSpentSoFar = (effectiveLimitMinor * currentDay) / daysInMonth;
-    final isOverPace = effectiveSpentMinor > expectedSpentSoFar;
+    final isOverPace =
+        effectiveSpentMinor > expectedSpentSoFar || safeDailyMinor < 0;
 
     return SmartSpendingPaceResult(
       safeDailyMinor: safeDailyMinor,
@@ -149,28 +151,32 @@ SmartSpendingPaceResult computeSmartSpendingPace({
   // Fallback 3: Neither budget nor monthly income is recorded.
   // Note: totalBalance is already net of all recorded expenses (including
   // this month's expenses), so we must NOT subtract effectiveSpentMinor again.
+  final balanceAtStartOfToday = totalBalance.minorUnits + todaySpentMinor;
+  final dailyAllowanceMinor = balanceAtStartOfToday > 0
+      ? balanceAtStartOfToday ~/ daysRemaining
+      : 0;
+  final safeDailyMinor = dailyAllowanceMinor - todaySpentMinor;
+
   if (totalBalance.minorUnits <= 0) {
     final isExceeded = effectiveSpentMinor > 0 || totalBalance.minorUnits < 0;
     return SmartSpendingPaceResult(
-      safeDailyMinor: 0,
-      dailyAllowanceMinor: 0,
+      safeDailyMinor: safeDailyMinor,
+      dailyAllowanceMinor: dailyAllowanceMinor,
       todaySpentMinor: todaySpentMinor,
       remainingLimitMinor: 0,
       daysRemaining: daysRemaining,
       currencyCode: currencyCode,
-      isOverPace: isExceeded || effectiveSpentMinor > 0,
+      isOverPace: isExceeded || effectiveSpentMinor > 0 || safeDailyMinor < 0,
       isExceeded: isExceeded,
       source: SmartPaceSource.balance,
     );
   }
 
-  final balanceAtStartOfToday = totalBalance.minorUnits + todaySpentMinor;
-  final dailyAllowanceMinor = balanceAtStartOfToday ~/ daysRemaining;
-  final safeDailyMinor = math.max(0, dailyAllowanceMinor - todaySpentMinor);
   final impliedStartingBalance = totalBalance.minorUnits + effectiveSpentMinor;
   final expectedSpentSoFar =
       (impliedStartingBalance * currentDay) / daysInMonth;
-  final isOverPace = effectiveSpentMinor > expectedSpentSoFar;
+  final isOverPace =
+      effectiveSpentMinor > expectedSpentSoFar || safeDailyMinor < 0;
 
   return SmartSpendingPaceResult(
     safeDailyMinor: safeDailyMinor,
@@ -223,6 +229,15 @@ class DashboardSmartSpendingPaceCard extends ConsumerWidget {
       minorUnits: pace.safeDailyMinor,
       currencyCode: pace.currencyCode,
     );
+    final isDailyOverspent = pace.safeDailyMinor < 0;
+    final paceLabel = isDailyOverspent
+        ? (locale.startsWith('vi')
+            ? 'Vượt mức chi hôm nay'
+            : "Exceeded today's pace")
+        : l10n.smartPaceSafeToSpend;
+    final amountColor = isDailyOverspent
+        ? AppleTokens.systemRed
+        : (isDark ? Colors.white : theme.colorScheme.onSurface);
 
     final statusColor = pace.isExceeded
         ? AppleTokens.systemRed
@@ -413,7 +428,7 @@ class DashboardSmartSpendingPaceCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    l10n.smartPaceSafeToSpend,
+                    paceLabel,
                     style: TextStyle(
                       fontSize: 12,
                       color: theme.colorScheme.onSurfaceVariant,
@@ -427,7 +442,7 @@ class DashboardSmartSpendingPaceCard extends ConsumerWidget {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
-                      color: isDark ? Colors.white : theme.colorScheme.onSurface,
+                      color: amountColor,
                       fontFeatures: AppTheme.tabularFigures,
                     ),
                   ),
@@ -464,7 +479,7 @@ class DashboardSmartSpendingPaceCard extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          l10n.smartPaceSafeToSpend,
+                          paceLabel,
                           style: TextStyle(
                             fontSize: 12,
                             color: theme.colorScheme.onSurfaceVariant,
@@ -481,7 +496,7 @@ class DashboardSmartSpendingPaceCard extends ConsumerWidget {
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w800,
-                              color: isDark ? Colors.white : theme.colorScheme.onSurface,
+                              color: amountColor,
                               fontFeatures: AppTheme.tabularFigures,
                             ),
                           ),
@@ -523,7 +538,7 @@ class DashboardSmartSpendingPaceCard extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              l10n.smartPaceSafeToSpend,
+                              paceLabel,
                               style: TextStyle(
                                 fontSize: 12,
                                 color: theme.colorScheme.onSurfaceVariant,
@@ -540,7 +555,7 @@ class DashboardSmartSpendingPaceCard extends ConsumerWidget {
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w800,
-                                  color: isDark ? Colors.white : theme.colorScheme.onSurface,
+                                  color: amountColor,
                                   fontFeatures: AppTheme.tabularFigures,
                                 ),
                               ),
