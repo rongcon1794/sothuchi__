@@ -144,6 +144,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
         : AppleTokens.scrollBottomPaddingWithFab;
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         toolbarHeight: isLandscape
             ? AppleTokens.appBarHeightLandscape

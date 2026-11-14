@@ -122,6 +122,7 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
     };
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         toolbarHeight: isLandscape
             ? AppleTokens.appBarHeightLandscape

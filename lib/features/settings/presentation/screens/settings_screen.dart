@@ -1039,7 +1039,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         : null;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         toolbarHeight: appBarHeight,
         backgroundColor: Colors.transparent,

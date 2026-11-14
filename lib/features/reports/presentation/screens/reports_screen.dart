@@ -122,6 +122,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
     final report = ref.watch(monthlyReportProvider);
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         toolbarHeight: isLandscape
             ? AppleTokens.appBarHeightLandscape

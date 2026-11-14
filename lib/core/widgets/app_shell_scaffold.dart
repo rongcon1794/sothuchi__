@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
+import 'package:so_thu_chi/core/widgets/apple_dynamic_ambient_background.dart';
 
 /// Translucent, frosted-glass Apple navigation shell.
 /// Adapts seamlessly between:
@@ -122,22 +123,26 @@ class AppShellScaffold extends StatelessWidget {
       ),
     );
 
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: Column(
-        children: [
-          ?topBanner,
-          Expanded(child: navigationShell),
-        ],
-      ),
-      bottomNavigationBar: RepaintBoundary(
-        child: ClipRect(
-          child: isOled || Theme.of(context).platform == TargetPlatform.android
-              ? navBarContent
-              : BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-                  child: navBarContent,
-                ),
+    return AppleDynamicAmbientBackground(
+      currentIndex: currentIndex,
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        resizeToAvoidBottomInset: false,
+        body: Column(
+          children: [
+            ?topBanner,
+            Expanded(child: navigationShell),
+          ],
+        ),
+        bottomNavigationBar: RepaintBoundary(
+          child: ClipRect(
+            child: isOled || Theme.of(context).platform == TargetPlatform.android
+                ? navBarContent
+                : BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                    child: navBarContent,
+                  ),
+          ),
         ),
       ),
     );

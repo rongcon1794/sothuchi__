@@ -1,4 +1,4 @@
-﻿part of 'transaction_filter_sheet.dart';
+part of 'transaction_filter_sheet.dart';
 
 enum _DatePreset {
   all,

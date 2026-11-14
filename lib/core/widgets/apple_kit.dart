@@ -9,6 +9,7 @@ export 'package:so_thu_chi/core/widgets/apple_button.dart';
 export 'package:so_thu_chi/core/widgets/apple_card.dart';
 export 'package:so_thu_chi/core/widgets/apple_compact_month_switcher.dart';
 export 'package:so_thu_chi/core/widgets/apple_date_picker_tile.dart';
+export 'package:so_thu_chi/core/widgets/apple_dynamic_ambient_background.dart';
 export 'package:so_thu_chi/core/widgets/apple_header_title.dart';
 export 'package:so_thu_chi/core/widgets/apple_modal_sheet.dart';
 export 'package:so_thu_chi/core/widgets/apple_month_year_picker_sheet.dart';

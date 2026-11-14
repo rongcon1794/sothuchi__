@@ -133,6 +133,7 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
         : AppleTokens.appBarHeightPortrait;
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         toolbarHeight: appBarHeight,
         backgroundColor: Colors.transparent,
