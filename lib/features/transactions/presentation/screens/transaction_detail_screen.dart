@@ -261,12 +261,12 @@ class TransactionDetailScreen extends ConsumerWidget {
             '${AppDateUtils.formatFullDate(tx.date, locale: locale)} • $timeStr';
 
         return Scaffold(
-          backgroundColor: Colors.transparent,
+          backgroundColor: theme.scaffoldBackgroundColor,
           appBar: AppBar(
             toolbarHeight: isLandscape
                 ? AppleTokens.appBarHeightLandscape
                 : AppleTokens.appBarHeightPortrait,
-            backgroundColor: Colors.transparent,
+            backgroundColor: theme.scaffoldBackgroundColor,
             elevation: 0,
             leading: IconButton(
               icon: const Icon(CupertinoIcons.chevron_left, size: 24),

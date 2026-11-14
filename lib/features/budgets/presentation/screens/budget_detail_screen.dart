@@ -190,12 +190,12 @@ class BudgetDetailScreen extends ConsumerWidget {
         final dailyMoney = Money(minorUnits: dailyMinor, currencyCode: budget.currency);
 
         return Scaffold(
-          backgroundColor: Colors.transparent,
+          backgroundColor: theme.scaffoldBackgroundColor,
           appBar: AppBar(
             toolbarHeight: isLandscape
                 ? AppleTokens.appBarHeightLandscape
                 : AppleTokens.appBarHeightPortrait,
-            backgroundColor: Colors.transparent,
+            backgroundColor: theme.scaffoldBackgroundColor,
             elevation: 0,
             leading: IconButton(
               icon: const Icon(CupertinoIcons.chevron_left, size: 24),
