@@ -78,8 +78,8 @@ class AppShellScaffold extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark
             ? (isOled
-                ? const Color(0xFF000000)
-                : const Color(0xFF1C1C1E).withValues(alpha: 0.90))
+                ? AppleTokens.bgOledPrimary
+                : AppleTokens.bgDarkCard.withValues(alpha: 0.88))
             : Colors.white.withValues(alpha: 0.90),
         border: Border(
           top: BorderSide(

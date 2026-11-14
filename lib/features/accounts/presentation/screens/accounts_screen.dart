@@ -22,6 +22,9 @@ import 'package:so_thu_chi/features/accounts/presentation/widgets/wallet_list_ti
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:so_thu_chi/l10n/app_localizations.dart';
 
+/// Redesigned Apple HIG & Lucian Accounts/Wallets Management Screen.
+/// Synchronized with dynamic ambient background, frosted glass cards,
+/// asset distribution telemetry, and fluid responsive grid.
 class AccountsScreen extends ConsumerStatefulWidget {
   const AccountsScreen({super.key});
 
@@ -183,7 +186,9 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final isVi = l10n.localeName.startsWith('vi');
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
     final accountsAsync = ref.watch(accountsStreamProvider);
     final activeAccounts = ref.watch(activeAccountsProvider);
@@ -212,7 +217,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
     final canPop = Navigator.of(context).canPop();
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         toolbarHeight: appBarHeight,
         backgroundColor: Colors.transparent,
@@ -227,16 +232,17 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
         ),
         actions: [
           if (activeAccounts.length >= 2) ...[
-            CupertinoButton(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              onPressed: () => _openTransferSheet(context),
+            ApplePressable(
+              onTap: () => _openTransferSheet(context),
+              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                margin: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppleTokens.systemBlue.withValues(alpha: isDark ? 0.2 : 0.1),
+                  color: AppleTokens.systemBlue.withValues(alpha: isDark ? 0.20 : 0.10),
                   borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                   border: Border.all(
-                    color: AppleTokens.systemBlue.withValues(alpha: 0.3),
+                    color: AppleTokens.systemBlue.withValues(alpha: 0.32),
                     width: 0.8,
                   ),
                 ),
@@ -261,7 +267,6 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                 ),
               ),
             ),
-            const SizedBox(width: 4),
           ],
         ],
       ),
@@ -305,7 +310,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                 );
               }
 
-              // 1. Apple Net Balance Hero Card
+              // 1. Redesigned Apple Glass Hero Net Balance Card
               final heroCard = _buildHeroNetBalanceCard(
                 context: context,
                 theme: theme,
@@ -327,36 +332,48 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
               // 3. Wallets List items
               final walletListItems = <Widget>[
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        l10n.activeWallets.toUpperCase(),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: AppleTokens.systemGray,
-                          letterSpacing: 0.6,
-                        ),
+                      Row(
+                        children: [
+                          AppleSquircleBadge(
+                            icon: CupertinoIcons.creditcard_fill,
+                            backgroundColor: scheme.primary,
+                            size: 26,
+                            iconSize: 13,
+                            radius: 7,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            l10n.activeWallets.toUpperCase(),
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.4,
+                              color: isDark ? Colors.white70 : const Color(0xFF55555B),
+                            ),
+                          ),
+                        ],
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        padding: const EdgeInsets.symmetric(horizontal: 8.5, vertical: 3),
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           color: isDark
-                              ? AppleTokens.bgDarkSecondary
-                              : AppleTokens.bgLightSecondary,
+                              ? Colors.white.withValues(alpha: 0.08)
+                              : Colors.black.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                         ),
                         child: Text(
-                          l10n.localeName.startsWith('vi')
+                          isVi
                               ? '${filteredAccounts.length} ví'
                               : '${filteredAccounts.length} wallets',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: AppleTokens.systemGray,
+                            fontWeight: FontWeight.w700,
+                            color: scheme.onSurfaceVariant,
                             height: 1.2,
                           ),
                         ),
@@ -364,95 +381,113 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 6),
-                ...filteredAccounts.map(
-                  (account) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: WalletListTile(
-                      key: ValueKey('wallet_tile_${account.id}'),
-                      account: account,
-                      typeLabel: _typeLabel(l10n, account.type),
-                      locale: locale,
-                      hideBalance: hideBalance,
-                      isDefault: account.id == settings?.defaultWalletId,
-                      onSetDefault: () => _handleSetDefaultWallet(context, account),
-                      onTap: () =>
-                          context.push(AppRoutes.accountDetail(account.id)),
-                      onEdit: () => _openWalletForm(context, existing: account),
-                      onToggleArchive: () => _handleToggleArchive(
-                        context,
-                        accountId: account.id,
-                        archived: true,
+                const SizedBox(height: 8),
+                if (filteredAccounts.isEmpty)
+                  AppleGlassCard(
+                    padding: const EdgeInsets.all(24),
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                    child: Center(
+                      child: Text(
+                        isVi ? 'Không tìm thấy ví phù hợp' : 'No matching wallets found',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: AppleTokens.systemGray,
+                        ),
                       ),
-                      onDelete: () => _handleDeleteWallet(context, account),
+                    ),
+                  )
+                else
+                  ...filteredAccounts.map(
+                    (account) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: WalletListTile(
+                        key: ValueKey('wallet_tile_${account.id}'),
+                        account: account,
+                        typeLabel: _typeLabel(l10n, account.type),
+                        locale: locale,
+                        hideBalance: hideBalance,
+                        isDefault: account.id == settings?.defaultWalletId,
+                        onSetDefault: () => _handleSetDefaultWallet(context, account),
+                        onTap: () =>
+                            context.push(AppRoutes.accountDetail(account.id)),
+                        onEdit: () => _openWalletForm(context, existing: account),
+                        onToggleArchive: () => _handleToggleArchive(
+                          context,
+                          accountId: account.id,
+                          archived: true,
+                        ),
+                        onDelete: () => _handleDeleteWallet(context, account),
+                      ),
                     ),
                   ),
-                ),
                 if (archivedAccounts.isNotEmpty) ...[
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
                   AppleGlassCard(
                     padding: EdgeInsets.zero,
                     borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                    child: ExpansionTile(
-                      shape: const Border(),
-                      tilePadding:
-                          const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                      title: Row(
+                    child: Theme(
+                      data: theme.copyWith(dividerColor: Colors.transparent),
+                      child: ExpansionTile(
+                        shape: const Border(),
+                        collapsedShape: const Border(),
+                        tilePadding:
+                            const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        title: Row(
+                          children: [
+                            const Icon(
+                              CupertinoIcons.archivebox_fill,
+                              size: 18,
+                              color: AppleTokens.systemGray,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '${l10n.archivedWallets} (${archivedAccounts.length})',
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
                         children: [
-                          const Icon(
-                            CupertinoIcons.archivebox_fill,
-                            size: 18,
-                            color: AppleTokens.systemGray,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            '${l10n.archivedWallets} (${archivedAccounts.length})',
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                            child: Column(
+                              children: archivedAccounts
+                                  .map(
+                                    (account) => Padding(
+                                      padding: const EdgeInsets.only(bottom: 8),
+                                      child: WalletListTile(
+                                        key: ValueKey('archived_wallet_tile_${account.id}'),
+                                        account: account,
+                                        typeLabel: _typeLabel(l10n, account.type),
+                                        locale: locale,
+                                        hideBalance: hideBalance,
+                                        isDefault: account.id == settings?.defaultWalletId,
+                                        onSetDefault: () => _handleSetDefaultWallet(context, account),
+                                        onTap: () => context.push(
+                                          AppRoutes.accountDetail(account.id),
+                                        ),
+                                        onEdit: () => _openWalletForm(
+                                          context,
+                                          existing: account,
+                                        ),
+                                        onToggleArchive: () =>
+                                            _handleToggleArchive(
+                                          context,
+                                          accountId: account.id,
+                                          archived: false,
+                                        ),
+                                        onDelete: () => _handleDeleteWallet(
+                                          context,
+                                          account,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
                             ),
                           ),
                         ],
                       ),
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                          child: Column(
-                            children: archivedAccounts
-                                .map(
-                                  (account) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 8),
-                                    child: WalletListTile(
-                                      key: ValueKey('archived_wallet_tile_${account.id}'),
-                                      account: account,
-                                      typeLabel: _typeLabel(l10n, account.type),
-                                      locale: locale,
-                                      hideBalance: hideBalance,
-                                      isDefault: account.id == settings?.defaultWalletId,
-                                      onSetDefault: () => _handleSetDefaultWallet(context, account),
-                                      onTap: () => context.push(
-                                        AppRoutes.accountDetail(account.id),
-                                      ),
-                                      onEdit: () => _openWalletForm(
-                                        context,
-                                        existing: account,
-                                      ),
-                                      onToggleArchive: () =>
-                                          _handleToggleArchive(
-                                        context,
-                                        accountId: account.id,
-                                        archived: false,
-                                      ),
-                                      onDelete: () => _handleDeleteWallet(
-                                        context,
-                                        account,
-                                      ),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                          ),
-                        ),
-                      ],
                     ),
                   ),
                 ],
@@ -460,7 +495,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
 
               return Center(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1024),
+                  constraints: const BoxConstraints(maxWidth: AppleTokens.maxContentWidth),
                   child: ListView(
                     physics: const BouncingScrollPhysics(),
                     padding: EdgeInsets.fromLTRB(
@@ -475,21 +510,23 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(
-                              flex: 44,
+                              flex: 42,
                               child: Column(
                                 children: [
                                   heroCard,
-                                  const SizedBox(height: 14),
-                                  filterPills,
                                 ],
                               ),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
-                              flex: 56,
+                              flex: 58,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: walletListItems,
+                                children: [
+                                  filterPills,
+                                  const SizedBox(height: 14),
+                                  ...walletListItems,
+                                ],
                               ),
                             ),
                           ],
@@ -532,175 +569,280 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
     required bool hideBalance,
     required AppLocalizations l10n,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: isDark
-              ? const [Color(0xFF0D281E), Color(0xFF06140E)]
-              : const [Color(0xFFE8F5E9), Color(0xFFC8E6C9)],
-        ),
-        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-        border: Border.all(
-          color: AppleTokens.jadePrimary.withValues(alpha: isDark ? 0.35 : 0.25),
-          width: 1.0,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppleTokens.jadeDark.withValues(alpha: isDark ? 0.25 : 0.08),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 14, 10, 14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
+    final isVi = locale.startsWith('vi');
+
+    // Calculate asset allocation across categories for visual telemetry
+    int totalCashMinor = 0;
+    int totalBankMinor = 0;
+    int totalEwalletMinor = 0;
+    int totalCardMinor = 0;
+
+    for (final acc in activeAccounts) {
+      final bal = acc.balance;
+      if (bal > 0) {
+        switch (acc.type) {
+          case AccountType.cash:
+            totalCashMinor += bal;
+            break;
+          case AccountType.bank:
+            totalBankMinor += bal;
+            break;
+          case AccountType.ewallet:
+            totalEwalletMinor += bal;
+            break;
+          case AccountType.card:
+            totalCardMinor += bal;
+            break;
+        }
+      }
+    }
+
+    final positiveTotalMinor =
+        totalCashMinor + totalBankMinor + totalEwalletMinor + totalCardMinor;
+
+    return AppleGlassCard(
+      padding: const EdgeInsets.all(18),
+      borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+      borderColor: isDark
+          ? AppleTokens.jadePrimary.withValues(alpha: 0.30)
+          : AppleTokens.jadePrimary.withValues(alpha: 0.22),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 1. Header: Shield Badge + Eyebrow + Count + Eye Toggle
+          Row(
             children: [
-              // Top Label & Pulse Status Row
-              Row(
-                children: [
-                  Container(
-                    width: 7,
-                    height: 7,
-                    decoration: BoxDecoration(
-                      color: AppleTokens.jadePrimary,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppleTokens.jadePrimary.withValues(alpha: 0.6),
-                          blurRadius: 5,
-                          spreadRadius: 1,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 7),
-                  Flexible(
-                    child: Text(
-                      l10n.totalBalance.toUpperCase(),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5,
-                        color: isDark ? AppleTokens.jadePrimary : const Color(0xFF1B5E20),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.08)
-                          : Colors.black.withValues(alpha: 0.06),
-                      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                    ),
-                    child: Text(
-                      l10n.localeName.startsWith('vi')
-                          ? '${activeAccounts.length} ví'
-                          : '${activeAccounts.length} wallets',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white70 : const Color(0xFF1B5E20),
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-                    alignment: Alignment.centerRight,
-                    tooltip: hideBalance ? l10n.showBalance : l10n.hideBalance,
-                    onPressed: () {
-                      unawaited(HapticFeedback.selectionClick());
-                      ref
-                          .read(settingsControllerProvider.notifier)
-                          .toggleHideBalance();
-                    },
-                    icon: Icon(
-                      hideBalance
-                          ? CupertinoIcons.eye_slash
-                          : CupertinoIcons.eye,
-                      size: 19,
-                      color: isDark ? Colors.white70 : Colors.black54,
-                    ),
-                  ),
-                ],
+              const AppleSquircleBadge(
+                icon: CupertinoIcons.shield_fill,
+                backgroundColor: AppleTokens.jadePrimary,
+                size: 28,
+                iconSize: 14,
+                radius: 8,
               ),
-              const SizedBox(height: 6),
-              // Big Balance Figure
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
+              const SizedBox(width: 9),
+              Flexible(
                 child: Text(
-                  totalBalance.format(locale: locale, masked: hideBalance),
-                  semanticsLabel: hideBalance ? l10n.balanceHidden : null,
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
-                    fontFeatures: AppTheme.tabularFigures,
-                    color: isDark ? Colors.white : const Color(0xFF0F3816),
+                  l10n.totalBalance.toUpperCase(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.6,
+                    color: isDark ? AppleTokens.jadePrimary : const Color(0xFF0F764A),
                   ),
                 ),
               ),
-              if (activeAccounts.length >= 2) ...[
-                const SizedBox(height: 10),
-                ApplePressable(
-                  onTap: () => _openTransferSheet(context),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : Colors.black.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 10),
-                    decoration: BoxDecoration(
-                      color: AppleTokens.systemBlue.withValues(alpha: isDark ? 0.20 : 0.10),
-                      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                      border: Border.all(
-                        color: AppleTokens.systemBlue.withValues(alpha: 0.28),
-                        width: 0.8,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.swap_horiz_rounded,
-                          size: 15,
-                          color: AppleTokens.systemBlue,
-                        ),
-                        const SizedBox(width: 5),
-                        Flexible(
-                          child: Text(
-                            l10n.transferBetweenWallets,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: AppleTokens.systemBlue,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                ),
+                child: Text(
+                  isVi
+                      ? '${activeAccounts.length} ví'
+                      : '${activeAccounts.length} wallets',
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white70 : const Color(0xFF1B5E20),
                   ),
                 ),
-              ],
+              ),
+              const Spacer(),
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                alignment: Alignment.centerRight,
+                tooltip: hideBalance ? l10n.showBalance : l10n.hideBalance,
+                onPressed: () {
+                  unawaited(HapticFeedback.selectionClick());
+                  ref
+                      .read(settingsControllerProvider.notifier)
+                      .toggleHideBalance();
+                },
+                icon: Icon(
+                  hideBalance
+                      ? CupertinoIcons.eye_slash
+                      : CupertinoIcons.eye,
+                  size: 20,
+                  color: isDark ? Colors.white70 : Colors.black54,
+                ),
+              ),
             ],
           ),
-        ),
+          const SizedBox(height: 8),
+
+          // 2. Primary Big Balance Figure
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              totalBalance.format(locale: locale, masked: hideBalance),
+              semanticsLabel: hideBalance ? l10n.balanceHidden : null,
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontSize: 32,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.8,
+                fontFeatures: AppTheme.tabularFigures,
+                color: isDark ? Colors.white : const Color(0xFF072711),
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          // 3. Segmented Asset Distribution Telemetry
+          if (positiveTotalMinor > 0 && !hideBalance) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+              child: SizedBox(
+                height: 6,
+                child: Row(
+                  children: [
+                    if (totalCashMinor > 0)
+                      Expanded(
+                        flex: totalCashMinor,
+                        child: Container(color: AppleTokens.jadePrimary),
+                      ),
+                    if (totalBankMinor > 0)
+                      Expanded(
+                        flex: totalBankMinor,
+                        child: Container(color: AppleTokens.systemBlue),
+                      ),
+                    if (totalEwalletMinor > 0)
+                      Expanded(
+                        flex: totalEwalletMinor,
+                        child: Container(color: AppleTokens.systemTeal),
+                      ),
+                    if (totalCardMinor > 0)
+                      Expanded(
+                        flex: totalCardMinor,
+                        child: Container(color: AppleTokens.systemPurple),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 12,
+              runSpacing: 6,
+              children: [
+                if (totalCashMinor > 0)
+                  _buildLegendItem(
+                    color: AppleTokens.jadePrimary,
+                    label: l10n.walletTypeCash,
+                    percent: (totalCashMinor * 100 / positiveTotalMinor).round(),
+                    isDark: isDark,
+                  ),
+                if (totalBankMinor > 0)
+                  _buildLegendItem(
+                    color: AppleTokens.systemBlue,
+                    label: l10n.walletTypeBank,
+                    percent: (totalBankMinor * 100 / positiveTotalMinor).round(),
+                    isDark: isDark,
+                  ),
+                if (totalEwalletMinor > 0)
+                  _buildLegendItem(
+                    color: AppleTokens.systemTeal,
+                    label: l10n.walletTypeEwallet,
+                    percent: (totalEwalletMinor * 100 / positiveTotalMinor).round(),
+                    isDark: isDark,
+                  ),
+                if (totalCardMinor > 0)
+                  _buildLegendItem(
+                    color: AppleTokens.systemPurple,
+                    label: l10n.walletTypeCard,
+                    percent: (totalCardMinor * 100 / positiveTotalMinor).round(),
+                    isDark: isDark,
+                  ),
+              ],
+            ),
+          ],
+
+          // 4. Quick Action Button: Transfer between wallets
+          if (activeAccounts.length >= 2) ...[
+            const SizedBox(height: 14),
+            ApplePressable(
+              onTap: () => _openTransferSheet(context),
+              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 12),
+                decoration: BoxDecoration(
+                  color: AppleTokens.systemBlue.withValues(alpha: isDark ? 0.22 : 0.10),
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                  border: Border.all(
+                    color: AppleTokens.systemBlue.withValues(alpha: 0.32),
+                    width: 0.9,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.swap_horiz_rounded,
+                      size: 16,
+                      color: AppleTokens.systemBlue,
+                    ),
+                    const SizedBox(width: 5),
+                    Flexible(
+                      child: Text(
+                        l10n.transferBetweenWallets,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: AppleTokens.systemBlue,
+                          letterSpacing: -0.1,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
+    );
+  }
+
+  Widget _buildLegendItem({
+    required Color color,
+    required String label,
+    required int percent,
+    required bool isDark,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 7,
+          height: 7,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 4.5),
+        Text(
+          '$label $percent%',
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            color: isDark ? Colors.white70 : const Color(0xFF48484A),
+          ),
+        ),
+      ],
     );
   }
 
@@ -712,32 +854,37 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
     final filters = [
       (
         type: null,
+        icon: CupertinoIcons.square_grid_2x2,
         label: '${l10n.localeName.startsWith('vi') ? 'Tất cả' : 'All'} (${activeAccounts.length})'
       ),
       (
         type: AccountType.cash,
+        icon: Icons.payments_rounded,
         label:
             '${l10n.walletTypeCash} (${activeAccounts.where((a) => a.type == AccountType.cash).length})'
       ),
       (
         type: AccountType.bank,
+        icon: Icons.account_balance_rounded,
         label:
             '${l10n.walletTypeBank} (${activeAccounts.where((a) => a.type == AccountType.bank).length})'
       ),
       (
         type: AccountType.ewallet,
+        icon: Icons.qr_code_2_rounded,
         label:
             '${l10n.walletTypeEwallet} (${activeAccounts.where((a) => a.type == AccountType.ewallet).length})'
       ),
       (
         type: AccountType.card,
+        icon: Icons.credit_card_rounded,
         label:
             '${l10n.walletTypeCard} (${activeAccounts.where((a) => a.type == AccountType.card).length})'
       ),
     ];
 
     return SizedBox(
-      height: 36,
+      height: 38,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
@@ -758,31 +905,53 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 14),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? (isDark ? Colors.white : Colors.black87)
+                    ? (isDark ? Colors.white : const Color(0xFF1C1C1E))
                     : (isDark
-                        ? AppleTokens.bgDarkSecondary
-                        : AppleTokens.bgLightSecondary),
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : Colors.white.withValues(alpha: 0.85)),
                 borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                 border: Border.all(
                   color: isSelected
                       ? Colors.transparent
                       : (isDark
-                          ? AppleTokens.separatorDark
-                          : AppleTokens.separatorLight),
+                          ? Colors.white.withValues(alpha: 0.12)
+                          : AppleTokens.borderLight),
                   width: 0.8,
                 ),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null,
               ),
-              child: Text(
-                f.label,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  color: isSelected
-                      ? (isDark ? Colors.black : Colors.white)
-                      : (isDark ? Colors.white70 : Colors.black87),
-                  height: 1.2,
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    f.icon,
+                    size: 14,
+                    color: isSelected
+                        ? (isDark ? Colors.black : Colors.white)
+                        : (isDark ? Colors.white70 : Colors.black87),
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    f.label,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                      color: isSelected
+                          ? (isDark ? Colors.black : Colors.white)
+                          : (isDark ? Colors.white70 : Colors.black87),
+                      height: 1.2,
+                    ),
+                  ),
+                ],
               ),
             ),
           );

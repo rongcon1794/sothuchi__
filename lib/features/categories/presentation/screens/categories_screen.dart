@@ -163,13 +163,13 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     required bool isDark,
     required int expenseCount,
     required int incomeCount,
+    required int defaultCount,
+    required int customCount,
     required int totalTransactions,
-    required Money monthExpenseMoney,
-    required Money monthIncomeMoney,
     required String locale,
-    required bool hideBalance,
   }) {
     final totalCategories = expenseCount + incomeCount;
+    final isVi = locale.startsWith('vi');
 
     return AppleGlassCard(
       borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
@@ -207,7 +207,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      locale.startsWith('vi')
+                      isVi
                           ? 'TỔNG QUAN PHÂN LOẠI'
                           : 'CATEGORIES OVERVIEW',
                       style: theme.textTheme.labelSmall?.copyWith(
@@ -219,7 +219,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      locale.startsWith('vi')
+                      isVi
                           ? '$totalCategories danh mục khả dụng'
                           : '$totalCategories categories available',
                       style: theme.textTheme.titleMedium?.copyWith(
@@ -234,7 +234,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
           ),
           const SizedBox(height: 14),
 
-          // Metric Pills Strip
+          // Metric Pills Strip: Expense vs Income counts
           Row(
             children: [
               // Expense badge
@@ -260,7 +260,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       const SizedBox(width: 6),
                       Flexible(
                         child: Text(
-                          locale.startsWith('vi')
+                          isVi
                               ? '$expenseCount Khoản chi'
                               : '$expenseCount Expense',
                           style: const TextStyle(
@@ -301,7 +301,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                       const SizedBox(width: 6),
                       Flexible(
                         child: Text(
-                          locale.startsWith('vi')
+                          isVi
                               ? '$incomeCount Khoản thu'
                               : '$incomeCount Income',
                           style: const TextStyle(
@@ -320,7 +320,32 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             ],
           ),
 
-          // Monthly Total Strip
+          // Visual Proportion Ratio Bar
+          if (totalCategories > 0) ...[
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+              child: SizedBox(
+                height: 6,
+                child: Row(
+                  children: [
+                    if (expenseCount > 0)
+                      Expanded(
+                        flex: expenseCount,
+                        child: Container(color: AppleTokens.rubyExpense),
+                      ),
+                    if (incomeCount > 0)
+                      Expanded(
+                        flex: incomeCount,
+                        child: Container(color: AppleTokens.emeraldIncome),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+
+          // Category Telemetry Strip (Default Templates, Custom Categories, Categorized Txs)
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -332,29 +357,41 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
             ),
             child: Row(
               children: [
+                // 1. Default categories
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        locale.startsWith('vi') ? 'Chi tháng này' : 'Month expense',
-                        style: const TextStyle(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w600,
-                          color: AppleTokens.systemGray,
-                        ),
+                      const Icon(
+                        CupertinoIcons.checkmark_seal_fill,
+                        size: 14,
+                        color: AppleTokens.systemBlue,
                       ),
-                      const SizedBox(height: 1),
-                      Text(
-                        monthExpenseMoney.format(locale: locale, masked: hideBalance),
-                        style: const TextStyle(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w700,
-                          fontFeatures: AppTheme.tabularFigures,
-                          color: AppleTokens.rubyExpense,
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              isVi ? 'Mẫu chuẩn' : 'Templates',
+                              style: const TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w500,
+                                color: AppleTokens.systemGray,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              '$defaultCount',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                fontFeatures: AppTheme.tabularFigures,
+                              ),
+                            ),
+                          ],
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -364,69 +401,95 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                   height: 24,
                   color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
+
+                // 2. Custom categories
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        locale.startsWith('vi') ? 'Thu tháng này' : 'Month income',
-                        style: const TextStyle(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w600,
-                          color: AppleTokens.systemGray,
-                        ),
+                      const Icon(
+                        CupertinoIcons.pencil_circle_fill,
+                        size: 14,
+                        color: AppleTokens.systemPurple,
                       ),
-                      const SizedBox(height: 1),
-                      Text(
-                        monthIncomeMoney.format(locale: locale, masked: hideBalance),
-                        style: const TextStyle(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w700,
-                          fontFeatures: AppTheme.tabularFigures,
-                          color: AppleTokens.emeraldIncome,
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              isVi ? 'Tùy chỉnh' : 'Custom',
+                              style: const TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w500,
+                                color: AppleTokens.systemGray,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              '$customCount',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                fontFeatures: AppTheme.tabularFigures,
+                              ),
+                            ),
+                          ],
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
                 ),
-                if (totalTransactions > 0) ...[
-                  Container(
-                    width: 1,
-                    height: 24,
-                    color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          locale.startsWith('vi') ? 'Đã phân loại' : 'Categorized',
-                          style: const TextStyle(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w600,
-                            color: AppleTokens.systemGray,
-                          ),
+                Container(
+                  width: 1,
+                  height: 24,
+                  color: isDark ? AppleTokens.separatorDark : AppleTokens.separatorLight,
+                ),
+                const SizedBox(width: 10),
+
+                // 3. Categorized transactions
+                Expanded(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        CupertinoIcons.doc_text_fill,
+                        size: 14,
+                        color: theme.colorScheme.primary,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              isVi ? 'Đã gán GD' : 'Assigned',
+                              style: const TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w500,
+                                color: AppleTokens.systemGray,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              '$totalTransactions GD',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                fontFeatures: AppTheme.tabularFigures,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 1),
-                        Text(
-                          '$totalTransactions GD',
-                          style: TextStyle(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w700,
-                            fontFeatures: AppTheme.tabularFigures,
-                            color: theme.textTheme.bodyMedium?.color,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ],
             ),
           ),
@@ -664,23 +727,17 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     final txMonthTotals = <String, int>{};
     final now = DateTime.now();
 
-    var totalExpenseMonthMinor = 0;
-    var totalIncomeMonthMinor = 0;
-
     for (final tx in txList) {
       txCounts[tx.categoryId] = (txCounts[tx.categoryId] ?? 0) + 1;
       if (tx.currency == currency && AppDateUtils.isSameMonth(tx.date, now)) {
         txMonthTotals[tx.categoryId] = (txMonthTotals[tx.categoryId] ?? 0) + tx.amount;
-        if (tx.type == TransactionType.expense) {
-          totalExpenseMonthMinor += tx.amount;
-        } else if (tx.type == TransactionType.income) {
-          totalIncomeMonthMinor += tx.amount;
-        }
       }
     }
 
-    final monthExpenseMoney = Money(minorUnits: totalExpenseMonthMinor, currencyCode: currency);
-    final monthIncomeMoney = Money(minorUnits: totalIncomeMonthMinor, currencyCode: currency);
+    final defaultCount = expenseList.where((c) => c.isDefault).length +
+        incomeList.where((c) => c.isDefault).length;
+    final customCount = expenseList.where((c) => !c.isDefault).length +
+        incomeList.where((c) => !c.isDefault).length;
 
     // Filter items based on search query
     final query = _searchQuery.toLowerCase();
@@ -698,7 +755,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     }).toList(growable: false);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         toolbarHeight: appBarHeight,
         backgroundColor: Colors.transparent,
@@ -791,11 +848,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                               isDark: isDark,
                               expenseCount: expenseList.length,
                               incomeCount: incomeList.length,
+                              defaultCount: defaultCount,
+                              customCount: customCount,
                               totalTransactions: txList.length,
-                              monthExpenseMoney: monthExpenseMoney,
-                              monthIncomeMoney: monthIncomeMoney,
                               locale: locale,
-                              hideBalance: hideBalance,
                             ),
                           ),
                         ),

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/theme/tokens/app_semantic_colors.dart';
 
@@ -193,7 +194,8 @@ abstract final class AppTheme {
           ? (oledMode ? AppleTokens.bgOledCard : AppleTokens.bgDarkCard)
           : AppleTokens.bgLightCard,
     );
-    final baseText = Typography.material2021().black.apply(
+    final typography = Typography.material2021(colorScheme: colorScheme);
+    final baseText = (isDark ? typography.white : typography.black).apply(
       bodyColor: colorScheme.onSurface,
       displayColor: colorScheme.onSurface,
     );
@@ -205,6 +207,18 @@ abstract final class AppTheme {
       scaffoldBackgroundColor: isDark
           ? (oledMode ? AppleTokens.bgOledPrimary : AppleTokens.bgDarkGrouped)
           : AppleTokens.bgLightGrouped,
+      cupertinoOverrideTheme: CupertinoThemeData(
+        brightness: brightness,
+        primaryColor: seed,
+        scaffoldBackgroundColor: isDark
+            ? (oledMode ? AppleTokens.bgOledPrimary : AppleTokens.bgDarkGrouped)
+            : AppleTokens.bgLightGrouped,
+        barBackgroundColor: isDark
+            ? (oledMode
+                ? AppleTokens.bgOledPrimary
+                : AppleTokens.bgDarkCard.withValues(alpha: 0.90))
+            : Colors.white.withValues(alpha: 0.90),
+      ),
       extensions: [
         isDark ? FinanceColors.dark : FinanceColors.light,
         if (isDark)
@@ -247,6 +261,9 @@ abstract final class AppTheme {
         centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 0,
+        systemOverlayStyle: isDark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
         backgroundColor: isDark
             ? (oledMode ? AppleTokens.bgOledPrimary : AppleTokens.bgDarkGrouped)
             : AppleTokens.bgLightGrouped,
@@ -360,9 +377,57 @@ abstract final class AppTheme {
             : AppleTokens.bgLightCard,
         surfaceTintColor: Colors.transparent,
       ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: isDark
+            ? (oledMode ? AppleTokens.bgOledCard : AppleTokens.bgDarkCard)
+            : AppleTokens.bgLightCard,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+          side: BorderSide(
+            color: isDark
+                ? (oledMode
+                    ? AppleTokens.bgOledBorder
+                    : Colors.white.withValues(alpha: 0.12))
+                : AppleTokens.borderLight,
+            width: AppleTokens.hairline,
+          ),
+        ),
+      ),
+      datePickerTheme: DatePickerThemeData(
+        backgroundColor: isDark
+            ? (oledMode ? AppleTokens.bgOledCard : AppleTokens.bgDarkCard)
+            : AppleTokens.bgLightCard,
+        surfaceTintColor: Colors.transparent,
+        headerBackgroundColor: Colors.transparent,
+        headerForegroundColor: isDark ? Colors.white : Colors.black87,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+        ),
+      ),
+      timePickerTheme: TimePickerThemeData(
+        backgroundColor: isDark
+            ? (oledMode ? AppleTokens.bgOledCard : AppleTokens.bgDarkCard)
+            : AppleTokens.bgLightCard,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
+        ),
+      ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        backgroundColor: isDark ? const Color(0xFF252632) : const Color(0xFF1C1C1E),
+        contentTextStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+          side: BorderSide(
+            color: isDark ? Colors.white.withValues(alpha: 0.12) : Colors.transparent,
+            width: AppleTokens.hairline,
+          ),
+        ),
       ),
       popupMenuTheme: PopupMenuThemeData(
         elevation: 10,

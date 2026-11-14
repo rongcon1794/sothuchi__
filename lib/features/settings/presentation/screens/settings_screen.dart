@@ -748,9 +748,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         if (settings.themeMode == ThemeMode.dark || (settings.themeMode == ThemeMode.system && isDark))
           ListTile(
             dense: isLandscape,
-            leading: const AppleSquircleBadge(
+            leading: AppleSquircleBadge(
               icon: CupertinoIcons.circle_fill,
-              backgroundColor: Colors.black,
+              backgroundColor: isDark ? const Color(0xFF2C2C2E) : Colors.black,
+              iconColor: isDark ? Colors.white : Colors.white70,
             ),
             title: const Text('OLED True Black', style: TextStyle(fontWeight: FontWeight.w600)),
             subtitle: Text(
