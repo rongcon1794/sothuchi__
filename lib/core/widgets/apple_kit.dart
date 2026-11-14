@@ -172,31 +172,12 @@ class AppleGlassCard extends StatelessWidget {
                 ? AppleTokens.bgOledCard
                 : (effectiveBlur
                     ? AppleTokens.bgDarkCard.withValues(alpha: 0.85)
-                    : AppleTokens.bgDarkCard.withValues(alpha: 0.88)))
+                    : AppleTokens.bgDarkCard.withValues(alpha: 0.90)))
             : (effectiveBlur
                 ? AppleTokens.bgLightCard.withValues(alpha: 0.88)
-                : AppleTokens.bgLightCard.withValues(alpha: 0.90)));
+                : AppleTokens.bgLightCard.withValues(alpha: 0.94)));
 
-    final effectiveGradient = gradient ??
-        (isOled
-            ? null
-            : LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: isDark
-                    ? [
-                        (backgroundColor ?? const Color(0xFF161824))
-                            .withValues(alpha: effectiveBlur ? 0.86 : 0.90),
-                        (backgroundColor ?? const Color(0xFF10111A))
-                            .withValues(alpha: effectiveBlur ? 0.78 : 0.84),
-                      ]
-                    : [
-                        (backgroundColor ?? Colors.white)
-                            .withValues(alpha: effectiveBlur ? 0.90 : 0.94),
-                        (backgroundColor ?? const Color(0xFFFCFAF7))
-                            .withValues(alpha: effectiveBlur ? 0.82 : 0.88),
-                      ],
-              ));
+    final effectiveGradient = gradient;
 
     final border = borderColor ??
         (isDark

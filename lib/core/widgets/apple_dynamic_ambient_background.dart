@@ -80,8 +80,8 @@ class AppleDynamicAmbientBackground extends StatefulWidget {
     super.key,
     required this.currentIndex,
     required this.child,
-    this.duration = const Duration(milliseconds: 650),
-    this.curve = Curves.easeInOutCubic,
+    this.duration = const Duration(milliseconds: 320),
+    this.curve = Curves.easeOutCubic,
   });
 
   /// The active navigation tab index (0 to 4).

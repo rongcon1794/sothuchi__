@@ -35,10 +35,14 @@ class AppShellScaffold extends ConsumerWidget {
     final l10n = context.l10n;
     final currentIndex = navigationShell.currentIndex;
 
-    // Keep global ambient background index synced when navigating
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(ambientBackgroundIndexProvider.notifier).setIndex(currentIndex);
-    });
+    // Keep global ambient background index synced when navigating (only when out of sync)
+    if (ref.read(ambientBackgroundIndexProvider) != currentIndex) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (ref.read(ambientBackgroundIndexProvider) != currentIndex) {
+          ref.read(ambientBackgroundIndexProvider.notifier).setIndex(currentIndex);
+        }
+      });
+    }
 
     final destinations = [
       AppleNavDestination(

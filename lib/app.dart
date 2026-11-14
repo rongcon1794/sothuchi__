@@ -56,10 +56,14 @@ class SoThuChiApp extends ConsumerWidget {
       routerConfig: router,
       builder: (context, child) {
         final content = rootWrapper(context, child ?? const SizedBox.shrink());
-        final ambientIndex = ref.watch(ambientBackgroundIndexProvider);
-        return AppleDynamicAmbientBackground(
-          currentIndex: ambientIndex,
-          child: KeyboardDismissBarOverlay(child: content),
+        return Consumer(
+          builder: (context, ref, _) {
+            final ambientIndex = ref.watch(ambientBackgroundIndexProvider);
+            return AppleDynamicAmbientBackground(
+              currentIndex: ambientIndex,
+              child: KeyboardDismissBarOverlay(child: content),
+            );
+          },
         );
       },
     );
