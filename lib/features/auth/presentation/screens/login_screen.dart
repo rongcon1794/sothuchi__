@@ -108,6 +108,7 @@ class LoginScreen extends ConsumerWidget {
         ref.watch(settingsControllerProvider.select((s) => s.value?.localeCode ?? 'vi'));
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(

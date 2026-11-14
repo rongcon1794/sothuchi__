@@ -295,7 +295,7 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
 
     if (_isCheckingExistingData) {
       return Scaffold(
-        backgroundColor: theme.scaffoldBackgroundColor,
+        backgroundColor: Colors.transparent,
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -334,9 +334,9 @@ class _InitialSetupScreenState extends ConsumerState<InitialSetupScreen> {
           }
         },
         child: Scaffold(
-          backgroundColor: theme.scaffoldBackgroundColor,
+          backgroundColor: Colors.transparent,
           appBar: AppBar(
-            backgroundColor: theme.scaffoldBackgroundColor,
+            backgroundColor: Colors.transparent,
             elevation: 0,
             leading: _currentStep == 1
                 ? IconButton(

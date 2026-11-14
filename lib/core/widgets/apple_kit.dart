@@ -10,6 +10,7 @@ export 'package:so_thu_chi/core/widgets/apple_card.dart';
 export 'package:so_thu_chi/core/widgets/apple_compact_month_switcher.dart';
 export 'package:so_thu_chi/core/widgets/apple_date_picker_tile.dart';
 export 'package:so_thu_chi/core/widgets/apple_dynamic_ambient_background.dart';
+export 'package:so_thu_chi/core/widgets/apple_gradient_background.dart';
 export 'package:so_thu_chi/core/widgets/apple_header_title.dart';
 export 'package:so_thu_chi/core/widgets/apple_modal_sheet.dart';
 export 'package:so_thu_chi/core/widgets/apple_month_year_picker_sheet.dart';
@@ -171,16 +172,38 @@ class AppleGlassCard extends StatelessWidget {
                 ? AppleTokens.bgOledCard
                 : (effectiveBlur
                     ? AppleTokens.bgDarkCard.withValues(alpha: 0.85)
-                    : AppleTokens.bgDarkCard))
+                    : AppleTokens.bgDarkCard.withValues(alpha: 0.88)))
             : (effectiveBlur
                 ? AppleTokens.bgLightCard.withValues(alpha: 0.88)
-                : AppleTokens.bgLightCard));
+                : AppleTokens.bgLightCard.withValues(alpha: 0.90)));
+
+    final effectiveGradient = gradient ??
+        (isOled
+            ? null
+            : LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: isDark
+                    ? [
+                        (backgroundColor ?? const Color(0xFF161824))
+                            .withValues(alpha: effectiveBlur ? 0.86 : 0.90),
+                        (backgroundColor ?? const Color(0xFF10111A))
+                            .withValues(alpha: effectiveBlur ? 0.78 : 0.84),
+                      ]
+                    : [
+                        (backgroundColor ?? Colors.white)
+                            .withValues(alpha: effectiveBlur ? 0.90 : 0.94),
+                        (backgroundColor ?? const Color(0xFFFCFAF7))
+                            .withValues(alpha: effectiveBlur ? 0.82 : 0.88),
+                      ],
+              ));
+
     final border = borderColor ??
         (isDark
             ? (isOled
                 ? AppleTokens.bgOledBorder
-                : Colors.white.withValues(alpha: 0.12))
-            : AppleTokens.borderLight);
+                : Colors.white.withValues(alpha: 0.14))
+            : const Color(0xFFE2DFD8).withValues(alpha: 0.85));
     final shadow = boxShadow ??
         (isDark
             ? (isOled ? const <BoxShadow>[] : AppleTokens.cardShadowDark)
@@ -190,8 +213,8 @@ class AppleGlassCard extends StatelessWidget {
       padding: padding ?? const EdgeInsets.all(16),
       clipBehavior: padding == EdgeInsets.zero ? Clip.hardEdge : Clip.none,
       decoration: BoxDecoration(
-        color: gradient == null ? bg : null,
-        gradient: gradient,
+        color: effectiveGradient == null ? bg : null,
+        gradient: effectiveGradient,
         borderRadius: radius,
         border: Border.all(color: border, width: AppleTokens.hairline),
       ),

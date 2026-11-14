@@ -39,6 +39,29 @@ class AmbientBlobSpec {
   Color resolveColor(bool isDark) => isDark ? darkColor : lightColor;
 }
 
+/// Inherited scope providing the active ambient palette index down the widget tree.
+class AppleAmbientTheme extends InheritedWidget {
+  const AppleAmbientTheme({
+    super.key,
+    required this.paletteIndex,
+    required super.child,
+  });
+
+  final int paletteIndex;
+
+  /// Retrieves the ambient palette index from the nearest ancestor, defaulting to 0.
+  static int of(BuildContext context) {
+    final scope =
+        context.dependOnInheritedWidgetOfExactType<AppleAmbientTheme>();
+    return scope?.paletteIndex ?? 0;
+  }
+
+  @override
+  bool updateShouldNotify(AppleAmbientTheme oldWidget) {
+    return paletteIndex != oldWidget.paletteIndex;
+  }
+}
+
 /// Dynamic, luminous ambient gradient background conforming to Apple HIG & Lucian design tokens.
 ///
 /// Features:
@@ -75,109 +98,109 @@ class AppleDynamicAmbientBackground extends StatefulWidget {
 
   /// Predefined tab palettes conforming to Apple HIG.
   static const List<List<AmbientBlobSpec>> tabPalettes = [
-    // 0: Overview (Jade / Mint / Amber)
+    // 0: Overview (Jade Emerald / Vivid Cyan / Golden Amber)
     [
       AmbientBlobSpec(
         alignment: Alignment(0.80, -0.65),
-        radiusFactor: 0.75,
-        lightColor: Color(0xFF00A86B), // Jade Primary
-        darkColor: Color(0xFF00C7BE),  // Mint Glow
+        radiusFactor: 0.85,
+        lightColor: Color(0xFF00C7BE), // Radiant Mint Glow
+        darkColor: Color(0xFF10B981),  // Emerald Glow
       ),
       AmbientBlobSpec(
-        alignment: Alignment(-0.70, 0.40),
-        radiusFactor: 0.70,
-        lightColor: Color(0xFF0EA5E9), // Sky Blue
-        darkColor: Color(0xFF0284C7),  // Cobalt
+        alignment: Alignment(-0.75, 0.35),
+        radiusFactor: 0.80,
+        lightColor: Color(0xFF0EA5E9), // Luminous Sky Blue
+        darkColor: Color(0xFF06B6D4),  // Electric Cyan
       ),
       AmbientBlobSpec(
         alignment: Alignment(0.40, 0.85),
-        radiusFactor: 0.60,
-        lightColor: Color(0xFFF59E0B), // Warm Amber
-        darkColor: Color(0xFFD97706),
+        radiusFactor: 0.70,
+        lightColor: Color(0xFFF59E0B), // Warm Sun Amber
+        darkColor: Color(0xFFF59E0B),
       ),
     ],
-    // 1: Transactions (Sapphire Blue / Indigo / Cyan)
+    // 1: Transactions (Royal Sapphire / Radiant Indigo / Electric Cyan)
     [
       AmbientBlobSpec(
-        alignment: Alignment(-0.75, -0.60),
-        radiusFactor: 0.75,
-        lightColor: Color(0xFF007AFF), // System Blue
-        darkColor: Color(0xFF2563EB),
+        alignment: Alignment(-0.80, -0.60),
+        radiusFactor: 0.85,
+        lightColor: Color(0xFF007AFF), // Apple System Blue
+        darkColor: Color(0xFF3B82F6),
       ),
       AmbientBlobSpec(
         alignment: Alignment(0.80, 0.35),
-        radiusFactor: 0.70,
-        lightColor: Color(0xFF5856D6), // System Indigo
-        darkColor: Color(0xFF6366F1),
+        radiusFactor: 0.80,
+        lightColor: Color(0xFF6366F1), // Electric Indigo
+        darkColor: Color(0xFF818CF8),
       ),
       AmbientBlobSpec(
         alignment: Alignment(-0.25, 0.85),
-        radiusFactor: 0.55,
-        lightColor: Color(0xFF38BDF8), // Cyan
+        radiusFactor: 0.65,
+        lightColor: Color(0xFF06B6D4), // Vibrant Cyan
         darkColor: Color(0xFF00C7BE),
       ),
     ],
-    // 2: Budgets (Emerald Teal / Amber / Green)
+    // 2: Budgets (Teal Aqua / Sunset Tangerine / Fresh Leaf)
     [
       AmbientBlobSpec(
         alignment: Alignment(0.10, -0.70),
-        radiusFactor: 0.80,
-        lightColor: Color(0xFF30B0C7), // System Teal
+        radiusFactor: 0.85,
+        lightColor: Color(0xFF14B8A6), // Vibrant Teal
         darkColor: Color(0xFF0D9488),
       ),
       AmbientBlobSpec(
-        alignment: Alignment(0.75, 0.55),
-        radiusFactor: 0.65,
-        lightColor: Color(0xFFFF9500), // System Orange
-        darkColor: Color(0xFFD97706),
+        alignment: Alignment(0.80, 0.50),
+        radiusFactor: 0.75,
+        lightColor: Color(0xFFF97316), // Warm Tangerine
+        darkColor: Color(0xFFFB923C),
       ),
       AmbientBlobSpec(
-        alignment: Alignment(-0.70, 0.25),
-        radiusFactor: 0.60,
-        lightColor: Color(0xFF34C759), // System Green
-        darkColor: Color(0xFF10B981),
+        alignment: Alignment(-0.75, 0.25),
+        radiusFactor: 0.70,
+        lightColor: Color(0xFF10B981), // Fresh Mint Emerald
+        darkColor: Color(0xFF34D399),
       ),
     ],
-    // 3: Reports (Amethyst Purple / Rose / Indigo)
+    // 3: Reports (Cosmic Amethyst / Radiant Sunset Rose / Deep Indigo)
     [
       AmbientBlobSpec(
-        alignment: Alignment(0.75, -0.65),
+        alignment: Alignment(0.80, -0.65),
+        radiusFactor: 0.85,
+        lightColor: Color(0xFF9333EA), // Royal Violet
+        darkColor: Color(0xFFA855F7),
+      ),
+      AmbientBlobSpec(
+        alignment: Alignment(-0.80, 0.40),
         radiusFactor: 0.75,
-        lightColor: Color(0xFFAF52DE), // System Purple
-        darkColor: Color(0xFF8B5CF6),
+        lightColor: Color(0xFFF43F5E), // Apple Neon Rose
+        darkColor: Color(0xFFFB7185),
       ),
       AmbientBlobSpec(
-        alignment: Alignment(-0.75, 0.45),
-        radiusFactor: 0.65,
-        lightColor: Color(0xFFFF2D55), // System Pink/Rose
-        darkColor: Color(0xFFEC4899),
+        alignment: Alignment(0.20, 0.85),
+        radiusFactor: 0.70,
+        lightColor: Color(0xFF4F46E5), // Deep Electric Indigo
+        darkColor: Color(0xFF6366F1),
       ),
+    ],
+    // 4: Settings (Luminous Azure / High-tech Indigo / Soft Amethyst)
+    [
       AmbientBlobSpec(
-        alignment: Alignment(0.15, 0.85),
-        radiusFactor: 0.60,
-        lightColor: Color(0xFF6366F1), // Indigo
+        alignment: Alignment(-0.60, -0.70),
+        radiusFactor: 0.80,
+        lightColor: Color(0xFF6366F1), // Tech Indigo
         darkColor: Color(0xFF4F46E5),
       ),
-    ],
-    // 4: Settings (Cool Slate / Silver Zinc / Muted Sage)
-    [
       AmbientBlobSpec(
-        alignment: Alignment(-0.50, -0.70),
-        radiusFactor: 0.70,
-        lightColor: Color(0xFF64748B), // Slate
-        darkColor: Color(0xFF475569),
-      ),
-      AmbientBlobSpec(
-        alignment: Alignment(0.65, 0.45),
-        radiusFactor: 0.65,
-        lightColor: Color(0xFF94A3B8), // Cool Gray
-        darkColor: Color(0xFF64748B),
+        alignment: Alignment(0.75, 0.40),
+        radiusFactor: 0.75,
+        lightColor: Color(0xFF0EA5E9), // Clean Azure
+        darkColor: Color(0xFF0284C7),
       ),
       AmbientBlobSpec(
         alignment: Alignment(-0.20, 0.85),
-        radiusFactor: 0.55,
-        lightColor: Color(0xFF00A86B), // Muted Jade hint
-        darkColor: Color(0xFF0284C7),
+        radiusFactor: 0.65,
+        lightColor: Color(0xFF8B5CF6), // Soft Violet Whisper
+        darkColor: Color(0xFFA855F7),
       ),
     ],
   ];
@@ -292,7 +315,10 @@ class _AppleDynamicAmbientBackgroundState
             },
           ),
         ),
-        widget.child,
+        AppleAmbientTheme(
+          paletteIndex: widget.currentIndex,
+          child: widget.child,
+        ),
       ],
     );
   }
@@ -324,13 +350,34 @@ class _AmbientBackgroundPainter extends CustomPainter {
     // In OLED True Black mode, keep absolute pitch black for pixel shutoff and battery savings
     if (isOled) return;
 
-    // 2. Draw animated ambient orbs
+    // 2. Subtle directional gradient wash for vertical depth
+    final topTint = isDark
+        ? const Color(0xFF141726).withValues(alpha: 0.55)
+        : Colors.white.withValues(alpha: 0.65);
+    final bottomTint = isDark
+        ? const Color(0xFF030407).withValues(alpha: 0.60)
+        : const Color(0xFFE5E1D8).withValues(alpha: 0.45);
+
+    final washGradient = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [topTint, Colors.transparent, bottomTint],
+      stops: const [0.0, 0.45, 1.0],
+    );
+
+    final washPaint = Paint()
+      ..shader = washGradient.createShader(
+        Rect.fromLTWH(0, 0, size.width, size.height),
+      );
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), washPaint);
+
+    // 3. Draw animated ambient orbs
     final maxDim = math.max(size.width, size.height);
     final count = math.min(startBlobs.length, targetBlobs.length);
 
-    // Opacity calibrations: gentle, refined, anti-distraction
-    final centerAlpha = isDark ? 0.095 : 0.058;
-    final midAlpha = isDark ? 0.040 : 0.024;
+    // Opacity calibrations: luminous, vibrant, Apple VisionOS inspired
+    final centerAlpha = isDark ? 0.160 : 0.105;
+    final midAlpha = isDark ? 0.075 : 0.048;
 
     for (int i = 0; i < count; i++) {
       final s = startBlobs[i];

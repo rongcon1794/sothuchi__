@@ -77,17 +77,20 @@ class SavingsGoalDetailScreen extends ConsumerWidget {
 
     return goalsAsync.when(
       loading: () => const Scaffold(
+        backgroundColor: Colors.transparent,
         body: Center(child: CupertinoActivityIndicator()),
       ),
       error: (err, _) => Scaffold(
-        appBar: AppBar(),
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(backgroundColor: Colors.transparent),
         body: Center(child: Text(context.localizeError(err))),
       ),
       data: (goals) {
         final goal = goals.where((g) => g.id == goalId).firstOrNull;
         if (goal == null) {
           return Scaffold(
-            appBar: AppBar(),
+            backgroundColor: Colors.transparent,
+            appBar: AppBar(backgroundColor: Colors.transparent),
             body: SafeArea(
               top: false,
               bottom: false,
@@ -105,12 +108,12 @@ class SavingsGoalDetailScreen extends ConsumerWidget {
         final linkedAccount = goal.linkedAccountId != null ? accountsMap[goal.linkedAccountId!] : null;
 
         return Scaffold(
-          backgroundColor: theme.scaffoldBackgroundColor,
+          backgroundColor: Colors.transparent,
           appBar: AppBar(
             toolbarHeight: isLandscape
                 ? AppleTokens.appBarHeightLandscape
                 : AppleTokens.appBarHeightPortrait,
-            backgroundColor: theme.scaffoldBackgroundColor,
+            backgroundColor: Colors.transparent,
             elevation: 0,
             leading: IconButton(
               icon: const Icon(CupertinoIcons.chevron_left, size: 24),

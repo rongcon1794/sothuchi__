@@ -108,12 +108,12 @@ class DebtDetailScreen extends ConsumerWidget {
         final linkedAccount = debt.accountId != null ? accountsMap[debt.accountId!] : null;
 
         return Scaffold(
-          backgroundColor: theme.scaffoldBackgroundColor,
+          backgroundColor: Colors.transparent,
           appBar: AppBar(
             toolbarHeight: isLandscape
                 ? AppleTokens.appBarHeightLandscape
                 : AppleTokens.appBarHeightPortrait,
-            backgroundColor: theme.scaffoldBackgroundColor,
+            backgroundColor: Colors.transparent,
             elevation: 0,
             leading: IconButton(
               icon: const Icon(CupertinoIcons.chevron_left, size: 24),

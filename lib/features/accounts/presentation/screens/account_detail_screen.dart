@@ -206,12 +206,12 @@ class AccountDetailScreen extends ConsumerWidget {
         );
 
         return Scaffold(
-          backgroundColor: theme.scaffoldBackgroundColor,
+          backgroundColor: Colors.transparent,
           appBar: AppBar(
             toolbarHeight: isLandscape
                 ? AppleTokens.appBarHeightLandscape
                 : AppleTokens.appBarHeightPortrait,
-            backgroundColor: theme.scaffoldBackgroundColor,
+            backgroundColor: Colors.transparent,
             elevation: 0,
             leading: IconButton(
               icon: const Icon(CupertinoIcons.chevron_left, size: 24),

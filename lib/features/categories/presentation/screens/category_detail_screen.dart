@@ -157,12 +157,12 @@ class CategoryDetailScreen extends ConsumerWidget {
         final typeLabel = isIncome ? l10n.income : l10n.expense;
 
         return Scaffold(
-          backgroundColor: theme.scaffoldBackgroundColor,
+          backgroundColor: Colors.transparent,
           appBar: AppBar(
             toolbarHeight: isLandscape
                 ? AppleTokens.appBarHeightLandscape
                 : AppleTokens.appBarHeightPortrait,
-            backgroundColor: theme.scaffoldBackgroundColor,
+            backgroundColor: Colors.transparent,
             elevation: 0,
             leading: IconButton(
               icon: const Icon(CupertinoIcons.chevron_left, size: 24),

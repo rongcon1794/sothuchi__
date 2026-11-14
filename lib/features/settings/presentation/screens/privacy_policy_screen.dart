@@ -60,7 +60,9 @@ class PrivacyPolicyScreen extends StatelessWidget {
     final sections = _buildSections(l10n);
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
         toolbarHeight: isLandscape
             ? AppleTokens.appBarHeightLandscape
             : AppleTokens.appBarHeightPortrait,

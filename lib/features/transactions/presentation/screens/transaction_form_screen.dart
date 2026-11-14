@@ -670,7 +670,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         toolbarHeight: appBarHeight,
         title: Text(
@@ -680,7 +680,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
         centerTitle: true,
-        backgroundColor: theme.scaffoldBackgroundColor,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(CupertinoIcons.chevron_left, size: 24),

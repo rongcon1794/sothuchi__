@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/contracts/transaction_draft_contract.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
+import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/core/widgets/app_shell_scaffold.dart';
 import 'package:so_thu_chi/core/widgets/offline_sync_banner.dart';
 import 'package:so_thu_chi/features/accounts/presentation/screens/account_detail_screen.dart';
@@ -188,23 +189,28 @@ class _RouterRefreshNotifier extends ChangeNotifier {
 /// Creates a platform-adaptive route transition:
 /// - iOS & macOS: [CupertinoPage] enabling native edge swipe-to-back gesture detector & parallax.
 /// - Android & other platforms: [MaterialPage] supporting predictive back and standard transitions.
+///
+/// Automatically wraps the route content in [AppleGradientBackground] to deliver an
+/// opaque, synchronous Apple HIG gradient canvas that eliminates screen bleed-through
+/// while matching parent and child screens seamlessly.
 Page<dynamic> adaptivePage({
   required BuildContext context,
   required GoRouterState state,
   required Widget child,
 }) {
   final platform = Theme.of(context).platform;
+  final wrappedChild = AppleGradientBackground(child: child);
   if (platform == TargetPlatform.iOS || platform == TargetPlatform.macOS) {
     return CupertinoPage<void>(
       key: state.pageKey,
       name: state.name,
-      child: child,
+      child: wrappedChild,
     );
   }
   return MaterialPage<void>(
     key: state.pageKey,
     name: state.name,
-    child: child,
+    child: wrappedChild,
   );
 }
 

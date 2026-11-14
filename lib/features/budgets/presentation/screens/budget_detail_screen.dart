@@ -93,17 +93,20 @@ class BudgetDetailScreen extends ConsumerWidget {
 
     return budgetsAsync.when(
       loading: () => const Scaffold(
+        backgroundColor: Colors.transparent,
         body: Center(child: CupertinoActivityIndicator()),
       ),
       error: (err, _) => Scaffold(
-        appBar: AppBar(),
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(backgroundColor: Colors.transparent),
         body: Center(child: Text(context.localizeError(err))),
       ),
       data: (budgets) {
         final budget = budgets.where((b) => b.id == budgetId).firstOrNull;
         if (budget == null) {
           return Scaffold(
-            appBar: AppBar(),
+            backgroundColor: Colors.transparent,
+            appBar: AppBar(backgroundColor: Colors.transparent),
             body: SafeArea(
               top: false,
               bottom: false,
@@ -190,12 +193,12 @@ class BudgetDetailScreen extends ConsumerWidget {
         final dailyMoney = Money(minorUnits: dailyMinor, currencyCode: budget.currency);
 
         return Scaffold(
-          backgroundColor: theme.scaffoldBackgroundColor,
+          backgroundColor: Colors.transparent,
           appBar: AppBar(
             toolbarHeight: isLandscape
                 ? AppleTokens.appBarHeightLandscape
                 : AppleTokens.appBarHeightPortrait,
-            backgroundColor: theme.scaffoldBackgroundColor,
+            backgroundColor: Colors.transparent,
             elevation: 0,
             leading: IconButton(
               icon: const Icon(CupertinoIcons.chevron_left, size: 24),
