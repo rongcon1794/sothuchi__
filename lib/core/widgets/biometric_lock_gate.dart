@@ -1,17 +1,35 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
+import 'package:so_thu_chi/core/widgets/app_data_loading_view.dart';
+import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_controller.dart';
 import 'package:so_thu_chi/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:so_thu_chi/features/categories/presentation/controllers/categories_controller.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
 
-/// Lifecycle-aware Biometric App Lock shield.
+/// Lifecycle-aware Biometric App Lock & Data Reload gate.
 ///
-/// Locks the interface on cold start and immediately on app backgrounding
-/// whenever the user is signed in and `biometricLockEnabled` is `true`.
+/// Handles:
+/// 1. Cold start / initial launch data warmup: Displays [AppDataLoadingView]
+///    with the app logo while settings, authentication, and secure keys resolve.
+/// 2. Long idle resume: When the app is resumed after being idle in the background
+///    for a significant period (e.g., > 2 minutes), displays a branded data reload
+///    screen while refreshing essential data streams so the user never sees a frozen frame.
+/// 3. Biometric App Lock: Locks the interface and prompts for biometrics whenever
+///    the user is signed in and `biometricLockEnabled` is `true`.
 class BiometricLockGate extends ConsumerStatefulWidget {
-  const BiometricLockGate({required this.child, super.key});
+  const BiometricLockGate({
+    required this.child,
+    this.longIdleThreshold = const Duration(minutes: 2),
+    super.key,
+  });
 
   final Widget child;
+
+  /// Duration after which returning to the app triggers a gentle data reload screen.
+  final Duration longIdleThreshold;
 
   @override
   ConsumerState<BiometricLockGate> createState() => _BiometricLockGateState();
@@ -23,6 +41,8 @@ class _BiometricLockGateState extends ConsumerState<BiometricLockGate>
   bool _authenticating = false;
   bool _wasBackgrounded = false;
   bool _initialPromptChecked = false;
+  bool _isReloadingOnResume = false;
+  DateTime? _backgroundedAt;
 
   @override
   void initState() {
@@ -42,19 +62,56 @@ class _BiometricLockGateState extends ConsumerState<BiometricLockGate>
         ref.read(settingsControllerProvider).value?.biometricLockEnabled ??
         false;
     final hasUser = ref.read(currentUserProvider) != null;
-    if (!enabled || !hasUser) return;
 
     if (state == AppLifecycleState.paused ||
         (state == AppLifecycleState.inactive && !_authenticating)) {
-      _wasBackgrounded = true;
-      if (_unlockedForSession && mounted) {
-        setState(() => _unlockedForSession = false);
+      _backgroundedAt ??= DateTime.now();
+      if (enabled && hasUser) {
+        _wasBackgrounded = true;
+        if (_unlockedForSession && mounted) {
+          setState(() => _unlockedForSession = false);
+        }
       }
-    } else if (state == AppLifecycleState.resumed && _wasBackgrounded) {
-      _wasBackgrounded = false;
-      if (!_unlockedForSession) {
-        _triggerUnlock();
+    } else if (state == AppLifecycleState.resumed) {
+      final pausedTime = _backgroundedAt;
+      _backgroundedAt = null;
+
+      final isLongIdle = pausedTime != null &&
+          DateTime.now().difference(pausedTime) >= widget.longIdleThreshold;
+
+      if (isLongIdle && hasUser) {
+        _triggerLongIdleResumeReload();
       }
+
+      if (enabled && hasUser && _wasBackgrounded) {
+        _wasBackgrounded = false;
+        if (!_unlockedForSession) {
+          _triggerUnlock();
+        }
+      }
+    }
+  }
+
+  /// Refreshes essential data streams and displays the branded loading screen
+  /// for a smooth minimum duration when returning after long inactivity.
+  Future<void> _triggerLongIdleResumeReload() async {
+    if (_isReloadingOnResume || !mounted) return;
+    setState(() => _isReloadingOnResume = true);
+
+    // Invalidate cached data streams to pull fresh data from local DB / Cloud
+    try {
+      ref
+        ..invalidate(rawAccountsStreamProvider)
+        ..invalidate(rawTransactionsStreamProvider)
+        ..invalidate(categoriesStreamProvider);
+    } catch (_) {
+      // Safe no-op if providers not active
+    }
+
+    // Smooth minimum 650ms display to give visual feedback and avoid frame stutter
+    await Future<void>.delayed(const Duration(milliseconds: 650));
+    if (mounted) {
+      setState(() => _isReloadingOnResume = false);
     }
   }
 
@@ -83,15 +140,28 @@ class _BiometricLockGateState extends ConsumerState<BiometricLockGate>
     );
     final authAsync = ref.watch(authStateStreamProvider);
     final user = ref.watch(currentUserProvider);
+    final l10n = context.l10n;
 
-    // Never reveal or mark unlocked while secure storage / auth session is still loading.
+    // 1. Initial Launch / Cold Start: Show branded logo loading screen while
+    // settings or authentication are loading, never a blank frozen screen.
     if (settingsLoading || (authAsync.isLoading && user == null)) {
-      return Material(
-        color: Theme.of(context).colorScheme.surface,
-        child: const SizedBox.expand(),
+      return AppDataLoadingView(
+        message: l10n.loadingData,
+        subtitle: l10n.syncingDataMessage,
+        showScaffold: false,
       );
     }
 
+    // 2. Warm Resume after long idle time: Show branded data reload screen.
+    if (_isReloadingOnResume) {
+      return AppDataLoadingView(
+        message: l10n.appResumeSyncing,
+        subtitle: l10n.syncingDataMessage,
+        showScaffold: false,
+      );
+    }
+
+    // 3. If biometric lock is disabled or user not signed in, render child directly.
     if (!lockEnabled || user == null) {
       _unlockedForSession = false;
       _initialPromptChecked = false;
@@ -107,7 +177,6 @@ class _BiometricLockGateState extends ConsumerState<BiometricLockGate>
       return widget.child;
     }
 
-    final l10n = context.l10n;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 

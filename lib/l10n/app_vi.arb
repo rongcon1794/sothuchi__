@@ -895,5 +895,8 @@
   "aboutFeature5Desc": "Phân tích cơ cấu chi tiêu, bản đồ nhiệt theo ngày, đường xu hướng thu - chi 6 tháng và đánh giá sức khỏe tài chính theo quy chuẩn 50/30/20.",
   "aboutFeature6Title": "Bảo mật cao, Đa tiền tệ & Xuất dữ liệu CSV",
   "aboutFeature6Desc": "Hỗ trợ 6 loại tiền tệ (VND, USD, EUR, JPY, KRW, SGD), khóa ứng dụng bằng vân tay/khuôn mặt, giao diện OLED True Black và xuất báo cáo CSV.",
-  "aboutFooterNote": "Hoạt động mượt mà cả khi ngoại tuyến • Đồng bộ đám mây an toàn • Không quảng cáo"
+  "aboutFooterNote": "Hoạt động mượt mà cả khi ngoại tuyến • Đồng bộ đám mây an toàn • Không quảng cáo",
+  "loadingData": "Đang tải dữ liệu...",
+  "syncingDataMessage": "Đang đồng bộ dữ liệu của bạn, vui lòng đợi trong giây lát...",
+  "appResumeSyncing": "Đang làm mới dữ liệu..."
 }

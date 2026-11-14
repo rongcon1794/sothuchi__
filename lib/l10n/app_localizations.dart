@@ -3391,6 +3391,24 @@ abstract class AppLocalizations {
   /// In vi, this message translates to:
   /// **'Hoạt động mượt mà cả khi ngoại tuyến • Đồng bộ đám mây an toàn • Không quảng cáo'**
   String get aboutFooterNote;
+
+  /// No description provided for @loadingData.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang tải dữ liệu...'**
+  String get loadingData;
+
+  /// No description provided for @syncingDataMessage.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang đồng bộ dữ liệu của bạn, vui lòng đợi trong giây lát...'**
+  String get syncingDataMessage;
+
+  /// No description provided for @appResumeSyncing.
+  ///
+  /// In vi, this message translates to:
+  /// **'Đang làm mới dữ liệu...'**
+  String get appResumeSyncing;
 }
 
 class _AppLocalizationsDelegate

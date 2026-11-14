@@ -1812,4 +1812,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get aboutFooterNote =>
       'Offline-first reliability • Secure cloud sync • Zero ads';
+
+  @override
+  String get loadingData => 'Loading data...';
+
+  @override
+  String get syncingDataMessage =>
+      'Synchronizing your data, please wait a moment...';
+
+  @override
+  String get appResumeSyncing => 'Refreshing data...';
 }

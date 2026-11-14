@@ -844,5 +844,8 @@
   "aboutFeature5Desc": "Explore category breakdowns, daily spending heatmaps, 6-month income vs. expense trend lines, and 50/30/20 financial health scores.",
   "aboutFeature6Title": "Biometric Security, Multi-Currency & CSV",
   "aboutFeature6Desc": "Supports 6 currencies (VND, USD, EUR, JPY, KRW, SGD), biometric app lock, OLED True Black mode, and full UTF-8 CSV export.",
-  "aboutFooterNote": "Offline-first reliability • Secure cloud sync • Zero ads"
+  "aboutFooterNote": "Offline-first reliability • Secure cloud sync • Zero ads",
+  "loadingData": "Loading data...",
+  "syncingDataMessage": "Synchronizing your data, please wait a moment...",
+  "appResumeSyncing": "Refreshing data..."
 }

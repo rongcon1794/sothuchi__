@@ -1808,4 +1808,14 @@ class AppLocalizationsVi extends AppLocalizations {
   @override
   String get aboutFooterNote =>
       'Hoạt động mượt mà cả khi ngoại tuyến • Đồng bộ đám mây an toàn • Không quảng cáo';
+
+  @override
+  String get loadingData => 'Đang tải dữ liệu...';
+
+  @override
+  String get syncingDataMessage =>
+      'Đang đồng bộ dữ liệu của bạn, vui lòng đợi trong giây lát...';
+
+  @override
+  String get appResumeSyncing => 'Đang làm mới dữ liệu...';
 }
