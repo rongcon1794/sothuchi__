@@ -52,7 +52,7 @@ class FinancialHealthDetailScreen extends ConsumerWidget {
         : AppleTokens.appBarHeightPortrait;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         toolbarHeight: appBarHeight,
         backgroundColor: Colors.transparent,

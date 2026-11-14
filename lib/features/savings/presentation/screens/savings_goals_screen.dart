@@ -116,7 +116,7 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
     final hideBalance = settings?.hideBalance ?? false;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         toolbarHeight: appBarHeight,
         backgroundColor: Colors.transparent,

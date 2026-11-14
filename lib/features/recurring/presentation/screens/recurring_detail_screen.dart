@@ -154,7 +154,7 @@ class RecurringDetailScreen extends ConsumerWidget {
         final isIncome = item.type == TransactionType.income;
 
         return Scaffold(
-          backgroundColor: theme.scaffoldBackgroundColor,
+          backgroundColor: Colors.transparent,
           appBar: AppBar(
             toolbarHeight: isLandscape
                 ? AppleTokens.appBarHeightLandscape

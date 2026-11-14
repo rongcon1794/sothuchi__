@@ -55,7 +55,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
     final canPop = Navigator.of(context).canPop();
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         toolbarHeight: appBarHeight,
         backgroundColor: Colors.transparent,

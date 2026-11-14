@@ -1,7 +1,26 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
+
+/// Global notifier provider for the active ambient background palette index (0..4).
+/// Allows any sub-screen or route to smoothly synchronize ambient lights without rebuild glitches.
+final ambientBackgroundIndexProvider = NotifierProvider<AmbientBackgroundIndexNotifier, int>(
+  AmbientBackgroundIndexNotifier.new,
+);
+
+class AmbientBackgroundIndexNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void setIndex(int index) {
+    final clamped = index.clamp(0, AppleDynamicAmbientBackground.tabPalettes.length - 1);
+    if (state != clamped) {
+      state = clamped;
+    }
+  }
+}
 
 /// Represents a single ambient light blob with position, spread, and adaptive theme colors.
 class AmbientBlobSpec {

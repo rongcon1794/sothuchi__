@@ -670,7 +670,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         toolbarHeight: appBarHeight,
         title: Text(

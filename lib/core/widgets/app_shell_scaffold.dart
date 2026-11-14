@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
@@ -14,7 +15,7 @@ import 'package:so_thu_chi/core/widgets/apple_dynamic_ambient_background.dart';
 /// - Ultra-compact, non-obscured Landscape BottomBar on landscape phones/tablets
 ///   (50dp, stacked Icon + Label with full width per tab, fully protected by left/right/bottom SafeArea
 ///   against camera notches, 3-button navigation bars, and gesture pills with zero text truncation).
-class AppShellScaffold extends StatelessWidget {
+class AppShellScaffold extends ConsumerWidget {
   const AppShellScaffold({
     required this.navigationShell,
     this.topBanner,
@@ -24,9 +25,10 @@ class AppShellScaffold extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
   final Widget? topBanner;
 
-  void _onDestinationSelected(int index) {
+  void _onDestinationSelected(WidgetRef ref, int index) {
     if (index != navigationShell.currentIndex) {
       HapticFeedback.selectionClick();
+      ref.read(ambientBackgroundIndexProvider.notifier).setIndex(index);
     }
     navigationShell.goBranch(
       index,
@@ -35,10 +37,15 @@ class AppShellScaffold extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final currentIndex = navigationShell.currentIndex;
+
+    // Keep global ambient background index synced when navigating
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(ambientBackgroundIndexProvider.notifier).setIndex(currentIndex);
+    });
 
     final destinations = [
       _NavDestinationData(
@@ -112,7 +119,7 @@ class AppShellScaffold extends StatelessWidget {
                         data: destinations[i],
                         isSelected: i == currentIndex,
                         isLandscape: isLandscape,
-                        onTap: () => _onDestinationSelected(i),
+                        onTap: () => _onDestinationSelected(ref, i),
                       ),
                   ],
                 ),
@@ -123,26 +130,23 @@ class AppShellScaffold extends StatelessWidget {
       ),
     );
 
-    return AppleDynamicAmbientBackground(
-      currentIndex: currentIndex,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        resizeToAvoidBottomInset: false,
-        body: Column(
-          children: [
-            ?topBanner,
-            Expanded(child: navigationShell),
-          ],
-        ),
-        bottomNavigationBar: RepaintBoundary(
-          child: ClipRect(
-            child: isOled || Theme.of(context).platform == TargetPlatform.android
-                ? navBarContent
-                : BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-                    child: navBarContent,
-                  ),
-          ),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      resizeToAvoidBottomInset: false,
+      body: Column(
+        children: [
+          ?topBanner,
+          Expanded(child: navigationShell),
+        ],
+      ),
+      bottomNavigationBar: RepaintBoundary(
+        child: ClipRect(
+          child: isOled || Theme.of(context).platform == TargetPlatform.android
+              ? navBarContent
+              : BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                  child: navBarContent,
+                ),
         ),
       ),
     );

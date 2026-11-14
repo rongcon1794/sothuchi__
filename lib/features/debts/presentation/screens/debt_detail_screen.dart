@@ -108,7 +108,7 @@ class DebtDetailScreen extends ConsumerWidget {
         final linkedAccount = debt.accountId != null ? accountsMap[debt.accountId!] : null;
 
         return Scaffold(
-          backgroundColor: theme.scaffoldBackgroundColor,
+          backgroundColor: Colors.transparent,
           appBar: AppBar(
             toolbarHeight: isLandscape
                 ? AppleTokens.appBarHeightLandscape

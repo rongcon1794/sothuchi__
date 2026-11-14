@@ -105,7 +105,7 @@ class SavingsGoalDetailScreen extends ConsumerWidget {
         final linkedAccount = goal.linkedAccountId != null ? accountsMap[goal.linkedAccountId!] : null;
 
         return Scaffold(
-          backgroundColor: theme.scaffoldBackgroundColor,
+          backgroundColor: Colors.transparent,
           appBar: AppBar(
             toolbarHeight: isLandscape
                 ? AppleTokens.appBarHeightLandscape
