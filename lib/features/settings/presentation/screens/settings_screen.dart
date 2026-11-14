@@ -377,9 +377,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     final isLandscape = context.isLandscape;
     final isWide = context.isWideScreen;
-    final appBarHeight = isLandscape
-        ? AppleTokens.appBarHeightLandscape
-        : AppleTokens.appBarHeightPortrait;
     final scrollBottomPadding = isWide
         ? AppleTokens.scrollBottomPaddingLandscape + 20
         : AppleTokens.scrollBottomPaddingNoFab;
@@ -1041,17 +1038,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        toolbarHeight: appBarHeight,
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        centerTitle: false,
-        titleSpacing: 16,
-        title: AppleHeaderTitle(
-          title: l10n.settingsTitle,
-          isLandscape: isLandscape,
-        ),
+      appBar: AppleAppBar(
+        titleText: l10n.settingsTitle,
+        isLandscape: isLandscape,
+        showBackButton: false,
       ),
       body: SafeArea(
         top: false,

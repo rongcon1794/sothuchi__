@@ -1,20 +1,14 @@
-import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
-import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
-import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/widgets/apple_dynamic_ambient_background.dart';
+import 'package:so_thu_chi/core/widgets/navigation/apple_bottom_nav_bar.dart';
 
 /// Translucent, frosted-glass Apple navigation shell.
-/// Adapts seamlessly between:
-/// - iOS Bottom Navigation Bar on portrait phones (52dp, stacked Icon + Label).
-/// - Ultra-compact, non-obscured Landscape BottomBar on landscape phones/tablets
-///   (50dp, stacked Icon + Label with full width per tab, fully protected by left/right/bottom SafeArea
-///   against camera notches, 3-button navigation bars, and gesture pills with zero text truncation).
+/// Uses the dedicated [AppleBottomNavBar] component to provide tactile navigation.
 class AppShellScaffold extends ConsumerWidget {
   const AppShellScaffold({
     required this.navigationShell,
@@ -39,7 +33,6 @@ class AppShellScaffold extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final currentIndex = navigationShell.currentIndex;
 
     // Keep global ambient background index synced when navigating
@@ -48,87 +41,32 @@ class AppShellScaffold extends ConsumerWidget {
     });
 
     final destinations = [
-      _NavDestinationData(
+      AppleNavDestination(
         icon: CupertinoIcons.square_grid_2x2,
         activeIcon: CupertinoIcons.square_grid_2x2_fill,
         label: l10n.navOverview,
       ),
-      _NavDestinationData(
+      AppleNavDestination(
         icon: CupertinoIcons.doc_text,
         activeIcon: CupertinoIcons.doc_text_fill,
         label: l10n.navTransactions,
       ),
-      _NavDestinationData(
+      AppleNavDestination(
         icon: CupertinoIcons.chart_pie,
         activeIcon: CupertinoIcons.chart_pie_fill,
         label: l10n.navBudgets,
       ),
-      _NavDestinationData(
+      AppleNavDestination(
         icon: CupertinoIcons.chart_bar,
         activeIcon: CupertinoIcons.chart_bar_fill,
         label: l10n.navReports,
       ),
-      _NavDestinationData(
+      AppleNavDestination(
         icon: CupertinoIcons.gear_alt,
         activeIcon: CupertinoIcons.gear_alt_fill,
         label: l10n.navSettings,
       ),
     ];
-
-    final isLandscape = context.isLandscape;
-    final isOled = context.isOled;
-    final navBarHeight = isLandscape
-        ? AppleTokens.navBarHeightLandscape
-        : AppleTokens.navBarHeightPortrait;
-
-    final navBarContent = Container(
-      decoration: BoxDecoration(
-        color: isDark
-            ? (isOled
-                ? AppleTokens.bgOledPrimary
-                : AppleTokens.bgDarkCard.withValues(alpha: 0.88))
-            : Colors.white.withValues(alpha: 0.90),
-        border: Border(
-          top: BorderSide(
-            color: isDark
-                ? (isOled
-                    ? AppleTokens.bgOledBorder
-                    : Colors.white.withValues(alpha: 0.12))
-                : Colors.black.withValues(alpha: 0.08),
-            width: AppleTokens.hairline,
-          ),
-        ),
-      ),
-      child: SafeArea(
-        top: false,
-        left: true,
-        right: true,
-        bottom: true,
-        child: MediaQuery.withClampedTextScaling(
-          maxScaleFactor: isLandscape ? 1.05 : 1.15,
-          child: SizedBox(
-            height: navBarHeight,
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: AppleTokens.maxContentWidth),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    for (int i = 0; i < destinations.length; i++)
-                      _AppleNavBarItem(
-                        data: destinations[i],
-                        isSelected: i == currentIndex,
-                        isLandscape: isLandscape,
-                        onTap: () => _onDestinationSelected(ref, i),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -139,100 +77,10 @@ class AppShellScaffold extends ConsumerWidget {
           Expanded(child: navigationShell),
         ],
       ),
-      bottomNavigationBar: RepaintBoundary(
-        child: ClipRect(
-          child: isOled || Theme.of(context).platform == TargetPlatform.android
-              ? navBarContent
-              : BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-                  child: navBarContent,
-                ),
-        ),
-      ),
-    );
-  }
-}
-
-class _NavDestinationData {
-  const _NavDestinationData({
-    required this.icon,
-    required this.activeIcon,
-    required this.label,
-  });
-
-  final IconData icon;
-  final IconData activeIcon;
-  final String label;
-}
-
-class _AppleNavBarItem extends StatelessWidget {
-  const _AppleNavBarItem({
-    required this.data,
-    required this.isSelected,
-    required this.isLandscape,
-    required this.onTap,
-  });
-
-  final _NavDestinationData data;
-  final bool isSelected;
-  final bool isLandscape;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final primaryColor = theme.colorScheme.primary;
-    const inactiveColor = Color(0xFF8E8E93);
-
-    final itemContent = Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          curve: LucianTokens.ease,
-          padding: EdgeInsets.symmetric(
-            horizontal: isLandscape ? 10 : 14,
-            vertical: isLandscape ? 1 : 4,
-          ),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? primaryColor.withValues(alpha: isDark ? 0.22 : 0.12)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-          ),
-          child: Icon(
-            isSelected ? data.activeIcon : data.icon,
-            size: isLandscape ? 17 : 22,
-            color: isSelected ? primaryColor : inactiveColor,
-          ),
-        ),
-        SizedBox(height: isLandscape ? 1 : 2),
-        Text(
-          data.label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: isLandscape ? 9.5 : 10.5,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-            color: isSelected ? primaryColor : inactiveColor,
-            letterSpacing: -0.2,
-          ),
-        ),
-      ],
-    );
-
-    return Expanded(
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: AnimatedScale(
-          scale: isSelected ? 1.04 : 1.0,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOutBack,
-          child: Center(child: itemContent),
-        ),
+      bottomNavigationBar: AppleBottomNavBar(
+        currentIndex: currentIndex,
+        destinations: destinations,
+        onTap: (index) => _onDestinationSelected(ref, index),
       ),
     );
   }

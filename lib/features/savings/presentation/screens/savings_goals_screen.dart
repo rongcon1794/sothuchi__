@@ -102,9 +102,6 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
     final l10n = context.l10n;
     final isLandscape = context.isLandscape;
     final isWide = context.isWideScreen;
-    final appBarHeight = isLandscape
-        ? AppleTokens.appBarHeightLandscape
-        : AppleTokens.appBarHeightPortrait;
     final scrollBottomPadding = isWide
         ? AppleTokens.scrollBottomPaddingLandscape + 42
         : AppleTokens.scrollBottomPaddingWithFab;
@@ -117,18 +114,10 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        toolbarHeight: appBarHeight,
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        centerTitle: false,
-        titleSpacing: 0,
-        leading: const AppleBackButton(),
-        title: AppleHeaderTitle(
-          title: l10n.savingsTitle,
-          isLandscape: isLandscape,
-        ),
+      appBar: AppleAppBar(
+        titleText: l10n.savingsTitle,
+        isLandscape: isLandscape,
+        showBackButton: true,
         actions: [
           AppleIconButton(
             icon: hideBalance ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
@@ -140,7 +129,6 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
               ref.read(settingsControllerProvider.notifier).toggleHideBalance();
             },
           ),
-          const SizedBox(width: 12),
         ],
       ),
       floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),

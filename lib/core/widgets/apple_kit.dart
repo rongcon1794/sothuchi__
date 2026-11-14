@@ -22,6 +22,8 @@ export 'package:so_thu_chi/core/widgets/lucian_hold_to_delete_button.dart';
 export 'package:so_thu_chi/core/widgets/lucian_progress_bar.dart';
 export 'package:so_thu_chi/core/widgets/lucian_sliding_pill_tabs.dart';
 export 'package:so_thu_chi/core/widgets/lucian_stretchy_switch.dart';
+export 'package:so_thu_chi/core/widgets/navigation/apple_app_bar.dart';
+export 'package:so_thu_chi/core/widgets/navigation/apple_bottom_nav_bar.dart';
 export 'package:so_thu_chi/core/widgets/scroll_reactive_fab.dart';
 export 'package:so_thu_chi/core/widgets/so_thu_chi_logo.dart';
 

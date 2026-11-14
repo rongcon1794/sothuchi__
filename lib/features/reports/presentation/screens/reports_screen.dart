@@ -123,19 +123,10 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        toolbarHeight: isLandscape
-            ? AppleTokens.appBarHeightLandscape
-            : AppleTokens.appBarHeightPortrait,
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        centerTitle: false,
-        titleSpacing: 16,
-        title: AppleHeaderTitle(
-          title: l10n.reportsTitle,
-          isLandscape: isLandscape,
-        ),
+      appBar: AppleAppBar(
+        titleText: l10n.reportsTitle,
+        isLandscape: isLandscape,
+        showBackButton: false,
         actions: [
           if (isLandscape) ...[
             Center(
@@ -153,7 +144,6 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
             tooltip: l10n.reportsShareTooltip,
             onTap: () => _shareFinancialSummary(report, selectedMonth, locale),
           ),
-          const SizedBox(width: 12),
         ],
       ),
       body: SafeArea(

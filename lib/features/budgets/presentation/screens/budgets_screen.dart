@@ -123,28 +123,17 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        toolbarHeight: isLandscape
-            ? AppleTokens.appBarHeightLandscape
-            : AppleTokens.appBarHeightPortrait,
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        centerTitle: false,
-        titleSpacing: 16,
-        title: AppleHeaderTitle(
-          title: l10n.budgetsTitle,
-          isLandscape: isLandscape,
-        ),
+      appBar: AppleAppBar(
+        titleText: l10n.budgetsTitle,
+        isLandscape: isLandscape,
+        showBackButton: false,
         actions: [
-          if (isLandscape) ...[
+          if (isLandscape)
             Center(
               child: _buildHeaderMonthSwitcher(
                 selectedMonth: selectedMonth,
               ),
             ),
-            const SizedBox(width: 12),
-          ],
         ],
       ),
       body: SafeArea(
@@ -228,24 +217,30 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
 
                     // Left Overview block (Overview Hero Card + Allocation + Warnings)
                     final overviewWidgets = <Widget>[
-                      BudgetHeroOverviewCard(
-                        progressList: progressList,
-                        selectedMonth: selectedMonth,
-                        locale: locale,
-                        hideBalance: hideBalance,
+                      RepaintBoundary(
+                        child: BudgetHeroOverviewCard(
+                          progressList: progressList,
+                          selectedMonth: selectedMonth,
+                          locale: locale,
+                          hideBalance: hideBalance,
+                        ),
                       ),
                       if (triggered.isNotEmpty) ...[
                         const SizedBox(height: 12),
-                        BudgetAlertBanner(
-                          progressOverride: triggered,
-                          navigateOnTap: false,
+                        RepaintBoundary(
+                          child: BudgetAlertBanner(
+                            progressOverride: triggered,
+                            navigateOnTap: false,
+                          ),
                         ),
                       ],
                       if (progressList.length >= 2) ...[
                         const SizedBox(height: 12),
-                        BudgetAllocationBar(
-                          progressList: progressList,
-                          categoriesMap: categoriesMap,
+                        RepaintBoundary(
+                          child: BudgetAllocationBar(
+                            progressList: progressList,
+                            categoriesMap: categoriesMap,
+                          ),
                         ),
                       ],
                     ];

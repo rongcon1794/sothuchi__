@@ -272,24 +272,28 @@ class _AppleDynamicAmbientBackgroundState
         ? (isOled ? AppleTokens.bgOledPrimary : AppleTokens.bgDarkGrouped)
         : AppleTokens.bgLightGrouped;
 
-    return RepaintBoundary(
-      child: AnimatedBuilder(
-        animation: _animation,
-        builder: (context, child) {
-          return CustomPaint(
-            painter: _AmbientBackgroundPainter(
-              startBlobs: _startPalette,
-              targetBlobs: _targetPalette,
-              progress: _animation.value,
-              baseColor: baseColor,
-              isDark: isDark,
-              isOled: isOled,
-            ),
-            child: child,
-          );
-        },
-        child: widget.child,
-      ),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        RepaintBoundary(
+          child: AnimatedBuilder(
+            animation: _animation,
+            builder: (context, _) {
+              return CustomPaint(
+                painter: _AmbientBackgroundPainter(
+                  startBlobs: _startPalette,
+                  targetBlobs: _targetPalette,
+                  progress: _animation.value,
+                  baseColor: baseColor,
+                  isDark: isDark,
+                  isOled: isOled,
+                ),
+              );
+            },
+          ),
+        ),
+        widget.child,
+      ],
     );
   }
 }
