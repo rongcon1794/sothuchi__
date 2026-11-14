@@ -3,7 +3,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:so_thu_chi/core/router/app_router.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
-import 'package:so_thu_chi/core/widgets/apple_dynamic_ambient_background.dart';
 import 'package:so_thu_chi/core/widgets/biometric_lock_gate.dart';
 import 'package:so_thu_chi/core/widgets/keyboard_accessory_bar.dart';
 import 'package:so_thu_chi/features/settings/domain/entities/app_settings.dart';
@@ -56,15 +55,7 @@ class SoThuChiApp extends ConsumerWidget {
       routerConfig: router,
       builder: (context, child) {
         final content = rootWrapper(context, child ?? const SizedBox.shrink());
-        return Consumer(
-          builder: (context, ref, _) {
-            final ambientIndex = ref.watch(ambientBackgroundIndexProvider);
-            return AppleDynamicAmbientBackground(
-              currentIndex: ambientIndex,
-              child: KeyboardDismissBarOverlay(child: content),
-            );
-          },
-        );
+        return KeyboardDismissBarOverlay(child: content);
       },
     );
   }

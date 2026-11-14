@@ -93,11 +93,11 @@ class _SynchronousGradientPainter extends CustomPainter {
 
     // 2. Subtle directional gradient wash for vertical depth
     final topTint = isDark
-        ? const Color(0xFF141726).withValues(alpha: 0.55)
-        : Colors.white.withValues(alpha: 0.65);
+        ? const Color(0xFF0F111C).withValues(alpha: 0.35)
+        : Colors.white.withValues(alpha: 0.40);
     final bottomTint = isDark
-        ? const Color(0xFF030407).withValues(alpha: 0.60)
-        : const Color(0xFFE5E1D8).withValues(alpha: 0.45);
+        ? const Color(0xFF040508).withValues(alpha: 0.40)
+        : const Color(0xFFECE9E2).withValues(alpha: 0.30);
 
     final washGradient = LinearGradient(
       begin: Alignment.topCenter,
@@ -112,10 +112,10 @@ class _SynchronousGradientPainter extends CustomPainter {
       );
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), washPaint);
 
-    // 3. Draw ambient gradient orbs with luminous, vibrant Apple styling
+    // 3. Draw ambient gradient orbs with harmonious, gentle Apple styling
     final maxDim = math.max(size.width, size.height);
-    final centerAlpha = isDark ? 0.160 : 0.105;
-    final midAlpha = isDark ? 0.075 : 0.048;
+    final centerAlpha = isDark ? 0.085 : 0.055;
+    final midAlpha = isDark ? 0.038 : 0.024;
 
     for (final blob in blobs) {
       final color = blob.resolveColor(isDark);

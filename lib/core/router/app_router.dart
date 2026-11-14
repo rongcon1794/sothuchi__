@@ -263,19 +263,35 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: AppRoutes.splash,
-        builder: (context, _) => screens.splashBuilder(context),
+        pageBuilder: (context, state) => adaptivePage(
+          context: context,
+          state: state,
+          child: screens.splashBuilder(context),
+        ),
       ),
       GoRoute(
         path: AppRoutes.onboarding,
-        builder: (context, _) => screens.onboardingBuilder(context),
+        pageBuilder: (context, state) => adaptivePage(
+          context: context,
+          state: state,
+          child: screens.onboardingBuilder(context),
+        ),
       ),
       GoRoute(
         path: AppRoutes.login,
-        builder: (context, _) => screens.loginBuilder(context),
+        pageBuilder: (context, state) => adaptivePage(
+          context: context,
+          state: state,
+          child: screens.loginBuilder(context),
+        ),
       ),
       GoRoute(
         path: AppRoutes.initialSetup,
-        builder: (context, _) => screens.initialSetupBuilder(context),
+        pageBuilder: (context, state) => adaptivePage(
+          context: context,
+          state: state,
+          child: screens.initialSetupBuilder(context),
+        ),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {

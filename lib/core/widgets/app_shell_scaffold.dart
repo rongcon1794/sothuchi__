@@ -22,7 +22,6 @@ class AppShellScaffold extends ConsumerWidget {
   void _onDestinationSelected(WidgetRef ref, int index) {
     if (index != navigationShell.currentIndex) {
       HapticFeedback.selectionClick();
-      ref.read(ambientBackgroundIndexProvider.notifier).setIndex(index);
     }
     navigationShell.goBranch(
       index,
@@ -34,15 +33,6 @@ class AppShellScaffold extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final currentIndex = navigationShell.currentIndex;
-
-    // Keep global ambient background index synced when navigating (only when out of sync)
-    if (ref.read(ambientBackgroundIndexProvider) != currentIndex) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (ref.read(ambientBackgroundIndexProvider) != currentIndex) {
-          ref.read(ambientBackgroundIndexProvider.notifier).setIndex(currentIndex);
-        }
-      });
-    }
 
     final destinations = [
       AppleNavDestination(
@@ -72,19 +62,22 @@ class AppShellScaffold extends ConsumerWidget {
       ),
     ];
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      resizeToAvoidBottomInset: false,
-      body: Column(
-        children: [
-          ?topBanner,
-          Expanded(child: navigationShell),
-        ],
-      ),
-      bottomNavigationBar: AppleBottomNavBar(
-        currentIndex: currentIndex,
-        destinations: destinations,
-        onTap: (index) => _onDestinationSelected(ref, index),
+    return AppleDynamicAmbientBackground(
+      currentIndex: currentIndex,
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        resizeToAvoidBottomInset: false,
+        body: Column(
+          children: [
+            ?topBanner,
+            Expanded(child: navigationShell),
+          ],
+        ),
+        bottomNavigationBar: AppleBottomNavBar(
+          currentIndex: currentIndex,
+          destinations: destinations,
+          onTap: (index) => _onDestinationSelected(ref, index),
+        ),
       ),
     );
   }

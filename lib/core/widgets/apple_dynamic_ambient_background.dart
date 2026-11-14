@@ -98,109 +98,109 @@ class AppleDynamicAmbientBackground extends StatefulWidget {
 
   /// Predefined tab palettes conforming to Apple HIG.
   static const List<List<AmbientBlobSpec>> tabPalettes = [
-    // 0: Overview (Jade Emerald / Vivid Cyan / Golden Amber)
+    // 0: Overview (Soft Jade Mint / Soft Morning Sky / Warm Honey Amber)
     [
       AmbientBlobSpec(
         alignment: Alignment(0.80, -0.65),
         radiusFactor: 0.85,
-        lightColor: Color(0xFF00C7BE), // Radiant Mint Glow
-        darkColor: Color(0xFF10B981),  // Emerald Glow
+        lightColor: Color(0xFF34D399), // Soft Mint Emerald
+        darkColor: Color(0xFF059669),
       ),
       AmbientBlobSpec(
         alignment: Alignment(-0.75, 0.35),
         radiusFactor: 0.80,
-        lightColor: Color(0xFF0EA5E9), // Luminous Sky Blue
-        darkColor: Color(0xFF06B6D4),  // Electric Cyan
+        lightColor: Color(0xFF38BDF8), // Soft Sky Azure
+        darkColor: Color(0xFF0284C7),
       ),
       AmbientBlobSpec(
         alignment: Alignment(0.40, 0.85),
         radiusFactor: 0.70,
-        lightColor: Color(0xFFF59E0B), // Warm Sun Amber
-        darkColor: Color(0xFFF59E0B),
+        lightColor: Color(0xFFFBBF24), // Warm Honey Amber
+        darkColor: Color(0xFFD97706),
       ),
     ],
-    // 1: Transactions (Royal Sapphire / Radiant Indigo / Electric Cyan)
+    // 1: Transactions (Soft Ocean Blue / Soft Lavender Violet / Soft Aqua)
     [
       AmbientBlobSpec(
         alignment: Alignment(-0.80, -0.60),
         radiusFactor: 0.85,
-        lightColor: Color(0xFF007AFF), // Apple System Blue
-        darkColor: Color(0xFF3B82F6),
+        lightColor: Color(0xFF60A5FA), // Soft Ocean Blue
+        darkColor: Color(0xFF2563EB),
       ),
       AmbientBlobSpec(
         alignment: Alignment(0.80, 0.35),
         radiusFactor: 0.80,
-        lightColor: Color(0xFF6366F1), // Electric Indigo
-        darkColor: Color(0xFF818CF8),
+        lightColor: Color(0xFF818CF8), // Soft Lavender Violet
+        darkColor: Color(0xFF4F46E5),
       ),
       AmbientBlobSpec(
         alignment: Alignment(-0.25, 0.85),
         radiusFactor: 0.65,
-        lightColor: Color(0xFF06B6D4), // Vibrant Cyan
-        darkColor: Color(0xFF00C7BE),
+        lightColor: Color(0xFF38BDF8), // Soft Aqua Ice
+        darkColor: Color(0xFF0D9488),
       ),
     ],
-    // 2: Budgets (Teal Aqua / Sunset Tangerine / Fresh Leaf)
+    // 2: Budgets (Soft Seafoam Teal / Soft Apricot / Soft Spring Sage)
     [
       AmbientBlobSpec(
         alignment: Alignment(0.10, -0.70),
         radiusFactor: 0.85,
-        lightColor: Color(0xFF14B8A6), // Vibrant Teal
+        lightColor: Color(0xFF2DD4BF), // Soft Seafoam Teal
         darkColor: Color(0xFF0D9488),
       ),
       AmbientBlobSpec(
         alignment: Alignment(0.80, 0.50),
         radiusFactor: 0.75,
-        lightColor: Color(0xFFF97316), // Warm Tangerine
-        darkColor: Color(0xFFFB923C),
+        lightColor: Color(0xFFFB923C), // Soft Apricot
+        darkColor: Color(0xFFD97706),
       ),
       AmbientBlobSpec(
         alignment: Alignment(-0.75, 0.25),
         radiusFactor: 0.70,
-        lightColor: Color(0xFF10B981), // Fresh Mint Emerald
-        darkColor: Color(0xFF34D399),
+        lightColor: Color(0xFF4ADE80), // Soft Spring Leaf
+        darkColor: Color(0xFF10B981),
       ),
     ],
-    // 3: Reports (Cosmic Amethyst / Radiant Sunset Rose / Deep Indigo)
+    // 3: Reports (Soft Lilac / Soft Blush Rose / Muted Indigo)
     [
       AmbientBlobSpec(
         alignment: Alignment(0.80, -0.65),
         radiusFactor: 0.85,
-        lightColor: Color(0xFF9333EA), // Royal Violet
-        darkColor: Color(0xFFA855F7),
+        lightColor: Color(0xFFA78BFA), // Soft Lilac Violet
+        darkColor: Color(0xFF7C3AED),
       ),
       AmbientBlobSpec(
         alignment: Alignment(-0.80, 0.40),
         radiusFactor: 0.75,
-        lightColor: Color(0xFFF43F5E), // Apple Neon Rose
-        darkColor: Color(0xFFFB7185),
+        lightColor: Color(0xFFFB7185), // Soft Blush Rose
+        darkColor: Color(0xFFE11D48),
       ),
       AmbientBlobSpec(
         alignment: Alignment(0.20, 0.85),
         radiusFactor: 0.70,
-        lightColor: Color(0xFF4F46E5), // Deep Electric Indigo
-        darkColor: Color(0xFF6366F1),
+        lightColor: Color(0xFF818CF8), // Muted Royal Blue
+        darkColor: Color(0xFF4338CA),
       ),
     ],
-    // 4: Settings (Luminous Azure / High-tech Indigo / Soft Amethyst)
+    // 4: Settings (Soft Slate Violet / Soft Powder Blue / Soft Mineral Sage)
     [
       AmbientBlobSpec(
         alignment: Alignment(-0.60, -0.70),
         radiusFactor: 0.80,
-        lightColor: Color(0xFF6366F1), // Tech Indigo
+        lightColor: Color(0xFF818CF8), // Soft Slate Violet
         darkColor: Color(0xFF4F46E5),
       ),
       AmbientBlobSpec(
         alignment: Alignment(0.75, 0.40),
         radiusFactor: 0.75,
-        lightColor: Color(0xFF0EA5E9), // Clean Azure
+        lightColor: Color(0xFF38BDF8), // Soft Powder Blue
         darkColor: Color(0xFF0284C7),
       ),
       AmbientBlobSpec(
         alignment: Alignment(-0.20, 0.85),
         radiusFactor: 0.65,
-        lightColor: Color(0xFF8B5CF6), // Soft Violet Whisper
-        darkColor: Color(0xFFA855F7),
+        lightColor: Color(0xFF94A3B8), // Soft Mineral Sage
+        darkColor: Color(0xFF64748B),
       ),
     ],
   ];
@@ -352,11 +352,11 @@ class _AmbientBackgroundPainter extends CustomPainter {
 
     // 2. Subtle directional gradient wash for vertical depth
     final topTint = isDark
-        ? const Color(0xFF141726).withValues(alpha: 0.55)
-        : Colors.white.withValues(alpha: 0.65);
+        ? const Color(0xFF0F111C).withValues(alpha: 0.35)
+        : Colors.white.withValues(alpha: 0.40);
     final bottomTint = isDark
-        ? const Color(0xFF030407).withValues(alpha: 0.60)
-        : const Color(0xFFE5E1D8).withValues(alpha: 0.45);
+        ? const Color(0xFF040508).withValues(alpha: 0.40)
+        : const Color(0xFFECE9E2).withValues(alpha: 0.30);
 
     final washGradient = LinearGradient(
       begin: Alignment.topCenter,
@@ -375,9 +375,9 @@ class _AmbientBackgroundPainter extends CustomPainter {
     final maxDim = math.max(size.width, size.height);
     final count = math.min(startBlobs.length, targetBlobs.length);
 
-    // Opacity calibrations: luminous, vibrant, Apple VisionOS inspired
-    final centerAlpha = isDark ? 0.160 : 0.105;
-    final midAlpha = isDark ? 0.075 : 0.048;
+    // Harmonious, gentle, non-distracting ambient opacity
+    final centerAlpha = isDark ? 0.085 : 0.055;
+    final midAlpha = isDark ? 0.038 : 0.024;
 
     for (int i = 0; i < count; i++) {
       final s = startBlobs[i];
