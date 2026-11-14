@@ -122,7 +122,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
     final report = ref.watch(monthlyReportProvider);
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppleAppBar(
         titleText: l10n.reportsTitle,
         isLandscape: isLandscape,

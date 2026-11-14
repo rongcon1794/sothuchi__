@@ -184,13 +184,10 @@ class TransactionDetailScreen extends ConsumerWidget {
 
     return txsAsync.when(
       loading: () => const Scaffold(
-        backgroundColor: Colors.transparent,
         body: Center(child: CupertinoActivityIndicator()),
       ),
       error: (err, _) => Scaffold(
-        backgroundColor: Colors.transparent,
         appBar: AppBar(
-          backgroundColor: Colors.transparent,
           leading: IconButton(
             icon: const Icon(CupertinoIcons.chevron_left, size: 24),
             onPressed: () => context.pop(),
@@ -202,9 +199,7 @@ class TransactionDetailScreen extends ConsumerWidget {
         final tx = transactions.where((t) => t.id == transactionId).firstOrNull;
         if (tx == null) {
           return Scaffold(
-            backgroundColor: Colors.transparent,
             appBar: AppBar(
-              backgroundColor: Colors.transparent,
               leading: IconButton(
                 icon: const Icon(CupertinoIcons.chevron_left, size: 24),
                 onPressed: () => context.pop(),
@@ -266,12 +261,12 @@ class TransactionDetailScreen extends ConsumerWidget {
             '${AppDateUtils.formatFullDate(tx.date, locale: locale)} • $timeStr';
 
         return Scaffold(
-          backgroundColor: Colors.transparent,
+          backgroundColor: theme.scaffoldBackgroundColor,
           appBar: AppBar(
             toolbarHeight: isLandscape
                 ? AppleTokens.appBarHeightLandscape
                 : AppleTokens.appBarHeightPortrait,
-            backgroundColor: Colors.transparent,
+            backgroundColor: theme.scaffoldBackgroundColor,
             elevation: 0,
             leading: IconButton(
               icon: const Icon(CupertinoIcons.chevron_left, size: 24),

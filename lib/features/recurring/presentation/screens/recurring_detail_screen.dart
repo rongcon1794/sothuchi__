@@ -120,20 +120,17 @@ class RecurringDetailScreen extends ConsumerWidget {
 
     return recurringAsync.when(
       loading: () => const Scaffold(
-        backgroundColor: Colors.transparent,
         body: Center(child: CupertinoActivityIndicator()),
       ),
       error: (err, _) => Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(backgroundColor: Colors.transparent),
+        appBar: AppBar(),
         body: Center(child: Text(context.localizeError(err))),
       ),
       data: (items) {
         final item = items.where((i) => i.id == recurringId).firstOrNull;
         if (item == null) {
           return Scaffold(
-            backgroundColor: Colors.transparent,
-            appBar: AppBar(backgroundColor: Colors.transparent),
+            appBar: AppBar(),
             body: SafeArea(
               top: false,
               bottom: false,
@@ -157,12 +154,12 @@ class RecurringDetailScreen extends ConsumerWidget {
         final isIncome = item.type == TransactionType.income;
 
         return Scaffold(
-          backgroundColor: Colors.transparent,
+          backgroundColor: theme.scaffoldBackgroundColor,
           appBar: AppBar(
             toolbarHeight: isLandscape
                 ? AppleTokens.appBarHeightLandscape
                 : AppleTokens.appBarHeightPortrait,
-            backgroundColor: Colors.transparent,
+            backgroundColor: theme.scaffoldBackgroundColor,
             elevation: 0,
             leading: IconButton(
               icon: const Icon(CupertinoIcons.chevron_left, size: 24),

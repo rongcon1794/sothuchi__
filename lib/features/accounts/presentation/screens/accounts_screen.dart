@@ -213,7 +213,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
             .toList(growable: false);
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppleAppBar(
         titleText: l10n.walletsTitle,
         isLandscape: isLandscape,

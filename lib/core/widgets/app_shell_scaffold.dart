@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
-import 'package:so_thu_chi/core/widgets/apple_dynamic_ambient_background.dart';
 import 'package:so_thu_chi/core/widgets/navigation/apple_bottom_nav_bar.dart';
 
 /// Translucent, frosted-glass Apple navigation shell.
@@ -62,22 +61,19 @@ class AppShellScaffold extends ConsumerWidget {
       ),
     ];
 
-    return AppleDynamicAmbientBackground(
-      currentIndex: currentIndex,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        resizeToAvoidBottomInset: false,
-        body: Column(
-          children: [
-            ?topBanner,
-            Expanded(child: navigationShell),
-          ],
-        ),
-        bottomNavigationBar: AppleBottomNavBar(
-          currentIndex: currentIndex,
-          destinations: destinations,
-          onTap: (index) => _onDestinationSelected(ref, index),
-        ),
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      resizeToAvoidBottomInset: false,
+      body: Column(
+        children: [
+          ?topBanner,
+          Expanded(child: navigationShell),
+        ],
+      ),
+      bottomNavigationBar: AppleBottomNavBar(
+        currentIndex: currentIndex,
+        destinations: destinations,
+        onTap: (index) => _onDestinationSelected(ref, index),
       ),
     );
   }

@@ -12,7 +12,6 @@ class SplashScreen extends StatelessWidget {
     final l10n = context.l10n;
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Center(
           child: Column(

@@ -45,7 +45,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
         : AppleTokens.scrollBottomPaddingWithFab;
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppleAppBar(
         titleText: l10n.debtBookTitle,
         isLandscape: isLandscape,

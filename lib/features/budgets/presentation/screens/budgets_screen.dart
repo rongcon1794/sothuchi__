@@ -122,7 +122,7 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
     };
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppleAppBar(
         titleText: l10n.budgetsTitle,
         isLandscape: isLandscape,

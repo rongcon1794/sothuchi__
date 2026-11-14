@@ -211,7 +211,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     }).toList(growable: false);
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppleAppBar(
         titleText: l10n.categoriesTitle,
         isLandscape: isLandscape,

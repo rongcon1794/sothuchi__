@@ -95,6 +95,7 @@ class AppleAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final landscape = isLandscape ?? context.isLandscape;
     final effectiveHeight = toolbarHeight ??
         (landscape
@@ -127,7 +128,7 @@ class AppleAppBar extends StatelessWidget implements PreferredSizeWidget {
 
     return AppBar(
       toolbarHeight: effectiveHeight,
-      backgroundColor: backgroundColor ?? Colors.transparent,
+      backgroundColor: backgroundColor ?? theme.scaffoldBackgroundColor,
       elevation: 0,
       scrolledUnderElevation: 0,
       centerTitle: centerTitle,

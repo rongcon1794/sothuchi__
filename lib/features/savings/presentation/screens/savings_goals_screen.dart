@@ -113,7 +113,7 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
     final hideBalance = settings?.hideBalance ?? false;
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppleAppBar(
         titleText: l10n.savingsTitle,
         isLandscape: isLandscape,
