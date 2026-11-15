@@ -6,6 +6,7 @@ import 'package:so_thu_chi/core/contracts/transaction_draft_contract.dart';
 import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/widgets/app_shell_scaffold.dart';
 import 'package:so_thu_chi/core/widgets/offline_sync_banner.dart';
+import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_controller.dart';
 import 'package:so_thu_chi/features/accounts/presentation/screens/account_detail_screen.dart';
 import 'package:so_thu_chi/features/accounts/presentation/screens/accounts_screen.dart';
 import 'package:so_thu_chi/features/auth/domain/entities/app_user.dart';
@@ -31,6 +32,7 @@ import 'package:so_thu_chi/features/settings/presentation/controllers/settings_c
 import 'package:so_thu_chi/features/settings/presentation/screens/about_screen.dart';
 import 'package:so_thu_chi/features/settings/presentation/screens/privacy_policy_screen.dart';
 import 'package:so_thu_chi/features/settings/presentation/screens/settings_screen.dart';
+import 'package:so_thu_chi/features/transactions/presentation/controllers/transactions_controller.dart';
 import 'package:so_thu_chi/features/transactions/presentation/screens/home_dashboard_screen.dart';
 import 'package:so_thu_chi/features/transactions/presentation/screens/transaction_detail_screen.dart';
 import 'package:so_thu_chi/features/transactions/presentation/screens/transaction_form_screen.dart';
@@ -40,6 +42,24 @@ import 'package:so_thu_chi/features/transactions/presentation/screens/transactio
 /// the router to Firebase SDK classes.
 final routerAuthStateProvider = Provider<AsyncValue<AppUser?>>((ref) {
   return ref.watch(authStateStreamProvider);
+});
+
+/// Tracks whether the essential initial data streams (accounts & transactions)
+/// have completed their initial emission or timed out (1.2s max), ensuring the
+/// user never lands on a blank / 0đ dashboard during launch.
+final initialDataWarmupProvider = FutureProvider<bool>((ref) async {
+  final user = ref.watch(currentUserProvider);
+  if (user == null) return true;
+
+  try {
+    await Future.wait([
+      ref.watch(rawAccountsStreamProvider.future),
+      ref.watch(rawTransactionsStreamProvider.future),
+    ]).timeout(const Duration(milliseconds: 1200));
+  } catch (_) {
+    // Graceful fallback on network timeout or offline mode
+  }
+  return true;
 });
 
 /// Top banner slot injected into the shell (Offline/Sync indicator by default).
@@ -181,6 +201,10 @@ class _RouterRefreshNotifier extends ChangeNotifier {
           ),
         ),
         (_, _) => notifyListeners(),
+      )
+      ..listen(
+        initialDataWarmupProvider,
+        (_, _) => notifyListeners(),
       );
   }
 }
@@ -219,15 +243,21 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final settingsAsync = ref.read(settingsControllerProvider);
       final authAsync = ref.read(routerAuthStateProvider);
+      final warmupAsync = ref.read(initialDataWarmupProvider);
       final location = state.matchedLocation;
-
-      if (settingsAsync.isLoading || authAsync.isLoading) {
-        return location == AppRoutes.splash ? null : AppRoutes.splash;
-      }
 
       final onboardingDone =
           settingsAsync.value?.onboardingCompleted ?? false;
       final user = authAsync.value;
+      final initialSetupDone =
+          settingsAsync.value?.initialSetupCompleted ?? false;
+
+      final isWarmingUpData =
+          user != null && onboardingDone && initialSetupDone && warmupAsync.isLoading;
+
+      if (settingsAsync.isLoading || authAsync.isLoading || isWarmingUpData) {
+        return location == AppRoutes.splash ? null : AppRoutes.splash;
+      }
 
       if (!onboardingDone) {
         return location == AppRoutes.onboarding ? null : AppRoutes.onboarding;
@@ -237,8 +267,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         return location == AppRoutes.login ? null : AppRoutes.login;
       }
 
-      final initialSetupDone =
-          settingsAsync.value?.initialSetupCompleted ?? false;
       if (!initialSetupDone) {
         return location == AppRoutes.initialSetup
             ? null

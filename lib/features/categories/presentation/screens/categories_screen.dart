@@ -171,10 +171,15 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     final currentList = _selectedType == CategoryType.expense ? expenseList : incomeList;
 
     // Currency and settings
-    final settings = ref.watch(settingsControllerProvider).value;
-    final locale = settings?.localeCode ?? 'vi';
-    final currency = settings?.currencyCode ?? AppCurrencies.defaultCode;
-    final hideBalance = settings?.hideBalance ?? false;
+    final (locale, currency, hideBalance) = ref.watch(
+      settingsControllerProvider.select(
+        (s) => (
+          s.value?.localeCode ?? 'vi',
+          s.value?.currencyCode ?? AppCurrencies.defaultCode,
+          s.value?.hideBalance ?? false,
+        ),
+      ),
+    );
 
     // Collect transactions count & month spend per category safely
     final transactionsAsync = ref.watch(transactionsStreamProvider);

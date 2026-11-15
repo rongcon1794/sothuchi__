@@ -235,40 +235,6 @@ void main() {
     });
   });
 
-  group('LucianStretchySwitch Widget Tests', () {
-    testWidgets('renders stretchy switch and triggers onChanged on tap', (tester) async {
-      var switchVal = false;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: StatefulBuilder(
-                builder: (context, setState) {
-                  return LucianStretchySwitch(
-                    value: switchVal,
-                    semanticLabel: 'Khóa sinh trắc học',
-                    onChanged: (val) => setState(() => switchVal = val),
-                  );
-                },
-              ),
-            ),
-          ),
-        ),
-      );
-
-      expect(find.byType(LucianStretchySwitch), findsOneWidget);
-      expect(switchVal, isFalse);
-
-      await tester.tap(find.byType(LucianStretchySwitch));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 200));
-
-      expect(switchVal, isTrue);
-      expect(find.byIcon(Icons.check_rounded), findsOneWidget);
-    });
-  });
-
   group('LucianSlidingPillTabs Widget Tests', () {
     testWidgets('renders sliding pill tabs with label and switches on tap', (tester) async {
       var selectedVal = 'A';

@@ -111,8 +111,11 @@ class _RecurringTransactionsScreenState
     final monthlyNetCashflow = ref.watch(monthlyRecurringNetCashflowProvider);
     final categoriesMap = ref.watch(categoriesMapProvider);
     final accountsMap = ref.watch(accountsMapProvider);
-    final settings = ref.watch(settingsControllerProvider).value;
-    final hideBalance = settings?.hideBalance ?? false;
+    final hideBalance = ref.watch(
+      settingsControllerProvider.select(
+        (s) => s.value?.hideBalance ?? false,
+      ),
+    );
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,

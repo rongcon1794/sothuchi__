@@ -111,10 +111,15 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final settings = ref.watch(settingsControllerProvider).value;
-    final locale = settings?.localeCode ?? 'vi';
-    final currency = settings?.currencyCode ?? AppCurrencies.defaultCode;
-    final hideBalance = settings?.hideBalance ?? false;
+    final (locale, currency, hideBalance) = ref.watch(
+      settingsControllerProvider.select(
+        (s) => (
+          s.value?.localeCode ?? 'vi',
+          s.value?.currencyCode ?? AppCurrencies.defaultCode,
+          s.value?.hideBalance ?? false,
+        ),
+      ),
+    );
 
     final txStream = ref.watch(transactionsStreamProvider);
     final filter = ref.watch(transactionFilterProvider);

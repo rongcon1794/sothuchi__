@@ -108,9 +108,11 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
     final isLandscape = context.isLandscape;
     final l10n = context.l10n;
     final theme = Theme.of(context);
-    final settings = ref.watch(settingsControllerProvider).value;
-    final locale = settings?.localeCode ?? 'vi';
-    final hideBalance = settings?.hideBalance ?? false;
+    final (locale, hideBalance) = ref.watch(
+      settingsControllerProvider.select(
+        (s) => (s.value?.localeCode ?? 'vi', s.value?.hideBalance ?? false),
+      ),
+    );
 
     final selectedMonth = ref.watch(selectedReportMonthProvider);
     final monthlyBudgetMinor = ref.watch(selectedReportMonthBudgetMinorProvider);

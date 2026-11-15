@@ -35,9 +35,11 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
     final filteredDebts = ref.watch(filteredDebtsProvider);
     final summary = ref.watch(debtSummaryProvider);
     final currentFilter = ref.watch(debtFilterModeProvider);
-    final settings = ref.watch(settingsControllerProvider).value;
-    final locale = settings?.localeCode ?? 'vi';
-    final hideBalance = settings?.hideBalance ?? false;
+    final (locale, hideBalance) = ref.watch(
+      settingsControllerProvider.select(
+        (s) => (s.value?.localeCode ?? 'vi', s.value?.hideBalance ?? false),
+      ),
+    );
     final isLandscape = context.isLandscape;
     final isWide = context.isWideScreen;
     final scrollBottomPadding = isWide

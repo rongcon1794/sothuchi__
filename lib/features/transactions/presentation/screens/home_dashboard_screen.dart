@@ -105,9 +105,11 @@ class _HomeDashboardScreenState extends ConsumerState<HomeDashboardScreen> {
     final isLargeText = textScale >= 1.35;
 
     final user = ref.watch(currentUserProvider);
-    final settings = ref.watch(settingsControllerProvider).value;
-    final locale = settings?.localeCode ?? 'vi';
-    final hideBalance = settings?.hideBalance ?? false;
+    final (locale, hideBalance) = ref.watch(
+      settingsControllerProvider.select(
+        (s) => (s.value?.localeCode ?? 'vi', s.value?.hideBalance ?? false),
+      ),
+    );
 
     final totalBalance = ref.watch(totalNetBalanceProvider);
     final monthSummary = ref.watch(currentMonthSummaryProvider);

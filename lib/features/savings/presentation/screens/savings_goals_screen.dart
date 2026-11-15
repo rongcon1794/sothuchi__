@@ -108,9 +108,11 @@ class _SavingsGoalsScreenState extends ConsumerState<SavingsGoalsScreen> {
 
     final goalsAsync = ref.watch(savingsGoalsStreamProvider);
     final summary = ref.watch(savingsSummaryProvider);
-    final settings = ref.watch(settingsControllerProvider).value;
-    final locale = settings?.localeCode ?? 'vi';
-    final hideBalance = settings?.hideBalance ?? false;
+    final (locale, hideBalance) = ref.watch(
+      settingsControllerProvider.select(
+        (s) => (s.value?.localeCode ?? 'vi', s.value?.hideBalance ?? false),
+      ),
+    );
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,

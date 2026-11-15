@@ -195,9 +195,15 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
     final activeAccounts = ref.watch(activeAccountsProvider);
     final archivedAccounts = ref.watch(archivedAccountsProvider);
     final totalBalance = ref.watch(totalNetBalanceProvider);
-    final settings = ref.watch(settingsControllerProvider).value;
-    final locale = settings?.localeCode ?? 'vi';
-    final hideBalance = settings?.hideBalance ?? false;
+    final (locale, hideBalance, defaultWalletId) = ref.watch(
+      settingsControllerProvider.select(
+        (s) => (
+          s.value?.localeCode ?? 'vi',
+          s.value?.hideBalance ?? false,
+          s.value?.defaultWalletId,
+        ),
+      ),
+    );
 
     final isLandscape = context.isLandscape;
     final isWide = context.isWideScreen;
@@ -398,7 +404,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                           typeLabel: _typeLabel(l10n, account.type),
                           locale: locale,
                           hideBalance: hideBalance,
-                          isDefault: account.id == settings?.defaultWalletId,
+                          isDefault: account.id == defaultWalletId,
                           onSetDefault: () => _handleSetDefaultWallet(context, account),
                           onTap: () =>
                               context.push(AppRoutes.accountDetail(account.id)),
@@ -421,7 +427,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                     l10n: l10n,
                     locale: locale,
                     hideBalance: hideBalance,
-                    defaultWalletId: settings?.defaultWalletId,
+                    defaultWalletId: defaultWalletId,
                     typeLabelBuilder: (type) => _typeLabel(l10n, type),
                     onTapWallet: (a) => context.push(AppRoutes.accountDetail(a.id)),
                     onEditWallet: (a) => _openWalletForm(context, existing: a),

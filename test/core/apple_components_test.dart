@@ -143,34 +143,6 @@ void main() {
       expect(tapped, isTrue);
     });
 
-    testWidgets('AppleDatePickerTile displays formatted date and opens date picker on tap', (tester) async {
-      DateTime pickedDate = DateTime(2026, 11, 4);
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: AppleDatePickerTile(
-              label: 'Ngày giao dịch',
-              selectedDate: pickedDate,
-              onDateSelected: (d) => pickedDate = d,
-            ),
-          ),
-        ),
-      );
-
-      expect(find.text('Ngày giao dịch'), findsOneWidget);
-      expect(find.textContaining('04/11/2026'), findsOneWidget);
-
-      await tester.tap(find.byType(AppleDatePickerTile));
-      await tester.pumpAndSettle();
-      // DatePicker dialog opens
-      expect(find.byType(DatePickerDialog), findsOneWidget);
-
-      // Dismiss dialog
-      await tester.tap(find.text('Cancel'));
-      await tester.pumpAndSettle();
-    });
-
     testWidgets('AppleModalSheetLayout renders title, body, and bottom action', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(

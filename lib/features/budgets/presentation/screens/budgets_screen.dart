@@ -92,9 +92,11 @@ class _BudgetsScreenState extends ConsumerState<BudgetsScreen> {
     final isVi = l10n.localeName.startsWith('vi');
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final isLargeText = textScale >= 1.35;
-    final settings = ref.watch(settingsControllerProvider).value;
-    final locale = settings?.localeCode ?? 'vi';
-    final hideBalance = settings?.hideBalance ?? false;
+    final (locale, hideBalance) = ref.watch(
+      settingsControllerProvider.select(
+        (s) => (s.value?.localeCode ?? 'vi', s.value?.hideBalance ?? false),
+      ),
+    );
 
     final selectedMonth = ref.watch(selectedBudgetMonthProvider);
     final budgetsStream = ref.watch(budgetsStreamProvider);
