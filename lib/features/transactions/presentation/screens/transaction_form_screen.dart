@@ -9,6 +9,7 @@ import 'package:so_thu_chi/core/constants/icon_catalog.dart';
 import 'package:so_thu_chi/core/contracts/transaction_draft_contract.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
+import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/utils/date_formatter.dart';
@@ -434,7 +435,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       res.fold(
         onSuccess: (saved) {
           _maybeShowBudgetAlert(saved);
-          context.pop();
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.go(AppRoutes.home);
+          }
         },
         onFailure: (err) {
           messenger.showSnackBar(
@@ -460,7 +465,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       res.fold(
         onSuccess: (saved) {
           _maybeShowBudgetAlert(saved);
-          context.pop();
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.go(AppRoutes.home);
+          }
         },
         onFailure: (err) {
           messenger.showSnackBar(
@@ -557,7 +566,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               ),
             ),
           );
-        context.pop();
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(AppRoutes.home);
+        }
       },
       onFailure: (err) {
         messenger.showSnackBar(
