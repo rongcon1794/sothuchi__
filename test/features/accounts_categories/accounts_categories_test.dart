@@ -435,24 +435,10 @@ void main() {
 
       expect(find.byIcon(CupertinoIcons.eye_slash), findsOneWidget);
 
-      // Test 3-dots popup menu on wallet has Delete option
-      final moreOptionsButton = find.byTooltip('Tùy chọn khác');
-      expect(moreOptionsButton, findsWidgets);
-      await tester.tap(moreOptionsButton.first);
-      await tester.pumpAndSettle();
-
-      expect(find.text('Xóa'), findsOneWidget);
-      await tester.tap(find.text('Xóa'));
-      await tester.pumpAndSettle();
-
-      // CupertinoActionSheet appears
-      expect(find.byType(CupertinoActionSheet), findsOneWidget);
-      await tester.tap(find.widgetWithText(CupertinoActionSheetAction, 'Xóa'));
-      await tester.pumpAndSettle();
-
-      // Verify wallet was deleted
-      final accounts = await accRepo.getAccounts();
-      expect(accounts.length, 1);
+      // Test drag handle replaces 3-dots menu on wallet card
+      final dragHandles = find.byIcon(CupertinoIcons.bars);
+      expect(dragHandles, findsWidgets);
+      expect(find.byTooltip('Kéo để sắp xếp ví'), findsWidgets);
     });
 
     testWidgets('WalletFormSheet renders live preview, templates and presets', (tester) async {
@@ -501,15 +487,19 @@ void main() {
       await tester.pumpAndSettle();
 
       // Quick amount presets
-      expect(find.text('+000'), findsOneWidget);
-      expect(find.text('1 triệu'), findsOneWidget);
+      final oneMil = find.text('1 triệu');
+      final plus000 = find.text('+000');
+      expect(plus000, findsOneWidget);
+      expect(oneMil, findsOneWidget);
 
       // Tap 1 triệu preset
-      await tester.tap(find.text('1 triệu'));
+      await tester.ensureVisible(oneMil);
+      await tester.tap(oneMil);
       await tester.pumpAndSettle();
 
       // Tap +000
-      await tester.tap(find.text('+000'));
+      await tester.ensureVisible(plus000);
+      await tester.tap(plus000);
       await tester.pumpAndSettle();
 
       // Save button exists

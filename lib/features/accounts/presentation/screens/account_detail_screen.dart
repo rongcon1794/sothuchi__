@@ -17,6 +17,7 @@ import 'package:so_thu_chi/core/widgets/apple_kit.dart';
 import 'package:so_thu_chi/core/widgets/empty_state_view.dart';
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
 import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_controller.dart';
+import 'package:so_thu_chi/features/accounts/presentation/widgets/transfer_between_wallets_sheet.dart';
 import 'package:so_thu_chi/features/accounts/presentation/widgets/wallet_form_sheet.dart';
 import 'package:so_thu_chi/features/categories/presentation/controllers/categories_controller.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
@@ -227,6 +228,9 @@ class AccountDetailScreen extends ConsumerWidget {
                 onSelected: (val) async {
                   if (val == 'edit') {
                     await WalletFormSheet.show(context, existing: account);
+                  } else if (val == 'transfer') {
+                    unawaited(HapticFeedback.lightImpact());
+                    await TransferBetweenWalletsSheet.show(context, initialFromAccountId: account.id);
                   } else if (val == 'set_default') {
                     unawaited(HapticFeedback.mediumImpact());
                     await ref.read(settingsControllerProvider.notifier).setDefaultWalletId(account.id);
@@ -256,6 +260,13 @@ class AccountDetailScreen extends ConsumerWidget {
                           ? 'Đặt làm ví mặc định'
                           : 'Set as default wallet',
                     ),
+                  ApplePopupMenuItem(
+                    value: 'transfer',
+                    icon: CupertinoIcons.arrow_right_arrow_left,
+                    title: locale.startsWith('vi')
+                        ? 'Chuyển tiền từ ví này'
+                        : 'Transfer from this wallet',
+                  ),
                   ApplePopupMenuItem(
                     value: 'edit',
                     icon: CupertinoIcons.pencil,

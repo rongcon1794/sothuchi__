@@ -219,65 +219,61 @@ class WalletListTile extends StatelessWidget {
                   // Line 2: Type info, Asset % & Balance
                   Row(
                     children: [
+                      Icon(
+                        _typeIcon(account.type),
+                        size: 13,
+                        color: isDark ? Colors.white60 : Colors.black54,
+                      ),
+                      const SizedBox(width: 4),
                       Expanded(
-                        child: Row(
-                          children: [
-                            Icon(
-                              _typeIcon(account.type),
-                              size: 13,
-                              color: isDark ? Colors.white60 : Colors.black54,
-                            ),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                '$typeLabel • ${account.currency.toUpperCase()}',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: isDark ? Colors.white60 : Colors.black54,
-                                ),
-                              ),
-                            ),
-                            if (!isReordering &&
-                                percentOfTotal != null &&
-                                percentOfTotal! > 0 &&
-                                !hideBalance &&
-                                !account.archived) ...[
-                              const SizedBox(width: 5),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 4.5, vertical: 1),
-                                decoration: BoxDecoration(
-                                  color: AppleTokens.systemBlue.withValues(alpha: isDark ? 0.18 : 0.10),
-                                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                                ),
-                                child: Text(
-                                  '$percentOfTotal%',
-                                  style: const TextStyle(
-                                    fontSize: 9.5,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppleTokens.systemBlue,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
+                        child: Text(
+                          '$typeLabel • ${account.currency.toUpperCase()}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: isDark ? Colors.white60 : Colors.black54,
+                          ),
                         ),
                       ),
+                      if (!isReordering &&
+                          percentOfTotal != null &&
+                          percentOfTotal! > 0 &&
+                          !hideBalance &&
+                          !account.archived) ...[
+                        const SizedBox(width: 5),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.5, vertical: 1),
+                          decoration: BoxDecoration(
+                            color: AppleTokens.systemBlue.withValues(alpha: isDark ? 0.18 : 0.10),
+                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                          ),
+                          child: Text(
+                            '$percentOfTotal%',
+                            style: const TextStyle(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w700,
+                              color: AppleTokens.systemBlue,
+                            ),
+                          ),
+                        ),
+                      ],
                       const SizedBox(width: 6),
-                      Text(
-                        balanceText,
-                        semanticsLabel: hideBalance ? l10n.balanceHidden : null,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.right,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontSize: 15.5,
-                          fontWeight: FontWeight.w800,
-                          fontFeatures: AppTheme.tabularFigures,
-                          letterSpacing: -0.3,
-                          color: isDark ? Colors.white : const Color(0xFF1C1C1E),
+                      Flexible(
+                        child: Text(
+                          balanceText,
+                          semanticsLabel: hideBalance ? l10n.balanceHidden : null,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.right,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontSize: 15.5,
+                            fontWeight: FontWeight.w800,
+                            fontFeatures: AppTheme.tabularFigures,
+                            letterSpacing: -0.3,
+                            color: isDark ? Colors.white : const Color(0xFF1C1C1E),
+                          ),
                         ),
                       ),
                     ],
@@ -287,11 +283,11 @@ class WalletListTile extends StatelessWidget {
             ),
             const SizedBox(width: 4),
 
-            // 3. Actions / Reorder Handle
-            if (isReordering)
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
+            // 3. Actions / Reorder Handle (3-dots menu replaced by drag handle & actions moved to AccountDetailScreen)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (isReordering) ...[
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                     decoration: BoxDecoration(
@@ -319,80 +315,49 @@ class WalletListTile extends StatelessWidget {
                       onPressed: onMoveToTop,
                     ),
                   ],
+                ] else ...[
+                  if (account.archived)
+                    IconButton(
+                      icon: const Icon(CupertinoIcons.arrow_counterclockwise, size: 18),
+                      tooltip: l10n.unarchiveWallet,
+                      visualDensity: VisualDensity.compact,
+                      splashRadius: 18,
+                      color: AppleTokens.systemBlue,
+                      onPressed: onToggleArchive,
+                    )
+                  else if (!isDefault && onSetDefault != null)
+                    IconButton(
+                      icon: const Icon(CupertinoIcons.star, size: 18),
+                      tooltip: isVi ? 'Đặt làm ví mặc định' : 'Set as default',
+                      visualDensity: VisualDensity.compact,
+                      splashRadius: 18,
+                      color: const Color(0xFFFFB800).withValues(alpha: isDark ? 0.65 : 0.85),
+                      onPressed: onSetDefault,
+                    ),
+                ],
+                if (!account.archived) ...[
                   const SizedBox(width: 4),
                   ReorderableDragStartListener(
                     index: reorderIndex,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.04),
-                        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                      ),
-                      child: Icon(
-                        CupertinoIcons.bars,
-                        size: 20,
-                        color: isDark ? Colors.white70 : AppleTokens.systemGray,
+                    child: Tooltip(
+                      message: isVi ? 'Kéo để sắp xếp ví' : 'Drag to reorder',
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.04),
+                          borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+                        ),
+                        child: Icon(
+                          CupertinoIcons.bars,
+                          size: 20,
+                          color: isDark ? Colors.white70 : AppleTokens.systemGray,
+                        ),
                       ),
                     ),
                   ),
                 ],
-              )
-            else ...[
-              if (!isDefault && onSetDefault != null)
-                IconButton(
-                  icon: const Icon(CupertinoIcons.star, size: 18),
-                  tooltip: isVi ? 'Đặt làm ví mặc định' : 'Set as default',
-                  visualDensity: VisualDensity.compact,
-                  splashRadius: 18,
-                  color: const Color(0xFFFFB800).withValues(alpha: isDark ? 0.65 : 0.85),
-                  onPressed: onSetDefault,
-                ),
-              ApplePopupMenuButton<String>(
-                tooltip: l10n.moreOptions,
-                onSelected: (value) {
-                  if (value == 'edit') onEdit();
-                  if (value == 'transfer') onTransfer?.call();
-                  if (value == 'archive') onToggleArchive();
-                  if (value == 'set_default') onSetDefault?.call();
-                  if (value == 'delete') onDelete?.call();
-                },
-                itemBuilder: (ctx) => [
-                  if (!isDefault && onSetDefault != null)
-                    ApplePopupMenuItem(
-                      value: 'set_default',
-                      icon: CupertinoIcons.star_fill,
-                      title: isVi ? 'Đặt làm ví mặc định' : 'Set as default',
-                    ),
-                  if (onTransfer != null)
-                    ApplePopupMenuItem(
-                      value: 'transfer',
-                      icon: CupertinoIcons.arrow_right_arrow_left,
-                      title: isVi ? 'Chuyển tiền từ ví này' : 'Transfer from wallet',
-                    ),
-                  ApplePopupMenuItem(
-                    value: 'edit',
-                    icon: CupertinoIcons.pencil,
-                    title: l10n.edit,
-                  ),
-                  ApplePopupMenuItem(
-                    value: 'archive',
-                    icon: account.archived
-                        ? CupertinoIcons.arrow_counterclockwise
-                        : CupertinoIcons.archivebox,
-                    title: account.archived
-                        ? l10n.unarchiveWallet
-                        : l10n.archiveWallet,
-                  ),
-                  if (onDelete != null)
-                    ApplePopupMenuItem(
-                      value: 'delete',
-                      icon: CupertinoIcons.trash,
-                      title: l10n.delete,
-                      isDestructive: true,
-                    ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ],
         ),
       ),
