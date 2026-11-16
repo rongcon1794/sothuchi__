@@ -576,6 +576,28 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     buildDefaultDragHandles: false,
+                    proxyDecorator: (child, index, animation) {
+                      return AnimatedBuilder(
+                        animation: animation,
+                        builder: (context, child) {
+                          final double animValue =
+                              Curves.easeInOut.transform(animation.value);
+                          final double scale = 1.0 + (0.02 * animValue);
+                          return Transform.scale(
+                            scale: scale,
+                            child: Material(
+                              color: Colors.transparent,
+                              elevation: 0,
+                              shadowColor: Colors.transparent,
+                              borderRadius:
+                                  BorderRadius.circular(AppleTokens.radiusCard),
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: child,
+                      );
+                    },
                     itemCount: accountsToDisplay.length,
                     onReorderItem: (oldIndex, newIndex) =>
                         _handleReorder(accountsToDisplay, oldIndex, newIndex),
