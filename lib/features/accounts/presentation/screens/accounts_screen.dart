@@ -495,6 +495,51 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                             ),
                           ),
                         )
+                      else if (activeAccounts.length >= 2)
+                        ApplePressable(
+                          onTap: () {
+                            unawaited(HapticFeedback.selectionClick());
+                            setState(() {
+                              _isReorderMode = true;
+                              _selectedTypeFilter = null;
+                            });
+                          },
+                          borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3.5),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.08)
+                                  : Colors.black.withValues(alpha: 0.05),
+                              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                              border: Border.all(
+                                color: isDark
+                                    ? Colors.white.withValues(alpha: 0.12)
+                                    : Colors.black.withValues(alpha: 0.08),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  CupertinoIcons.arrow_up_arrow_down,
+                                  size: 12,
+                                  color: scheme.onSurfaceVariant,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  isVi ? 'Sắp xếp' : 'Sort',
+                                  style: TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: scheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
                       else
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),

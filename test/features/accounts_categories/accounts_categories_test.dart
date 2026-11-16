@@ -667,6 +667,9 @@ void main() {
       );
       addTearDown(container.dispose);
 
+      final w1 = (w1Res as Success<Account>).value;
+      await container.read(settingsControllerProvider.notifier).setDefaultWalletId(w1.id);
+
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
@@ -681,10 +684,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Check Smart Default Spending Wallet pill exists
+      // Check Smart Default Spending Wallet badge exists on wallet card
       expect(
         find.byWidgetPredicate(
-          (w) => w is Text && (w.data?.contains('mặc định') ?? false),
+          (w) => w is Text && (w.data?.toLowerCase().contains('mặc định') ?? false),
         ),
         findsWidgets,
       );
@@ -700,7 +703,6 @@ void main() {
       expect(find.byType(ReorderableListView), findsOneWidget);
 
       // Reorder using action controller
-      final w1 = (w1Res as Success<Account>).value;
       final w2 = (w2Res as Success<Account>).value;
       await container.read(accountsActionControllerProvider.notifier).reorderWallets([w2.id, w1.id]);
       await tester.pumpAndSettle();

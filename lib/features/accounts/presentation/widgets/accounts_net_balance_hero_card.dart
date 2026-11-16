@@ -127,78 +127,25 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              if (activeAccounts.isNotEmpty && onOpenDefaultWalletPicker != null)
-                ApplePressable(
-                  onTap: onOpenDefaultWalletPicker,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7.5, vertical: 2.5),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : Colors.black.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFB800).withValues(alpha: isDark ? 0.20 : 0.12),
-                      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                      border: Border.all(
-                        color: const Color(0xFFFFB800).withValues(alpha: isDark ? 0.35 : 0.25),
-                        width: 0.8,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          CupertinoIcons.star_fill,
-                          size: 11,
-                          color: Color(0xFFFF9500),
-                        ),
-                        const SizedBox(width: 4),
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 135),
-                          child: Text(
-                            isVi
-                                ? (defaultWallet != null
-                                    ? 'Ví mặc định: ${defaultWallet!.name}'
-                                    : 'Chọn ví mặc định chi tiêu')
-                                : (defaultWallet != null
-                                    ? 'Default: ${defaultWallet!.name}'
-                                    : 'Set default wallet'),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w700,
-                              color: isDark ? const Color(0xFFFFCC00) : const Color(0xFFB45309),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 3),
-                        Icon(
-                          CupertinoIcons.chevron_down,
-                          size: 9.5,
-                          color: isDark ? const Color(0xFFFFCC00) : const Color(0xFFB45309),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              else
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7.5, vertical: 2.5),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.08)
-                        : Colors.black.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                  ),
-                  child: Text(
-                    isVi
-                        ? '${activeAccounts.length} ví'
-                        : '${activeAccounts.length} wallets',
-                    style: TextStyle(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w600,
-                      color: isDark ? Colors.white70 : const Color(0xFF1B5E20),
-                    ),
+                ),
+                child: Text(
+                  isVi
+                      ? '${activeAccounts.length} ví'
+                      : '${activeAccounts.length} wallets',
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white70 : const Color(0xFF1B5E20),
                   ),
                 ),
+              ),
             ],
           ),
           const SizedBox(height: 6),
@@ -220,106 +167,47 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
             ),
           ),
 
-          // 4. Consolidated Action Bar: Transfer between wallets & Sort
+          // 3. Consolidated Action Bar: Transfer between wallets
           if (activeAccounts.length >= 2) ...[
             const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: ApplePressable(
-                    onTap: onOpenTransferSheet,
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 7.5, horizontal: 10),
-                      decoration: BoxDecoration(
-                        color: AppleTokens.systemBlue.withValues(alpha: isDark ? 0.20 : 0.10),
-                        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                        border: Border.all(
-                          color: AppleTokens.systemBlue.withValues(alpha: isDark ? 0.35 : 0.25),
-                          width: 0.8,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.swap_horiz_rounded,
-                            size: 16,
-                            color: AppleTokens.systemBlue,
-                          ),
-                          const SizedBox(width: 5),
-                          Flexible(
-                            child: Text(
-                              l10n.transferBetweenWallets,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: AppleTokens.systemBlue,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+            ApplePressable(
+              onTap: onOpenTransferSheet,
+              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                decoration: BoxDecoration(
+                  color: AppleTokens.systemBlue.withValues(alpha: isDark ? 0.20 : 0.10),
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                  border: Border.all(
+                    color: AppleTokens.systemBlue.withValues(alpha: isDark ? 0.35 : 0.25),
+                    width: 0.8,
                   ),
                 ),
-                if (onToggleReorderMode != null || onOpenSortSheet != null) ...[
-                  const SizedBox(width: 8),
-                  ApplePressable(
-                    onTap: onToggleReorderMode ?? onOpenSortSheet,
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 7.5, horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: isReorderMode
-                            ? AppleTokens.systemBlue.withValues(alpha: isDark ? 0.25 : 0.15)
-                            : (isDark
-                                ? Colors.white.withValues(alpha: 0.08)
-                                : Colors.black.withValues(alpha: 0.05)),
-                        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                        border: Border.all(
-                          color: isReorderMode
-                              ? AppleTokens.systemBlue.withValues(alpha: 0.45)
-                              : (isDark
-                                  ? Colors.white.withValues(alpha: 0.14)
-                                  : Colors.black.withValues(alpha: 0.08)),
-                          width: 0.8,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.swap_horiz_rounded,
+                      size: 16,
+                      color: AppleTokens.systemBlue,
+                    ),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        l10n.transferBetweenWallets,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          color: AppleTokens.systemBlue,
                         ),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            isReorderMode
-                                ? CupertinoIcons.checkmark_alt
-                                : CupertinoIcons.arrow_up_arrow_down,
-                            size: 13,
-                            color: isReorderMode
-                                ? AppleTokens.systemBlue
-                                : (isDark ? Colors.white70 : const Color(0xFF3A3A3C)),
-                          ),
-                          const SizedBox(width: 4.5),
-                          Text(
-                            isReorderMode
-                                ? (isVi ? 'Xong' : 'Done')
-                                : (isVi ? 'Sắp xếp' : 'Sort'),
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: isReorderMode
-                                  ? AppleTokens.systemBlue
-                                  : (isDark ? Colors.white70 : const Color(0xFF3A3A3C)),
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
-                  ),
-                ],
-              ],
+                  ],
+                ),
+              ),
             ),
           ],
 
