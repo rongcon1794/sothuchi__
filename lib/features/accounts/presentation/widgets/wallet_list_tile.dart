@@ -97,41 +97,74 @@ class WalletListTile extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // 1. Squircle Icon Badge with gradient & soft elevation
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    walletColor,
-                    Color.lerp(
-                      walletColor,
-                      Colors.black,
-                      isDark ? 0.30 : 0.18,
-                    )!,
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: isDark ? 0.25 : 0.45),
-                  width: 1.0,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: walletColor.withValues(alpha: isDark ? 0.35 : 0.20),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+            // 1. Squircle Icon Badge with gradient & soft elevation (with corner star for default wallet)
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        walletColor,
+                        Color.lerp(
+                          walletColor,
+                          Colors.black,
+                          isDark ? 0.30 : 0.18,
+                        )!,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: isDark ? 0.25 : 0.45),
+                      width: 1.0,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: walletColor.withValues(alpha: isDark ? 0.35 : 0.20),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: Icon(
-                AppIconCatalog.resolve(account.icon),
-                color: Colors.white,
-                size: 20,
-              ),
+                  child: Icon(
+                    AppIconCatalog.resolve(account.icon),
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                if (isDefault)
+                  Positioned(
+                    top: -2,
+                    right: -2,
+                    child: Container(
+                      padding: const EdgeInsets.all(2.5),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFB800),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                          width: 1.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.18),
+                            blurRadius: 3,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        CupertinoIcons.star_fill,
+                        size: 9,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(width: 12),
 
@@ -141,7 +174,7 @@ class WalletListTile extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Line 1: Name + Badges
+                  // Line 1: Name + Badges / Quick Star Action
                   Row(
                     children: [
                       Flexible(
@@ -191,6 +224,18 @@ class WalletListTile extends StatelessWidget {
                               ),
                             ],
                           ),
+                        ),
+                      ] else if (!account.archived && onSetDefault != null) ...[
+                        const SizedBox(width: 4),
+                        IconButton(
+                          icon: const Icon(CupertinoIcons.star, size: 15),
+                          tooltip: isVi ? 'Đặt làm ví mặc định' : 'Set as default',
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 26, minHeight: 22),
+                          splashRadius: 14,
+                          color: const Color(0xFFFFB800).withValues(alpha: isDark ? 0.65 : 0.85),
+                          onPressed: onSetDefault,
                         ),
                       ],
                       if (account.archived) ...[
@@ -324,15 +369,6 @@ class WalletListTile extends StatelessWidget {
                       splashRadius: 18,
                       color: AppleTokens.systemBlue,
                       onPressed: onToggleArchive,
-                    )
-                  else if (!isDefault && onSetDefault != null)
-                    IconButton(
-                      icon: const Icon(CupertinoIcons.star, size: 18),
-                      tooltip: isVi ? 'Đặt làm ví mặc định' : 'Set as default',
-                      visualDensity: VisualDensity.compact,
-                      splashRadius: 18,
-                      color: const Color(0xFFFFB800).withValues(alpha: isDark ? 0.65 : 0.85),
-                      onPressed: onSetDefault,
                     ),
                 ],
                 if (!account.archived) ...[
