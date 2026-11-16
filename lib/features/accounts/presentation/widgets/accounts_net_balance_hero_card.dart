@@ -23,6 +23,7 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
     required this.onOpenTransferSheet,
     this.defaultWallet,
     this.onOpenDefaultWalletPicker,
+    this.onOpenSortSheet,
   });
 
   final Money totalBalance;
@@ -35,6 +36,7 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
   final VoidCallback onOpenTransferSheet;
   final Account? defaultWallet;
   final VoidCallback? onOpenDefaultWalletPicker;
+  final VoidCallback? onOpenSortSheet;
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +73,7 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
         totalCashMinor + totalBankMinor + totalEwalletMinor + totalCardMinor;
 
     return AppleGlassCard(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       borderRadius: BorderRadius.circular(AppleTokens.radiusHero),
       borderColor: isDark
           ? AppleTokens.jadePrimary.withValues(alpha: 0.30)
@@ -80,17 +82,17 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 1. Header: Shield Badge + Eyebrow + Count + Eye Toggle
+          // 1. Header: Shield Badge + Eyebrow + Eye Toggle + Count
           Row(
             children: [
               const AppleSquircleBadge(
                 icon: CupertinoIcons.shield_fill,
                 backgroundColor: AppleTokens.jadePrimary,
-                size: 28,
-                iconSize: 14,
-                radius: 8,
+                size: 26,
+                iconSize: 13,
+                radius: 7,
               ),
-              const SizedBox(width: 9),
+              const SizedBox(width: 8),
               Flexible(
                 child: Text(
                   l10n.totalBalance.toUpperCase(),
@@ -104,9 +106,25 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 4),
+              IconButton(
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                tooltip: hideBalance ? l10n.showBalance : l10n.hideBalance,
+                onPressed: () {
+                  unawaited(HapticFeedback.selectionClick());
+                  onToggleHideBalance();
+                },
+                icon: Icon(
+                  hideBalance ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
+                  size: 18,
+                  color: isDark ? Colors.white70 : Colors.black54,
+                ),
+              ),
+              const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                padding: const EdgeInsets.symmetric(horizontal: 7.5, vertical: 2.5),
                 decoration: BoxDecoration(
                   color: isDark
                       ? Colors.white.withValues(alpha: 0.08)
@@ -124,28 +142,9 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const Spacer(),
-              IconButton(
-                visualDensity: VisualDensity.compact,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                alignment: Alignment.centerRight,
-                tooltip: hideBalance ? l10n.showBalance : l10n.hideBalance,
-                onPressed: () {
-                  unawaited(HapticFeedback.selectionClick());
-                  onToggleHideBalance();
-                },
-                icon: Icon(
-                  hideBalance
-                      ? CupertinoIcons.eye_slash
-                      : CupertinoIcons.eye,
-                  size: 20,
-                  color: isDark ? Colors.white70 : Colors.black54,
-                ),
-              ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
 
           // 2. Primary Big Balance Figure
           FittedBox(
@@ -155,7 +154,7 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
               totalBalance.format(locale: locale, masked: hideBalance),
               semanticsLabel: hideBalance ? l10n.balanceHidden : null,
               style: theme.textTheme.headlineMedium?.copyWith(
-                fontSize: 32,
+                fontSize: 30,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.8,
                 fontFeatures: AppTheme.tabularFigures,
@@ -163,15 +162,15 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
 
-          // Smart Default Spending Wallet Switcher Pill
+          // 3. Consolidated Command Center Row: Default Wallet Switcher Pill
           if (activeAccounts.isNotEmpty) ...[
             ApplePressable(
               onTap: onOpenDefaultWalletPicker,
               borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4.5),
                 decoration: BoxDecoration(
                   color: const Color(0xFFFFB800).withValues(alpha: isDark ? 0.18 : 0.10),
                   borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
@@ -185,10 +184,10 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
                   children: [
                     const Icon(
                       CupertinoIcons.star_fill,
-                      size: 13,
+                      size: 11.5,
                       color: Color(0xFFFF9500),
                     ),
-                    const SizedBox(width: 5),
+                    const SizedBox(width: 4.5),
                     Flexible(
                       child: Text(
                         isVi
@@ -201,7 +200,7 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 11.5,
                           fontWeight: FontWeight.w700,
                           color: isDark ? const Color(0xFFFFCC00) : const Color(0xFFB45309),
                         ),
@@ -210,23 +209,113 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
                     const SizedBox(width: 4),
                     Icon(
                       CupertinoIcons.chevron_down,
-                      size: 11,
+                      size: 10,
                       color: isDark ? const Color(0xFFFFCC00) : const Color(0xFFB45309),
                     ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 12),
-          ] else
-            const SizedBox(height: 14),
+          ],
 
-          // 3. Segmented Asset Distribution Telemetry
+          // 4. Consolidated Action Bar: Transfer between wallets & Sort
+          if (activeAccounts.length >= 2) ...[
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: ApplePressable(
+                    onTap: onOpenTransferSheet,
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 7.5, horizontal: 10),
+                      decoration: BoxDecoration(
+                        color: AppleTokens.systemBlue.withValues(alpha: isDark ? 0.20 : 0.10),
+                        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                        border: Border.all(
+                          color: AppleTokens.systemBlue.withValues(alpha: isDark ? 0.35 : 0.25),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.swap_horiz_rounded,
+                            size: 16,
+                            color: AppleTokens.systemBlue,
+                          ),
+                          const SizedBox(width: 5),
+                          Flexible(
+                            child: Text(
+                              l10n.transferBetweenWallets,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: AppleTokens.systemBlue,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                if (onOpenSortSheet != null) ...[
+                  const SizedBox(width: 8),
+                  ApplePressable(
+                    onTap: onOpenSortSheet,
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 7.5, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : Colors.black.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                        border: Border.all(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.14)
+                              : Colors.black.withValues(alpha: 0.08),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            CupertinoIcons.arrow_up_arrow_down,
+                            size: 13,
+                            color: isDark ? Colors.white70 : const Color(0xFF3A3A3C),
+                          ),
+                          const SizedBox(width: 4.5),
+                          Text(
+                            isVi ? 'Sắp xếp' : 'Sort',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: isDark ? Colors.white70 : const Color(0xFF3A3A3C),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
+
+          // 5. Segmented Asset Distribution Telemetry
           if (positiveTotalMinor > 0 && !hideBalance) ...[
+            const SizedBox(height: 12),
             ClipRRect(
               borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
               child: SizedBox(
-                height: 6,
+                height: 5,
                 child: Row(
                   children: [
                     if (totalCashMinor > 0)
@@ -253,10 +342,10 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             Wrap(
               spacing: 12,
-              runSpacing: 6,
+              runSpacing: 4,
               children: [
                 if (totalCashMinor > 0)
                   _buildLegendItem(
@@ -287,52 +376,6 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
                     isDark: isDark,
                   ),
               ],
-            ),
-          ],
-
-          // 4. Quick Action Button: Transfer between wallets
-          if (activeAccounts.length >= 2) ...[
-            const SizedBox(height: 14),
-            ApplePressable(
-              onTap: onOpenTransferSheet,
-              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 12),
-                decoration: BoxDecoration(
-                  color: AppleTokens.systemBlue.withValues(alpha: isDark ? 0.22 : 0.10),
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                  border: Border.all(
-                    color: AppleTokens.systemBlue.withValues(alpha: 0.32),
-                    width: 0.9,
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.swap_horiz_rounded,
-                      size: 16,
-                      color: AppleTokens.systemBlue,
-                    ),
-                    const SizedBox(width: 5),
-                    Flexible(
-                      child: Text(
-                        l10n.transferBetweenWallets,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: AppleTokens.systemBlue,
-                          letterSpacing: -0.1,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ),
           ],
         ],

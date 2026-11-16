@@ -347,90 +347,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                   ],
                 ),
               ),
-            )
-          else ...[
-            if (activeAccounts.length >= 2) ...[
-              ApplePressable(
-                onTap: () => _openSortSheet(
-                  context,
-                  activeAccounts,
-                  defaultWalletId,
-                  locale,
-                ),
-                borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                child: Container(
-                  margin: const EdgeInsets.only(right: 8),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.08)
-                        : Colors.black.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                    border: Border.all(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.12)
-                          : Colors.black.withValues(alpha: 0.08),
-                      width: 0.8,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        CupertinoIcons.arrow_up_arrow_down,
-                        size: 14,
-                        color: scheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        isVi ? 'Sắp xếp' : 'Sort',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: scheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              ApplePressable(
-                onTap: () => _openTransferSheet(context),
-                borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                child: Container(
-                  margin: const EdgeInsets.only(right: 12),
-                  padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: AppleTokens.systemBlue.withValues(alpha: isDark ? 0.20 : 0.10),
-                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                    border: Border.all(
-                      color: AppleTokens.systemBlue.withValues(alpha: 0.32),
-                      width: 0.8,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.swap_horiz_rounded,
-                        size: 16,
-                        color: AppleTokens.systemBlue,
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        l10n.transferBetweenWallets,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: AppleTokens.systemBlue,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ],
+            ),
         ],
       ),
       body: SafeArea(
@@ -502,6 +419,14 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                       .toggleHideBalance();
                 },
                 onOpenTransferSheet: () => _openTransferSheet(context),
+                onOpenSortSheet: activeAccounts.length >= 2
+                    ? () => _openSortSheet(
+                          context,
+                          activeAccounts,
+                          defaultWalletId,
+                          locale,
+                        )
+                    : null,
               );
 
               // 2. Filter Pills row
@@ -516,7 +441,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
               // 3. Wallets List items
               final walletListItems = <Widget>[
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -525,15 +450,15 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                           AppleSquircleBadge(
                             icon: CupertinoIcons.creditcard_fill,
                             backgroundColor: scheme.primary,
-                            size: 26,
-                            iconSize: 13,
-                            radius: 7,
+                            size: 24,
+                            iconSize: 12,
+                            radius: 6,
                           ),
                           const SizedBox(width: 8),
                           Text(
                             l10n.activeWallets.toUpperCase(),
                             style: theme.textTheme.titleMedium?.copyWith(
-                              fontSize: 13,
+                              fontSize: 12.5,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.4,
                               color: isDark ? Colors.white70 : const Color(0xFF55555B),
@@ -541,76 +466,31 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                           ),
                         ],
                       ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (activeAccounts.length >= 2 && !_isReorderMode) ...[
-                            ApplePressable(
-                              onTap: () => _openSortSheet(
-                                context,
-                                activeAccounts,
-                                defaultWalletId,
-                                locale,
-                              ),
-                              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: isDark
-                                      ? Colors.white.withValues(alpha: 0.08)
-                                      : Colors.black.withValues(alpha: 0.05),
-                                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      CupertinoIcons.arrow_up_arrow_down,
-                                      size: 11,
-                                      color: scheme.onSurfaceVariant,
-                                    ),
-                                    const SizedBox(width: 3),
-                                    Text(
-                                      isVi ? 'Sắp xếp' : 'Sort',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                        color: scheme.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                          ],
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.5, vertical: 3),
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.08)
-                                  : Colors.black.withValues(alpha: 0.05),
-                              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                            ),
-                            child: Text(
-                              isVi
-                                  ? '${filteredAccounts.length} ví'
-                                  : '${filteredAccounts.length} wallets',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                color: scheme.onSurfaceVariant,
-                                height: 1.2,
-                              ),
-                            ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.5, vertical: 2.5),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.08)
+                              : Colors.black.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                        ),
+                        child: Text(
+                          isVi
+                              ? '${filteredAccounts.length} ví'
+                              : '${filteredAccounts.length} wallets',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: scheme.onSurfaceVariant,
+                            height: 1.2,
                           ),
-                        ],
+                        ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 if (filteredAccounts.isEmpty)
                   AppleGlassCard(
                     padding: const EdgeInsets.all(24),
