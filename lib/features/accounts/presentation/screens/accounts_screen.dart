@@ -21,6 +21,7 @@ import 'package:so_thu_chi/features/accounts/presentation/widgets/transfer_betwe
 import 'package:so_thu_chi/features/accounts/presentation/widgets/wallet_form_sheet.dart';
 import 'package:so_thu_chi/features/accounts/presentation/widgets/wallet_list_tile.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
+import 'package:so_thu_chi/features/settings/presentation/widgets/default_wallet_picker_sheet.dart';
 import 'package:so_thu_chi/l10n/app_localizations.dart';
 
 /// Redesigned Apple HIG & Lucian Accounts/Wallets Management Screen.
@@ -184,6 +185,38 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
     }
   }
 
+  Future<void> _openDefaultWalletPicker(
+    BuildContext context,
+    List<Account> wallets,
+    String? currentDefaultId,
+    String locale,
+  ) async {
+    if (wallets.isEmpty) {
+      final isVi = locale.toLowerCase().startsWith('vi');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isVi ? 'Chưa có ví tiền nào để chọn' : 'No wallets available to select',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    await DefaultWalletPickerSheet.show(
+      context: context,
+      wallets: wallets,
+      currentDefaultId: currentDefaultId,
+      locale: locale,
+      onSelected: (walletId) async {
+        await ref
+            .read(settingsControllerProvider.notifier)
+            .setDefaultWalletId(walletId);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -318,7 +351,111 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                 onOpenTransferSheet: () => _openTransferSheet(context),
               );
 
-              // 2. Filter Pills row
+              // 2. Default Spending Wallet Card
+              final defaultWallet = activeAccounts
+                  .where((w) => w.id == defaultWalletId)
+                  .firstOrNull;
+
+              final defaultWalletCard = ApplePressable(
+                onTap: () => _openDefaultWalletPicker(
+                  context,
+                  activeAccounts,
+                  defaultWalletId,
+                  locale,
+                ),
+                borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                child: AppleGlassCard(
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  child: Row(
+                    children: [
+                      const AppleSquircleBadge(
+                        icon: Icons.star_rounded,
+                        backgroundColor: Color(0xFFFFB800),
+                        size: 38,
+                        iconSize: 22,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              isVi ? 'Ví mặc định chi tiêu' : 'Default Spending Wallet',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14.5,
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              defaultWallet != null
+                                  ? (isVi
+                                      ? 'Tự động chọn "${defaultWallet.name}" khi ghi thu chi'
+                                      : 'Auto-selects "${defaultWallet.name}" for new transactions')
+                                  : (isVi
+                                      ? 'Chưa chọn ví mặc định (Chạm để cài đặt)'
+                                      : 'No default wallet set (Tap to configure)'),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: scheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      if (defaultWallet != null) ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFB800).withValues(alpha: isDark ? 0.22 : 0.12),
+                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                            border: Border.all(
+                              color: const Color(0xFFFFB800).withValues(alpha: 0.35),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.star_rounded,
+                                size: 13,
+                                color: Color(0xFFFFB800),
+                              ),
+                              const SizedBox(width: 4),
+                              ConstrainedBox(
+                                constraints: const BoxConstraints(maxWidth: 100),
+                                child: Text(
+                                  defaultWallet.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFFFFB800),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                      ],
+                      const Icon(
+                        Icons.chevron_right_rounded,
+                        size: 20,
+                        color: AppleTokens.systemGray,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+
+              // 3. Filter Pills row
               final filterPills = AccountsTypeFilterPills(
                 activeAccounts: activeAccounts,
                 selectedTypeFilter: _selectedTypeFilter,
@@ -327,7 +464,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                 onSelectFilter: (type) => setState(() => _selectedTypeFilter = type),
               );
 
-              // 3. Wallets List items
+              // 4. Wallets List items
               final walletListItems = <Widget>[
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
@@ -459,6 +596,8 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                               child: Column(
                                 children: [
                                   heroCard,
+                                  const SizedBox(height: 14),
+                                  defaultWalletCard,
                                 ],
                               ),
                             ),
@@ -478,6 +617,8 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                         )
                       else ...[
                         heroCard,
+                        const SizedBox(height: 14),
+                        defaultWalletCard,
                         const SizedBox(height: 14),
                         filterPills,
                         const SizedBox(height: 14),

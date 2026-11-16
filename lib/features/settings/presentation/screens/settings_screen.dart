@@ -11,14 +11,12 @@ import 'package:so_thu_chi/core/router/app_routes.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
-import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
 import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_controller.dart';
 import 'package:so_thu_chi/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:so_thu_chi/features/categories/presentation/controllers/categories_controller.dart';
 import 'package:so_thu_chi/features/debts/presentation/controllers/debts_controller.dart';
 import 'package:so_thu_chi/features/settings/domain/entities/app_settings.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
-import 'package:so_thu_chi/features/settings/presentation/widgets/default_wallet_picker_sheet.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -321,38 +319,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Future<void> _showDefaultWalletPicker(
-    BuildContext context,
-    List<Account> wallets,
-    String? currentDefaultId,
-    String locale,
-  ) async {
-    if (wallets.isEmpty) {
-      final isVi = locale.toLowerCase().startsWith('vi');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            isVi ? 'Chưa có ví tiền nào để chọn' : 'No wallets available to select',
-          ),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
-
-    await DefaultWalletPickerSheet.show(
-      context: context,
-      wallets: wallets,
-      currentDefaultId: currentDefaultId,
-      locale: locale,
-      onSelected: (walletId) async {
-        await ref
-            .read(settingsControllerProvider.notifier)
-            .setDefaultWalletId(walletId);
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -489,6 +455,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             backgroundColor: AppleTokens.systemGreen,
           ),
           title: Text(l10n.walletsTitle, style: const TextStyle(fontWeight: FontWeight.w600)),
+          subtitle: Text(
+            activeWallets
+                    .where((w) => w.id == settings.defaultWalletId)
+                    .firstOrNull
+                    ?.name !=
+                null
+                ? (isVi
+                    ? 'Ví mặc định: ${activeWallets.firstWhere((w) => w.id == settings.defaultWalletId).name}'
+                    : 'Default: ${activeWallets.firstWhere((w) => w.id == settings.defaultWalletId).name}')
+                : (isVi
+                    ? (activeWallets.isNotEmpty ? 'Chưa đặt ví mặc định' : 'Chưa có ví')
+                    : (activeWallets.isNotEmpty ? 'No default wallet' : 'No wallets')),
+            style: TextStyle(
+              fontSize: 12.5,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -512,37 +495,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ],
           ),
           onTap: () => context.push(AppRoutes.accounts),
-        ),
-        ListTile(
-          dense: isLandscape,
-          leading: const AppleSquircleBadge(
-            icon: Icons.star_rounded,
-            backgroundColor: Color(0xFFFFB800),
-          ),
-          title: Text(
-            isVi ? 'Ví mặc định chi tiêu' : 'Default Spending Wallet',
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-          subtitle: Text(
-            activeWallets
-                    .where((w) => w.id == settings.defaultWalletId)
-                    .firstOrNull
-                    ?.name ??
-                (activeWallets.isNotEmpty
-                    ? (isVi ? 'Chưa thiết lập' : 'Not set')
-                    : (isVi ? 'Chưa có ví' : 'No wallets')),
-            style: TextStyle(
-              fontSize: 12.5,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          trailing: const Icon(Icons.chevron_right_rounded, size: 20),
-          onTap: () => _showDefaultWalletPicker(
-            context,
-            activeWallets,
-            settings.defaultWalletId,
-            settings.localeCode,
-          ),
         ),
         ListTile(
           dense: isLandscape,
