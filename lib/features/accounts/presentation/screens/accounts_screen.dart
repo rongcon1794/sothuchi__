@@ -323,6 +323,13 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                   ],
                 ),
               ),
+            )
+          else
+            IconButton(
+              icon: const Icon(CupertinoIcons.plus_circle_fill, size: 24),
+              tooltip: l10n.addWallet,
+              color: AppleTokens.systemBlue,
+              onPressed: () => _openWalletForm(context),
             ),
         ],
       ),
@@ -440,8 +447,8 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                             backgroundColor: _isReorderMode
                                 ? AppleTokens.systemBlue
                                 : scheme.primary,
-                            size: 24,
-                            iconSize: 12,
+                            size: 22,
+                            iconSize: 11,
                             radius: 6,
                           ),
                           const SizedBox(width: 8),
@@ -450,111 +457,47 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                                 ? (isVi ? 'KÉO THẢ SẮP XẾP VÍ' : 'DRAG TO REORDER')
                                 : l10n.activeWallets.toUpperCase(),
                             style: theme.textTheme.titleMedium?.copyWith(
-                              fontSize: 12.5,
+                              fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              letterSpacing: 0.4,
+                              letterSpacing: 0.5,
                               color: isDark ? Colors.white70 : const Color(0xFF55555B),
                             ),
                           ),
                         ],
                       ),
-                      if (activeAccounts.length >= 2) ...[
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ApplePressable(
-                              onTap: () {
-                                unawaited(HapticFeedback.selectionClick());
-                                setState(() {
-                                  _isReorderMode = !_isReorderMode;
-                                  if (_isReorderMode) {
-                                    _selectedTypeFilter = null;
-                                  }
-                                });
-                              },
+                      if (_isReorderMode)
+                        ApplePressable(
+                          onTap: () {
+                            unawaited(HapticFeedback.selectionClick());
+                            setState(() => _isReorderMode = false);
+                          },
+                          borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3.5),
+                            decoration: BoxDecoration(
+                              color: AppleTokens.systemBlue,
                               borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 9,
-                                  vertical: 3.5,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: _isReorderMode
-                                      ? AppleTokens.systemBlue
-                                      : (isDark
-                                          ? Colors.white.withValues(alpha: 0.08)
-                                          : Colors.black.withValues(alpha: 0.05)),
-                                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                                  border: Border.all(
-                                    color: _isReorderMode
-                                        ? AppleTokens.systemBlue
-                                        : (isDark
-                                            ? Colors.white.withValues(alpha: 0.12)
-                                            : Colors.black.withValues(alpha: 0.08)),
-                                    width: 0.8,
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      _isReorderMode
-                                          ? CupertinoIcons.checkmark_alt
-                                          : CupertinoIcons.arrow_up_arrow_down,
-                                      size: 12,
-                                      color: _isReorderMode
-                                          ? Colors.white
-                                          : scheme.onSurfaceVariant,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      _isReorderMode
-                                          ? (isVi ? 'Xong' : 'Done')
-                                          : (isVi ? 'Sắp xếp' : 'Sort'),
-                                      style: TextStyle(
-                                        fontSize: 11.5,
-                                        fontWeight: FontWeight.w700,
-                                        color: _isReorderMode
-                                            ? Colors.white
-                                            : scheme.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
                             ),
-                            if (!_isReorderMode) ...[
-                              const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 3,
-                                ),
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: isDark
-                                      ? Colors.white.withValues(alpha: 0.08)
-                                      : Colors.black.withValues(alpha: 0.05),
-                                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                                ),
-                                child: Text(
-                                  isVi
-                                      ? '${filteredAccounts.length} ví'
-                                      : '${filteredAccounts.length} wallets',
-                                  style: TextStyle(
-                                    fontSize: 11,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(CupertinoIcons.checkmark_alt, size: 12, color: Colors.white),
+                                const SizedBox(width: 4),
+                                Text(
+                                  isVi ? 'Xong' : 'Done',
+                                  style: const TextStyle(
+                                    fontSize: 11.5,
                                     fontWeight: FontWeight.w700,
-                                    color: scheme.onSurfaceVariant,
-                                    height: 1.2,
+                                    color: Colors.white,
                                   ),
                                 ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ] else ...[
+                              ],
+                            ),
+                          ),
+                        )
+                      else
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.5, vertical: 2.5),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             color: isDark
@@ -567,14 +510,13 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                                 ? '${filteredAccounts.length} ví'
                                 : '${filteredAccounts.length} wallets',
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 10.5,
                               fontWeight: FontWeight.w700,
                               color: scheme.onSurfaceVariant,
                               height: 1.2,
                             ),
                           ),
                         ),
-                      ],
                     ],
                   ),
                 ),

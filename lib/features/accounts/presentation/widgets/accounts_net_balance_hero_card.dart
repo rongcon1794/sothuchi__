@@ -127,25 +127,78 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7.5, vertical: 2.5),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.08)
-                      : Colors.black.withValues(alpha: 0.05),
+              if (activeAccounts.isNotEmpty && onOpenDefaultWalletPicker != null)
+                ApplePressable(
+                  onTap: onOpenDefaultWalletPicker,
                   borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                ),
-                child: Text(
-                  isVi
-                      ? '${activeAccounts.length} ví'
-                      : '${activeAccounts.length} wallets',
-                  style: TextStyle(
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? Colors.white70 : const Color(0xFF1B5E20),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFB800).withValues(alpha: isDark ? 0.20 : 0.12),
+                      borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                      border: Border.all(
+                        color: const Color(0xFFFFB800).withValues(alpha: isDark ? 0.35 : 0.25),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          CupertinoIcons.star_fill,
+                          size: 11,
+                          color: Color(0xFFFF9500),
+                        ),
+                        const SizedBox(width: 4),
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 135),
+                          child: Text(
+                            isVi
+                                ? (defaultWallet != null
+                                    ? 'Ví mặc định: ${defaultWallet!.name}'
+                                    : 'Chọn ví mặc định chi tiêu')
+                                : (defaultWallet != null
+                                    ? 'Default: ${defaultWallet!.name}'
+                                    : 'Set default wallet'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w700,
+                              color: isDark ? const Color(0xFFFFCC00) : const Color(0xFFB45309),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 3),
+                        Icon(
+                          CupertinoIcons.chevron_down,
+                          size: 9.5,
+                          color: isDark ? const Color(0xFFFFCC00) : const Color(0xFFB45309),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 7.5, vertical: 2.5),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : Colors.black.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                  ),
+                  child: Text(
+                    isVi
+                        ? '${activeAccounts.length} ví'
+                        : '${activeAccounts.length} wallets',
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white70 : const Color(0xFF1B5E20),
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
           const SizedBox(height: 6),
@@ -158,7 +211,7 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
               totalBalance.format(locale: locale, masked: hideBalance),
               semanticsLabel: hideBalance ? l10n.balanceHidden : null,
               style: theme.textTheme.headlineMedium?.copyWith(
-                fontSize: 30,
+                fontSize: 32,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -0.8,
                 fontFeatures: AppTheme.tabularFigures,
@@ -166,61 +219,6 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 8),
-
-          // 3. Consolidated Command Center Row: Default Wallet Switcher Pill
-          if (activeAccounts.isNotEmpty) ...[
-            ApplePressable(
-              onTap: onOpenDefaultWalletPicker,
-              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4.5),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFB800).withValues(alpha: isDark ? 0.18 : 0.10),
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                  border: Border.all(
-                    color: const Color(0xFFFFB800).withValues(alpha: isDark ? 0.35 : 0.25),
-                    width: 0.8,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      CupertinoIcons.star_fill,
-                      size: 11.5,
-                      color: Color(0xFFFF9500),
-                    ),
-                    const SizedBox(width: 4.5),
-                    Flexible(
-                      child: Text(
-                        isVi
-                            ? (defaultWallet != null
-                                ? 'Ví mặc định: ${defaultWallet!.name}'
-                                : 'Chọn ví mặc định chi tiêu')
-                            : (defaultWallet != null
-                                ? 'Default: ${defaultWallet!.name}'
-                                : 'Set default wallet'),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w700,
-                          color: isDark ? const Color(0xFFFFCC00) : const Color(0xFFB45309),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      CupertinoIcons.chevron_down,
-                      size: 10,
-                      color: isDark ? const Color(0xFFFFCC00) : const Color(0xFFB45309),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
 
           // 4. Consolidated Action Bar: Transfer between wallets & Sort
           if (activeAccounts.length >= 2) ...[

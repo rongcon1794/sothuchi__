@@ -59,7 +59,7 @@ class AccountsTypeFilterPills extends StatelessWidget {
     ];
 
     return SizedBox(
-      height: 38,
+      height: 34,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
@@ -77,7 +77,7 @@ class AccountsTypeFilterPills extends StatelessWidget {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               alignment: Alignment.center,
-              padding: const EdgeInsets.symmetric(horizontal: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
                 color: isSelected
                     ? (isDark ? Colors.white : const Color(0xFF1C1C1E))
