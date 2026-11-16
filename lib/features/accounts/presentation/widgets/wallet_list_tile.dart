@@ -221,7 +221,6 @@ class WalletListTile extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Row(
-                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
                               _typeIcon(account.type),
@@ -229,7 +228,7 @@ class WalletListTile extends StatelessWidget {
                               color: isDark ? Colors.white60 : Colors.black54,
                             ),
                             const SizedBox(width: 4),
-                            Flexible(
+                            Expanded(
                               child: Text(
                                 '$typeLabel • ${account.currency.toUpperCase()}',
                                 maxLines: 1,
@@ -241,7 +240,8 @@ class WalletListTile extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            if (percentOfTotal != null &&
+                            if (!isReordering &&
+                                percentOfTotal != null &&
                                 percentOfTotal! > 0 &&
                                 !hideBalance &&
                                 !account.archived) ...[

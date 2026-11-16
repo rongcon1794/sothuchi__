@@ -699,24 +699,13 @@ void main() {
         findsWidgets,
       );
 
-      // Check Reorder/Sort button in AppBar/Header
+      // Check Reorder/Sort button in Header/Hero Card
       expect(find.text('Sắp xếp'), findsWidgets);
       await tester.tap(find.text('Sắp xếp').first);
       await tester.pumpAndSettle();
 
-      // SmartWalletSortSheet opens: displays smart options & manual drag & drop
-      expect(find.text('Sắp xếp ví & tài khoản'), findsOneWidget);
-      expect(find.text('Ví mặc định lên đầu'), findsOneWidget);
-      expect(find.text('Kéo và thả thủ công'), findsOneWidget);
-
-      // Tap manual drag & drop
-      await tester.ensureVisible(find.text('Kéo và thả thủ công'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Kéo và thả thủ công'));
-      await tester.pumpAndSettle();
-
-      // Reorder mode active: AppBar shows 'Xong', reorder banner is visible
-      expect(find.text('Xong'), findsOneWidget);
+      // Direct in-place reorder mode activated on the screen (no separate sheet or screen)
+      expect(find.text('Xong'), findsWidgets);
       expect(find.text('Kéo và thả để sắp xếp ví'), findsOneWidget);
       expect(find.byType(ReorderableListView), findsOneWidget);
 
@@ -731,8 +720,8 @@ void main() {
       expect(activeAccounts.first.id, w2.id);
       expect(activeAccounts.last.id, w1.id);
 
-      // Tap 'Xong' to exit reorder mode
-      await tester.tap(find.text('Xong'));
+      // Tap 'Xong' to exit in-place reorder mode
+      await tester.tap(find.text('Xong').first);
       await tester.pumpAndSettle();
       expect(find.text('Sắp xếp'), findsWidgets);
     });

@@ -24,6 +24,8 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
     this.defaultWallet,
     this.onOpenDefaultWalletPicker,
     this.onOpenSortSheet,
+    this.onToggleReorderMode,
+    this.isReorderMode = false,
   });
 
   final Money totalBalance;
@@ -37,6 +39,8 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
   final Account? defaultWallet;
   final VoidCallback? onOpenDefaultWalletPicker;
   final VoidCallback? onOpenSortSheet;
+  final VoidCallback? onToggleReorderMode;
+  final bool isReorderMode;
 
   @override
   Widget build(BuildContext context) {
@@ -263,22 +267,26 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (onOpenSortSheet != null) ...[
+                if (onToggleReorderMode != null || onOpenSortSheet != null) ...[
                   const SizedBox(width: 8),
                   ApplePressable(
-                    onTap: onOpenSortSheet,
+                    onTap: onToggleReorderMode ?? onOpenSortSheet,
                     borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 7.5, horizontal: 12),
                       decoration: BoxDecoration(
-                        color: isDark
-                            ? Colors.white.withValues(alpha: 0.08)
-                            : Colors.black.withValues(alpha: 0.05),
+                        color: isReorderMode
+                            ? AppleTokens.systemBlue.withValues(alpha: isDark ? 0.25 : 0.15)
+                            : (isDark
+                                ? Colors.white.withValues(alpha: 0.08)
+                                : Colors.black.withValues(alpha: 0.05)),
                         borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
                         border: Border.all(
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.14)
-                              : Colors.black.withValues(alpha: 0.08),
+                          color: isReorderMode
+                              ? AppleTokens.systemBlue.withValues(alpha: 0.45)
+                              : (isDark
+                                  ? Colors.white.withValues(alpha: 0.14)
+                                  : Colors.black.withValues(alpha: 0.08)),
                           width: 0.8,
                         ),
                       ),
@@ -287,17 +295,25 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            CupertinoIcons.arrow_up_arrow_down,
+                            isReorderMode
+                                ? CupertinoIcons.checkmark_alt
+                                : CupertinoIcons.arrow_up_arrow_down,
                             size: 13,
-                            color: isDark ? Colors.white70 : const Color(0xFF3A3A3C),
+                            color: isReorderMode
+                                ? AppleTokens.systemBlue
+                                : (isDark ? Colors.white70 : const Color(0xFF3A3A3C)),
                           ),
                           const SizedBox(width: 4.5),
                           Text(
-                            isVi ? 'Sắp xếp' : 'Sort',
+                            isReorderMode
+                                ? (isVi ? 'Xong' : 'Done')
+                                : (isVi ? 'Sắp xếp' : 'Sort'),
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              color: isDark ? Colors.white70 : const Color(0xFF3A3A3C),
+                              color: isReorderMode
+                                  ? AppleTokens.systemBlue
+                                  : (isDark ? Colors.white70 : const Color(0xFF3A3A3C)),
                             ),
                           ),
                         ],

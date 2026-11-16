@@ -17,7 +17,6 @@ import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_c
 import 'package:so_thu_chi/features/accounts/presentation/widgets/accounts_net_balance_hero_card.dart';
 import 'package:so_thu_chi/features/accounts/presentation/widgets/accounts_type_filter_pills.dart';
 import 'package:so_thu_chi/features/accounts/presentation/widgets/archived_wallets_expansion_card.dart';
-import 'package:so_thu_chi/features/accounts/presentation/widgets/smart_wallet_sort_sheet.dart';
 import 'package:so_thu_chi/features/accounts/presentation/widgets/transfer_between_wallets_sheet.dart';
 import 'package:so_thu_chi/features/accounts/presentation/widgets/wallet_form_sheet.dart';
 import 'package:so_thu_chi/features/accounts/presentation/widgets/wallet_list_tile.dart';
@@ -58,29 +57,6 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
     TransferBetweenWalletsSheet.show(
       context,
       initialFromAccountId: fromAccountId,
-    );
-  }
-
-  void _openSortSheet(
-    BuildContext context,
-    List<Account> activeAccounts,
-    String? defaultWalletId,
-    String locale,
-  ) {
-    unawaited(HapticFeedback.lightImpact());
-    SmartWalletSortSheet.show(
-      context: context,
-      activeAccounts: activeAccounts,
-      defaultWalletId: defaultWalletId,
-      locale: locale,
-      onApplyOrder: (orderedIds) {
-        ref
-            .read(accountsActionControllerProvider.notifier)
-            .reorderWallets(orderedIds);
-      },
-      onStartManualReorder: () {
-        setState(() => _isReorderMode = true);
-      },
     );
   }
 
@@ -419,24 +395,34 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                       .toggleHideBalance();
                 },
                 onOpenTransferSheet: () => _openTransferSheet(context),
-                onOpenSortSheet: activeAccounts.length >= 2
-                    ? () => _openSortSheet(
-                          context,
-                          activeAccounts,
-                          defaultWalletId,
-                          locale,
-                        )
+                onToggleReorderMode: activeAccounts.length >= 2
+                    ? () {
+                        unawaited(HapticFeedback.selectionClick());
+                        setState(() {
+                          _isReorderMode = !_isReorderMode;
+                          if (_isReorderMode) _selectedTypeFilter = null;
+                        });
+                      }
                     : null,
+                isReorderMode: _isReorderMode,
               );
 
-              // 2. Filter Pills row
-              final filterPills = AccountsTypeFilterPills(
-                activeAccounts: activeAccounts,
-                selectedTypeFilter: _selectedTypeFilter,
-                isDark: isDark,
-                l10n: l10n,
-                onSelectFilter: (type) => setState(() => _selectedTypeFilter = type),
-              );
+              // 2. Filter Pills row (hidden during reorder mode to focus on global wallet order)
+              final filterPills = _isReorderMode
+                  ? null
+                  : AccountsTypeFilterPills(
+                      activeAccounts: activeAccounts,
+                      selectedTypeFilter: _selectedTypeFilter,
+                      isDark: isDark,
+                      l10n: l10n,
+                      onSelectFilter: (type) =>
+                          setState(() => _selectedTypeFilter = type),
+                    );
+
+              // Filtered active accounts
+              final accountsToDisplay = _isReorderMode
+                  ? activeAccounts
+                  : filteredAccounts;
 
               // 3. Wallets List items
               final walletListItems = <Widget>[
@@ -448,15 +434,21 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                       Row(
                         children: [
                           AppleSquircleBadge(
-                            icon: CupertinoIcons.creditcard_fill,
-                            backgroundColor: scheme.primary,
+                            icon: _isReorderMode
+                                ? CupertinoIcons.arrow_up_arrow_down
+                                : CupertinoIcons.creditcard_fill,
+                            backgroundColor: _isReorderMode
+                                ? AppleTokens.systemBlue
+                                : scheme.primary,
                             size: 24,
                             iconSize: 12,
                             radius: 6,
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            l10n.activeWallets.toUpperCase(),
+                            _isReorderMode
+                                ? (isVi ? 'KÉO THẢ SẮP XẾP VÍ' : 'DRAG TO REORDER')
+                                : l10n.activeWallets.toUpperCase(),
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontSize: 12.5,
                               fontWeight: FontWeight.w700,
@@ -466,32 +458,165 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                           ),
                         ],
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.5, vertical: 2.5),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.08)
-                              : Colors.black.withValues(alpha: 0.05),
-                          borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                      if (activeAccounts.length >= 2) ...[
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ApplePressable(
+                              onTap: () {
+                                unawaited(HapticFeedback.selectionClick());
+                                setState(() {
+                                  _isReorderMode = !_isReorderMode;
+                                  if (_isReorderMode) {
+                                    _selectedTypeFilter = null;
+                                  }
+                                });
+                              },
+                              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 9,
+                                  vertical: 3.5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: _isReorderMode
+                                      ? AppleTokens.systemBlue
+                                      : (isDark
+                                          ? Colors.white.withValues(alpha: 0.08)
+                                          : Colors.black.withValues(alpha: 0.05)),
+                                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                                  border: Border.all(
+                                    color: _isReorderMode
+                                        ? AppleTokens.systemBlue
+                                        : (isDark
+                                            ? Colors.white.withValues(alpha: 0.12)
+                                            : Colors.black.withValues(alpha: 0.08)),
+                                    width: 0.8,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      _isReorderMode
+                                          ? CupertinoIcons.checkmark_alt
+                                          : CupertinoIcons.arrow_up_arrow_down,
+                                      size: 12,
+                                      color: _isReorderMode
+                                          ? Colors.white
+                                          : scheme.onSurfaceVariant,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      _isReorderMode
+                                          ? (isVi ? 'Xong' : 'Done')
+                                          : (isVi ? 'Sắp xếp' : 'Sort'),
+                                      style: TextStyle(
+                                        fontSize: 11.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: _isReorderMode
+                                            ? Colors.white
+                                            : scheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            if (!_isReorderMode) ...[
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.08)
+                                      : Colors.black.withValues(alpha: 0.05),
+                                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                                ),
+                                child: Text(
+                                  isVi
+                                      ? '${filteredAccounts.length} ví'
+                                      : '${filteredAccounts.length} wallets',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: scheme.onSurfaceVariant,
+                                    height: 1.2,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
-                        child: Text(
-                          isVi
-                              ? '${filteredAccounts.length} ví'
-                              : '${filteredAccounts.length} wallets',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: scheme.onSurfaceVariant,
-                            height: 1.2,
+                      ] else ...[
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.5, vertical: 2.5),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.08)
+                                : Colors.black.withValues(alpha: 0.05),
+                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                          ),
+                          child: Text(
+                            isVi
+                                ? '${filteredAccounts.length} ví'
+                                : '${filteredAccounts.length} wallets',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: scheme.onSurfaceVariant,
+                              height: 1.2,
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ),
                 const SizedBox(height: 6),
-                if (filteredAccounts.isEmpty)
+                if (_isReorderMode)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppleTokens.systemBlue.withValues(alpha: isDark ? 0.15 : 0.08),
+                        borderRadius: BorderRadius.circular(AppleTokens.radiusControl),
+                        border: Border.all(
+                          color: AppleTokens.systemBlue.withValues(alpha: 0.25),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            CupertinoIcons.info_circle_fill,
+                            size: 14,
+                            color: AppleTokens.systemBlue,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              isVi
+                                  ? 'Kéo và thả để sắp xếp ví'
+                                  : 'Drag and drop to reorder wallets',
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? Colors.white70 : const Color(0xFF1D4ED8),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                if (accountsToDisplay.isEmpty)
                   AppleGlassCard(
                     padding: const EdgeInsets.all(24),
                     borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
@@ -505,23 +630,35 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                     ),
                   )
                 else
-                  ...filteredAccounts.map(
-                    (account) {
+                  ReorderableListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    buildDefaultDragHandles: false,
+                    itemCount: accountsToDisplay.length,
+                    onReorderItem: (oldIndex, newIndex) =>
+                        _handleReorder(accountsToDisplay, oldIndex, newIndex),
+                    itemBuilder: (context, index) {
+                      final account = accountsToDisplay[index];
                       final percent = (totalPositiveBalanceMinor > 0 && account.balance > 0)
                           ? ((account.balance * 100) / totalPositiveBalanceMinor).round()
                           : null;
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: RepaintBoundary(
+                        key: ValueKey('wallet_tile_${account.id}'),
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: ReorderableDelayedDragStartListener(
+                          index: index,
+                          enabled: !_isReorderMode && _selectedTypeFilter == null,
                           child: WalletListTile(
-                            key: ValueKey('wallet_tile_${account.id}'),
                             account: account,
                             typeLabel: _typeLabel(l10n, account.type),
                             locale: locale,
                             hideBalance: hideBalance,
                             isDefault: account.id == defaultWalletId,
                             percentOfTotal: percent,
+                            isReordering: _isReorderMode,
+                            reorderIndex: index,
                             onSetDefault: () => _handleSetDefaultWallet(context, account),
+                            onMoveToTop: () => _handleMoveToTop(activeAccounts, index),
                             onTap: () =>
                                 context.push(AppRoutes.accountDetail(account.id)),
                             onEdit: () => _openWalletForm(context, existing: account),
@@ -537,7 +674,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                       );
                     },
                   ),
-                if (archivedAccounts.isNotEmpty) ...[
+                if (archivedAccounts.isNotEmpty && !_isReorderMode) ...[
                   const SizedBox(height: 14),
                   ArchivedWalletsExpansionCard(
                     archivedAccounts: archivedAccounts,
@@ -556,85 +693,6 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                 ],
               ];
 
-              // Reorder Mode Views
-              final reorderBanner = AppleGlassCard(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                borderColor: AppleTokens.systemBlue.withValues(alpha: isDark ? 0.35 : 0.20),
-                child: Row(
-                  children: [
-                    const AppleSquircleBadge(
-                      icon: CupertinoIcons.arrow_up_arrow_down,
-                      backgroundColor: AppleTokens.systemBlue,
-                      size: 36,
-                      iconSize: 18,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            isVi ? 'Kéo và thả để sắp xếp ví' : 'Drag & Drop to Reorder',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14,
-                              letterSpacing: -0.2,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            isVi
-                                ? 'Thứ tự này sẽ tự động áp dụng ở Trang chủ, Ghi giao dịch và Chuyển tiền'
-                                : 'This order applies to Home, New Transaction & Transfer',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: scheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              );
-
-              final reorderListView = ReorderableListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                buildDefaultDragHandles: false,
-                itemCount: activeAccounts.length,
-                onReorderItem: (oldIndex, newIndex) =>
-                    _handleReorder(activeAccounts, oldIndex, newIndex),
-                itemBuilder: (context, index) {
-                  final account = activeAccounts[index];
-                  return Padding(
-                    key: ValueKey('reorder_wallet_${account.id}'),
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: WalletListTile(
-                      account: account,
-                      typeLabel: _typeLabel(l10n, account.type),
-                      locale: locale,
-                      hideBalance: hideBalance,
-                      isDefault: account.id == defaultWalletId,
-                      isReordering: true,
-                      reorderIndex: index,
-                      onSetDefault: () => _handleSetDefaultWallet(context, account),
-                      onMoveToTop: () => _handleMoveToTop(activeAccounts, index),
-                      onTap: () {},
-                      onEdit: () => _openWalletForm(context, existing: account),
-                      onToggleArchive: () => _handleToggleArchive(
-                        context,
-                        accountId: account.id,
-                        archived: true,
-                      ),
-                      onDelete: () => _handleDeleteWallet(context, account),
-                    ),
-                  );
-                },
-              );
-
               return Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: AppleTokens.maxContentWidth),
@@ -647,40 +705,38 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                       scrollBottomPadding,
                     ),
                     children: [
-                      if (_isReorderMode) ...[
-                        reorderBanner,
-                        const SizedBox(height: 14),
-                        reorderListView,
-                      ] else ...[
-                        if (isWide)
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                flex: 42,
-                                child: heroCard,
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                flex: 58,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: [
+                      if (isWide)
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 42,
+                              child: heroCard,
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              flex: 58,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  if (filterPills != null) ...[
                                     filterPills,
                                     const SizedBox(height: 14),
-                                    ...walletListItems,
                                   ],
-                                ),
+                                  ...walletListItems,
+                                ],
                               ),
-                            ],
-                          )
-                        else ...[
-                          heroCard,
-                          const SizedBox(height: 14),
+                            ),
+                          ],
+                        )
+                      else ...[
+                        heroCard,
+                        const SizedBox(height: 14),
+                        if (filterPills != null) ...[
                           filterPills,
                           const SizedBox(height: 14),
-                          ...walletListItems,
                         ],
+                        ...walletListItems,
                       ],
                     ],
                   ),
