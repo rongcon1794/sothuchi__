@@ -17,6 +17,7 @@ import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_c
 import 'package:so_thu_chi/features/accounts/presentation/widgets/accounts_net_balance_hero_card.dart';
 import 'package:so_thu_chi/features/accounts/presentation/widgets/accounts_type_filter_pills.dart';
 import 'package:so_thu_chi/features/accounts/presentation/widgets/archived_wallets_expansion_card.dart';
+import 'package:so_thu_chi/features/accounts/presentation/widgets/smart_wallet_sort_sheet.dart';
 import 'package:so_thu_chi/features/accounts/presentation/widgets/transfer_between_wallets_sheet.dart';
 import 'package:so_thu_chi/features/accounts/presentation/widgets/wallet_form_sheet.dart';
 import 'package:so_thu_chi/features/accounts/presentation/widgets/wallet_list_tile.dart';
@@ -37,6 +38,7 @@ class AccountsScreen extends ConsumerStatefulWidget {
 class _AccountsScreenState extends ConsumerState<AccountsScreen> {
   bool _isFabExpanded = true;
   bool _isFabVisible = true;
+  bool _isReorderMode = false;
   AccountType? _selectedTypeFilter;
 
   String _typeLabel(AppLocalizations l10n, AccountType type) => switch (type) {
@@ -51,12 +53,45 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
     WalletFormSheet.show(context, existing: existing);
   }
 
-  void _openTransferSheet(BuildContext context) {
+  void _openTransferSheet(BuildContext context, {String? fromAccountId}) {
     unawaited(HapticFeedback.lightImpact());
-    AppleModalSheetLayout.show<void>(
-      context: context,
-      builder: (_) => const TransferBetweenWalletsSheet(),
+    TransferBetweenWalletsSheet.show(
+      context,
+      initialFromAccountId: fromAccountId,
     );
+  }
+
+  void _openSortSheet(
+    BuildContext context,
+    List<Account> activeAccounts,
+    String? defaultWalletId,
+    String locale,
+  ) {
+    unawaited(HapticFeedback.lightImpact());
+    SmartWalletSortSheet.show(
+      context: context,
+      activeAccounts: activeAccounts,
+      defaultWalletId: defaultWalletId,
+      locale: locale,
+      onApplyOrder: (orderedIds) {
+        ref
+            .read(accountsActionControllerProvider.notifier)
+            .reorderWallets(orderedIds);
+      },
+      onStartManualReorder: () {
+        setState(() => _isReorderMode = true);
+      },
+    );
+  }
+
+  void _handleMoveToTop(List<Account> activeAccounts, int index) {
+    if (index <= 0 || index >= activeAccounts.length) return;
+    unawaited(HapticFeedback.mediumImpact());
+    final updated = List<Account>.from(activeAccounts);
+    final moved = updated.removeAt(index);
+    updated.insert(0, moved);
+    final orderedIds = updated.map((a) => a.id).toList();
+    ref.read(accountsActionControllerProvider.notifier).reorderWallets(orderedIds);
   }
 
   Future<void> _handleToggleArchive(
@@ -217,6 +252,18 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
     );
   }
 
+  void _handleReorder(List<Account> activeAccounts, int oldIndex, int newIndex) {
+    if (oldIndex == newIndex) return;
+
+    final updated = List<Account>.from(activeAccounts);
+    final moved = updated.removeAt(oldIndex);
+    updated.insert(newIndex, moved);
+    final orderedIds = updated.map((a) => a.id).toList();
+
+    unawaited(HapticFeedback.lightImpact());
+    ref.read(accountsActionControllerProvider.notifier).reorderWallets(orderedIds);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -254,45 +301,136 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppleAppBar(
-        titleText: l10n.walletsTitle,
+        titleText: _isReorderMode
+            ? (isVi ? 'Sắp xếp thứ tự ví' : 'Reorder Wallets')
+            : l10n.walletsTitle,
         isLandscape: isLandscape,
         actions: [
-          if (activeAccounts.length >= 2)
+          if (_isReorderMode)
             ApplePressable(
-              onTap: () => _openTransferSheet(context),
+              onTap: () {
+                unawaited(HapticFeedback.selectionClick());
+                setState(() => _isReorderMode = false);
+              },
               borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
               child: Container(
                 margin: const EdgeInsets.only(right: 12),
-                padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppleTokens.systemBlue.withValues(alpha: isDark ? 0.20 : 0.10),
+                  color: AppleTokens.systemBlue,
                   borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                  border: Border.all(
-                    color: AppleTokens.systemBlue.withValues(alpha: 0.32),
-                    width: 0.8,
-                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppleTokens.systemBlue.withValues(alpha: 0.35),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(
-                      Icons.swap_horiz_rounded,
-                      size: 16,
-                      color: AppleTokens.systemBlue,
+                      CupertinoIcons.checkmark_alt,
+                      size: 15,
+                      color: Colors.white,
                     ),
-                    const SizedBox(width: 5),
+                    const SizedBox(width: 4),
                     Text(
-                      l10n.transferBetweenWallets,
+                      isVi ? 'Xong' : 'Done',
                       style: const TextStyle(
-                        fontSize: 12,
+                        fontSize: 12.5,
                         fontWeight: FontWeight.w700,
-                        color: AppleTokens.systemBlue,
+                        color: Colors.white,
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
+            )
+          else ...[
+            if (activeAccounts.length >= 2) ...[
+              ApplePressable(
+                onTap: () => _openSortSheet(
+                  context,
+                  activeAccounts,
+                  defaultWalletId,
+                  locale,
+                ),
+                borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                child: Container(
+                  margin: const EdgeInsets.only(right: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : Colors.black.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.12)
+                          : Colors.black.withValues(alpha: 0.08),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        CupertinoIcons.arrow_up_arrow_down,
+                        size: 14,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        isVi ? 'Sắp xếp' : 'Sort',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              ApplePressable(
+                onTap: () => _openTransferSheet(context),
+                borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                child: Container(
+                  margin: const EdgeInsets.only(right: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppleTokens.systemBlue.withValues(alpha: isDark ? 0.20 : 0.10),
+                    borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                    border: Border.all(
+                      color: AppleTokens.systemBlue.withValues(alpha: 0.32),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.swap_horiz_rounded,
+                        size: 16,
+                        color: AppleTokens.systemBlue,
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        l10n.transferBetweenWallets,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: AppleTokens.systemBlue,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ],
         ],
       ),
       body: SafeArea(
@@ -335,7 +473,15 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                 );
               }
 
-              // 1. Redesigned Apple Glass Hero Net Balance Card
+              // 1. Redesigned Apple Glass Hero Net Balance Card with integrated Default Wallet Quick Switcher
+              final defaultWallet = activeAccounts
+                  .where((w) => w.id == defaultWalletId)
+                  .firstOrNull;
+
+              final totalPositiveBalanceMinor = activeAccounts
+                  .where((a) => a.balance > 0)
+                  .fold<int>(0, (sum, a) => sum + a.balance);
+
               final heroCard = AccountsNetBalanceHeroCard(
                 totalBalance: totalBalance,
                 activeAccounts: activeAccounts,
@@ -343,6 +489,13 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                 hideBalance: hideBalance,
                 l10n: l10n,
                 isDark: isDark,
+                defaultWallet: defaultWallet,
+                onOpenDefaultWalletPicker: () => _openDefaultWalletPicker(
+                  context,
+                  activeAccounts,
+                  defaultWalletId,
+                  locale,
+                ),
                 onToggleHideBalance: () {
                   ref
                       .read(settingsControllerProvider.notifier)
@@ -351,111 +504,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                 onOpenTransferSheet: () => _openTransferSheet(context),
               );
 
-              // 2. Default Spending Wallet Card
-              final defaultWallet = activeAccounts
-                  .where((w) => w.id == defaultWalletId)
-                  .firstOrNull;
-
-              final defaultWalletCard = ApplePressable(
-                onTap: () => _openDefaultWalletPicker(
-                  context,
-                  activeAccounts,
-                  defaultWalletId,
-                  locale,
-                ),
-                borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                child: AppleGlassCard(
-                  borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  child: Row(
-                    children: [
-                      const AppleSquircleBadge(
-                        icon: Icons.star_rounded,
-                        backgroundColor: Color(0xFFFFB800),
-                        size: 38,
-                        iconSize: 22,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              isVi ? 'Ví mặc định chi tiêu' : 'Default Spending Wallet',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14.5,
-                                letterSpacing: -0.2,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              defaultWallet != null
-                                  ? (isVi
-                                      ? 'Tự động chọn "${defaultWallet.name}" khi ghi thu chi'
-                                      : 'Auto-selects "${defaultWallet.name}" for new transactions')
-                                  : (isVi
-                                      ? 'Chưa chọn ví mặc định (Chạm để cài đặt)'
-                                      : 'No default wallet set (Tap to configure)'),
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: scheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      if (defaultWallet != null) ...[
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFFB800).withValues(alpha: isDark ? 0.22 : 0.12),
-                            borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                            border: Border.all(
-                              color: const Color(0xFFFFB800).withValues(alpha: 0.35),
-                              width: 0.8,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.star_rounded,
-                                size: 13,
-                                color: Color(0xFFFFB800),
-                              ),
-                              const SizedBox(width: 4),
-                              ConstrainedBox(
-                                constraints: const BoxConstraints(maxWidth: 100),
-                                child: Text(
-                                  defaultWallet.name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 11.5,
-                                    fontWeight: FontWeight.w700,
-                                    color: Color(0xFFFFB800),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                      ],
-                      const Icon(
-                        Icons.chevron_right_rounded,
-                        size: 20,
-                        color: AppleTokens.systemGray,
-                      ),
-                    ],
-                  ),
-                ),
-              );
-
-              // 3. Filter Pills row
+              // 2. Filter Pills row
               final filterPills = AccountsTypeFilterPills(
                 activeAccounts: activeAccounts,
                 selectedTypeFilter: _selectedTypeFilter,
@@ -464,7 +513,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                 onSelectFilter: (type) => setState(() => _selectedTypeFilter = type),
               );
 
-              // 4. Wallets List items
+              // 3. Wallets List items
               final walletListItems = <Widget>[
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
@@ -492,26 +541,71 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                           ),
                         ],
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.5, vertical: 3),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.08)
-                              : Colors.black.withValues(alpha: 0.05),
-                          borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
-                        ),
-                        child: Text(
-                          isVi
-                              ? '${filteredAccounts.length} ví'
-                              : '${filteredAccounts.length} wallets',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: scheme.onSurfaceVariant,
-                            height: 1.2,
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (activeAccounts.length >= 2 && !_isReorderMode) ...[
+                            ApplePressable(
+                              onTap: () => _openSortSheet(
+                                context,
+                                activeAccounts,
+                                defaultWalletId,
+                                locale,
+                              ),
+                              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.08)
+                                      : Colors.black.withValues(alpha: 0.05),
+                                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      CupertinoIcons.arrow_up_arrow_down,
+                                      size: 11,
+                                      color: scheme.onSurfaceVariant,
+                                    ),
+                                    const SizedBox(width: 3),
+                                    Text(
+                                      isVi ? 'Sắp xếp' : 'Sort',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: scheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                          ],
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8.5, vertical: 3),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.08)
+                                  : Colors.black.withValues(alpha: 0.05),
+                              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                            ),
+                            child: Text(
+                              isVi
+                                  ? '${filteredAccounts.length} ví'
+                                  : '${filteredAccounts.length} wallets',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: scheme.onSurfaceVariant,
+                                height: 1.2,
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ],
                   ),
@@ -532,29 +626,36 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                   )
                 else
                   ...filteredAccounts.map(
-                    (account) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: RepaintBoundary(
-                        child: WalletListTile(
-                          key: ValueKey('wallet_tile_${account.id}'),
-                          account: account,
-                          typeLabel: _typeLabel(l10n, account.type),
-                          locale: locale,
-                          hideBalance: hideBalance,
-                          isDefault: account.id == defaultWalletId,
-                          onSetDefault: () => _handleSetDefaultWallet(context, account),
-                          onTap: () =>
-                              context.push(AppRoutes.accountDetail(account.id)),
-                          onEdit: () => _openWalletForm(context, existing: account),
-                          onToggleArchive: () => _handleToggleArchive(
-                            context,
-                            accountId: account.id,
-                            archived: true,
+                    (account) {
+                      final percent = (totalPositiveBalanceMinor > 0 && account.balance > 0)
+                          ? ((account.balance * 100) / totalPositiveBalanceMinor).round()
+                          : null;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: RepaintBoundary(
+                          child: WalletListTile(
+                            key: ValueKey('wallet_tile_${account.id}'),
+                            account: account,
+                            typeLabel: _typeLabel(l10n, account.type),
+                            locale: locale,
+                            hideBalance: hideBalance,
+                            isDefault: account.id == defaultWalletId,
+                            percentOfTotal: percent,
+                            onSetDefault: () => _handleSetDefaultWallet(context, account),
+                            onTap: () =>
+                                context.push(AppRoutes.accountDetail(account.id)),
+                            onEdit: () => _openWalletForm(context, existing: account),
+                            onTransfer: () => _openTransferSheet(context, fromAccountId: account.id),
+                            onToggleArchive: () => _handleToggleArchive(
+                              context,
+                              accountId: account.id,
+                              archived: true,
+                            ),
+                            onDelete: () => _handleDeleteWallet(context, account),
                           ),
-                          onDelete: () => _handleDeleteWallet(context, account),
                         ),
-                      ),
-                    ),
+                      );
+                    },
                   ),
                 if (archivedAccounts.isNotEmpty) ...[
                   const SizedBox(height: 14),
@@ -575,6 +676,85 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                 ],
               ];
 
+              // Reorder Mode Views
+              final reorderBanner = AppleGlassCard(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                borderRadius: BorderRadius.circular(AppleTokens.radiusCard),
+                borderColor: AppleTokens.systemBlue.withValues(alpha: isDark ? 0.35 : 0.20),
+                child: Row(
+                  children: [
+                    const AppleSquircleBadge(
+                      icon: CupertinoIcons.arrow_up_arrow_down,
+                      backgroundColor: AppleTokens.systemBlue,
+                      size: 36,
+                      iconSize: 18,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            isVi ? 'Kéo và thả để sắp xếp ví' : 'Drag & Drop to Reorder',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                              letterSpacing: -0.2,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            isVi
+                                ? 'Thứ tự này sẽ tự động áp dụng ở Trang chủ, Ghi giao dịch và Chuyển tiền'
+                                : 'This order applies to Home, New Transaction & Transfer',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: scheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+
+              final reorderListView = ReorderableListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                buildDefaultDragHandles: false,
+                itemCount: activeAccounts.length,
+                onReorderItem: (oldIndex, newIndex) =>
+                    _handleReorder(activeAccounts, oldIndex, newIndex),
+                itemBuilder: (context, index) {
+                  final account = activeAccounts[index];
+                  return Padding(
+                    key: ValueKey('reorder_wallet_${account.id}'),
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: WalletListTile(
+                      account: account,
+                      typeLabel: _typeLabel(l10n, account.type),
+                      locale: locale,
+                      hideBalance: hideBalance,
+                      isDefault: account.id == defaultWalletId,
+                      isReordering: true,
+                      reorderIndex: index,
+                      onSetDefault: () => _handleSetDefaultWallet(context, account),
+                      onMoveToTop: () => _handleMoveToTop(activeAccounts, index),
+                      onTap: () {},
+                      onEdit: () => _openWalletForm(context, existing: account),
+                      onToggleArchive: () => _handleToggleArchive(
+                        context,
+                        accountId: account.id,
+                        archived: true,
+                      ),
+                      onDelete: () => _handleDeleteWallet(context, account),
+                    ),
+                  );
+                },
+              );
+
               return Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: AppleTokens.maxContentWidth),
@@ -587,42 +767,40 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                       scrollBottomPadding,
                     ),
                     children: [
-                      if (isWide)
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              flex: 42,
-                              child: Column(
-                                children: [
-                                  heroCard,
-                                  const SizedBox(height: 14),
-                                  defaultWalletCard,
-                                ],
+                      if (_isReorderMode) ...[
+                        reorderBanner,
+                        const SizedBox(height: 14),
+                        reorderListView,
+                      ] else ...[
+                        if (isWide)
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                flex: 42,
+                                child: heroCard,
                               ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              flex: 58,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  filterPills,
-                                  const SizedBox(height: 14),
-                                  ...walletListItems,
-                                ],
+                              const SizedBox(width: 16),
+                              Expanded(
+                                flex: 58,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    filterPills,
+                                    const SizedBox(height: 14),
+                                    ...walletListItems,
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        )
-                      else ...[
-                        heroCard,
-                        const SizedBox(height: 14),
-                        defaultWalletCard,
-                        const SizedBox(height: 14),
-                        filterPills,
-                        const SizedBox(height: 14),
-                        ...walletListItems,
+                            ],
+                          )
+                        else ...[
+                          heroCard,
+                          const SizedBox(height: 14),
+                          filterPills,
+                          const SizedBox(height: 14),
+                          ...walletListItems,
+                        ],
                       ],
                     ],
                   ),
@@ -633,15 +811,17 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
         ),
       ),
       floatingActionButtonLocation: const AppleFloatingActionButtonLocation(),
-      floatingActionButton: AppleAdaptiveExpandableFab(
-        heroTag: 'accounts_add_fab',
-        isVisible: _isFabVisible,
-        isExpanded: _isFabExpanded,
-        icon: const Icon(Icons.add_rounded),
-        label: Text(l10n.addWallet),
-        onPressed: () => _openWalletForm(context),
-        tooltip: l10n.addWallet,
-      ),
+      floatingActionButton: _isReorderMode
+          ? null
+          : AppleAdaptiveExpandableFab(
+              heroTag: 'accounts_add_fab',
+              isVisible: _isFabVisible,
+              isExpanded: _isFabExpanded,
+              icon: const Icon(Icons.add_rounded),
+              label: Text(l10n.addWallet),
+              onPressed: () => _openWalletForm(context),
+              tooltip: l10n.addWallet,
+            ),
     );
   }
 }

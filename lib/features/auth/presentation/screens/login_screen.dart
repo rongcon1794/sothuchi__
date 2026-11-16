@@ -1,15 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:so_thu_chi/core/errors/app_exception.dart';
 import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/theme/app_theme.dart';
 import 'package:so_thu_chi/core/widgets/so_thu_chi_logo.dart';
+import 'package:so_thu_chi/features/auth/data/datasources/google_sign_in_client.dart';
 import 'package:so_thu_chi/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 
-class LoginScreen extends ConsumerWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
-  Future<void> _handleGoogleSignIn(BuildContext context, WidgetRef ref) async {
+  @override
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends ConsumerState<LoginScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Warm up Google Sign-In instance in the background so it is fully ready
+    // before the user interacts with the sign-in button.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref
+            .read(googleSignInClientProvider)
+            .ensureInitialized()
+            .catchError((_) {});
+      }
+    });
+  }
+
+  Future<void> _handleGoogleSignIn(BuildContext context) async {
     final res = await ref
         .read(authActionControllerProvider.notifier)
         .signInWithGoogle();
@@ -17,6 +39,10 @@ class LoginScreen extends ConsumerWidget {
     res.fold(
       onSuccess: (_) {},
       onFailure: (error) {
+        if (error is AuthCancelledException) {
+          // User intentionally closed or cancelled the account chooser; do not show error banner.
+          return;
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.localizeError(error))),
         );
@@ -24,7 +50,7 @@ class LoginScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _handleOfflineDemo(BuildContext context, WidgetRef ref) async {
+  Future<void> _handleOfflineDemo(BuildContext context) async {
     final res = await ref
         .read(authActionControllerProvider.notifier)
         .signInOfflineDemo();
@@ -94,7 +120,7 @@ class LoginScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
@@ -158,7 +184,7 @@ class LoginScreen extends ConsumerWidget {
                   FilledButton.icon(
                     onPressed: isLoading
                         ? null
-                        : () => _handleGoogleSignIn(context, ref),
+                        : () => _handleGoogleSignIn(context),
                     icon: isLoading
                         ? SizedBox(
                             width: 20,
@@ -211,7 +237,7 @@ class LoginScreen extends ConsumerWidget {
                               OutlinedButton.icon(
                                 onPressed: isLoading
                                     ? null
-                                    : () => _handleOfflineDemo(context, ref),
+                                    : () => _handleOfflineDemo(context),
                                 icon: const Icon(Icons.offline_bolt_rounded),
                                 label: Text(l10n.tryOfflineDemo),
                               ),

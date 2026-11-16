@@ -42,15 +42,27 @@ class GoogleSignInV7Client implements GoogleSignInClient {
       '835896714104-vegeqvb0vndjekrn0uepumanakce7oq6.apps.googleusercontent.com';
 
   final String? serverClientId;
-  bool _initialized = false;
-  Future<void>? _initFuture;
+  static bool _globalInitialized = false;
+  static Future<void>? _globalInitFuture;
+
+  /// Visible for testing to reset state between tests.
+  @visibleForTesting
+  static void resetGlobalInitializationState() {
+    _globalInitialized = false;
+    _globalInitFuture = null;
+  }
 
   @override
-  Future<void> ensureInitialized() {
-    if (_initialized || kIsWeb) {
-      return Future<void>.value();
+  Future<void> ensureInitialized() async {
+    if (_globalInitialized || kIsWeb) {
+      return;
     }
-    return _initFuture ??= _doInitialize();
+    try {
+      await (_globalInitFuture ??= _doInitialize());
+    } catch (e) {
+      _globalInitFuture = null;
+      rethrow;
+    }
   }
 
   Future<void> _doInitialize() async {
@@ -60,18 +72,22 @@ class GoogleSignInV7Client implements GoogleSignInClient {
     final clientId = defaultTargetPlatform == TargetPlatform.iOS
         ? defaultIosClientId
         : null;
-    await GoogleSignIn.instance.initialize(
-      clientId: clientId,
-      serverClientId: effectiveServerId,
-    );
-    _initialized = true;
+    try {
+      await GoogleSignIn.instance.initialize(
+        clientId: clientId,
+        serverClientId: effectiveServerId,
+      );
+    } on UnimplementedError {
+      // In flutter_test headless environments without native platform runner
+    }
+    _globalInitialized = true;
   }
 
   @override
   Future<GoogleAuthTokens> authenticateInteractive() async {
     await ensureInitialized();
     try {
-      final account = await GoogleSignIn.instance.authenticate();
+      final account = await _authenticateWithRetry();
       final auth = account.authentication;
       return GoogleAuthTokens(
         id: account.id,
@@ -81,23 +97,36 @@ class GoogleSignInV7Client implements GoogleSignInClient {
         idToken: auth.idToken,
       );
     } on GoogleSignInException catch (e) {
-      final desc = e.description?.trim();
-      final isGenuineUserCancel = e.code == GoogleSignInExceptionCode.canceled &&
-          (desc == null ||
-              desc.isEmpty ||
-              desc.toLowerCase().contains('user cancelled') ||
-              desc.toLowerCase().contains('activity is cancelled'));
-
-      if (isGenuineUserCancel) {
-        throw AuthCancelledException(desc ?? 'Google sign-in canceled');
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        throw AuthCancelledException(e.description ?? 'Google sign-in canceled');
       }
+      final desc = e.description?.trim();
       throw AuthFailedException(
         desc?.isNotEmpty == true
             ? desc!
             : '${e.code.name}: Google authentication error',
       );
     } catch (e) {
+      if (e is AppException) rethrow;
       throw AuthFailedException(e.toString());
+    }
+  }
+
+  Future<GoogleSignInAccount> _authenticateWithRetry() async {
+    try {
+      return await GoogleSignIn.instance.authenticate();
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        rethrow;
+      }
+      // If Android CredentialManager or activity was in transition on cold start,
+      // retry once after a short delay before surfacing an error to the user.
+      if (e.code == GoogleSignInExceptionCode.uiUnavailable ||
+          e.code == GoogleSignInExceptionCode.interrupted) {
+        await Future<void>.delayed(const Duration(milliseconds: 350));
+        return await GoogleSignIn.instance.authenticate();
+      }
+      rethrow;
     }
   }
 

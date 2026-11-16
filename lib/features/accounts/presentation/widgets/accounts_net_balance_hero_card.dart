@@ -21,6 +21,8 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
     required this.isDark,
     required this.onToggleHideBalance,
     required this.onOpenTransferSheet,
+    this.defaultWallet,
+    this.onOpenDefaultWalletPicker,
   });
 
   final Money totalBalance;
@@ -31,6 +33,8 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
   final bool isDark;
   final VoidCallback onToggleHideBalance;
   final VoidCallback onOpenTransferSheet;
+  final Account? defaultWallet;
+  final VoidCallback? onOpenDefaultWalletPicker;
 
   @override
   Widget build(BuildContext context) {
@@ -159,7 +163,63 @@ class AccountsNetBalanceHeroCard extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
+
+          // Smart Default Spending Wallet Switcher Pill
+          if (activeAccounts.isNotEmpty) ...[
+            ApplePressable(
+              onTap: onOpenDefaultWalletPicker,
+              borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFB800).withValues(alpha: isDark ? 0.18 : 0.10),
+                  borderRadius: BorderRadius.circular(AppleTokens.radiusPill),
+                  border: Border.all(
+                    color: const Color(0xFFFFB800).withValues(alpha: isDark ? 0.35 : 0.25),
+                    width: 0.8,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      CupertinoIcons.star_fill,
+                      size: 13,
+                      color: Color(0xFFFF9500),
+                    ),
+                    const SizedBox(width: 5),
+                    Flexible(
+                      child: Text(
+                        isVi
+                            ? (defaultWallet != null
+                                ? 'Ví mặc định: ${defaultWallet!.name}'
+                                : 'Chọn ví mặc định chi tiêu')
+                            : (defaultWallet != null
+                                ? 'Default: ${defaultWallet!.name}'
+                                : 'Set default wallet'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? const Color(0xFFFFCC00) : const Color(0xFFB45309),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      CupertinoIcons.chevron_down,
+                      size: 11,
+                      color: isDark ? const Color(0xFFFFCC00) : const Color(0xFFB45309),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ] else
+            const SizedBox(height: 14),
 
           // 3. Segmented Asset Distribution Telemetry
           if (positiveTotalMinor > 0 && !hideBalance) ...[

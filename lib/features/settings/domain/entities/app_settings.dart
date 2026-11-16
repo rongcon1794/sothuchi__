@@ -17,6 +17,7 @@ abstract class AppSettings with _$AppSettings {
     String? defaultWalletId,
     @Default(0) int accentColorIndex,
     @Default(false) bool oledMode,
+    @Default(<String>[]) List<String> walletOrder,
   }) = _AppSettings;
 }
 

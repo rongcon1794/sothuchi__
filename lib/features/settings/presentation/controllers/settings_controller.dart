@@ -207,6 +207,15 @@ class SettingsController extends AsyncNotifier<AppSettings> {
     return res;
   }
 
+  Future<Result<void>> setWalletOrder(List<String> order) async {
+    final repo = ref.read(settingsRepositoryProvider);
+    final res = await repo.setWalletOrder(order);
+    if (res.isSuccess) {
+      state = AsyncData(currentOrDefaults.copyWith(walletOrder: order));
+    }
+    return res;
+  }
+
   /// Restores user settings stored in Firestore cloud document when user signs in
   Future<void> restoreFromCloudUser(AppUser user) async {
     final repo = ref.read(settingsRepositoryProvider);

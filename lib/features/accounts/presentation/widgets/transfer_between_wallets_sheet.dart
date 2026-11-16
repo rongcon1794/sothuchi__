@@ -15,7 +15,25 @@ import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_c
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 
 class TransferBetweenWalletsSheet extends ConsumerStatefulWidget {
-  const TransferBetweenWalletsSheet({super.key});
+  const TransferBetweenWalletsSheet({
+    super.key,
+    this.initialFromAccountId,
+  });
+
+  final String? initialFromAccountId;
+
+  static Future<void> show(
+    BuildContext context, {
+    String? initialFromAccountId,
+  }) {
+    unawaited(HapticFeedback.lightImpact());
+    return AppleModalSheetLayout.show<void>(
+      context: context,
+      builder: (_) => TransferBetweenWalletsSheet(
+        initialFromAccountId: initialFromAccountId,
+      ),
+    );
+  }
 
   @override
   ConsumerState<TransferBetweenWalletsSheet> createState() =>
@@ -35,14 +53,23 @@ class _TransferBetweenWalletsSheetState
     super.initState();
     final active = ref.read(activeAccountsProvider);
     if (active.isNotEmpty) {
-      _fromId = active.first.id;
+      if (widget.initialFromAccountId != null &&
+          active.any((w) => w.id == widget.initialFromAccountId)) {
+        _fromId = widget.initialFromAccountId;
+      } else {
+        _fromId = active.first.id;
+      }
+      final source = active.firstWhere(
+        (w) => w.id == _fromId,
+        orElse: () => active.first,
+      );
       final sameCurrencyDest = active
-          .where((w) => w.id != _fromId && w.currency == active.first.currency)
+          .where((w) => w.id != _fromId && w.currency == source.currency)
           .toList(growable: false);
       if (sameCurrencyDest.isNotEmpty) {
         _toId = sameCurrencyDest.first.id;
       } else if (active.length >= 2) {
-        _toId = active[1].id;
+        _toId = active.firstWhere((w) => w.id != _fromId, orElse: () => active.last).id;
       }
     }
   }

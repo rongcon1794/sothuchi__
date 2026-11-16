@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AppSettings {
 
- ThemeMode get themeMode; String get localeCode; String get currencyCode; bool get biometricLockEnabled; bool get hideBalance; bool get onboardingCompleted; bool get initialSetupCompleted; String? get defaultWalletId; int get accentColorIndex; bool get oledMode;
+ ThemeMode get themeMode; String get localeCode; String get currencyCode; bool get biometricLockEnabled; bool get hideBalance; bool get onboardingCompleted; bool get initialSetupCompleted; String? get defaultWalletId; int get accentColorIndex; bool get oledMode; List<String> get walletOrder;
 /// Create a copy of AppSettings
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $AppSettingsCopyWith<AppSettings> get copyWith => _$AppSettingsCopyWithImpl<AppS
 @override
 bool operator ==(Object other) {
   final _this = this as AppSettings;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppSettings&&(identical(other.themeMode, _this.themeMode) || other.themeMode == _this.themeMode)&&(identical(other.localeCode, _this.localeCode) || other.localeCode == _this.localeCode)&&(identical(other.currencyCode, _this.currencyCode) || other.currencyCode == _this.currencyCode)&&(identical(other.biometricLockEnabled, _this.biometricLockEnabled) || other.biometricLockEnabled == _this.biometricLockEnabled)&&(identical(other.hideBalance, _this.hideBalance) || other.hideBalance == _this.hideBalance)&&(identical(other.onboardingCompleted, _this.onboardingCompleted) || other.onboardingCompleted == _this.onboardingCompleted)&&(identical(other.initialSetupCompleted, _this.initialSetupCompleted) || other.initialSetupCompleted == _this.initialSetupCompleted)&&(identical(other.defaultWalletId, _this.defaultWalletId) || other.defaultWalletId == _this.defaultWalletId)&&(identical(other.accentColorIndex, _this.accentColorIndex) || other.accentColorIndex == _this.accentColorIndex)&&(identical(other.oledMode, _this.oledMode) || other.oledMode == _this.oledMode));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppSettings&&(identical(other.themeMode, _this.themeMode) || other.themeMode == _this.themeMode)&&(identical(other.localeCode, _this.localeCode) || other.localeCode == _this.localeCode)&&(identical(other.currencyCode, _this.currencyCode) || other.currencyCode == _this.currencyCode)&&(identical(other.biometricLockEnabled, _this.biometricLockEnabled) || other.biometricLockEnabled == _this.biometricLockEnabled)&&(identical(other.hideBalance, _this.hideBalance) || other.hideBalance == _this.hideBalance)&&(identical(other.onboardingCompleted, _this.onboardingCompleted) || other.onboardingCompleted == _this.onboardingCompleted)&&(identical(other.initialSetupCompleted, _this.initialSetupCompleted) || other.initialSetupCompleted == _this.initialSetupCompleted)&&(identical(other.defaultWalletId, _this.defaultWalletId) || other.defaultWalletId == _this.defaultWalletId)&&(identical(other.accentColorIndex, _this.accentColorIndex) || other.accentColorIndex == _this.accentColorIndex)&&(identical(other.oledMode, _this.oledMode) || other.oledMode == _this.oledMode)&&const DeepCollectionEquality().equals(other.walletOrder, _this.walletOrder));
 }
 
 
 @override
 int get hashCode {
   final _this = this as AppSettings;
-  return Object.hash(runtimeType,_this.themeMode,_this.localeCode,_this.currencyCode,_this.biometricLockEnabled,_this.hideBalance,_this.onboardingCompleted,_this.initialSetupCompleted,_this.defaultWalletId,_this.accentColorIndex,_this.oledMode);
+  return Object.hash(runtimeType,_this.themeMode,_this.localeCode,_this.currencyCode,_this.biometricLockEnabled,_this.hideBalance,_this.onboardingCompleted,_this.initialSetupCompleted,_this.defaultWalletId,_this.accentColorIndex,_this.oledMode,const DeepCollectionEquality().hash(_this.walletOrder));
 }
 
 @override
 String toString() {
   final _this = this as AppSettings;
-  return 'AppSettings(themeMode: ${_this.themeMode}, localeCode: ${_this.localeCode}, currencyCode: ${_this.currencyCode}, biometricLockEnabled: ${_this.biometricLockEnabled}, hideBalance: ${_this.hideBalance}, onboardingCompleted: ${_this.onboardingCompleted}, initialSetupCompleted: ${_this.initialSetupCompleted}, defaultWalletId: ${_this.defaultWalletId}, accentColorIndex: ${_this.accentColorIndex}, oledMode: ${_this.oledMode})';
+  return 'AppSettings(themeMode: ${_this.themeMode}, localeCode: ${_this.localeCode}, currencyCode: ${_this.currencyCode}, biometricLockEnabled: ${_this.biometricLockEnabled}, hideBalance: ${_this.hideBalance}, onboardingCompleted: ${_this.onboardingCompleted}, initialSetupCompleted: ${_this.initialSetupCompleted}, defaultWalletId: ${_this.defaultWalletId}, accentColorIndex: ${_this.accentColorIndex}, oledMode: ${_this.oledMode}, walletOrder: ${_this.walletOrder})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $AppSettingsCopyWith<$Res>  {
   factory $AppSettingsCopyWith(AppSettings value, $Res Function(AppSettings) _then) = _$AppSettingsCopyWithImpl;
 @useResult
 $Res call({
- ThemeMode themeMode, String localeCode, String currencyCode, bool biometricLockEnabled, bool hideBalance, bool onboardingCompleted, bool initialSetupCompleted, String? defaultWalletId, int accentColorIndex, bool oledMode
+ ThemeMode themeMode, String localeCode, String currencyCode, bool biometricLockEnabled, bool hideBalance, bool onboardingCompleted, bool initialSetupCompleted, String? defaultWalletId, int accentColorIndex, bool oledMode, List<String> walletOrder
 });
 
 
@@ -68,7 +68,7 @@ class _$AppSettingsCopyWithImpl<$Res>
 
 /// Create a copy of AppSettings
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? themeMode = null,Object? localeCode = null,Object? currencyCode = null,Object? biometricLockEnabled = null,Object? hideBalance = null,Object? onboardingCompleted = null,Object? initialSetupCompleted = null,Object? defaultWalletId = freezed,Object? accentColorIndex = null,Object? oledMode = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? themeMode = null,Object? localeCode = null,Object? currencyCode = null,Object? biometricLockEnabled = null,Object? hideBalance = null,Object? onboardingCompleted = null,Object? initialSetupCompleted = null,Object? defaultWalletId = freezed,Object? accentColorIndex = null,Object? oledMode = null,Object? walletOrder = null,}) {
   return _then(AppSettings(
 themeMode: null == themeMode ? _self.themeMode : themeMode // ignore: cast_nullable_to_non_nullable
 as ThemeMode,localeCode: null == localeCode ? _self.localeCode : localeCode // ignore: cast_nullable_to_non_nullable
@@ -80,7 +80,8 @@ as bool,initialSetupCompleted: null == initialSetupCompleted ? _self.initialSetu
 as bool,defaultWalletId: freezed == defaultWalletId ? _self.defaultWalletId : defaultWalletId // ignore: cast_nullable_to_non_nullable
 as String?,accentColorIndex: null == accentColorIndex ? _self.accentColorIndex : accentColorIndex // ignore: cast_nullable_to_non_nullable
 as int,oledMode: null == oledMode ? _self.oledMode : oledMode // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,walletOrder: null == walletOrder ? _self.walletOrder : walletOrder // ignore: cast_nullable_to_non_nullable
+as List<String>,
   ));
 }
 
@@ -165,10 +166,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ThemeMode themeMode,  String localeCode,  String currencyCode,  bool biometricLockEnabled,  bool hideBalance,  bool onboardingCompleted,  bool initialSetupCompleted,  String? defaultWalletId,  int accentColorIndex,  bool oledMode)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ThemeMode themeMode,  String localeCode,  String currencyCode,  bool biometricLockEnabled,  bool hideBalance,  bool onboardingCompleted,  bool initialSetupCompleted,  String? defaultWalletId,  int accentColorIndex,  bool oledMode,  List<String> walletOrder)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AppSettings() when $default != null:
-return $default(_that.themeMode,_that.localeCode,_that.currencyCode,_that.biometricLockEnabled,_that.hideBalance,_that.onboardingCompleted,_that.initialSetupCompleted,_that.defaultWalletId,_that.accentColorIndex,_that.oledMode);case _:
+return $default(_that.themeMode,_that.localeCode,_that.currencyCode,_that.biometricLockEnabled,_that.hideBalance,_that.onboardingCompleted,_that.initialSetupCompleted,_that.defaultWalletId,_that.accentColorIndex,_that.oledMode,_that.walletOrder);case _:
   return orElse();
 
 }
@@ -186,10 +187,10 @@ return $default(_that.themeMode,_that.localeCode,_that.currencyCode,_that.biomet
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ThemeMode themeMode,  String localeCode,  String currencyCode,  bool biometricLockEnabled,  bool hideBalance,  bool onboardingCompleted,  bool initialSetupCompleted,  String? defaultWalletId,  int accentColorIndex,  bool oledMode)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ThemeMode themeMode,  String localeCode,  String currencyCode,  bool biometricLockEnabled,  bool hideBalance,  bool onboardingCompleted,  bool initialSetupCompleted,  String? defaultWalletId,  int accentColorIndex,  bool oledMode,  List<String> walletOrder)  $default,) {final _that = this;
 switch (_that) {
 case _AppSettings():
-return $default(_that.themeMode,_that.localeCode,_that.currencyCode,_that.biometricLockEnabled,_that.hideBalance,_that.onboardingCompleted,_that.initialSetupCompleted,_that.defaultWalletId,_that.accentColorIndex,_that.oledMode);case _:
+return $default(_that.themeMode,_that.localeCode,_that.currencyCode,_that.biometricLockEnabled,_that.hideBalance,_that.onboardingCompleted,_that.initialSetupCompleted,_that.defaultWalletId,_that.accentColorIndex,_that.oledMode,_that.walletOrder);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -206,10 +207,10 @@ return $default(_that.themeMode,_that.localeCode,_that.currencyCode,_that.biomet
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ThemeMode themeMode,  String localeCode,  String currencyCode,  bool biometricLockEnabled,  bool hideBalance,  bool onboardingCompleted,  bool initialSetupCompleted,  String? defaultWalletId,  int accentColorIndex,  bool oledMode)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ThemeMode themeMode,  String localeCode,  String currencyCode,  bool biometricLockEnabled,  bool hideBalance,  bool onboardingCompleted,  bool initialSetupCompleted,  String? defaultWalletId,  int accentColorIndex,  bool oledMode,  List<String> walletOrder)?  $default,) {final _that = this;
 switch (_that) {
 case _AppSettings() when $default != null:
-return $default(_that.themeMode,_that.localeCode,_that.currencyCode,_that.biometricLockEnabled,_that.hideBalance,_that.onboardingCompleted,_that.initialSetupCompleted,_that.defaultWalletId,_that.accentColorIndex,_that.oledMode);case _:
+return $default(_that.themeMode,_that.localeCode,_that.currencyCode,_that.biometricLockEnabled,_that.hideBalance,_that.onboardingCompleted,_that.initialSetupCompleted,_that.defaultWalletId,_that.accentColorIndex,_that.oledMode,_that.walletOrder);case _:
   return null;
 
 }
@@ -221,7 +222,7 @@ return $default(_that.themeMode,_that.localeCode,_that.currencyCode,_that.biomet
 
 
 class _AppSettings implements AppSettings {
-  const _AppSettings({this.themeMode = ThemeMode.system, this.localeCode = 'vi', this.currencyCode = AppCurrencies.defaultCode, this.biometricLockEnabled = false, this.hideBalance = false, this.onboardingCompleted = false, this.initialSetupCompleted = false, this.defaultWalletId, this.accentColorIndex = 0, this.oledMode = false});
+  const _AppSettings({this.themeMode = ThemeMode.system, this.localeCode = 'vi', this.currencyCode = AppCurrencies.defaultCode, this.biometricLockEnabled = false, this.hideBalance = false, this.onboardingCompleted = false, this.initialSetupCompleted = false, this.defaultWalletId, this.accentColorIndex = 0, this.oledMode = false,  List<String> walletOrder = const <String>[]}): _walletOrder = walletOrder;
   
 
 @override@JsonKey() final  ThemeMode themeMode;
@@ -234,6 +235,13 @@ class _AppSettings implements AppSettings {
 @override final  String? defaultWalletId;
 @override@JsonKey() final  int accentColorIndex;
 @override@JsonKey() final  bool oledMode;
+ final  List<String> _walletOrder;
+@override@JsonKey() List<String> get walletOrder {
+  if (_walletOrder is EqualUnmodifiableListView) return _walletOrder;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_walletOrder);
+}
+
 
 /// Create a copy of AppSettings
 /// with the given fields replaced by the non-null parameter values.
@@ -245,18 +253,18 @@ _$AppSettingsCopyWith<_AppSettings> get copyWith => __$AppSettingsCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppSettings&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.localeCode, localeCode) || other.localeCode == localeCode)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.biometricLockEnabled, biometricLockEnabled) || other.biometricLockEnabled == biometricLockEnabled)&&(identical(other.hideBalance, hideBalance) || other.hideBalance == hideBalance)&&(identical(other.onboardingCompleted, onboardingCompleted) || other.onboardingCompleted == onboardingCompleted)&&(identical(other.initialSetupCompleted, initialSetupCompleted) || other.initialSetupCompleted == initialSetupCompleted)&&(identical(other.defaultWalletId, defaultWalletId) || other.defaultWalletId == defaultWalletId)&&(identical(other.accentColorIndex, accentColorIndex) || other.accentColorIndex == accentColorIndex)&&(identical(other.oledMode, oledMode) || other.oledMode == oledMode));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppSettings&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.localeCode, localeCode) || other.localeCode == localeCode)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.biometricLockEnabled, biometricLockEnabled) || other.biometricLockEnabled == biometricLockEnabled)&&(identical(other.hideBalance, hideBalance) || other.hideBalance == hideBalance)&&(identical(other.onboardingCompleted, onboardingCompleted) || other.onboardingCompleted == onboardingCompleted)&&(identical(other.initialSetupCompleted, initialSetupCompleted) || other.initialSetupCompleted == initialSetupCompleted)&&(identical(other.defaultWalletId, defaultWalletId) || other.defaultWalletId == defaultWalletId)&&(identical(other.accentColorIndex, accentColorIndex) || other.accentColorIndex == accentColorIndex)&&(identical(other.oledMode, oledMode) || other.oledMode == oledMode)&&const DeepCollectionEquality().equals(other.walletOrder, _walletOrder));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,themeMode,localeCode,currencyCode,biometricLockEnabled,hideBalance,onboardingCompleted,initialSetupCompleted,defaultWalletId,accentColorIndex,oledMode);
+    return Object.hash(runtimeType,themeMode,localeCode,currencyCode,biometricLockEnabled,hideBalance,onboardingCompleted,initialSetupCompleted,defaultWalletId,accentColorIndex,oledMode,const DeepCollectionEquality().hash(_walletOrder));
 }
 
 @override
 String toString() {
-    return 'AppSettings(themeMode: $themeMode, localeCode: $localeCode, currencyCode: $currencyCode, biometricLockEnabled: $biometricLockEnabled, hideBalance: $hideBalance, onboardingCompleted: $onboardingCompleted, initialSetupCompleted: $initialSetupCompleted, defaultWalletId: $defaultWalletId, accentColorIndex: $accentColorIndex, oledMode: $oledMode)';
+    return 'AppSettings(themeMode: $themeMode, localeCode: $localeCode, currencyCode: $currencyCode, biometricLockEnabled: $biometricLockEnabled, hideBalance: $hideBalance, onboardingCompleted: $onboardingCompleted, initialSetupCompleted: $initialSetupCompleted, defaultWalletId: $defaultWalletId, accentColorIndex: $accentColorIndex, oledMode: $oledMode, walletOrder: $walletOrder)';
 }
 
 
@@ -267,7 +275,7 @@ abstract mixin class _$AppSettingsCopyWith<$Res> implements $AppSettingsCopyWith
   factory _$AppSettingsCopyWith(_AppSettings value, $Res Function(_AppSettings) _then) = __$AppSettingsCopyWithImpl;
 @override @useResult
 $Res call({
- ThemeMode themeMode, String localeCode, String currencyCode, bool biometricLockEnabled, bool hideBalance, bool onboardingCompleted, bool initialSetupCompleted, String? defaultWalletId, int accentColorIndex, bool oledMode
+ ThemeMode themeMode, String localeCode, String currencyCode, bool biometricLockEnabled, bool hideBalance, bool onboardingCompleted, bool initialSetupCompleted, String? defaultWalletId, int accentColorIndex, bool oledMode, List<String> walletOrder
 });
 
 
@@ -284,7 +292,7 @@ class __$AppSettingsCopyWithImpl<$Res>
 
 /// Create a copy of AppSettings
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? themeMode = null,Object? localeCode = null,Object? currencyCode = null,Object? biometricLockEnabled = null,Object? hideBalance = null,Object? onboardingCompleted = null,Object? initialSetupCompleted = null,Object? defaultWalletId = freezed,Object? accentColorIndex = null,Object? oledMode = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? themeMode = null,Object? localeCode = null,Object? currencyCode = null,Object? biometricLockEnabled = null,Object? hideBalance = null,Object? onboardingCompleted = null,Object? initialSetupCompleted = null,Object? defaultWalletId = freezed,Object? accentColorIndex = null,Object? oledMode = null,Object? walletOrder = null,}) {
   return _then(_AppSettings(
 themeMode: null == themeMode ? _self.themeMode : themeMode // ignore: cast_nullable_to_non_nullable
 as ThemeMode,localeCode: null == localeCode ? _self.localeCode : localeCode // ignore: cast_nullable_to_non_nullable
@@ -296,7 +304,8 @@ as bool,initialSetupCompleted: null == initialSetupCompleted ? _self.initialSetu
 as bool,defaultWalletId: freezed == defaultWalletId ? _self.defaultWalletId : defaultWalletId // ignore: cast_nullable_to_non_nullable
 as String?,accentColorIndex: null == accentColorIndex ? _self.accentColorIndex : accentColorIndex // ignore: cast_nullable_to_non_nullable
 as int,oledMode: null == oledMode ? _self.oledMode : oledMode // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,walletOrder: null == walletOrder ? _self._walletOrder : walletOrder // ignore: cast_nullable_to_non_nullable
+as List<String>,
   ));
 }
 

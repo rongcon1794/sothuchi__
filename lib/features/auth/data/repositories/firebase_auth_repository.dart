@@ -41,6 +41,7 @@ class FirebaseAuthRepository implements AuthRepository {
       StreamController<AppUser?>.broadcast();
   StreamSubscription<User?>? _firebaseSub;
   AppUser? _currentUser;
+  bool _isSigningIn = false;
 
   void _initSession() {
     final auth = firebaseAuth;
@@ -120,6 +121,13 @@ class FirebaseAuthRepository implements AuthRepository {
       );
     }
 
+    if (_isSigningIn) {
+      return const Failure(
+        AuthFailedException('Sign-in is already in progress.'),
+      );
+    }
+    _isSigningIn = true;
+
     try {
       UserCredential credential;
       if (kIsWeb) {
@@ -147,7 +155,11 @@ class FirebaseAuthRepository implements AuthRepository {
       final appUser = await _ensureUserProfileDocument(fbUser);
       await prefs.setBool(_demoSessionKey, false);
       if (onUserSignedIn != null) {
-        await onUserSignedIn!(appUser);
+        try {
+          await onUserSignedIn!(appUser);
+        } catch (e) {
+          debugPrint('User bootstrap callback error: $e');
+        }
       }
       _emit(appUser);
       return Success(appUser);
@@ -160,6 +172,8 @@ class FirebaseAuthRepository implements AuthRepository {
       return Failure(AuthFailedException('${e.code}: ${e.message}'));
     } catch (e) {
       return Failure(AuthFailedException(e.toString()));
+    } finally {
+      _isSigningIn = false;
     }
   }
 
@@ -170,7 +184,11 @@ class FirebaseAuthRepository implements AuthRepository {
       final demo = _buildDemoUser();
       _emit(demo);
       if (onUserSignedIn != null) {
-        await onUserSignedIn!(demo);
+        try {
+          await onUserSignedIn!(demo);
+        } catch (e) {
+          debugPrint('Demo user bootstrap error: $e');
+        }
       }
       return Success(demo);
     } catch (e) {

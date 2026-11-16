@@ -11,6 +11,7 @@ import 'package:so_thu_chi/data/firebase/firebase_providers.dart';
 import 'package:so_thu_chi/data/providers/repository_providers.dart';
 import 'package:so_thu_chi/features/accounts/data/repositories/firestore_account_repository.dart';
 import 'package:so_thu_chi/features/accounts/domain/entities/account.dart';
+import 'package:so_thu_chi/features/accounts/presentation/controllers/accounts_controller.dart';
 import 'package:so_thu_chi/features/accounts/presentation/screens/account_detail_screen.dart';
 import 'package:so_thu_chi/features/accounts/presentation/screens/accounts_screen.dart';
 import 'package:so_thu_chi/features/accounts/presentation/widgets/wallet_form_sheet.dart';
@@ -19,6 +20,7 @@ import 'package:so_thu_chi/features/categories/domain/entities/category.dart';
 import 'package:so_thu_chi/features/categories/presentation/screens/category_detail_screen.dart';
 import 'package:so_thu_chi/features/categories/presentation/screens/categories_screen.dart';
 import 'package:so_thu_chi/features/categories/presentation/widgets/category_form_sheet.dart';
+import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 import 'package:so_thu_chi/features/transactions/data/repositories/firestore_transaction_repository.dart';
 import 'package:so_thu_chi/features/transactions/presentation/widgets/dashboard_mini_cards.dart';
 import 'package:so_thu_chi/features/transactions/presentation/widgets/dashboard_quick_action_bar.dart';
@@ -640,6 +642,158 @@ void main() {
       expect(createdCategory, isNotNull);
       expect(createdCategory?.name, 'Cà phê & Đồ uống');
       expect(createdCategory?.type, CategoryType.expense);
+    });
+
+    testWidgets('AccountsScreen toggles reorder mode and updates wallet order across providers', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(800, 1200));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      SharedPreferences.setMockInitialValues({'onboarding_completed': true});
+      final prefs = await SharedPreferences.getInstance();
+      final firestore = FakeFirebaseFirestore();
+      final accRepo = FirestoreAccountRepository(firestore: firestore, uid: 'u1');
+      final w1Res = await accRepo.createAccount(
+        name: 'Ví Tiền Mặt',
+        type: AccountType.cash,
+        initialBalance: 1000000,
+        currency: 'VND',
+        icon: 'cash',
+        color: 0xFF00A86B,
+      );
+      final w2Res = await accRepo.createAccount(
+        name: 'Tài Khoản Techcombank',
+        type: AccountType.bank,
+        initialBalance: 5000000,
+        currency: 'VND',
+        icon: 'bank',
+        color: 0xFF007AFF,
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          accountRepositoryProvider.overrideWithValue(accRepo),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: AppTheme.light(),
+            home: const AccountsScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Check Smart Default Spending Wallet pill exists
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is Text && (w.data?.contains('mặc định') ?? false),
+        ),
+        findsWidgets,
+      );
+
+      // Check Reorder/Sort button in AppBar/Header
+      expect(find.text('Sắp xếp'), findsWidgets);
+      await tester.tap(find.text('Sắp xếp').first);
+      await tester.pumpAndSettle();
+
+      // SmartWalletSortSheet opens: displays smart options & manual drag & drop
+      expect(find.text('Sắp xếp ví & tài khoản'), findsOneWidget);
+      expect(find.text('Ví mặc định lên đầu'), findsOneWidget);
+      expect(find.text('Kéo và thả thủ công'), findsOneWidget);
+
+      // Tap manual drag & drop
+      await tester.ensureVisible(find.text('Kéo và thả thủ công'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Kéo và thả thủ công'));
+      await tester.pumpAndSettle();
+
+      // Reorder mode active: AppBar shows 'Xong', reorder banner is visible
+      expect(find.text('Xong'), findsOneWidget);
+      expect(find.text('Kéo và thả để sắp xếp ví'), findsOneWidget);
+      expect(find.byType(ReorderableListView), findsOneWidget);
+
+      // Reorder using action controller
+      final w1 = (w1Res as Success<Account>).value;
+      final w2 = (w2Res as Success<Account>).value;
+      await container.read(accountsActionControllerProvider.notifier).reorderWallets([w2.id, w1.id]);
+      await tester.pumpAndSettle();
+
+      // Verify activeAccountsProvider order is updated: Techcombank is first
+      final activeAccounts = container.read(activeAccountsProvider);
+      expect(activeAccounts.first.id, w2.id);
+      expect(activeAccounts.last.id, w1.id);
+
+      // Tap 'Xong' to exit reorder mode
+      await tester.tap(find.text('Xong'));
+      await tester.pumpAndSettle();
+      expect(find.text('Sắp xếp'), findsWidgets);
+    });
+
+    testWidgets('AccountsScreen supports 1-tap star to set default wallet with haptic feedback', (tester) async {
+      await tester.binding.setSurfaceSize(const Size(800, 1200));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      SharedPreferences.setMockInitialValues({'onboarding_completed': true});
+      final prefs = await SharedPreferences.getInstance();
+      final firestore = FakeFirebaseFirestore();
+      final accRepo = FirestoreAccountRepository(firestore: firestore, uid: 'u1');
+      await accRepo.createAccount(
+        name: 'Ví Tiền Mặt',
+        type: AccountType.cash,
+        initialBalance: 1000000,
+        currency: 'VND',
+        icon: 'cash',
+        color: 0xFF00A86B,
+      );
+      final w2Res = await accRepo.createAccount(
+        name: 'MoMo E-Wallet',
+        type: AccountType.ewallet,
+        initialBalance: 500000,
+        currency: 'VND',
+        icon: 'ewallet',
+        color: 0xFFA50064,
+      );
+      final w2 = (w2Res as Success<Account>).value;
+
+      final container = ProviderContainer(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          accountRepositoryProvider.overrideWithValue(accRepo),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            locale: const Locale('vi'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: AppTheme.light(),
+            home: const AccountsScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Tap 1-tap star button for MoMo E-Wallet
+      final starButtons = find.byTooltip('Đặt làm ví mặc định');
+      expect(starButtons, findsWidgets);
+      await tester.tap(starButtons.last);
+      await tester.pumpAndSettle();
+
+      // Check snackbar and settings updated
+      expect(container.read(settingsControllerProvider).value?.defaultWalletId, w2.id);
+      expect(find.text('Mặc định'), findsAtLeastNWidgets(1));
     });
   });
 }

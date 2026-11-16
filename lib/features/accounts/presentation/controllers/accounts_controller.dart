@@ -13,22 +13,45 @@ final rawAccountsStreamProvider = StreamProvider<List<Account>>((ref) {
   return ref.watch(accountRepositoryProvider).watchAccounts();
 });
 
-/// Streams all non-deleted accounts (both active and archived) for the currently active ledger.
+/// Streams all non-deleted accounts (both active and archived) for the currently active ledger,
+/// automatically ordered according to the user's custom wallet order preferences.
 final accountsStreamProvider = Provider<AsyncValue<List<Account>>>((ref) {
   final activeLedgerId = ref.watch(activeLedgerIdProvider);
   final activeLedger = ref.watch(activeLedgerProvider);
   final isDefaultPersonal =
       activeLedger.isDefault || activeLedgerId == LedgerBook.defaultPersonalId;
   final rawAsync = ref.watch(rawAccountsStreamProvider);
-  return rawAsync.whenData(
-    (all) => all
+  final walletOrder = ref.watch(
+    settingsControllerProvider.select(
+      (s) => s.value?.walletOrder ?? const <String>[],
+    ),
+  );
+
+  return rawAsync.whenData((all) {
+    final list = all
         .where(
           (a) =>
               a.ledgerId == activeLedgerId ||
               (isDefaultPersonal && a.ledgerId == LedgerBook.defaultPersonalId),
         )
-        .toList(growable: false),
-  );
+        .toList(growable: true);
+
+    if (walletOrder.isNotEmpty) {
+      list.sort((a, b) {
+        if (a.archived != b.archived) {
+          return a.archived ? 1 : -1;
+        }
+        final idxA = walletOrder.indexOf(a.id);
+        final idxB = walletOrder.indexOf(b.id);
+        if (idxA != -1 && idxB != -1) return idxA.compareTo(idxB);
+        if (idxA != -1) return -1;
+        if (idxB != -1) return 1;
+        return a.createdAt.compareTo(b.createdAt);
+      });
+    }
+
+    return list;
+  });
 });
 
 /// Active (non-archived) accounts list.
@@ -156,6 +179,12 @@ class AccountsActionController extends Notifier<AsyncValue<void>> {
       onFailure: (e) => AsyncError(e, StackTrace.current),
     );
     return res;
+  }
+
+  Future<Result<void>> reorderWallets(List<String> orderedAccountIds) async {
+    return ref
+        .read(settingsControllerProvider.notifier)
+        .setWalletOrder(orderedAccountIds);
   }
 }
 
