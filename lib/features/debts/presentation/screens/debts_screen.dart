@@ -9,12 +9,23 @@ import 'package:so_thu_chi/core/l10n/l10n_ext.dart';
 import 'package:so_thu_chi/core/responsive/apple_responsive.dart';
 import 'package:so_thu_chi/core/theme/apple_theme_tokens.dart';
 import 'package:so_thu_chi/core/widgets/apple_kit.dart';
+import 'package:so_thu_chi/core/widgets/empty_state_view.dart';
 import 'package:so_thu_chi/features/debts/presentation/controllers/debts_controller.dart';
 import 'package:so_thu_chi/features/debts/presentation/widgets/debt_card_tile.dart';
 import 'package:so_thu_chi/features/debts/presentation/widgets/debt_form_sheet.dart';
 import 'package:so_thu_chi/features/debts/presentation/widgets/debt_hero_overview_card.dart';
 import 'package:so_thu_chi/features/settings/presentation/controllers/settings_controller.dart';
 
+/// Redesigned Debt & Loan Management Screen ("Sổ Ghi Nợ").
+///
+/// Fully aligned with the app's executive Apple HIG design language:
+/// - AppleAppBar with blur, hide-balance toggle
+/// - Breathtaking Glassmorphic Hero Overview Card
+/// - Real-time instant search by name, phone, or note
+/// - Segmented filter pill for quick categorization (All / Lent / Borrowed / Settled)
+/// - Streamlined, beautiful DebtCardTile items with 1-tap quick repayment
+/// - EmptyStateView integration
+/// - Adaptive Expandable FAB
 class DebtsScreen extends ConsumerStatefulWidget {
   const DebtsScreen({super.key});
 
@@ -23,14 +34,37 @@ class DebtsScreen extends ConsumerStatefulWidget {
 }
 
 class _DebtsScreenState extends ConsumerState<DebtsScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
   bool _isFabExpanded = true;
   bool _isFabVisible = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  void _onSearchChanged() {
+    final query = _searchController.text.trim();
+    if (query != _searchQuery) {
+      setState(() => _searchQuery = query);
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final l10n = context.l10n;
+    final isVi = l10n.localeName.startsWith('vi');
     final debtsAsync = ref.watch(debtsStreamProvider);
     final filteredDebts = ref.watch(filteredDebtsProvider);
     final summary = ref.watch(debtSummaryProvider);
@@ -71,7 +105,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
         isExpanded: _isFabExpanded,
         icon: const Icon(CupertinoIcons.plus),
         label: Text(l10n.debtNew),
-        backgroundColor: AppleTokens.jadeDark,
+        backgroundColor: AppleTokens.emeraldIncome,
         onPressed: () {
           HapticFeedback.mediumImpact();
           DebtFormSheet.show(context);
@@ -87,8 +121,19 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
           data: (allDebts) {
             final activeCount = allDebts.where((d) => !d.isSettled).length;
 
+            // Apply in-memory search query
+            final query = _searchQuery.toLowerCase();
+            final displayedDebts = query.isEmpty
+                ? filteredDebts
+                : filteredDebts.where((d) {
+                    final matchName = d.personName.toLowerCase().contains(query);
+                    final matchPhone = d.phoneNumber?.contains(query) ?? false;
+                    final matchNote = d.note.toLowerCase().contains(query);
+                    return matchName || matchPhone || matchNote;
+                  }).toList();
+
             final summaryCardWidgets = <Widget>[
-              // Unified Compact Summary Card
+              // 1. Executive Glassmorphic Hero Overview Card
               DebtHeroOverviewCard(
                 summary: summary,
                 activeCount: activeCount,
@@ -98,7 +143,30 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
 
               const SizedBox(height: 12),
 
-              // Filter Segmented Pill
+              // 2. Real-Time Search Field
+              AppleTextField(
+                controller: _searchController,
+                placeholder: isVi
+                    ? 'Tìm theo tên, SĐT, ghi chú...'
+                    : 'Search by name, phone, note...',
+                prefixIcon: const Icon(CupertinoIcons.search, size: 17),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(
+                          CupertinoIcons.clear_thick_circled,
+                          size: 16,
+                        ),
+                        onPressed: () {
+                          unawaited(HapticFeedback.lightImpact());
+                          _searchController.clear();
+                        },
+                      )
+                    : null,
+              ),
+
+              const SizedBox(height: 10),
+
+              // 3. Filter Segmented Pill
               AppleSegmentedPill<DebtFilterMode>(
                 selected: currentFilter,
                 segments: {
@@ -112,20 +180,32 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
             ];
 
             final debtListWidgets = <Widget>[
-              // Consistent Section Header
+              // Section Header
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      currentFilter.label(l10n).toUpperCase(),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: AppleTokens.systemGray,
-                        letterSpacing: 0.6,
-                      ),
+                    Row(
+                      children: [
+                        const AppleSquircleBadge(
+                          icon: CupertinoIcons.person_2_fill,
+                          backgroundColor: AppleTokens.systemIndigo,
+                          size: 22,
+                          iconSize: 11,
+                          radius: 6,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          currentFilter.label(l10n).toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                            color: isDark ? Colors.white70 : const Color(0xFF55555B),
+                          ),
+                        ),
+                      ],
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -134,18 +214,18 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
                       ),
                       decoration: BoxDecoration(
                         color: isDark
-                            ? AppleTokens.bgDarkSecondary
-                            : AppleTokens.bgLightSecondary,
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : Colors.black.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(
                           AppleTokens.radiusPill,
                         ),
                       ),
                       child: Text(
-                        '${filteredDebts.length} ${locale == 'vi' ? 'khoản' : (filteredDebts.length == 1 ? 'item' : 'items')}',
-                        style: const TextStyle(
+                        '${displayedDebts.length} ${locale.startsWith('vi') ? 'khoản' : (displayedDebts.length == 1 ? 'item' : 'items')}',
+                        style: TextStyle(
                           fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: AppleTokens.systemGray,
+                          fontWeight: FontWeight.w700,
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -154,51 +234,41 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
               ),
               const SizedBox(height: 8),
 
-              if (filteredDebts.isEmpty)
+              if (displayedDebts.isEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 36,
+                    horizontal: 16,
+                    vertical: 32,
                   ),
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          CupertinoIcons.tray_fill,
-                          size: 48,
-                          color: theme.colorScheme.onSurfaceVariant.withValues(
-                            alpha: 0.4,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          currentFilter == DebtFilterMode.settled
+                  child: _searchQuery.isNotEmpty
+                      ? EmptyStateView(
+                          icon: CupertinoIcons.search,
+                          title: isVi
+                              ? 'Không tìm thấy khoản nợ'
+                              : 'No debts found',
+                          subtitle: isVi
+                              ? 'Không có kết quả phù hợp với từ khóa "$_searchQuery".'
+                              : 'No debts match "$_searchQuery".',
+                          actionLabel: isVi ? 'Xóa tìm kiếm' : 'Clear search',
+                          onAction: () => _searchController.clear(),
+                        )
+                      : EmptyStateView(
+                          icon: CupertinoIcons.tray_fill,
+                          title: currentFilter == DebtFilterMode.settled
                               ? l10n.debtFilterSettled
                               : l10n.debtEmpty,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
+                          subtitle: l10n.debtEmptySubtitle,
+                          actionLabel: l10n.debtNew,
+                          onAction: () {
+                            HapticFeedback.mediumImpact();
+                            DebtFormSheet.show(context);
+                          },
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          l10n.debtEmptySubtitle,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: theme.colorScheme.onSurfaceVariant
-                                .withValues(alpha: 0.8),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 )
               else
-                for (final debt in filteredDebts)
+                for (final debt in displayedDebts)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.only(bottom: 8),
                     child: RepaintBoundary(
                       child: DebtCardTile(
                         debt: debt,
@@ -282,5 +352,3 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
     );
   }
 }
-
-
